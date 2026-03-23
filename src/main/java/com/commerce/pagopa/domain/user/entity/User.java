@@ -53,6 +53,20 @@ public class User extends BaseTimeEntity {
         this.role = role;
     }
 
+    public static User create(
+            String email, String nickname, String profileImage,
+            Provider provider, String providerId, Role role
+    ) {
+        return User.builder()
+                .email(email)
+                .nickname(nickname)
+                .profileImage(profileImage)
+                .provider(provider)
+                .providerId(providerId)
+                .role(role)
+                .build();
+    }
+
     public void updateProfile(String nickname, String profileImage) {
         if (nickname != null && !nickname.isBlank()) this.nickname = nickname;
         if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;

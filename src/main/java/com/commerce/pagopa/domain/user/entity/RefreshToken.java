@@ -29,6 +29,13 @@ public class RefreshToken {
         this.token = token;
     }
 
+    public static RefreshToken create(Long userId, String token) {
+        return RefreshToken.builder()
+                .userId(userId)
+                .token(token)
+                .build();
+    }
+
     public void updateToken(String newToken) {
         this.token = newToken;
     }
