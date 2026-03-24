@@ -1,9 +1,11 @@
 package com.commerce.pagopa.auth.oauth.handler;
 
 import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
+import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.domain.user.entity.RefreshToken;
 import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
+import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -46,13 +47,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                         ))
                 );
 
-        Map<String, String> paramMap = Map.of(
-                "userId", String.valueOf(oAuth2User.getUserId()),
-                "accessToken", accessToken,
-                "refreshToken", refreshToken
+        ApiResponse<TokenResponseDto> apiResponse = ApiResponse.ok(
+                TokenResponseDto.of(oAuth2User.getUserId(), accessToken, refreshToken)
         );
 
-        String json = objectMapper.writeValueAsString(paramMap);
+        String json = objectMapper.writeValueAsString(apiResponse);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(json);
