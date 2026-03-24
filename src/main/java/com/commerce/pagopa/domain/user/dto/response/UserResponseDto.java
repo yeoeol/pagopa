@@ -5,6 +5,7 @@ import com.commerce.pagopa.domain.user.entity.User;
 public record UserResponseDto(
         Long userId,
         String email,
+        String nickname,
         String profileImage,
         String role
 ) {
@@ -12,6 +13,7 @@ public record UserResponseDto(
         return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
+                user.getNickname(),
                 user.getProfileImage(),
                 user.getRole().name()
         );

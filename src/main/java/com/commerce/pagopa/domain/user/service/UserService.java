@@ -1,5 +1,6 @@
 package com.commerce.pagopa.domain.user.service;
 
+import com.commerce.pagopa.domain.user.dto.request.UserUpdateRequestDto;
 import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
@@ -21,4 +22,11 @@ public class UserService {
         return UserResponseDto.from(user);
     }
 
+    @Transactional
+    public UserResponseDto update(Long userId, UserUpdateRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFountException::new);
+        user.updateProfile(requestDto.nickname(), requestDto.profileImage());
+        return UserResponseDto.from(user);
+    }
 }
