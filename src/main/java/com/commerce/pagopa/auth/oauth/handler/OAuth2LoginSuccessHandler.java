@@ -7,15 +7,12 @@ import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -25,9 +22,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ObjectMapper objectMapper;
-
-/*    @Value("${app.oauth2.authorized-redirect-uris[0]}")
-    private String redirectUri;*/
 
     @Override
     public void onAuthenticationSuccess(
@@ -52,19 +46,15 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                         ))
                 );
 
-        Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("accessToken", accessToken);
-        paramMap.put("refreshToken", refreshToken);
+        Map<String, String> paramMap = Map.of(
+                "userId", String.valueOf(oAuth2User.getUserId()),
+                "accessToken", accessToken,
+                "refreshToken", refreshToken
+        );
 
         String json = objectMapper.writeValueAsString(paramMap);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(json);
-/*        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("accessToken", accessToken)
-                .queryParam("refreshToken", refreshToken)
-                .build().toUriString();
-
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);*/
     }
 }
