@@ -14,6 +14,9 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"COMMON_003", "서버 오류가 발생했습니다."),
     INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "COMMON_004", "잘못된 타입입니다."),
 
+    // IMAGE
+    IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE_001", "이미지 업로드에 실패했습니다."),
+
     // AUTH
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"AUTH_001", "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN,"AUTH_002", "접근 권한이 없습니다."),
