@@ -36,6 +36,7 @@ public enum ErrorCode {
 
     // CATEGORY
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND,"CATEGORY_001", "존재하지 않는 카테고리입니다."),
+    INVALID_CATEGORY_LEVEL(HttpStatus.BAD_REQUEST,"CATEGORY_002", "소분류 카테고리에만 상품 등록이 가능합니다."),
 
     // CART
     CART_NOT_FOUND(HttpStatus.NOT_FOUND,"CART_001", "존재하지 않는 장바구니 항목입니다."),
