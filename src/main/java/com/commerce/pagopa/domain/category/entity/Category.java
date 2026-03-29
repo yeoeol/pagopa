@@ -54,15 +54,16 @@ public class Category {
     }
 
     public Category createChild(String name) {
-        if (parent.isLeaf()) {
-            throw new BusinessException(ErrorCode.INVALID_CATEGORY_LEVEL_REQUEST);
-        }
-
         Category child = Category.builder()
                 .name(name)
                 .depth(this.depth + 1)
                 .parent(this)
                 .build();
+
+        if (child.isLeaf()) {
+            throw new BusinessException(ErrorCode.INVALID_CATEGORY_LEVEL_REQUEST);
+        }
+
         this.addChild(child);
 
         return child;
