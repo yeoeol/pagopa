@@ -1,5 +1,7 @@
 package com.commerce.pagopa.domain.category.entity;
 
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -34,13 +36,37 @@ public class Category {
     private Category parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Category> children = new ArrayList<>();
+    private final List<Category> children = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
     private Category(String name, int depth, Category parent) {
         this.name = name;
         this.depth = depth;
         this.parent = parent;
+    }
+
+    public static Category createRoot(String name) {
+        return Category.builder()
+                .name(name)
+                .depth(0)
+                .parent(null)
+                .build();
+    }
+
+    public Category createChild(String name) {
+        Category child = Category.builder()
+                .name(name)
+                .depth(this.depth + 1)
+                .parent(this)
+                .build();
+
+        if (child.isLeaf()) {
+            throw new BusinessException(ErrorCode.INVALID_CATEGORY_LEVEL_REQUEST);
+        }
+
+        this.addChild(child);
+
+        return child;
     }
 
     public void addChild(Category child) {

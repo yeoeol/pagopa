@@ -10,7 +10,7 @@ import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
-import com.commerce.pagopa.global.exception.UserNotFountException;
+import com.commerce.pagopa.global.exception.UserNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class ProductService {
     @Transactional
     public ProductResponseDto register(Long sellerId, ProductRegisterRequestDto requestDto) {
         User seller = userRepository.findById(sellerId)
-                .orElseThrow(UserNotFountException::new);
+                .orElseThrow(UserNotFoundException::new);
 
         Category category = categoryRepository.findById(requestDto.categoryId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
