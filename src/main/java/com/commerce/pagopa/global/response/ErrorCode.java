@@ -13,6 +13,7 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED,"COMMON_002", "허용되지 않는 HTTP 메서드입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"COMMON_003", "서버 오류가 발생했습니다."),
     INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "COMMON_004", "잘못된 타입입니다."),
+    ACCESS_DENIED(HttpStatus.UNAUTHORIZED, "COMMON_005", "접근이 거부되었습니다."),
 
     // IMAGE
     IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE_001", "이미지 업로드에 실패했습니다."),
@@ -42,6 +43,7 @@ public enum ErrorCode {
     // CART
     CART_NOT_FOUND(HttpStatus.NOT_FOUND,"CART_001", "존재하지 않는 장바구니 항목입니다."),
     CART_ITEM_NOT_MINE(HttpStatus.FORBIDDEN,"CART_002", "본인의 장바구니 항목이 아닙니다."),
+    CART_QUANTITY(HttpStatus.BAD_REQUEST,"CART_003", "수량은 0 이하로 감소할 수 없습니다."),
 
     // ORDER
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND,"ORDER_001", "존재하지 않는 주문입니다."),

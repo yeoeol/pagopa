@@ -7,7 +7,9 @@ import com.commerce.pagopa.auth.oauth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -31,7 +34,20 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        // 1. 카테고리 (Category) 패키지: 조회는 모두 허용, 그 외(생성/수정/삭제)는 ADMIN만
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
+
+                        // 2. 상품 (Product) 패키지: 조회는 모두 허용
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                        // 상품 등록(POST), 수정/삭제는 SELLER, ADMIN만 (@PreAuthorize와 함께 사용)
+                        .requestMatchers("/api/v1/products/**").hasAnyRole("SELLER", "ADMIN")
+
+                        // 3. User, Cart, Image 패키지: 인증된 사용자(모든 권한) 인가
+                        .requestMatchers("/api/v1/users/**", "/api/v1/cart/**", "/api/v1/images/**").authenticated()
+
+                        // 그 외의 모든 요청은 로그인 필요
+                        .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2Login -> oauth2Login

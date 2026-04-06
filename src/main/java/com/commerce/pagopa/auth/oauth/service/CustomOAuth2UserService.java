@@ -8,6 +8,7 @@ import com.commerce.pagopa.domain.user.entity.enums.Role;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -21,6 +22,9 @@ import java.util.UUID;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+
+    @Value("${app.azure.base-url}")
+    private String azureBaseUrl;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -49,7 +53,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         User.create(
                                 userInfo.getEmail(),
                                 "user_" + UUID.randomUUID().toString().substring(0, 8),
-                                "/images/default.png",
+                                azureBaseUrl + "/default.png",
                                 provider,
                                 userInfo.getProviderId(),
                                 Role.ROLE_USER
