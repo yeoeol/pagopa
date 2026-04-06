@@ -60,13 +60,16 @@ public class Category {
                 .parent(this)
                 .build();
 
-        if (child.isLeaf()) {
+        if (child.isGreaterThanLeaf()) {
             throw new BusinessException(ErrorCode.INVALID_CATEGORY_LEVEL_REQUEST);
         }
-
         this.addChild(child);
 
         return child;
+    }
+
+    private boolean isGreaterThanLeaf() {
+        return this.depth > 2;
     }
 
     public void addChild(Category child) {
