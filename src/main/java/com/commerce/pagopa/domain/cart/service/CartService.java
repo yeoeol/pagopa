@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,13 +33,21 @@ public class CartService {
         Product product = productRepository.findById(requestDto.productId())
                 .orElseThrow(ProductNotFoundException::new);
 
-        Cart cart = cartRepository.findByUserAndProduct(user, product)
-                .map(existingCart -> {
-                    if (isAdd) { existingCart.addQuantity(); }
-                    else { existingCart.reduceQuantity(); }
-                    return existingCart;
-                })
-                .orElseGet(() -> cartRepository.save(Cart.create(requestDto.quantity(), user, product)));
+        Cart cart;
+        Optional<Cart> optionalCart = cartRepository.findByUserAndProduct(user, product);
+        if (optionalCart.isPresent()) {
+            cart = optionalCart.get();
+            if (isAdd) { cart.addQuantity(); }
+            else {
+                cart.reduceQuantity();
+                if (cart.getQuantity() == 0) {
+                    delete(cart.getId());
+                    return null;
+                }
+            }
+        } else {
+            cart = cartRepository.save(Cart.create(requestDto.quantity(), user, product));
+        }
 
         return CartResponseDto.from(cart);
     }
@@ -63,6 +72,10 @@ public class CartService {
             cart.addQuantity();
         } else {
             cart.reduceQuantity();
+            if (cart.getQuantity() == 0) {
+                delete(cart.getId());
+                return null; // 삭제된 경우 null 반환
+            }
         }
         return CartResponseDto.from(cart);
     }

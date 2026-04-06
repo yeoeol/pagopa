@@ -51,7 +51,7 @@ public class CartController {
     ) {
         CartResponseDto response = cartService.updateQuantity(cartId, isAdd);
         return ResponseEntity.ok(
-                ApiResponse.ok(response)
+                ApiResponse.ok(response) // 수량이 0이 되어 삭제된 경우 response는 null
         );
     }
 
