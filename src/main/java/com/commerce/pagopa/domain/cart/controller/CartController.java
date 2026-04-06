@@ -23,9 +23,10 @@ public class CartController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CartResponseDto>> addCart(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody CartAddRequestDto requestDto
     ) {
-        CartResponseDto response = cartService.addCart(requestDto);
+        CartResponseDto response = cartService.addCart(userDetails.getUserId(), requestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(response));
@@ -53,10 +54,20 @@ public class CartController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> updateQuantity(
+    public ResponseEntity<ApiResponse<Void>> deleteCart(
             @PathVariable("id") Long cartId
     ) {
         cartService.delete(cartId);
+        return ResponseEntity.ok(
+                ApiResponse.ok()
+        );
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteAllCart(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        cartService.deleteAll(userDetails.getUserId());
         return ResponseEntity.ok(
                 ApiResponse.ok()
         );

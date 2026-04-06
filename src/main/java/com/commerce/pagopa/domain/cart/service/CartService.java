@@ -27,8 +27,8 @@ public class CartService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public CartResponseDto addCart(CartAddRequestDto requestDto) {
-        User user = userRepository.findById(requestDto.userId())
+    public CartResponseDto addCart(Long userId, CartAddRequestDto requestDto) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
         Product product = productRepository.findById(requestDto.productId())
                 .orElseThrow(ProductNotFoundException::new);
@@ -76,5 +76,10 @@ public class CartService {
     @Transactional
     public void delete(Long cartId) {
         cartRepository.deleteById(cartId);
+    }
+
+    @Transactional
+    public void deleteAll(Long userId) {
+        cartRepository.deleteAllByUserId(userId);
     }
 }
