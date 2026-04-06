@@ -42,6 +42,7 @@ public enum ErrorCode {
     // CART
     CART_NOT_FOUND(HttpStatus.NOT_FOUND,"CART_001", "존재하지 않는 장바구니 항목입니다."),
     CART_ITEM_NOT_MINE(HttpStatus.FORBIDDEN,"CART_002", "본인의 장바구니 항목이 아닙니다."),
+    CART_QUANTITY(HttpStatus.BAD_REQUEST,"CART_003", "수량은 0 이하로 감소할 수 없습니다."),
 
     // ORDER
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND,"ORDER_001", "존재하지 않는 주문입니다."),

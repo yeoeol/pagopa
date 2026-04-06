@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.cart.entity;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.CartQuantityException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -52,6 +53,9 @@ public class Cart extends BaseTimeEntity {
 
     // 수량 감소 메서드
     public void reduceQuantity() {
+        if (this.quantity <= 0) {
+            throw new CartQuantityException();
+        }
         this.quantity -= 1;
     }
 }

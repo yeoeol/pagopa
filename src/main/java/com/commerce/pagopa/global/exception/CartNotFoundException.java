@@ -4,6 +4,6 @@ import com.commerce.pagopa.global.response.ErrorCode;
 
 public class CartNotFoundException extends BusinessException {
     public CartNotFoundException() {
-        super(ErrorCode.ORDER_NOT_FOUND);
+        super(ErrorCode.CART_NOT_FOUND);
     }
 }

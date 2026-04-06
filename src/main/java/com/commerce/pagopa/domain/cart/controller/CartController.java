@@ -1,7 +1,6 @@
 package com.commerce.pagopa.domain.cart.controller;
 
 import com.commerce.pagopa.domain.cart.dto.request.CartAddRequestDto;
-import com.commerce.pagopa.domain.cart.dto.request.CartUpdateRequestDto;
 import com.commerce.pagopa.domain.cart.dto.response.CartResponseDto;
 import com.commerce.pagopa.domain.cart.service.CartService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
@@ -24,9 +23,10 @@ public class CartController {
     @PostMapping
     public ResponseEntity<ApiResponse<CartResponseDto>> addCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody CartAddRequestDto requestDto
+            @RequestBody CartAddRequestDto requestDto,
+            @RequestParam(required = false, defaultValue = "true") boolean isAdd
     ) {
-        CartResponseDto response = cartService.addCart(userDetails.getUserId(), requestDto);
+        CartResponseDto response = cartService.addCart(userDetails.getUserId(), requestDto, isAdd);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(response));

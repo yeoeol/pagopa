@@ -1,7 +1,6 @@
 package com.commerce.pagopa.domain.cart.service;
 
 import com.commerce.pagopa.domain.cart.dto.request.CartAddRequestDto;
-import com.commerce.pagopa.domain.cart.dto.request.CartUpdateRequestDto;
 import com.commerce.pagopa.domain.cart.dto.response.CartResponseDto;
 import com.commerce.pagopa.domain.cart.entity.Cart;
 import com.commerce.pagopa.domain.cart.repository.CartRepository;
@@ -27,25 +26,20 @@ public class CartService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public CartResponseDto addCart(Long userId, CartAddRequestDto requestDto) {
+    public CartResponseDto addCart(Long userId, CartAddRequestDto requestDto, boolean isAdd) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
         Product product = productRepository.findById(requestDto.productId())
                 .orElseThrow(ProductNotFoundException::new);
 
-        Cart cart;
-        if (cartRepository.findByUserAndProduct(user, product).isPresent()) {
-            cart = cartRepository.findByUserAndProduct(user, product).get();
-            if (requestDto.isAdd()) {
-                cart.addQuantity();
-            } else {
-                cart.reduceQuantity();
-            }
-        } else {
-            cart = Cart.create(requestDto.quantity(), user, product);
-            cartRepository.save(cart);
-        }
-        
+        Cart cart = cartRepository.findByUserAndProduct(user, product)
+                .map(existingCart -> {
+                    if (isAdd) { existingCart.addQuantity(); }
+                    else { existingCart.reduceQuantity(); }
+                    return existingCart;
+                })
+                .orElseGet(() -> cartRepository.save(Cart.create(requestDto.quantity(), user, product)));
+
         return CartResponseDto.from(cart);
     }
 
