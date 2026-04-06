@@ -8,6 +8,7 @@ import com.commerce.pagopa.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<ApiResponse<ProductResponseDto>> register(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody ProductRegisterRequestDto requestDto
@@ -45,4 +47,14 @@ public class ProductController {
                 ApiResponse.ok(productService.find(id))
         );
     }
+
+    // @PutMapping("/{id}")
+    // @PreAuthorize("@productOwnerValidator.isOwner(#id, principal.userId) or hasRole('ADMIN')")
+    // public ResponseEntity<ApiResponse<ProductResponseDto>> update(
+    //         @PathVariable Long id,
+    //         @AuthenticationPrincipal CustomUserDetails userDetails,
+    //         @RequestBody ProductUpdateRequestDto requestDto
+    // ) {
+    //     return ResponseEntity.ok(ApiResponse.ok(productService.update(id, requestDto)));
+    // }
 }

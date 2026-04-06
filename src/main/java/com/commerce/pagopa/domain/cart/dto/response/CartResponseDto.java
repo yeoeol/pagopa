@@ -5,12 +5,14 @@ import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
 
 public record CartResponseDto(
+        Long cartId,
         Integer quantity,
         UserResponseDto user,
         ProductResponseDto product
 ) {
     public static CartResponseDto from(Cart cart) {
         return new CartResponseDto(
+                cart.getId(),
                 cart.getQuantity(),
                 UserResponseDto.from(cart.getUser()),
                 ProductResponseDto.from(cart.getProduct())

@@ -8,6 +8,7 @@ import com.commerce.pagopa.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CartResponseDto>>> getCarts(
+    public ResponseEntity<ApiResponse<List<CartResponseDto>>> getCart(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         List<CartResponseDto> responses = cartService.findUserCart(userDetails.getUserId());
@@ -43,6 +44,7 @@ public class CartController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
     public ResponseEntity<ApiResponse<CartResponseDto>> updateQuantity(
             @PathVariable("id") Long cartId,
             @RequestParam boolean isAdd
@@ -54,6 +56,7 @@ public class CartController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> deleteCart(
             @PathVariable("id") Long cartId
     ) {
