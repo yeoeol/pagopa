@@ -46,7 +46,12 @@ public class Cart extends BaseTimeEntity {
     }
 
     // 수량 증가 메서드
-    public void addQuantity(int quantity) {
-        this.quantity += quantity;
+    public void addQuantity() {
+        this.quantity += 1;
+    }
+
+    // 수량 감소 메서드
+    public void reduceQuantity() {
+        this.quantity -= 1;
     }
 }

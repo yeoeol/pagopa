@@ -1,9 +1,7 @@
 package com.commerce.pagopa.domain.cart.dto.request;
 
-public record CartAddRequestDto(
-        Long userId,
+public record CartUpdateRequestDto(
         Long productId,
-        int quantity,
         boolean isAdd
 ) {
 }
