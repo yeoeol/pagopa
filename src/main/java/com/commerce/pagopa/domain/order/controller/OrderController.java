@@ -1,6 +1,7 @@
 package com.commerce.pagopa.domain.order.controller;
 
 import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
+import com.commerce.pagopa.domain.order.dto.request.OrderRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.service.OrderService;
@@ -21,6 +22,16 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+
+    @PostMapping("/cart")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> orderFromCart(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OrderRequestDto requestDto
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(orderService.orderFromCart(userDetails.getUserId(), requestDto)));
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponseDto>> order(

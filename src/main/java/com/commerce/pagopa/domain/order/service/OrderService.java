@@ -1,7 +1,10 @@
 package com.commerce.pagopa.domain.order.service;
 
+import com.commerce.pagopa.domain.cart.entity.Cart;
+import com.commerce.pagopa.domain.cart.repository.CartRepository;
 import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderProductRequestDto;
+import com.commerce.pagopa.domain.order.dto.request.OrderRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.entity.Order;
@@ -11,10 +14,7 @@ import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
-import com.commerce.pagopa.global.exception.OrderNotFoundException;
-import com.commerce.pagopa.global.exception.ProductNotFoundException;
-import com.commerce.pagopa.global.exception.ProductOutOfStockException;
-import com.commerce.pagopa.global.exception.UserNotFoundException;
+import com.commerce.pagopa.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +29,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final CartRepository cartRepository;
 
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
@@ -84,6 +85,37 @@ public class OrderService {
         return orderRepository.findByUserIdAndStatus(userId, orderSearch.status()).stream()
                 .map(OrderResponseDto::from)
                 .toList();
+    }
+
+    @Transactional
+    public OrderResponseDto orderFromCart(Long userId, OrderRequestDto requestDto) {
+        List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
+        if (carts.isEmpty()) {
+            throw new CartNotFoundException();
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        Order order = Order.init(getOrderNumber(), requestDto.paymentMethod(), user);
+
+        for (Cart cart : carts) {
+            Product product = cart.getProduct();
+
+            int updatedRows = productRepository.decreaseStock(product.getId(), cart.getQuantity());
+            if (updatedRows == 0) {
+                throw new ProductOutOfStockException();
+            }
+
+            OrderProduct orderProduct = OrderProduct.create(
+                    cart.getQuantity(),
+                    product.getPrice(),
+                    product
+            );
+            order.addOrderProduct(orderProduct);
+        }
+
+        // 주문 완료 후 장바구니 항목 삭제
+        cartRepository.deleteAllById(requestDto.cartIds());
+        return OrderResponseDto.from(orderRepository.save(order));
     }
 
     private static String getOrderNumber() {

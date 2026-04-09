@@ -1,7 +1,6 @@
 package com.commerce.pagopa.domain.order.dto.response;
 
 import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
 
@@ -12,7 +11,7 @@ public record OrderResponseDto(
         Long orderId,
         String orderNumber,
         BigDecimal totalAmount,
-        OrderStatus status,
+        String status,
         PaymentMethod paymentMethod,
         UserResponseDto user,
         List<OrderProductResponseDto> orderItems
@@ -22,7 +21,7 @@ public record OrderResponseDto(
                 order.getId(),
                 order.getOrderNumber(),
                 order.getTotalAmount(),
-                order.getStatus(),
+                order.getStatus().getDescription(),
                 order.getPaymentMethod(),
                 UserResponseDto.from(order.getUser()),
                 order.getOrderProducts().stream()

@@ -69,7 +69,7 @@ public class Order extends BaseTimeEntity {
     }
 
     public void cancel() {
-        if (this.status == OrderStatus.COMPLETED) {
+        if (this.status != OrderStatus.ORDERED) {
             throw new OrderCannotCancelException();
         }
 
