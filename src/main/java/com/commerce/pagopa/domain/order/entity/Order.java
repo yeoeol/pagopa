@@ -74,9 +74,6 @@ public class Order extends BaseTimeEntity {
         }
 
         this.updateStatus(OrderStatus.CANCELLED);
-        for (OrderProduct orderProduct : orderProducts) {
-            orderProduct.cancel();
-        }
     }
 
     public void updateStatus(OrderStatus status) {
@@ -86,8 +83,6 @@ public class Order extends BaseTimeEntity {
     private void calcTotalAmount() {
         this.totalAmount = orderProducts.stream()
                 .map(OrderProduct::getTotalPrice)
-                .reduce(Integer::sum)
-                .map(BigDecimal::new)
-                .orElse(BigDecimal.ZERO);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

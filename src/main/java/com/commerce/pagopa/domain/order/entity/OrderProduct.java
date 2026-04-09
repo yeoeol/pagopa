@@ -53,11 +53,7 @@ public class OrderProduct {
         this.order = order;
     }
 
-    public void cancel() {
-        getProduct().increaseStock(this.quantity);
-    }
-
-    public int getTotalPrice() {
-        return getPrice().intValue() * getQuantity();
+    public BigDecimal getTotalPrice() {
+        return getPrice().multiply(BigDecimal.valueOf(getQuantity()));
     }
 }

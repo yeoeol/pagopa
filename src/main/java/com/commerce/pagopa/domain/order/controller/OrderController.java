@@ -9,6 +9,7 @@ import com.commerce.pagopa.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(
             @PathVariable("id") Long orderId
     ) {
@@ -43,7 +45,7 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<OrderResponseDto>>> getOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody OrderSearch orderSearch
+            @ModelAttribute OrderSearch orderSearch
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(orderService.findAll(userDetails.getUserId(), orderSearch))
@@ -51,6 +53,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/cancel")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> cancelOrder(
             @PathVariable("id") Long orderId
     ) {

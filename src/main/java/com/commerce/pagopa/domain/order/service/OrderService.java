@@ -39,7 +39,8 @@ public class OrderService {
             Product product = productRepository.findById(orderProductRequestDto.productId())
                     .orElseThrow(ProductNotFoundException::new);
 
-            if (product.getStock() < orderProductRequestDto.quantity()) {
+            int updatedRows = productRepository.decreaseStock(product.getId(), orderProductRequestDto.quantity());
+            if (updatedRows == 0) {
                 throw new ProductOutOfStockException();
             }
 
@@ -49,8 +50,6 @@ public class OrderService {
                     product
             );
             order.addOrderProduct(orderProduct);
-
-            product.decreaseStock(orderProductRequestDto.quantity());
         }
 
         return OrderResponseDto.from(orderRepository.save(order));
@@ -61,6 +60,16 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(OrderNotFoundException::new);
         order.cancel();
+
+        for (OrderProduct orderProduct : order.getOrderProducts()) {
+            int updatedRows = productRepository.increaseStock(
+                    orderProduct.getProduct().getId(),
+                    orderProduct.getQuantity()
+            );
+            if (updatedRows == 0) {
+                throw new ProductNotFoundException();
+            }
+        }
     }
 
     @Transactional(readOnly = true)
