@@ -15,8 +15,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,13 +46,11 @@ public class Order extends BaseTimeEntity {
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(String orderNumber, BigDecimal totalAmount, OrderStatus status, PaymentMethod paymentMethod, User user, OrderProduct... orderProducts) {
+    private Order(String orderNumber, OrderStatus status, PaymentMethod paymentMethod, User user) {
         this.orderNumber = orderNumber;
-        this.totalAmount = totalAmount;
         this.status = status;
         this.paymentMethod = paymentMethod;
         this.user = user;
-        this.orderProducts.addAll(asList(orderProducts));
     }
 
     public static Order init(String orderNumber, PaymentMethod paymentMethod, User user) {

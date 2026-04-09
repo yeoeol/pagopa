@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.order.service;
 
 import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderProductRequestDto;
+import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -59,6 +61,20 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(OrderNotFoundException::new);
         order.cancel();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponseDto find(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(OrderNotFoundException::new);
+        return OrderResponseDto.from(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch) {
+        return orderRepository.findByUserIdAndStatus(userId, orderSearch.status()).stream()
+                .map(OrderResponseDto::from)
+                .toList();
     }
 
     private static String getOrderNumber() {

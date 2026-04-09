@@ -1,0 +1,60 @@
+package com.commerce.pagopa.domain.order.controller;
+
+import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
+import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
+import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
+import com.commerce.pagopa.domain.order.service.OrderService;
+import com.commerce.pagopa.global.entity.CustomUserDetails;
+import com.commerce.pagopa.global.response.ApiResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<OrderResponseDto>> order(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OrderCreateRequestDto requestDto
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(orderService.order(userDetails.getUserId(), requestDto)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(
+            @PathVariable("id") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(orderService.find(orderId))
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<OrderResponseDto>>> getOrders(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OrderSearch orderSearch
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(orderService.findAll(userDetails.getUserId(), orderSearch))
+        );
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(
+            @PathVariable("id") Long orderId
+    ) {
+        orderService.cancelOrder(orderId);
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+}
