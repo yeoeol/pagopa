@@ -34,6 +34,7 @@ public enum ErrorCode {
     PRODUCT_OUT_OF_STOCK(HttpStatus.CONFLICT,"PRODUCT_002", "재고가 부족합니다."),
     PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST,"PRODUCT_003", "판매 중인 상품이 아닙니다."),
     NOT_PRODUCT_OWNER(HttpStatus.FORBIDDEN,"PRODUCT_004", "상품 수정 권한이 없습니다."),
+    BAD_REQUEST_QUANTITY(HttpStatus.BAD_REQUEST,"PRODUCT_005", "quantity는 1 이상이어야 합니다."),
 
     // CATEGORY
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND,"CATEGORY_001", "존재하지 않는 카테고리입니다."),
