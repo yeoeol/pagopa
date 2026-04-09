@@ -4,6 +4,7 @@ import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.OrderCannotCancelException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -44,26 +45,53 @@ public class Order extends BaseTimeEntity {
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(String orderNumber, BigDecimal totalAmount, OrderStatus status, PaymentMethod paymentMethod, User user, OrderItem... orderItems) {
+    private Order(String orderNumber, BigDecimal totalAmount, OrderStatus status, PaymentMethod paymentMethod, User user, OrderProduct... orderProducts) {
         this.orderNumber = orderNumber;
         this.totalAmount = totalAmount;
         this.status = status;
         this.paymentMethod = paymentMethod;
         this.user = user;
-        this.orderItems.addAll(asList(orderItems));
+        this.orderProducts.addAll(asList(orderProducts));
     }
 
-    public static Order create(String orderNumber, BigDecimal totalAmount, OrderStatus status, PaymentMethod paymentMethod, User user, OrderItem... orderItems) {
+    public static Order init(String orderNumber, PaymentMethod paymentMethod, User user) {
         return Order.builder()
                 .orderNumber(orderNumber)
-                .totalAmount(totalAmount)
-                .status(status)
+                .status(OrderStatus.ORDERED)
                 .paymentMethod(paymentMethod)
                 .user(user)
-                .orderItems(orderItems)
                 .build();
+    }
+
+    public void addOrderProduct(OrderProduct orderProduct) {
+        this.orderProducts.add(orderProduct);
+        orderProduct.assignOrder(this);
+        calcTotalAmount();
+    }
+
+    public void cancel() {
+        if (this.status == OrderStatus.COMPLETED) {
+            throw new OrderCannotCancelException();
+        }
+
+        this.updateStatus(OrderStatus.CANCELLED);
+        for (OrderProduct orderProduct : orderProducts) {
+            orderProduct.cancel();
+        }
+    }
+
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    private void calcTotalAmount() {
+        this.totalAmount = orderProducts.stream()
+                .map(OrderProduct::getTotalPrice)
+                .reduce(Integer::sum)
+                .map(BigDecimal::new)
+                .orElse(BigDecimal.ZERO);
     }
 }

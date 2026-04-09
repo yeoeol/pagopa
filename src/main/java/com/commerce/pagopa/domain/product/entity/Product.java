@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.product.entity;
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.global.exception.ProductOutOfStockException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -104,5 +105,16 @@ public class Product {
                 .filter(ProductImage::isThumbnail)
                 .findFirst()
                 .or(() -> images.stream().findFirst());
+    }
+
+    public void increaseStock(int quantity) {
+        this.stock += quantity;
+    }
+
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new ProductOutOfStockException();
+        }
+        this.stock -= quantity;
     }
 }
