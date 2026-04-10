@@ -3,19 +3,33 @@ package com.commerce.pagopa.global.exception.handler;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.response.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageSource messageSource;
+    private final ObjectMapper objectMapper;
 
     // 커스텀 예외 (BusinessException 하위 전체 처리)
     @ExceptionHandler(BusinessException.class)
@@ -28,20 +42,26 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(errorCode));
     }
 
-    // @Valid 검증 실패 (@RequestBody)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(fe -> fe.getDefaultMessage())
-                .findFirst()
-                .orElse("입력 값이 올바르지 않습니다.");
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException e) {
+        List<String> errors = new ArrayList<>();
+        e.getBindingResult().getAllErrors().forEach(error -> {
+            String errorMessage = getInternationalizedMessage((FieldError) error);
+            errors.add(errorMessage);
+        });
 
-        log.warn("[Validation] {}", message);
+        log.warn("[Validation failed] {}", errors);
         return ResponseEntity
                 .status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
-                .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, message));
+                .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, errors.toString()));
+    }
+
+    private String getInternationalizedMessage(FieldError fieldError) {
+        try {
+            return messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            return fieldError.getDefaultMessage(); // 메시지 키를 찾지 못한 경우 원래 메시지 반환
+        }
     }
 
     // @Valid 검증 실패 (@RequestParam, @PathVariable)

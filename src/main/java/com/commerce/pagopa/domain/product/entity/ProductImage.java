@@ -21,7 +21,7 @@ public class ProductImage {
     private String imageUrl;
 
     @Column(nullable = false)
-    private int order;
+    private int displayOrder;
 
     @Column(nullable = false)
     private boolean isThumbnail = false;
@@ -32,19 +32,26 @@ public class ProductImage {
 
     @Builder(access = AccessLevel.PRIVATE)
     private ProductImage(
-            String imageUrl, int order, boolean isThumbnail, Product product
+            String imageUrl, int displayOrder, boolean isThumbnail
     ) {
         this.imageUrl = imageUrl;
-        this.order = order;
+        this.displayOrder = displayOrder;
         this.isThumbnail = isThumbnail;
-        this.product = product;
+    }
+
+    public static ProductImage create(String imageUrl, int displayOrder, boolean isThumbnail) {
+        return ProductImage.builder()
+                .imageUrl(imageUrl)
+                .displayOrder(displayOrder)
+                .isThumbnail(isThumbnail)
+                .build();
     }
 
     public void assignProduct(Product product) {
         this.product = product;
     }
 
-    public void updateOrder(int order) {
-        this.order = order;
+    public void updateDisplayOrder(int order) {
+        this.displayOrder = order;
     }
 }

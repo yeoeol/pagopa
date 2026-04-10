@@ -5,6 +5,7 @@ import com.commerce.pagopa.domain.category.repository.CategoryRepository;
 import com.commerce.pagopa.domain.product.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.domain.product.entity.ProductImage;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -48,6 +50,15 @@ public class ProductService {
                 category,
                 seller
         );
+
+        for (int i = 0; i < requestDto.imageUrls().size(); i++) {
+            boolean isThumbnail = false;
+            if (i == 0) {
+                isThumbnail = true;
+            }
+            ProductImage productImage = ProductImage.create(requestDto.imageUrls().get(i), i + 1, isThumbnail);
+            product.addImage(productImage);
+        }
 
         return ProductResponseDto.from(productRepository.save(product));
     }

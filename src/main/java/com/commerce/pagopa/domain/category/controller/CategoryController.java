@@ -7,6 +7,7 @@ import com.commerce.pagopa.domain.category.dto.response.CategorySimpleResponseDt
 import com.commerce.pagopa.domain.category.dto.response.CategoryTreeResponseDto;
 import com.commerce.pagopa.domain.category.service.CategoryService;
 import com.commerce.pagopa.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +43,7 @@ public class CategoryController {
     @PostMapping("/root")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CategorySimpleResponseDto>> createRoot(
-            @RequestBody RootCategoryCreateRequestDto requestDto
+            @Valid @RequestBody RootCategoryCreateRequestDto requestDto
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(categoryService.createRoot(requestDto))
@@ -52,7 +53,7 @@ public class CategoryController {
     @PostMapping("/child")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CategoryResponseDto>> createChild(
-            @RequestBody ChildCategoryCreateRequestDto requestDto
+            @Valid @RequestBody ChildCategoryCreateRequestDto requestDto
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(categoryService.createChild(requestDto))
