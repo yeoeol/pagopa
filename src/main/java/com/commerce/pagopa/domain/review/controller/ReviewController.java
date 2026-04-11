@@ -9,6 +9,7 @@ import com.commerce.pagopa.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ public class ReviewController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#reviewId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable("id") Long reviewId,
             @RequestBody ReviewUpdateRequestDto requestDto
@@ -50,6 +52,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#reviewId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable("id") Long reviewId
     ) {
