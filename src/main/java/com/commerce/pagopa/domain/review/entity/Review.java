@@ -1,7 +1,6 @@
 package com.commerce.pagopa.domain.review.entity;
 
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
-import com.commerce.pagopa.domain.product.entity.ProductImage;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -60,5 +59,10 @@ public class Review extends BaseTimeEntity {
     public void addImage(ReviewImage image) {
         this.images.add(image);
         image.assignReview(this);
+    }
+
+    public void update(int rating, String content) {
+        this.rating = rating;
+        this.content = content;
     }
 }

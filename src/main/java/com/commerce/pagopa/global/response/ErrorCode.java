@@ -51,6 +51,9 @@ public enum ErrorCode {
     ORDER_NOT_MINE(HttpStatus.FORBIDDEN,"ORDER_002", "본인의 주문이 아닙니다."),
     ORDER_CANNOT_CANCEL(HttpStatus.BAD_REQUEST,"ORDER_003", "취소할 수 없는 주문 상태입니다."),
 
+    // ORDER
+    ORDER_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND,"ORDER_PRODUCT_001", "존재하지 않는 주문 상품입니다."),
+
     // REVIEW
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,"REVIEW_001", "존재하지 않는 리뷰입니다."),
     REVIEW_NOT_MINE(HttpStatus.FORBIDDEN,"REVIEW_002", "본인의 리뷰가 아닙니다."),

@@ -1,0 +1,81 @@
+package com.commerce.pagopa.domain.review.service;
+
+import com.commerce.pagopa.domain.order.entity.OrderProduct;
+import com.commerce.pagopa.domain.order.repository.OrderProductRepository;
+import com.commerce.pagopa.domain.review.dto.request.ReviewUpdateRequestDto;
+import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.domain.product.repository.ProductRepository;
+import com.commerce.pagopa.domain.review.dto.request.ReviewCreateRequestDto;
+import com.commerce.pagopa.domain.review.dto.response.ReviewResponseDto;
+import com.commerce.pagopa.domain.review.entity.Review;
+import com.commerce.pagopa.domain.review.entity.ReviewImage;
+import com.commerce.pagopa.domain.review.repository.ReviewRepository;
+import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.global.exception.OrderProductNotFoundException;
+import com.commerce.pagopa.global.exception.ProductNotFoundException;
+import com.commerce.pagopa.global.exception.ReviewNotFoundException;
+import com.commerce.pagopa.global.exception.UserNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
+    private final OrderProductRepository orderProductRepository;
+    private final ProductRepository productRepository;
+
+    @Transactional
+    public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        OrderProduct orderProduct = orderProductRepository.findById(requestDto.orderProductId())
+                .orElseThrow(OrderProductNotFoundException::new);
+
+        Review review = Review.create(requestDto.rating(), requestDto.content(), user, orderProduct);
+
+        for (int i = 0; i < requestDto.imageUrls().size(); i++) {
+            ReviewImage reviewImage = ReviewImage.create(requestDto.imageUrls().get(i), i + 1);
+            review.addImage(reviewImage);
+        }
+
+        return ReviewResponseDto.from(reviewRepository.save(review));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> findAll() {
+        return reviewRepository.findAll()
+                .stream()
+                .map(ReviewResponseDto::from)
+                .toList();
+    }
+
+    @Transactional
+    public void update(Long reviewId, ReviewUpdateRequestDto requestDto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(ReviewNotFoundException::new);
+
+        review.update(requestDto.rating(), requestDto.content());
+    }
+
+    @Transactional
+    public void delete(Long reviewId) {
+        reviewRepository.deleteById(reviewId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> findAllByProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(ProductNotFoundException::new);
+
+        return reviewRepository.findAllByOrderProduct_Product(product).stream()
+                .map(ReviewResponseDto::from)
+                .toList();
+    }
+}

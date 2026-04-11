@@ -16,10 +16,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +27,6 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
-    private final ObjectMapper objectMapper;
 
     // 커스텀 예외 (BusinessException 하위 전체 처리)
     @ExceptionHandler(BusinessException.class)
