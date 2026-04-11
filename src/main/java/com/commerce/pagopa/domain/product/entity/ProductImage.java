@@ -51,7 +51,7 @@ public class ProductImage {
         this.product = product;
     }
 
-    public void updateDisplayOrder(int order) {
-        this.displayOrder = order;
+    public void updateDisplayOrder(int displayOrder) {
+        this.displayOrder = displayOrder;
     }
 }
