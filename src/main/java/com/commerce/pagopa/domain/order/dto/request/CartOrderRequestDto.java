@@ -11,7 +11,7 @@ public record CartOrderRequestDto(
         @NotNull(message = "{validation.notNull}")
         PaymentMethod paymentMethod,
 
-        @NotEmpty(message = "{validation.notNull}")
+        @NotEmpty(message = "{validation.notEmpty}")
         List<@NotNull(message = "{validation.notNull}") @Positive(message = "{validation.min}") Long> cartIds
 ) {
 }
