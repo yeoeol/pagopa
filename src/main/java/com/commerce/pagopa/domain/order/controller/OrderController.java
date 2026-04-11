@@ -1,7 +1,7 @@
 package com.commerce.pagopa.domain.order.controller;
 
 import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.domain.order.dto.request.OrderRequestDto;
+import com.commerce.pagopa.domain.order.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.service.OrderService;
@@ -26,7 +26,7 @@ public class OrderController {
     @PostMapping("/cart")
     public ResponseEntity<ApiResponse<OrderResponseDto>> orderFromCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody OrderRequestDto requestDto
+            @RequestBody CartOrderRequestDto requestDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)

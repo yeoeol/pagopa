@@ -4,7 +4,7 @@ import com.commerce.pagopa.domain.cart.entity.Cart;
 import com.commerce.pagopa.domain.cart.repository.CartRepository;
 import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderProductRequestDto;
-import com.commerce.pagopa.domain.order.dto.request.OrderRequestDto;
+import com.commerce.pagopa.domain.order.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.entity.Order;
@@ -88,7 +88,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponseDto orderFromCart(Long userId, OrderRequestDto requestDto) {
+    public OrderResponseDto orderFromCart(Long userId, CartOrderRequestDto requestDto) {
         List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
         if (carts.isEmpty()) {
             throw new CartNotFoundException();

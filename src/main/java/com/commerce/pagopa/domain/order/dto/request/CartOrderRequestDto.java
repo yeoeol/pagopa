@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record OrderCreateRequestDto(
+public record CartOrderRequestDto(
         @NotNull(message = "{validation.notNull}")
         PaymentMethod paymentMethod,
 
         @NotEmpty(message = "{validation.notNull}")
-        List<OrderProductRequestDto> products
+        List<Long> cartIds
 ) {
 }

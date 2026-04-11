@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.product.dto.response;
 import com.commerce.pagopa.domain.product.entity.Product;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record ProductResponseDto(
         Long productId,
@@ -13,7 +14,8 @@ public record ProductResponseDto(
         int stock,
         String status,
         Long categoryId,
-        Long sellerId
+        Long sellerId,
+        List<ProductImageResponseDto> productImages
 ) {
     public static ProductResponseDto from(Product product) {
         return new ProductResponseDto(
@@ -25,7 +27,10 @@ public record ProductResponseDto(
                 product.getStock(),
                 product.getStatus().getDescription(),
                 product.getCategory().getId(),
-                product.getSeller().getId()
+                product.getSeller().getId(),
+                product.getImages().stream()
+                        .map(ProductImageResponseDto::from)
+                        .toList()
         );
     }
 }
