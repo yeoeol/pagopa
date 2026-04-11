@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -40,7 +39,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiResponse<List<String>>> handleValidation(MethodArgumentNotValidException e) {
         List<String> errors = new ArrayList<>();
         e.getBindingResult().getAllErrors().forEach(error -> {
             String errorMessage = getInternationalizedMessage((FieldError) error);

@@ -6,6 +6,7 @@ import com.commerce.pagopa.domain.review.dto.response.ReviewResponseDto;
 import com.commerce.pagopa.domain.review.service.ReviewService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<ApiResponse<ReviewResponseDto>> review(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ReviewCreateRequestDto requestDto
+            @Valid @RequestBody ReviewCreateRequestDto requestDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -40,10 +41,10 @@ public class ReviewController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("@orderOwnerValidator.isOwner(#reviewId, principal.userId)")
+    @PreAuthorize("@reviewOwnerValidator.isOwner(#reviewId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable("id") Long reviewId,
-            @RequestBody ReviewUpdateRequestDto requestDto
+            @Valid @RequestBody ReviewUpdateRequestDto requestDto
     ) {
         reviewService.update(reviewId, requestDto);
         return ResponseEntity.ok(
@@ -52,7 +53,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@orderOwnerValidator.isOwner(#reviewId, principal.userId)")
+    @PreAuthorize("@reviewOwnerValidator.isOwner(#reviewId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable("id") Long reviewId
     ) {

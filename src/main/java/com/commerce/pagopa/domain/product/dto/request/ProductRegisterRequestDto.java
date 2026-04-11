@@ -1,9 +1,6 @@
 package com.commerce.pagopa.domain.product.dto.request;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,7 +23,8 @@ public record ProductRegisterRequestDto(
         @NotNull(message = "{validation.notNull}")
         Long categoryId,
 
-        @NotNull(message = "{validation.notNull}")
-        List<String> imageUrls
+        @NotEmpty(message = "{validation.notEmpty}")
+        List<@NotBlank(message = "{validation.notBlank}")
+                @Size(max = 512, message = "{validation.size}") String> imageUrls
 ) {
 }

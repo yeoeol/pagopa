@@ -1,7 +1,9 @@
 package com.commerce.pagopa.domain.review.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Range;
 
 import java.util.List;
@@ -17,7 +19,8 @@ public record ReviewCreateRequestDto(
         @NotNull(message = "{validation.notNull}")
         Long orderProductId,
 
-        @NotNull(message = "{validation.notNull}")
-        List<String> imageUrls
+        @NotEmpty(message = "{validation.notEmpty}")
+        List<@NotBlank(message = "{validation.notBlank}")
+             @Size(max = 512, message = "{validation.size}") String> imageUrls
 ) {
 }
