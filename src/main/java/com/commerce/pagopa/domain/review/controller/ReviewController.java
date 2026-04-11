@@ -24,6 +24,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
+    @PreAuthorize("@orderProductOwnerValidator.isOwner(#requestDto.orderProductId(), principal.userId)")
     public ResponseEntity<ApiResponse<ReviewResponseDto>> review(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ReviewCreateRequestDto requestDto
