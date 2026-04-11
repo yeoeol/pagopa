@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiResponse<List<String>>> handleValidation(MethodArgumentNotValidException e) {
         List<String> errors = new ArrayList<>();
         e.getBindingResult().getAllErrors().forEach(error -> {
             String errorMessage = getInternationalizedMessage((FieldError) error);

@@ -7,6 +7,7 @@ import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.service.OrderService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class OrderController {
     @PostMapping("/cart")
     public ResponseEntity<ApiResponse<OrderResponseDto>> orderFromCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody CartOrderRequestDto requestDto
+            @Valid @RequestBody CartOrderRequestDto requestDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -36,7 +37,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponseDto>> order(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody OrderCreateRequestDto requestDto
+            @Valid @RequestBody OrderCreateRequestDto requestDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
