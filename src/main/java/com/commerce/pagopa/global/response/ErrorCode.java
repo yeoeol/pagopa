@@ -51,7 +51,7 @@ public enum ErrorCode {
     ORDER_NOT_MINE(HttpStatus.FORBIDDEN,"ORDER_002", "본인의 주문이 아닙니다."),
     ORDER_CANNOT_CANCEL(HttpStatus.BAD_REQUEST,"ORDER_003", "취소할 수 없는 주문 상태입니다."),
 
-    // ORDER
+    // ORDER PRODUCT
     ORDER_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND,"ORDER_PRODUCT_001", "존재하지 않는 주문 상품입니다."),
 
     // REVIEW
@@ -62,7 +62,8 @@ public enum ErrorCode {
 
     // SCRAP
     SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND,"SCRAP_001", "존재하지 않는 스크랩입니다."),
-    SCRAP_ALREADY_EXISTS(HttpStatus.CONFLICT,"SCRAP_002", "이미 스크랩한 항목입니다.");
+    SCRAP_ALREADY_EXISTS(HttpStatus.CONFLICT,"SCRAP_002", "이미 스크랩한 항목입니다."),
+    SCRAP_TARGET_UNSUPPORTED(HttpStatus.BAD_REQUEST,"SCRAP_003", "지원하지 않는 스크랩 대상 타입입니다."),
 
     ;
     private final HttpStatus httpStatus;
