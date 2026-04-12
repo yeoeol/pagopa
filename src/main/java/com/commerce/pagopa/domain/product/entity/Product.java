@@ -3,9 +3,6 @@ package com.commerce.pagopa.domain.product.entity;
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.exception.ProductOutOfStockException;
-import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -58,7 +55,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
-    private List<ProductImage> images = new ArrayList<>();
+    private final List<ProductImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
     private Product(

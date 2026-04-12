@@ -1,10 +1,15 @@
 package com.commerce.pagopa.domain.product.controller;
 
 import com.commerce.pagopa.domain.product.dto.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.domain.product.dto.request.ProductSearch;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.service.ProductService;
+import com.commerce.pagopa.domain.searchhistory.service.SearchHistoryService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.util.CookieUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +26,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final SearchHistoryService searchHistoryService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
@@ -49,13 +55,29 @@ public class ProductController {
         );
     }
 
-    // @PutMapping("/{id}")
-    // @PreAuthorize("@productOwnerValidator.isOwner(#id, principal.userId) or hasRole('ADMIN')")
-    // public ResponseEntity<ApiResponse<ProductResponseDto>> update(
-    //         @PathVariable Long id,
-    //         @AuthenticationPrincipal CustomUserDetails userDetails,
-    //         @Valid @RequestBody ProductUpdateRequestDto requestDto
-    // ) {
-    //     return ResponseEntity.ok(ApiResponse.ok(productService.update(id, requestDto)));
-    // }
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @ModelAttribute ProductSearch productSearch,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String keyword = productSearch.productName();
+        
+        // 검색어가 있을 때만 기록
+        if (keyword != null && !keyword.isBlank()) {
+            if (userDetails != null) {
+                // 로그인 사용자 검색 기록 저장
+                searchHistoryService.saveHistory(userDetails.getUserId(), null, keyword);
+            } else {
+                // 비로그인 사용자: 쿠키에서 세션 ID 확인, 없으면 발급
+                String sessionId = CookieUtil.getOrCreateGuestSessionId(request, response);
+                searchHistoryService.saveHistory(null, sessionId, keyword);
+            }
+        }
+
+        return ResponseEntity.ok(
+                ApiResponse.ok(productService.search(productSearch))
+        );
+    }
 }
