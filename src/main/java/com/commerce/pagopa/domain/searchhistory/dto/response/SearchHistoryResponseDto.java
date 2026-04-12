@@ -1,6 +1,6 @@
-package com.commerce.pagopa.domain.search.dto.response;
+package com.commerce.pagopa.domain.searchhistory.dto.response;
 
-import com.commerce.pagopa.domain.search.entity.SearchHistory;
+import com.commerce.pagopa.domain.searchhistory.entity.SearchHistory;
 
 import java.time.LocalDateTime;
 

@@ -1,8 +1,8 @@
-package com.commerce.pagopa.domain.search.service;
+package com.commerce.pagopa.domain.searchhistory.service;
 
-import com.commerce.pagopa.domain.search.dto.response.SearchHistoryResponseDto;
-import com.commerce.pagopa.domain.search.entity.SearchHistory;
-import com.commerce.pagopa.domain.search.repository.SearchHistoryRepository;
+import com.commerce.pagopa.domain.searchhistory.dto.response.SearchHistoryResponseDto;
+import com.commerce.pagopa.domain.searchhistory.entity.SearchHistory;
+import com.commerce.pagopa.domain.searchhistory.repository.SearchHistoryRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

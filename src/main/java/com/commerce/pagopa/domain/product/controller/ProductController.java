@@ -4,7 +4,7 @@ import com.commerce.pagopa.domain.product.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.domain.product.dto.request.ProductSearch;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.service.ProductService;
-import com.commerce.pagopa.domain.search.service.SearchHistoryService;
+import com.commerce.pagopa.domain.searchhistory.service.SearchHistoryService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.CookieUtil;
@@ -58,11 +58,11 @@ public class ProductController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @ModelAttribute ProductSearch productSearch,
+            @Valid @ModelAttribute ProductSearch productSearch,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        String keyword = productSearch.name();
+        String keyword = productSearch.productName();
         
         // 검색어가 있을 때만 기록
         if (keyword != null && !keyword.isBlank()) {

@@ -1,7 +1,7 @@
-package com.commerce.pagopa.domain.search.controller;
+package com.commerce.pagopa.domain.searchhistory.controller;
 
-import com.commerce.pagopa.domain.search.dto.response.SearchHistoryResponseDto;
-import com.commerce.pagopa.domain.search.service.SearchHistoryService;
+import com.commerce.pagopa.domain.searchhistory.dto.response.SearchHistoryResponseDto;
+import com.commerce.pagopa.domain.searchhistory.service.SearchHistoryService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.CookieUtil;
