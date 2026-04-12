@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.product.service;
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.category.repository.CategoryRepository;
 import com.commerce.pagopa.domain.product.dto.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.domain.product.dto.request.ProductSearch;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.entity.ProductImage;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,10 +52,7 @@ public class ProductService {
         );
 
         for (int i = 0; i < requestDto.imageUrls().size(); i++) {
-            boolean isThumbnail = false;
-            if (i == 0) {
-                isThumbnail = true;
-            }
+            boolean isThumbnail = (i == 0);
             ProductImage productImage = ProductImage.create(requestDto.imageUrls().get(i), i + 1, isThumbnail);
             product.addImage(productImage);
         }
@@ -76,5 +73,14 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(ProductNotFoundException::new);
         return ProductResponseDto.from(product);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> search(ProductSearch productSearch) {
+        return productRepository.searchProducts(
+                productSearch.name()
+        ).stream()
+                .map(ProductResponseDto::from)
+                .toList();
     }
 }
