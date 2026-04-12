@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,26 +29,36 @@ public class SearchHistoryService {
         if (userId != null) {
             User user = userRepository.findById(userId).orElse(null);
             if (user != null) {
-                SearchHistory history = SearchHistory.createForUser(user, keyword);
-                searchHistoryRepository.save(history);
+                Optional<SearchHistory> existingHistory = searchHistoryRepository.findByUserIdAndKeyword(userId, keyword);
+                if (existingHistory.isPresent()) {
+                    existingHistory.get().updateLastSearchedAt(); // 이미 존재하면 갱신만 수행
+                } else {
+                    SearchHistory history = SearchHistory.createForUser(user, keyword);
+                    searchHistoryRepository.save(history);
+                }
             }
         } 
         // 비로그인 사용자 (세션 기반)
         else if (sessionId != null && !sessionId.isBlank()) {
-            SearchHistory history = SearchHistory.createForGuest(sessionId, keyword);
-            searchHistoryRepository.save(history);
+            Optional<SearchHistory> existingHistory = searchHistoryRepository.findBySessionIdAndKeyword(sessionId, keyword);
+            if (existingHistory.isPresent()) {
+                existingHistory.get().updateLastSearchedAt(); // 이미 존재하면 갱신만 수행
+            } else {
+                SearchHistory history = SearchHistory.createForGuest(sessionId, keyword);
+                searchHistoryRepository.save(history);
+            }
         }
     }
 
     @Transactional(readOnly = true)
     public List<SearchHistoryResponseDto> getHistories(Long userId, String sessionId) {
         if (userId != null) {
-            return searchHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId)
+            return searchHistoryRepository.findByUserIdOrderByLastSearchedAtDesc(userId)
                     .stream()
                     .map(SearchHistoryResponseDto::from)
                     .toList();
         } else if (sessionId != null && !sessionId.isBlank()) {
-            return searchHistoryRepository.findBySessionIdOrderByCreatedAtDesc(sessionId)
+            return searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId)
                     .stream()
                     .map(SearchHistoryResponseDto::from)
                     .toList();

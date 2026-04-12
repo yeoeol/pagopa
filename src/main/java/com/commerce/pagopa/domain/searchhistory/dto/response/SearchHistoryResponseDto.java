@@ -13,7 +13,7 @@ public record SearchHistoryResponseDto(
         return new SearchHistoryResponseDto(
                 searchHistory.getId(),
                 searchHistory.getKeyword(),
-                searchHistory.getCreatedAt()
+                searchHistory.getLastSearchedAt() // 갱신된 시간을 반환
         );
     }
 }
