@@ -1,6 +1,7 @@
 package com.commerce.pagopa.domain.product.controller;
 
 import com.commerce.pagopa.domain.product.dto.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.domain.product.dto.request.ProductSearch;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.service.ProductService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
@@ -49,13 +50,12 @@ public class ProductController {
         );
     }
 
-    // @PutMapping("/{id}")
-    // @PreAuthorize("@productOwnerValidator.isOwner(#id, principal.userId) or hasRole('ADMIN')")
-    // public ResponseEntity<ApiResponse<ProductResponseDto>> update(
-    //         @PathVariable Long id,
-    //         @AuthenticationPrincipal CustomUserDetails userDetails,
-    //         @Valid @RequestBody ProductUpdateRequestDto requestDto
-    // ) {
-    //     return ResponseEntity.ok(ApiResponse.ok(productService.update(id, requestDto)));
-    // }
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
+            @ModelAttribute ProductSearch productSearch
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(productService.search(productSearch))
+        );
+    }
 }
