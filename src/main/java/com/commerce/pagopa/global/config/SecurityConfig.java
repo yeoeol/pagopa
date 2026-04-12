@@ -43,7 +43,10 @@ public class SecurityConfig {
                         // 상품 등록(POST), 수정/삭제는 SELLER, ADMIN만 (@PreAuthorize와 함께 사용)
                         .requestMatchers("/api/v1/products/**").hasAnyRole("SELLER", "ADMIN")
 
-                        // 3. User, Cart, Image 패키지: 인증된 사용자(모든 권한) 인가
+                        // 3. 검색 기록 (Search History): 모두 허용(비로그인은 null로 넘어가 빈 배열 반환됨)
+                        .requestMatchers("/api/v1/search-histories/**").permitAll()
+
+                        // 4. User, Cart, Image 패키지: 인증된 사용자(모든 권한) 인가
                         .requestMatchers("/api/v1/users/**", "/api/v1/cart/**", "/api/v1/images/**").authenticated()
 
                         // 그 외의 모든 요청은 로그인 필요
