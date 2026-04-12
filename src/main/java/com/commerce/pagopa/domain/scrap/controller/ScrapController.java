@@ -5,6 +5,7 @@ import com.commerce.pagopa.domain.scrap.dto.response.ScrapResponseDto;
 import com.commerce.pagopa.domain.scrap.service.ScrapService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class ScrapController {
     @PostMapping
     public ResponseEntity<ApiResponse<ScrapResponseDto>> addScrap(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ScrapAddRequestDto requestDto
+            @Valid @RequestBody ScrapAddRequestDto requestDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
