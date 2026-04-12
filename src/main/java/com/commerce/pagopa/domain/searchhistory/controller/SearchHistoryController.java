@@ -8,6 +8,7 @@ import com.commerce.pagopa.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,9 @@ public class SearchHistoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@searchHistoryOwnerValidator.isOwner(#searchHistoryId, #userDetails != null ? #userDetails.userId : null)")
     public ResponseEntity<ApiResponse<Void>> deleteHistory(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("id") Long searchHistoryId
     ) {
         searchHistoryService.delete(searchHistoryId);
