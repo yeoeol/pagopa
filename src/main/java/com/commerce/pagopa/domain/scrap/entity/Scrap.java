@@ -12,7 +12,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "scraps")
+@Table(
+        name = "scraps",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"user_id", "target_type", "target_id"}
+                )
+        }
+)
 public class Scrap extends BaseTimeEntity {
 
     @Id

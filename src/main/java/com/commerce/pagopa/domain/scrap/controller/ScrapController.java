@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,7 @@ public class ScrapController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@scrapOwnerValidator.isOwner(#scrapId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> deleteScrap(@PathVariable("id") Long scrapId) {
         scrapService.delete(scrapId);
         return ResponseEntity.ok(
