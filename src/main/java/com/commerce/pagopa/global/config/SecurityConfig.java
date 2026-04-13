@@ -12,6 +12,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -30,27 +31,43 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // 1. 카테고리 (Category) 패키지: 조회는 모두 허용, 그 외(생성/수정/삭제)는 ADMIN만
+                        // 1. 카테고리 (Category): 조회는 전부 가능, 생성 등은 ADMIN만
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
 
-                        // 2. 상품 (Product) 패키지: 조회는 모두 허용
-                        .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
-                        // 상품 등록(POST), 수정/삭제는 SELLER, ADMIN만 (@PreAuthorize와 함께 사용)
-                        .requestMatchers("/api/v1/products/**").hasAnyRole("SELLER", "ADMIN")
+                        // 2. 이미지 (Image): 전부 가능
+                        .requestMatchers("/api/v1/images/**").permitAll()
 
-                        // 3. 검색 기록 (Search History): 모두 허용(비로그인은 null로 넘어가 빈 배열 반환됨)
-                        .requestMatchers(HttpMethod.GET, "/api/v1/search-histories/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/search-histories/**").authenticated()
+                        // 3. 상품 (Product): 상품 등록(POST)은 SELLER, ADMIN만, 조회 등 나머지는 전부 가능
+                        .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers("/api/v1/products/**").permitAll()
 
-                        // 4. User, Cart, Image 패키지: 인증된 사용자(모든 권한) 인가
-                        .requestMatchers("/api/v1/users/**", "/api/v1/cart/**", "/api/v1/images/**").authenticated()
+                        // 4. 유저 (User): SELLER, USER 가능
+                        .requestMatchers("/api/v1/users/**").hasAnyRole("USER", "SELLER")
 
-                        // 그 외의 모든 요청은 로그인 필요
+                        // 5. 장바구니 (Cart): USER
+                        .requestMatchers("/api/v1/cart/**").hasRole("USER")
+
+                        // 6. 주문 (Order): USER
+                        .requestMatchers("/api/v1/orders/**").hasRole("USER")
+
+                        // 7. 리뷰 (Review):
+                        // 상품별 리뷰 목록 API(GET /api/v1/reviews/products/{id})는 SELLER, USER
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").hasAnyRole("USER", "SELLER")
+                        // 그 외 리뷰 관련: USER만 가능
+                        .requestMatchers("/api/v1/reviews/**").hasRole("USER")
+
+                        // 8. 스크랩 (Scrap): USER
+                        .requestMatchers("/api/v1/scraps/**").hasRole("USER")
+
+                        // 9. 검색 기록 (Search History): 모두 허용 (비로그인 대응)
+                        .requestMatchers("/api/v1/search-histories/**").permitAll()
+
+                        // 그 외의 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
 
