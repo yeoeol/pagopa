@@ -25,7 +25,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, null, ApiError.of(errorCode));
     }
 
-    public static <T> ApiResponse<T> error(ErrorCode errorCode, String message) {
+    public static <T> ApiResponse<T> error(ErrorCode errorCode, Object message) {
         return new ApiResponse<>(false, null, ApiError.of(errorCode, message));
     }
 
@@ -34,13 +34,13 @@ public class ApiResponse<T> {
     static class ApiError {
 
         private final String code;
-        private final String message;
+        private final Object message;
 
         static ApiError of(ErrorCode errorCode) {
             return new ApiError(errorCode.getCode(), errorCode.getMessage());
         }
 
-        static ApiError of(ErrorCode errorCode, String message) {
+        static ApiError of(ErrorCode errorCode, Object message) {
             return new ApiError(errorCode.getCode(), message);
         }
     }

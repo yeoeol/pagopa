@@ -1,4 +1,4 @@
-package com.commerce.pagopa.global.config;
+package com.commerce.pagopa.domain.searchhistory.validator;
 
 import com.commerce.pagopa.domain.searchhistory.entity.SearchHistory;
 import com.commerce.pagopa.domain.searchhistory.repository.SearchHistoryRepository;
