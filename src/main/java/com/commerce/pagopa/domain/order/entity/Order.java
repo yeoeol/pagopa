@@ -42,6 +42,10 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
@@ -66,6 +70,11 @@ public class Order extends BaseTimeEntity {
         this.orderProducts.add(orderProduct);
         orderProduct.assignOrder(this);
         calcTotalAmount();
+    }
+
+    public void assignDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.assignOrder(this);
     }
 
     public void cancel() {

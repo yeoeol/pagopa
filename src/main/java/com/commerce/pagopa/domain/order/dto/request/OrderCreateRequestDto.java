@@ -11,6 +11,10 @@ public record OrderCreateRequestDto(
         @NotNull(message = "{validation.notNull}")
         PaymentMethod paymentMethod,
 
+        @Valid
+        @NotNull(message = "{validation.notNull}")
+        DeliveryRequestDto delivery,
+
         @NotEmpty(message = "{validation.notEmpty}")
         List<@Valid OrderProductRequestDto> products
 ) {

@@ -7,8 +7,11 @@ import com.commerce.pagopa.domain.order.dto.request.OrderProductRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
+import com.commerce.pagopa.domain.order.entity.Address;
+import com.commerce.pagopa.domain.order.entity.Delivery;
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
+import com.commerce.pagopa.domain.order.repository.DeliveryRepository;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
@@ -30,11 +33,27 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
+    private final DeliveryRepository deliveryRepository;
 
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         Order order = Order.init(getOrderNumber(), requestDto.paymentMethod(), user);
+
+        // 배송 정보 생성 및 연관관계 매핑
+        Address address = new Address(
+                requestDto.delivery().zipcode(),
+                requestDto.delivery().address(),
+                requestDto.delivery().detailAddress()
+        );
+        Delivery delivery = Delivery.create(
+                address,
+                requestDto.delivery().recipientName(),
+                requestDto.delivery().recipientPhone(),
+                requestDto.delivery().deliveryRequestMemo()
+        );
+        deliveryRepository.save(delivery);
+        order.assignDelivery(delivery);
 
         for (OrderProductRequestDto orderProductRequestDto : requestDto.products()) {
             Product product = productRepository.findById(orderProductRequestDto.productId())
@@ -96,6 +115,21 @@ public class OrderService {
 
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         Order order = Order.init(getOrderNumber(), requestDto.paymentMethod(), user);
+
+        // 배송 정보 생성 및 연관관계 매핑
+        Address address = new Address(
+                requestDto.delivery().zipcode(),
+                requestDto.delivery().address(),
+                requestDto.delivery().detailAddress()
+        );
+        Delivery delivery = Delivery.create(
+                address,
+                requestDto.delivery().recipientName(),
+                requestDto.delivery().recipientPhone(),
+                requestDto.delivery().deliveryRequestMemo()
+        );
+        deliveryRepository.save(delivery);
+        order.assignDelivery(delivery);
 
         for (Cart cart : carts) {
             Product product = cart.getProduct();
