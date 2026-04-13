@@ -17,8 +17,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -39,17 +39,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<List<String>>> handleValidation(MethodArgumentNotValidException e) {
-        List<String> errors = new ArrayList<>();
-        e.getBindingResult().getAllErrors().forEach(error -> {
-            String errorMessage = getInternationalizedMessage((FieldError) error);
-            errors.add(errorMessage);
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException e) {
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
+            String errorMessage = getInternationalizedMessage(error);
+            errors.put(fieldName, errorMessage);
         });
 
         log.warn("[Validation failed] {}", errors);
         return ResponseEntity
                 .status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
-                .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, errors.toString()));
+                .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, errors));
     }
 
     private String getInternationalizedMessage(FieldError fieldError) {
