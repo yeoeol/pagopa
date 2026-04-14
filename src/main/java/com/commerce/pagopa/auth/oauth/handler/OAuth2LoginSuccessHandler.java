@@ -52,8 +52,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         );
 
         String json = objectMapper.writeValueAsString(apiResponse);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(json);
+        response.sendRedirect("http://localhost:3000/oauth2/redirect", HttpServletResponse.SC_FOUND);
     }
 }

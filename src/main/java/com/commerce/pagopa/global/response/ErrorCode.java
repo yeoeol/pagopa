@@ -65,6 +65,13 @@ public enum ErrorCode {
     SCRAP_ALREADY_EXISTS(HttpStatus.CONFLICT,"SCRAP_002", "이미 스크랩한 항목입니다."),
     SCRAP_TARGET_UNSUPPORTED(HttpStatus.BAD_REQUEST,"SCRAP_003", "지원하지 않는 스크랩 대상 타입입니다."),
 
+    // PAYMENT
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND,"PAYMENT_001", "해당 주문의 결제 정보가 존재하지 않습니다."),
+    PAYMENT_CANCEL(HttpStatus.BAD_REQUEST, "PAYMENT_002", "결제를 취소합니다."),
+    PAYMENT_CONFIRM_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_003", "결제 승인에 실패했습니다."),
+    PAYMENT_REQUEST_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_003", "결제 요청 중 오류가 발생했습니다."),
+
+
     ;
     private final HttpStatus httpStatus;
     private final String code;
