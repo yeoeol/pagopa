@@ -52,7 +52,6 @@ public class OrderService {
                 requestDto.delivery().recipientPhone(),
                 requestDto.delivery().deliveryRequestMemo()
         );
-        deliveryRepository.save(delivery);
         order.assignDelivery(delivery);
 
         for (OrderProductRequestDto orderProductRequestDto : requestDto.products()) {
@@ -128,7 +127,6 @@ public class OrderService {
                 requestDto.delivery().recipientPhone(),
                 requestDto.delivery().deliveryRequestMemo()
         );
-        deliveryRepository.save(delivery);
         order.assignDelivery(delivery);
 
         for (Cart cart : carts) {

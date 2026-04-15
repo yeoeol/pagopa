@@ -14,8 +14,8 @@ public record PaymentResponseDto(
         return new PaymentResponseDto(
                 orderId,
                 orderName,
-                "http://localhost:8080/success", // 실제 운영 환경에서는 프론트 도메인으로 변경해야 함
-                "http://localhost:8080/fail",
+                "http://localhost:3000/success", // 실제 운영 환경에서는 프론트 도메인으로 변경해야 함
+                "http://localhost:3000/fail",
                 amount,
                 customerName
         );
