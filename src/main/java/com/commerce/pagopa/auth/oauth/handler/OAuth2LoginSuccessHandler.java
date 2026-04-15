@@ -8,6 +8,7 @@ import com.commerce.pagopa.global.util.JwtCookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+
+    @Value("${app.oauth2.redirect-url}")
+    private String oauth2RedirectUrl;
 
     @Override
     public void onAuthenticationSuccess(
@@ -45,6 +49,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 );
 
         response.addCookie(JwtCookieUtil.createJwtCookie(accessToken, jwtTokenProvider.getAccessTokenExpiry()));
-        response.sendRedirect("http://localhost:3000/oauth2/redirect", HttpServletResponse.SC_FOUND);
+        response.sendRedirect(oauth2RedirectUrl);
     }
 }

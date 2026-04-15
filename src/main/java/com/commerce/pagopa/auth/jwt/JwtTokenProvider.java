@@ -14,7 +14,6 @@ import java.util.Date;
 
 @Slf4j
 @Component
-@Getter
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
@@ -89,5 +88,9 @@ public class JwtTokenProvider {
             log.warn("[JWT] 토큰이 비어있음: {}", e.getMessage());
         }
         return false;
+    }
+
+    public long getAccessTokenExpiry() {
+        return accessTokenExpiry;
     }
 }
