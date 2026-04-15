@@ -11,7 +11,6 @@ import com.commerce.pagopa.domain.order.entity.Address;
 import com.commerce.pagopa.domain.order.entity.Delivery;
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
-import com.commerce.pagopa.domain.order.repository.DeliveryRepository;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
@@ -33,7 +32,6 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
-    private final DeliveryRepository deliveryRepository;
 
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
@@ -70,6 +68,13 @@ public class OrderService {
             );
             order.addOrderProduct(orderProduct);
         }
+
+        String orderName = order.getOrderProducts().size() > 1
+                ? "%s 외 %s건".formatted(
+                order.getOrderProducts().getFirst().getProduct().getName(),
+                order.getOrderProducts().size()-1)
+                : order.getOrderProducts().getFirst().getProduct().getName();
+        order.assignOrderName(orderName);
 
         return OrderResponseDto.from(orderRepository.save(order));
     }
@@ -144,6 +149,13 @@ public class OrderService {
             );
             order.addOrderProduct(orderProduct);
         }
+
+        String orderName = order.getOrderProducts().size() > 1
+                ? "%s 외 %s건".formatted(
+                order.getOrderProducts().getFirst().getProduct().getName(),
+                order.getOrderProducts().size()-1)
+                : order.getOrderProducts().getFirst().getProduct().getName();
+        order.assignOrderName(orderName);
 
         // 주문 완료 후 장바구니 항목 삭제
         cartRepository.deleteAllById(requestDto.cartIds());

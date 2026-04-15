@@ -10,12 +10,19 @@ public record PaymentResponseDto(
         BigDecimal amount,  // 결제 금액
         String customerName // 주문자명
 ) {
-    public static PaymentResponseDto of(String orderId, String orderName, BigDecimal amount, String customerName) {
+    public static PaymentResponseDto of(
+            String orderId,
+            String orderName,
+            String successUrl,
+            String failUrl,
+            BigDecimal amount,
+            String customerName
+    ) {
         return new PaymentResponseDto(
                 orderId,
                 orderName,
-                "http://localhost:3000/success",
-                "http://localhost:3000/fail",
+                successUrl,
+                failUrl,
                 amount,
                 customerName
         );

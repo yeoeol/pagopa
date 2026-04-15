@@ -27,7 +27,10 @@ public class Order extends BaseTimeEntity {
     private Long id;
 
     @Column(unique = true)
-    private String orderNumber; // 20240101-XXXXX (비즈니스 식별자)
+    private String orderNumber;
+
+    @Column(nullable = false)
+    private String orderName;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal totalAmount;
@@ -75,6 +78,10 @@ public class Order extends BaseTimeEntity {
     public void assignDelivery(Delivery delivery) {
         this.delivery = delivery;
         delivery.assignOrder(this);
+    }
+
+    public void assignOrderName(String orderName) {
+        this.orderName = orderName;
     }
 
     public void cancel() {

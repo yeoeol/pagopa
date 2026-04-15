@@ -23,11 +23,9 @@ public class PaymentController {
     @PostMapping("/ready/{id}")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<PaymentResponseDto>> readyPayment(
-            @PathVariable("id") Long orderId,
-            @RequestParam String orderName,
-            @RequestParam String customerName
+            @PathVariable("id") Long orderId
     ) {
-        PaymentResponseDto response = paymentService.requestPayment(orderId, orderName, customerName);
+        PaymentResponseDto response = paymentService.requestPayment(orderId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
