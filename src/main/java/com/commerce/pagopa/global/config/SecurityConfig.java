@@ -74,7 +74,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/search-histories/**").permitAll()
 
                         // 그 외의 모든 요청은 인증 필요
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2Login -> oauth2Login
