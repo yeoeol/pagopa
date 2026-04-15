@@ -77,7 +77,6 @@ public class PaymentService {
         Order order = orderRepository.findByOrderNumber(requestDto.orderId())
                 .orElseThrow(OrderNotFoundException::new);
 
-        // 주문의 Payment 내역 가져오기
         Payment payment = paymentRepository.findByOrder(order)
                 .orElseThrow(PaymentNotFoundException::new);
 
@@ -88,14 +87,12 @@ public class PaymentService {
             throw new PaymentCancelException();
         }
 
-        // 토스 페이먼츠 API로 승인(Confirm) 요청을 보냅니다.
         try {
             Map<String, String> payload = new HashMap<>();
             payload.put("orderId", requestDto.orderId());
             payload.put("amount", requestDto.amount().toString());
             payload.put("paymentKey", requestDto.paymentKey());
 
-            // RestClient를 사용하여 POST 요청 전송
             ResponseEntity<String> response = restClient.post()
                     .uri("/v1/payments/confirm")
                     .body(payload)
