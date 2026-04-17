@@ -48,7 +48,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                         ))
                 );
 
-        response.addCookie(JwtCookieUtil.createJwtCookie(accessToken, jwtTokenProvider.getAccessTokenExpiry()));
+        response.addCookie(JwtCookieUtil.createJwtCookie(accessToken, jwtTokenProvider.getAccessTokenExpiry() / 1000));
         response.sendRedirect(oauth2RedirectUrl);
     }
 }

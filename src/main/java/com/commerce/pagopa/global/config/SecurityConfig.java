@@ -5,6 +5,7 @@ import com.commerce.pagopa.auth.oauth.handler.OAuth2LoginFailureHandler;
 import com.commerce.pagopa.auth.oauth.handler.OAuth2LoginSuccessHandler;
 import com.commerce.pagopa.auth.oauth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,6 +33,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+
+    @Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -93,7 +97,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration conf = new CorsConfiguration();
-        conf.setAllowedOrigins(List.of("http://localhost:3000"));
+        conf.setAllowedOrigins(allowedOrigins);
         conf.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         conf.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         conf.setAllowCredentials(true);

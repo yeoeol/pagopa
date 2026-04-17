@@ -53,37 +53,38 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
-    // 결제 진행 중 상태로 변경
-    public void setInProgress() {
-        verifyNotTerminalStatus();
+    // 결제 진행 중 상태로 변경 (재시도 시를 위해 FAILED, CANCELLED는 재사용 허용)
+    public void markInProgress() {
+        if (this.status == PaymentStatus.PAID) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_COMPLETED, "이미 처리 완료된 결제 건입니다. (현재 상태: " + this.status + ")");
+        }
         this.status = PaymentStatus.IN_PROGRESS;
+    }
+
+    public void validateConfirmable() {
+        if (this.status == PaymentStatus.PAID) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_COMPLETED);
+        }
+        if (this.status != PaymentStatus.IN_PROGRESS) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        }
     }
 
     // 결제 승인 완료
     public void success(String paymentKey) {
-        verifyNotTerminalStatus();
+        validateConfirmable();
         this.paymentKey = paymentKey;
         this.status = PaymentStatus.PAID;
     }
 
     // 결제 실패
     public void fail() {
-        verifyNotTerminalStatus();
         this.status = PaymentStatus.FAILED;
     }
 
     // 결제 취소
     public void cancel() {
-        verifyNotTerminalStatus();
         this.status = PaymentStatus.CANCELLED;
     }
 
-    // 종료 상태(PAID, FAILED, CANCELLED)인지 검증하는 가드 메서드
-    private void verifyNotTerminalStatus() {
-        if (this.status == PaymentStatus.PAID || 
-            this.status == PaymentStatus.FAILED || 
-            this.status == PaymentStatus.CANCELLED) {
-            throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR, "이미 처리 완료된 결제 건입니다. (현재 상태: " + this.status + ")");
-        }
-    }
 }
