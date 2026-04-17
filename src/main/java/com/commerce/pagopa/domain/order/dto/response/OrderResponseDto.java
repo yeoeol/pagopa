@@ -14,6 +14,7 @@ public record OrderResponseDto(
         String status,
         PaymentMethod paymentMethod,
         UserResponseDto user,
+        DeliveryResponseDto delivery,
         List<OrderProductResponseDto> orderItems
 ) {
     public static OrderResponseDto from(Order order) {
@@ -24,6 +25,7 @@ public record OrderResponseDto(
                 order.getStatus().getDescription(),
                 order.getPaymentMethod(),
                 UserResponseDto.from(order.getUser()),
+                DeliveryResponseDto.from(order.getDelivery()),
                 order.getOrderProducts().stream()
                         .map(OrderProductResponseDto::from)
                         .toList()

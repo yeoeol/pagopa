@@ -27,7 +27,10 @@ public class Order extends BaseTimeEntity {
     private Long id;
 
     @Column(unique = true)
-    private String orderNumber; // 20240101-XXXXX (비즈니스 식별자)
+    private String orderNumber;
+
+    @Column(nullable = false)
+    private String orderName;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal totalAmount;
@@ -41,6 +44,10 @@ public class Order extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
@@ -66,6 +73,15 @@ public class Order extends BaseTimeEntity {
         this.orderProducts.add(orderProduct);
         orderProduct.assignOrder(this);
         calcTotalAmount();
+    }
+
+    public void assignDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.assignOrder(this);
+    }
+
+    public void assignOrderName(String orderName) {
+        this.orderName = orderName;
     }
 
     public void cancel() {

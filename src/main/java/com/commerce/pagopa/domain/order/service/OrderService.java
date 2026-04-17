@@ -2,13 +2,13 @@ package com.commerce.pagopa.domain.order.service;
 
 import com.commerce.pagopa.domain.cart.entity.Cart;
 import com.commerce.pagopa.domain.cart.repository.CartRepository;
-import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.domain.order.dto.request.OrderProductRequestDto;
-import com.commerce.pagopa.domain.order.dto.request.CartOrderRequestDto;
-import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
+import com.commerce.pagopa.domain.order.dto.request.*;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
+import com.commerce.pagopa.domain.order.entity.Address;
+import com.commerce.pagopa.domain.order.entity.Delivery;
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
+import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
@@ -31,28 +31,44 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
 
+    // 바로 주문
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        Order order = Order.init(getOrderNumber(), requestDto.paymentMethod(), user);
+        Order order = createOrderProcess(user, requestDto.paymentMethod(), requestDto.delivery());
 
         for (OrderProductRequestDto orderProductRequestDto : requestDto.products()) {
             Product product = productRepository.findById(orderProductRequestDto.productId())
                     .orElseThrow(ProductNotFoundException::new);
-
-            int updatedRows = productRepository.decreaseStock(product.getId(), orderProductRequestDto.quantity());
-            if (updatedRows == 0) {
-                throw new ProductOutOfStockException();
-            }
-
-            OrderProduct orderProduct = OrderProduct.create(
-                    orderProductRequestDto.quantity(),
-                    product.getPrice(),
-                    product
-            );
-            order.addOrderProduct(orderProduct);
+            processOrderProduct(order, product, orderProductRequestDto.quantity());
         }
 
+        String orderName = getOrderName(order);
+        order.assignOrderName(orderName);
+
+        return OrderResponseDto.from(orderRepository.save(order));
+    }
+
+    // 장바구니 목록 주문
+    @Transactional
+    public OrderResponseDto orderFromCart(Long userId, CartOrderRequestDto requestDto) {
+        List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
+        if (carts.isEmpty()) {
+            throw new CartNotFoundException();
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        Order order = createOrderProcess(user, requestDto.paymentMethod(), requestDto.delivery());
+
+        for (Cart cart : carts) {
+            processOrderProduct(order, cart.getProduct(), cart.getQuantity());
+        }
+
+        String orderName = getOrderName(order);
+        order.assignOrderName(orderName);
+
+        // 주문 완료 후 장바구니 항목 삭제
+        cartRepository.deleteAllById(requestDto.cartIds());
         return OrderResponseDto.from(orderRepository.save(order));
     }
 
@@ -87,35 +103,46 @@ public class OrderService {
                 .toList();
     }
 
-    @Transactional
-    public OrderResponseDto orderFromCart(Long userId, CartOrderRequestDto requestDto) {
-        List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
-        if (carts.isEmpty()) {
-            throw new CartNotFoundException();
+    private Order createOrderProcess(User user, PaymentMethod paymentMethod, DeliveryRequestDto deliveryDto) {
+        Order order = Order.init(getOrderNumber(), paymentMethod, user);
+
+        // 배송 정보 생성 및 연관관계 매핑
+        Address address = new Address(
+                deliveryDto.zipcode(),
+                deliveryDto.address(),
+                deliveryDto.detailAddress()
+        );
+        Delivery delivery = Delivery.create(
+                address,
+                deliveryDto.recipientName(),
+                deliveryDto.recipientPhone(),
+                deliveryDto.deliveryRequestMemo()
+        );
+        order.assignDelivery(delivery);
+
+        return order;
+    }
+
+    private void processOrderProduct(Order order, Product product, int quantity) {
+        int updatedRows = productRepository.decreaseStock(product.getId(), quantity);
+        if (updatedRows == 0) {
+            throw new ProductOutOfStockException();
         }
 
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        Order order = Order.init(getOrderNumber(), requestDto.paymentMethod(), user);
+        OrderProduct orderProduct = OrderProduct.create(
+                quantity,
+                product.getPrice(),
+                product
+        );
+        order.addOrderProduct(orderProduct);
+    }
 
-        for (Cart cart : carts) {
-            Product product = cart.getProduct();
-
-            int updatedRows = productRepository.decreaseStock(product.getId(), cart.getQuantity());
-            if (updatedRows == 0) {
-                throw new ProductOutOfStockException();
-            }
-
-            OrderProduct orderProduct = OrderProduct.create(
-                    cart.getQuantity(),
-                    product.getPrice(),
-                    product
-            );
-            order.addOrderProduct(orderProduct);
-        }
-
-        // 주문 완료 후 장바구니 항목 삭제
-        cartRepository.deleteAllById(requestDto.cartIds());
-        return OrderResponseDto.from(orderRepository.save(order));
+    private static String getOrderName(Order order) {
+        return order.getOrderProducts().size() > 1
+                ? "%s 외 %s건".formatted(
+                order.getOrderProducts().getFirst().getProduct().getName(),
+                order.getOrderProducts().size() - 1)
+                : order.getOrderProducts().getFirst().getProduct().getName();
     }
 
     private static String getOrderNumber() {
