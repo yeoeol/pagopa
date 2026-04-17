@@ -2,12 +2,17 @@ package com.commerce.pagopa.domain.user.entity;
 
 import com.commerce.pagopa.domain.user.entity.enums.Provider;
 import com.commerce.pagopa.domain.user.entity.enums.Role;
+import com.commerce.pagopa.domain.user.entity.enums.UserStatus;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -40,10 +45,16 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus userStatus;
+
+    private LocalDateTime withdrawnAt;  // 탈퇴 일시
+    private LocalDateTime banEndDate;   // 정지 종료일
+
     @Builder
     public User(
             String email, String nickname, String profileImage,
-            Provider provider, String providerId, Role role
+            Provider provider, String providerId, Role role, UserStatus userStatus
     ) {
         this.email = email;
         this.nickname = nickname;
@@ -51,6 +62,7 @@ public class User extends BaseTimeEntity {
         this.provider = provider;
         this.providerId = providerId;
         this.role = role;
+        this.userStatus = userStatus;
     }
 
     public static User create(
@@ -64,11 +76,39 @@ public class User extends BaseTimeEntity {
                 .provider(provider)
                 .providerId(providerId)
                 .role(role)
+                .userStatus(UserStatus.ACTIVE)
                 .build();
     }
 
     public void updateProfile(String nickname, String profileImage) {
         if (nickname != null && !nickname.isBlank()) this.nickname = nickname;
         if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;
+    }
+
+    public void ban() {
+        validateActiveUserStatus();
+        this.userStatus = UserStatus.BANNED;
+        this.banEndDate = getBanEndDate();     // 1주일 정지
+    }
+
+    public void withdrawn() {
+        validateActiveUserStatus();
+        this.userStatus = UserStatus.WITHDRAWN;
+        this.withdrawnAt = LocalDateTime.now();
+    }
+
+    public void updateSellerRole() {
+        validateActiveUserStatus();
+        this.role = Role.ROLE_SELLER;
+    }
+
+    private void validateActiveUserStatus() {
+        if (this.userStatus != UserStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
+        }
+    }
+
+    private static LocalDateTime getBanEndDate() {
+        return LocalDateTime.now().plusWeeks(1);
     }
 }
