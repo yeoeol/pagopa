@@ -41,10 +41,10 @@ public class AdminUserService {
     }
 
     @Transactional
-    public void withdrawn(Long userId) {
+    public void withdraw(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
-        user.withdrawn();
+        user.withdraw();
     }
 
     @Transactional

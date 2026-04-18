@@ -98,7 +98,7 @@ public class User extends BaseTimeEntity {
         this.banEndDate = null;
     }
 
-    public void withdrawn() {
+    public void withdraw() {
         validateActiveUserStatus();
         this.userStatus = UserStatus.WITHDRAWN;
         this.withdrawnAt = LocalDateTime.now();

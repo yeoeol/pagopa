@@ -38,13 +38,13 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @PatchMapping("/{id}/withdrawn")
+    @PatchMapping("/{id}/withdraw")
     public ResponseEntity<ApiResponse<Void>> withdrawn(@PathVariable("id") Long userId) {
-        adminUserService.withdrawn(userId);
+        adminUserService.withdraw(userId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @PatchMapping("/{id}/role")
+    @PatchMapping("/{id}/seller")
     public ResponseEntity<ApiResponse<Void>> updateSellerRole(@PathVariable("id") Long userId) {
         adminUserService.updateSellerRole(userId);
         return ResponseEntity.ok(ApiResponse.ok());
