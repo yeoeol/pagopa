@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.category.dto.request;
+package com.commerce.pagopa.domain.admin.category.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
