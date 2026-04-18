@@ -60,7 +60,7 @@ class PaymentServiceTest {
     @Test
     void requestPayment_throwsWhenOrderIsCancelled() {
         Order order = createOrder("order-1");
-        order.updateStatus(OrderStatus.CANCELLED);
+        order.cancel();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
@@ -75,7 +75,7 @@ class PaymentServiceTest {
     @Test
     void confirmPayment_throwsAlreadyCompletedBeforeCallingToss() {
         Order order = createOrder("order-2");
-        order.updateStatus(OrderStatus.PAID);
+        order.paid();
         Payment payment = createPayment(order, PaymentStatus.PAID);
 
         when(orderRepository.findByOrderNumber("order-2")).thenReturn(Optional.of(order));

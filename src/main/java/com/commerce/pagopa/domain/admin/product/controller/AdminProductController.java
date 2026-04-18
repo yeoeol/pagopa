@@ -1,8 +1,10 @@
 package com.commerce.pagopa.domain.admin.product.controller;
 
+import com.commerce.pagopa.domain.admin.product.dto.request.ProductStatusChangeRequestDto;
 import com.commerce.pagopa.domain.admin.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.admin.product.service.AdminProductService;
 import com.commerce.pagopa.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,27 +28,12 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.ok(adminProductService.findAll(pageable)));
     }
 
-    @PatchMapping("/{id}/active")
-    public ResponseEntity<ApiResponse<Void>> active(@PathVariable("id") Long productId) {
-        adminProductService.active(productId);
-        return ResponseEntity.ok(ApiResponse.ok());
-    }
-
-    @PatchMapping("/{id}/inactive")
-    public ResponseEntity<ApiResponse<Void>> inactive(@PathVariable("id") Long productId) {
-        adminProductService.inactive(productId);
-        return ResponseEntity.ok(ApiResponse.ok());
-    }
-
-    @PatchMapping("/{id}/sold-out")
-    public ResponseEntity<ApiResponse<Void>> soldOut(@PathVariable("id") Long productId) {
-        adminProductService.soldOut(productId);
-        return ResponseEntity.ok(ApiResponse.ok());
-    }
-
-    @PatchMapping("/{id}/hidden")
-    public ResponseEntity<ApiResponse<Void>> hidden(@PathVariable("id") Long productId) {
-        adminProductService.hidden(productId);
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<Void>> changeStatus(
+            @PathVariable("id") Long productId,
+            @Valid @RequestBody ProductStatusChangeRequestDto requestDto
+    ) {
+        adminProductService.changeStatus(productId, requestDto);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 

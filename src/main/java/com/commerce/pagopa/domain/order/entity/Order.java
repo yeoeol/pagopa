@@ -5,6 +5,7 @@ import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.OrderCannotCancelException;
+import com.commerce.pagopa.global.exception.OrderCannotPayException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -93,7 +94,7 @@ public class Order extends BaseTimeEntity {
 
     public void paid() {
         if (this.status != OrderStatus.ORDERED) {
-            throw new OrderCannotCancelException();
+            throw new OrderCannotPayException();
         }
         this.updateStatus(OrderStatus.PAID);
     }
