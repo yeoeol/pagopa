@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.order.dto.response;
+package com.commerce.pagopa.domain.admin.order.dto.response;
 
 import com.commerce.pagopa.domain.order.entity.Address;
 import com.commerce.pagopa.domain.order.entity.Delivery;
