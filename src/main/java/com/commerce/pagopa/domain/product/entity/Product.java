@@ -95,6 +95,22 @@ public class Product {
         image.assignProduct(this);
     }
 
+    public void active() {
+        this.status = ProductStatus.ACTIVE;
+    }
+
+    public void inactive() {
+        this.status = ProductStatus.INACTIVE;
+    }
+
+    public void soldOut() {
+        this.status = ProductStatus.SOLDOUT;
+    }
+
+    public void hidden() {
+        this.status = ProductStatus.HIDDEN;
+    }
+
     public void clearImages() {
         this.images.clear();
     }

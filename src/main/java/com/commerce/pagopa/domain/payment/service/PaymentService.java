@@ -76,7 +76,7 @@ public class PaymentService {
     private static void validateAmount(BigDecimal amount, Payment payment, Order order) {
         if (payment.getAmount().compareTo(amount) != 0) {
             payment.fail();
-            order.updateStatus(OrderStatus.CANCELLED);
+            order.cancel();
             throw new PaymentCancelException();
         }
     }
@@ -96,13 +96,13 @@ public class PaymentService {
                     .toBodilessEntity();
         } catch (Exception e) {
             payment.fail();
-            order.updateStatus(OrderStatus.CANCELLED);
+            order.cancel();
             log.error("[Payment] 토스 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
             throw new PaymentConfirmException();
         }
 
         payment.success(requestDto.paymentKey());
-        order.updateStatus(OrderStatus.PAID);
+        order.paid();
         log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
