@@ -1,5 +1,6 @@
 package com.commerce.pagopa.domain.admin.order.dto.response;
 
+import com.commerce.pagopa.domain.order.entity.Address;
 import com.commerce.pagopa.domain.order.entity.Delivery;
 import com.commerce.pagopa.domain.order.entity.enums.DeliveryStatus;
 
@@ -14,16 +15,14 @@ public record DeliveryResponseDto(
         DeliveryStatus status
 ) {
     public static DeliveryResponseDto from(Delivery delivery) {
-        if (delivery == null) {
-            return null;
-        }
+        Address address = delivery.getAddress();
         return new DeliveryResponseDto(
                 delivery.getId(),
                 delivery.getRecipientName(),
                 delivery.getRecipientPhone(),
-                delivery.getAddress() != null ? delivery.getAddress().getZipcode() : null,
-                delivery.getAddress() != null ? delivery.getAddress().getAddress() : null,
-                delivery.getAddress() != null ? delivery.getAddress().getDetailAddress() : null,
+                address != null ? address.getZipcode() : null,
+                address != null ? address.getAddress() : null,
+                address != null ? address.getDetailAddress() : null,
                 delivery.getDeliveryRequestMemo(),
                 delivery.getStatus()
         );
