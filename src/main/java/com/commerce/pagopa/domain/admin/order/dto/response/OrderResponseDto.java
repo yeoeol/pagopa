@@ -10,6 +10,7 @@ import java.util.List;
 public record OrderResponseDto(
         Long orderId,
         String orderNumber,
+        String orderName,
         BigDecimal totalAmount,
         String status,
         PaymentMethod paymentMethod,
@@ -21,6 +22,7 @@ public record OrderResponseDto(
         return new OrderResponseDto(
                 order.getId(),
                 order.getOrderNumber(),
+                order.getOrderName(),
                 order.getTotalAmount(),
                 order.getStatus().getDescription(),
                 order.getPaymentMethod(),
