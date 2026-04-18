@@ -2,12 +2,17 @@ package com.commerce.pagopa.domain.user.entity;
 
 import com.commerce.pagopa.domain.user.entity.enums.Provider;
 import com.commerce.pagopa.domain.user.entity.enums.Role;
+import com.commerce.pagopa.domain.user.entity.enums.UserStatus;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -40,10 +45,17 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus userStatus;
+
+    private LocalDateTime withdrawnAt;  // 탈퇴 일시
+    private LocalDateTime banEndDate;   // 정지 종료일
+
     @Builder
     public User(
             String email, String nickname, String profileImage,
-            Provider provider, String providerId, Role role
+            Provider provider, String providerId, Role role, UserStatus userStatus
     ) {
         this.email = email;
         this.nickname = nickname;
@@ -51,6 +63,7 @@ public class User extends BaseTimeEntity {
         this.provider = provider;
         this.providerId = providerId;
         this.role = role;
+        this.userStatus = userStatus;
     }
 
     public static User create(
@@ -64,11 +77,51 @@ public class User extends BaseTimeEntity {
                 .provider(provider)
                 .providerId(providerId)
                 .role(role)
+                .userStatus(UserStatus.ACTIVE)
                 .build();
     }
 
     public void updateProfile(String nickname, String profileImage) {
         if (nickname != null && !nickname.isBlank()) this.nickname = nickname;
         if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;
+    }
+
+    public void ban(long banSeconds) {
+        validateActiveUserStatus();
+        this.userStatus = UserStatus.BANNED;
+        this.banEndDate = getBanEndDate(banSeconds);
+    }
+
+    public void unban() {
+        validateBannedUserStatus();
+        this.userStatus = UserStatus.ACTIVE;
+        this.banEndDate = null;
+    }
+
+    public void withdraw() {
+        validateActiveUserStatus();
+        this.userStatus = UserStatus.WITHDRAWN;
+        this.withdrawnAt = LocalDateTime.now();
+    }
+
+    public void updateSellerRole() {
+        validateActiveUserStatus();
+        this.role = Role.ROLE_SELLER;
+    }
+
+    private void validateActiveUserStatus() {
+        if (this.userStatus != UserStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
+        }
+    }
+
+    private void validateBannedUserStatus() {
+        if (this.userStatus != UserStatus.BANNED) {
+            throw new BusinessException(ErrorCode.USER_NOT_BANNED);
+        }
+    }
+
+    private static LocalDateTime getBanEndDate(long banSeconds) {
+        return LocalDateTime.now().plusSeconds(banSeconds);
     }
 }

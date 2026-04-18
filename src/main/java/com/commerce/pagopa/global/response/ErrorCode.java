@@ -28,6 +28,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_001", "존재하지 않는 회원입니다."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "USER_002", "이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "USER_003", "이미 사용 중인 닉네임입니다."),
+    USER_NOT_ACTIVE(HttpStatus.CONFLICT, "USER_004", "활성화된 사용자가 아닙니다."),
+    USER_NOT_BANNED(HttpStatus.CONFLICT, "USER_005", "정지된 사용자가 아닙니다."),
 
     // PRODUCT
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT_001", "존재하지 않는 상품입니다."),

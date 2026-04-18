@@ -45,37 +45,40 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // 1. 카테고리 (Category): 조회는 전부 가능, 생성 등은 ADMIN만
+                        // 카테고리 (Category): 조회는 전부 가능, 생성 등은 ADMIN만
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
 
-                        // 2. 이미지 (Image): 전부 가능
+                        // 이미지 (Image): 전부 가능
                         .requestMatchers("/api/v1/images/**").permitAll()
 
-                        // 3. 상품 (Product): 상품 등록(POST)은 SELLER, ADMIN만, 조회 등 나머지는 전부 가능
+                        // 상품 (Product): 상품 등록(POST)은 SELLER, ADMIN만, 조회 등 나머지는 전부 가능
                         .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasAnyRole("SELLER", "ADMIN")
                         .requestMatchers("/api/v1/products/**").permitAll()
 
-                        // 4. 유저 (User): SELLER, USER 가능
+                        // 유저 (User): SELLER, USER 가능
                         .requestMatchers("/api/v1/users/**").hasAnyRole("USER", "SELLER")
 
-                        // 5. 장바구니 (Cart): USER
+                        // 장바구니 (Cart): USER
                         .requestMatchers("/api/v1/cart/**").hasRole("USER")
 
-                        // 6. 주문 (Order): USER
+                        // 주문 (Order): USER
                         .requestMatchers("/api/v1/orders/**").hasRole("USER")
 
-                        // 7. 리뷰 (Review):
+                        // 리뷰 (Review)
                         // 상품별 리뷰 목록 API(GET /api/v1/reviews/products/{id})는 SELLER, USER
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").hasAnyRole("USER", "SELLER")
                         // 그 외 리뷰 관련: USER만 가능
                         .requestMatchers("/api/v1/reviews/**").hasRole("USER")
 
-                        // 8. 스크랩 (Scrap): USER
+                        // 스크랩 (Scrap): USER
                         .requestMatchers("/api/v1/scraps/**").hasRole("USER")
 
-                        // 9. 검색 기록 (Search History): 모두 허용 (비로그인 대응)
+                        // 검색 기록 (Search History): 모두 허용 (비로그인 대응)
                         .requestMatchers("/api/v1/search-histories/**").permitAll()
+
+                        // 관리자 (ADMIN)
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
                         // 그 외의 모든 요청은 인증 필요
                         .anyRequest().authenticated()
