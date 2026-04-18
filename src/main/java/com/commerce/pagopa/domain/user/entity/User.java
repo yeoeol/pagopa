@@ -46,6 +46,7 @@ public class User extends BaseTimeEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserStatus userStatus;
 
     private LocalDateTime withdrawnAt;  // 탈퇴 일시
@@ -85,10 +86,16 @@ public class User extends BaseTimeEntity {
         if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;
     }
 
-    public void ban() {
+    public void ban(long banSeconds) {
         validateActiveUserStatus();
         this.userStatus = UserStatus.BANNED;
-        this.banEndDate = getBanEndDate();     // 1주일 정지
+        this.banEndDate = getBanEndDate(banSeconds);
+    }
+
+    public void unban() {
+        validateBannedUserStatus();
+        this.userStatus = UserStatus.ACTIVE;
+        this.banEndDate = null;
     }
 
     public void withdrawn() {
@@ -108,7 +115,13 @@ public class User extends BaseTimeEntity {
         }
     }
 
-    private static LocalDateTime getBanEndDate() {
-        return LocalDateTime.now().plusWeeks(1);
+    private void validateBannedUserStatus() {
+        if (this.userStatus != UserStatus.BANNED) {
+            throw new BusinessException(ErrorCode.USER_NOT_BANNED);
+        }
+    }
+
+    private static LocalDateTime getBanEndDate(long banSeconds) {
+        return LocalDateTime.now().plusSeconds(banSeconds);
     }
 }

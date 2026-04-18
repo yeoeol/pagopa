@@ -32,6 +32,12 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @PatchMapping("/{id}/unban")
+    public ResponseEntity<ApiResponse<Void>> unban(@PathVariable("id") Long userId) {
+        adminUserService.unban(userId);
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
     @PatchMapping("/{id}/withdrawn")
     public ResponseEntity<ApiResponse<Void>> withdrawn(@PathVariable("id") Long userId) {
         adminUserService.withdrawn(userId);

@@ -5,6 +5,7 @@ import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ public class AdminUserService {
 
     private final UserRepository userRepository;
 
+    @Value("${app.ban.seconds}")
+    private long banSeconds;
+
     @Transactional(readOnly = true)
     public Page<UserResponseDto> findAll(Pageable pageable) {
         Page<User> userPage = userRepository.findAll(pageable);
@@ -26,7 +30,14 @@ public class AdminUserService {
     public void ban(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
-        user.ban();
+        user.ban(banSeconds);
+    }
+
+    @Transactional
+    public void unban(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        user.unban();
     }
 
     @Transactional
