@@ -1,8 +1,12 @@
 package com.commerce.pagopa.domain.admin.product.controller;
 
+import com.commerce.pagopa.domain.admin.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.admin.product.service.AdminProductService;
 import com.commerce.pagopa.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +18,13 @@ import org.springframework.web.bind.annotation.*;
 public class AdminProductController {
 
     private final AdminProductService adminProductService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getProducts(
+            @PageableDefault(size = 10, page = 0) Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(adminProductService.findAll(pageable)));
+    }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> active(@PathVariable("id") Long productId) {
