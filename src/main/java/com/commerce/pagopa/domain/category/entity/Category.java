@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.category.entity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -89,5 +90,9 @@ public class Category {
     // 대분류(depth=0) 검증
     public boolean isRoot() {
         return this.depth == 0;
+    }
+
+    public void update(String name) {
+        this.name = name;
     }
 }
