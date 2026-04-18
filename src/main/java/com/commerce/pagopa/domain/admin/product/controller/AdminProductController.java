@@ -26,31 +26,31 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.ok(adminProductService.findAll(pageable)));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/active")
     public ResponseEntity<ApiResponse<Void>> active(@PathVariable("id") Long productId) {
         adminProductService.active(productId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/inactive")
     public ResponseEntity<ApiResponse<Void>> inactive(@PathVariable("id") Long productId) {
         adminProductService.inactive(productId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/sold-out")
     public ResponseEntity<ApiResponse<Void>> soldOut(@PathVariable("id") Long productId) {
         adminProductService.soldOut(productId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/hidden")
     public ResponseEntity<ApiResponse<Void>> hidden(@PathVariable("id") Long productId) {
         adminProductService.hidden(productId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @DeleteMapping("/{id")
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") Long productId) {
         adminProductService.delete(productId);
         return ResponseEntity.ok(ApiResponse.ok());
