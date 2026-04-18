@@ -10,7 +10,6 @@ import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.category.repository.CategoryRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.CategoryNotFoundException;
-import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +33,7 @@ public class AdminCategoryService {
     @Transactional
     public CategoryResponseDto createChild(ChildCategoryCreateRequestDto requestDto) {
         Category parent = categoryRepository.findById(requestDto.parentId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+                .orElseThrow(CategoryNotFoundException::new);
 
         Category child = parent.createChild(requestDto.name());
         Category savedChild = categoryRepository.save(child);

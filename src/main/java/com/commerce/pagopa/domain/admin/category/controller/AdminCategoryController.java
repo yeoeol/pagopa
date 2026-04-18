@@ -46,7 +46,7 @@ public class AdminCategoryController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CategoryTreeResponseDto>>> getCategories(
             @PageableDefault(size = 10, page = 0, sort = "name") Pageable pageable
-            ) {
+    ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(adminCategoryService.findCategories(pageable))
         );
