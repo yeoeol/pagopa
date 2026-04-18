@@ -95,19 +95,19 @@ public class Product {
         image.assignProduct(this);
     }
 
-    public void active() {
+    public void activate() {
         this.status = ProductStatus.ACTIVE;
     }
 
-    public void inactive() {
+    public void inactivate() {
         this.status = ProductStatus.INACTIVE;
     }
 
-    public void soldOut() {
+    public void markAsSoldOut() {
         this.status = ProductStatus.SOLDOUT;
     }
 
-    public void hidden() {
+    public void hide() {
         this.status = ProductStatus.HIDDEN;
     }
 

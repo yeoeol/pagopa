@@ -6,7 +6,6 @@ import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,13 +36,13 @@ public class AdminProductService {
         ProductStatus status = requestDto.status();
 
         if (ProductStatus.ACTIVE.equals(status)) {
-            product.active();
+            product.activate();
         } else if (ProductStatus.INACTIVE.equals(status)) {
-            product.inactive();
+            product.inactivate();
         } else if (ProductStatus.SOLDOUT.equals(status)) {
-            product.soldOut();
+            product.markAsSoldOut();
         } else if (ProductStatus.HIDDEN.equals(status)) {
-            product.hidden();
+            product.hide();
         }
     }
 }
