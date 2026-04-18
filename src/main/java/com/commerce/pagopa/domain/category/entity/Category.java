@@ -90,4 +90,8 @@ public class Category {
     public boolean isRoot() {
         return this.depth == 0;
     }
+
+    public void update(String name) {
+        this.name = name;
+    }
 }

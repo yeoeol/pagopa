@@ -11,6 +11,7 @@ import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.exception.CategoryNotFoundException;
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
 import com.commerce.pagopa.global.exception.UserNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
@@ -34,7 +35,7 @@ public class ProductService {
                 .orElseThrow(UserNotFoundException::new);
 
         Category category = categoryRepository.findById(requestDto.categoryId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+                .orElseThrow(CategoryNotFoundException::new);
 
         // 소분류에만 상품 등록이 가능
         if (!category.isLeaf()) {
