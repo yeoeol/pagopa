@@ -34,7 +34,7 @@ public class SellerOrderController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
-    public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(
+    public ResponseEntity<ApiResponse<OrderResponseDto>> getSellerOrder(
             @PathVariable("id") Long orderId
     ) {
         return ResponseEntity.ok(

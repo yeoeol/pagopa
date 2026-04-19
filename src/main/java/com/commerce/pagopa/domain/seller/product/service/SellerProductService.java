@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.seller.product.service;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.seller.product.dto.response.ProductResponseDto;
+import com.commerce.pagopa.global.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,5 +20,12 @@ public class SellerProductService {
     public Page<ProductResponseDto> findAll(Long userId, Pageable pageable) {
         Page<Product> pageProduct = productRepository.findAllBySellerId(userId, pageable);
         return pageProduct.map(ProductResponseDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponseDto find(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(ProductNotFoundException::new);
+        return ProductResponseDto.from(product);
     }
 }
