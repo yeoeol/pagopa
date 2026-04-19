@@ -1,6 +1,8 @@
 package com.commerce.pagopa.domain.product.repository;
 
 import com.commerce.pagopa.domain.product.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +33,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     "OR :name = '' " +
                     "OR p.name LIKE CONCAT('%', :name, '%'))")
     List<Product> searchProducts(@Param("name") String name);
+
+    Page<Product> findAllBySellerId(Long userId, Pageable pageable);
 }
