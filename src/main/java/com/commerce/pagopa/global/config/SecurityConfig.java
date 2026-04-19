@@ -80,6 +80,9 @@ public class SecurityConfig {
                         // 관리자 (ADMIN)
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
+                        // 판매자 (SELLER)
+                        .requestMatchers("/api/v1/seller/**").hasRole("SELLER")
+
                         .requestMatchers("/api/v1/auth/**").authenticated()
 
                         // 그 외의 모든 요청은 인증 필요

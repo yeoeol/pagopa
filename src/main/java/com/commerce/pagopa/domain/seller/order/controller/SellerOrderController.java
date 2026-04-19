@@ -1,8 +1,10 @@
 package com.commerce.pagopa.domain.seller.order.controller;
 
+import com.commerce.pagopa.domain.seller.order.dto.request.OrderStatusChangeRequestDto;
 import com.commerce.pagopa.domain.seller.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.seller.order.service.SellerOrderService;
 import com.commerce.pagopa.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,9 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,5 +30,25 @@ public class SellerOrderController {
         return ResponseEntity.ok(
                 ApiResponse.ok(sellerOrderService.findAll(userId, pageable))
         );
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(
+            @PathVariable("id") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(sellerOrderService.find(orderId))
+        );
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> changeStatus(
+            @PathVariable("id") Long orderId,
+            @Valid @RequestBody OrderStatusChangeRequestDto requestDto
+    ) {
+        sellerOrderService.changeStatus(orderId, requestDto);
+        return ResponseEntity.ok(ApiResponse.ok());
     }
 }

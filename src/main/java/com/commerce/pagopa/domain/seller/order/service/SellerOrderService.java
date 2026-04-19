@@ -1,8 +1,11 @@
 package com.commerce.pagopa.domain.seller.order.service;
 
 import com.commerce.pagopa.domain.order.entity.Order;
+import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.domain.seller.order.dto.request.OrderStatusChangeRequestDto;
 import com.commerce.pagopa.domain.seller.order.dto.response.OrderResponseDto;
+import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,5 +22,31 @@ public class SellerOrderService {
     public Page<OrderResponseDto> findAll(Long userId, Pageable pageable) {
         Page<Order> orderPage = orderRepository.findAllByUserId(userId, pageable);
         return orderPage.map(OrderResponseDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponseDto find(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(OrderNotFoundException::new);
+        return OrderResponseDto.from(order);
+    }
+
+    @Transactional
+    public void changeStatus(Long orderId, OrderStatusChangeRequestDto requestDto) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(OrderNotFoundException::new);
+        OrderStatus status = requestDto.status();
+
+        if (OrderStatus.ORDERED.equals(status)) {
+            order.markAsOrdered();
+        } else if (OrderStatus.PAID.equals(status)) {
+            order.markAsPaid();
+        } else if (OrderStatus.DELIVERING.equals(status)) {
+            order.markAsDelivering();
+        } else if (OrderStatus.COMPLETED.equals(status)) {
+            order.markAsCompleted();
+        } else if (OrderStatus.CANCELLED.equals(status)) {
+            order.markAsCancelled();
+        }
     }
 }

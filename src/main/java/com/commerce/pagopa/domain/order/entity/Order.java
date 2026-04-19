@@ -4,8 +4,10 @@ import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.OrderCannotCancelException;
 import com.commerce.pagopa.global.exception.OrderCannotPayException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -85,18 +87,36 @@ public class Order extends BaseTimeEntity {
         this.orderName = orderName;
     }
 
-    public void cancel() {
+    public void markAsCancelled() {
         if (this.status != OrderStatus.ORDERED) {
             throw new OrderCannotCancelException();
         }
         this.updateStatus(OrderStatus.CANCELLED);
     }
 
-    public void paid() {
+    public void markAsPaid() {
         if (this.status != OrderStatus.ORDERED) {
             throw new OrderCannotPayException();
         }
         this.updateStatus(OrderStatus.PAID);
+    }
+
+    public void markAsOrdered() {
+        this.updateStatus(OrderStatus.ORDERED);
+    }
+
+    public void markAsDelivering() {
+        if (this.status != OrderStatus.PAID) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_DELIVER);
+        }
+        this.updateStatus(OrderStatus.DELIVERING);
+    }
+
+    public void markAsCompleted() {
+        if (this.status != OrderStatus.DELIVERING) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_COMPLETE);
+        }
+        this.updateStatus(OrderStatus.COMPLETED);
     }
 
     private void updateStatus(OrderStatus status) {

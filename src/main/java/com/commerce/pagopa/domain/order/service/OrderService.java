@@ -76,7 +76,7 @@ public class OrderService {
     public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(OrderNotFoundException::new);
-        order.cancel();
+        order.markAsCancelled();
 
         for (OrderProduct orderProduct : order.getOrderProducts()) {
             int updatedRows = productRepository.increaseStock(
