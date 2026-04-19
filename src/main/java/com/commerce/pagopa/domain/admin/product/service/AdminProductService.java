@@ -42,14 +42,11 @@ public class AdminProductService {
                 .orElseThrow(ProductNotFoundException::new);
         ProductStatus status = requestDto.status();
 
-        if (ProductStatus.ACTIVE.equals(status)) {
-            product.activate();
-        } else if (ProductStatus.INACTIVE.equals(status)) {
-            product.inactivate();
-        } else if (ProductStatus.SOLDOUT.equals(status)) {
-            product.markAsSoldOut();
-        } else if (ProductStatus.HIDDEN.equals(status)) {
-            product.hide();
+        switch (status) {
+            case ACTIVE -> product.activate();
+            case INACTIVE -> product.inactivate();
+            case SOLDOUT -> product.markAsSoldOut();
+            case HIDDEN -> product.hide();
         }
     }
 }

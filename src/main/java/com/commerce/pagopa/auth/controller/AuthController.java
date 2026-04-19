@@ -39,7 +39,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> authenticate() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse<Void>> checkAuthenticated() {
+        return ResponseEntity.ok(ApiResponse.ok());
     }
 }

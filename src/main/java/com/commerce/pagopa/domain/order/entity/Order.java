@@ -53,7 +53,7 @@ public class Order extends BaseTimeEntity {
     private Delivery delivery;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderProduct> orderProducts = new ArrayList<>();
+    private final List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
     private Order(String orderNumber, OrderStatus status, PaymentMethod paymentMethod, User user) {
@@ -99,10 +99,6 @@ public class Order extends BaseTimeEntity {
             throw new OrderCannotPayException();
         }
         this.updateStatus(OrderStatus.PAID);
-    }
-
-    public void markAsOrdered() {
-        this.updateStatus(OrderStatus.ORDERED);
     }
 
     public void markAsDelivering() {

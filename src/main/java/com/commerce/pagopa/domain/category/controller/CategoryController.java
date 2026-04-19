@@ -35,11 +35,11 @@ public class CategoryController {
         );
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<CategoryTreeResponseDto>>> getAllCategories(
+    @GetMapping("/tree")
+    public ResponseEntity<ApiResponse<List<CategoryTreeResponseDto>>> getCategoryTree(
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(categoryService.findCategories())
+                ApiResponse.ok(categoryService.findCategoryTree())
         );
     }
 }

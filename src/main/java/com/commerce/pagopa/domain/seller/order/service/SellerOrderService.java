@@ -37,16 +37,11 @@ public class SellerOrderService {
                 .orElseThrow(OrderNotFoundException::new);
         OrderStatus status = requestDto.status();
 
-        if (OrderStatus.ORDERED.equals(status)) {
-            order.markAsOrdered();
-        } else if (OrderStatus.PAID.equals(status)) {
-            order.markAsPaid();
-        } else if (OrderStatus.DELIVERING.equals(status)) {
-            order.markAsDelivering();
-        } else if (OrderStatus.COMPLETED.equals(status)) {
-            order.markAsCompleted();
-        } else if (OrderStatus.CANCELLED.equals(status)) {
-            order.markAsCancelled();
+        switch (status) {
+            case PAID -> order.markAsPaid();
+            case DELIVERING -> order.markAsDelivering();
+            case COMPLETED -> order.markAsCompleted();
+            case CANCELLED -> order.markAsCancelled();
         }
     }
 }

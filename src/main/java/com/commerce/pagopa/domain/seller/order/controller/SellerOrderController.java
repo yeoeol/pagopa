@@ -33,7 +33,7 @@ public class SellerOrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
+    @PreAuthorize("@sellerOrderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<OrderResponseDto>> getSellerOrder(
             @PathVariable("id") Long orderId
     ) {
@@ -43,8 +43,8 @@ public class SellerOrderController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
-    public ResponseEntity<ApiResponse<OrderResponseDto>> changeStatus(
+    @PreAuthorize("@sellerOrderOwnerValidator.isOwner(#orderId, principal.userId)")
+    public ResponseEntity<ApiResponse<Void>> changeStatus(
             @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderStatusChangeRequestDto requestDto
     ) {
