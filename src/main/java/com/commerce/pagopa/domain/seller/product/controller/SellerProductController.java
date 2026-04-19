@@ -1,7 +1,7 @@
-package com.commerce.pagopa.domain.seller.order.controller;
+package com.commerce.pagopa.domain.seller.product.controller;
 
-import com.commerce.pagopa.domain.seller.order.dto.response.ProductResponseDto;
-import com.commerce.pagopa.domain.seller.order.service.SellerProductService;
+import com.commerce.pagopa.domain.seller.product.dto.response.ProductResponseDto;
+import com.commerce.pagopa.domain.seller.product.service.SellerProductService;
 import com.commerce.pagopa.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

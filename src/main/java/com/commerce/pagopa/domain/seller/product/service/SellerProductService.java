@@ -1,8 +1,8 @@
-package com.commerce.pagopa.domain.seller.order.service;
+package com.commerce.pagopa.domain.seller.product.service;
 
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
-import com.commerce.pagopa.domain.seller.order.dto.response.ProductResponseDto;
+import com.commerce.pagopa.domain.seller.product.dto.response.ProductResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

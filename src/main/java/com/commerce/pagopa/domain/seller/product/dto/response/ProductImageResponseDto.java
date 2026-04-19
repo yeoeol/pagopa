@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.seller.order.dto.response;
+package com.commerce.pagopa.domain.seller.product.dto.response;
 
 import com.commerce.pagopa.domain.product.entity.ProductImage;
 
