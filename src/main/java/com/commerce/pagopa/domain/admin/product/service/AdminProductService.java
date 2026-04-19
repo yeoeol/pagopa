@@ -24,6 +24,13 @@ public class AdminProductService {
         return productPage.map(ProductResponseDto::from);
     }
 
+    @Transactional(readOnly = true)
+    public ProductResponseDto find(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(ProductNotFoundException::new);
+        return ProductResponseDto.from(product);
+    }
+
     @Transactional
     public void delete(Long productId) {
         productRepository.deleteById(productId);
