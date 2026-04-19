@@ -34,4 +34,12 @@ public class CategoryController {
                 ApiResponse.ok(categoryService.findChildCategories(categoryId))
         );
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<CategoryTreeResponseDto>>> getAllCategories(
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(categoryService.findCategories())
+        );
+    }
 }

@@ -6,6 +6,8 @@ import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.category.repository.CategoryRepository;
 import com.commerce.pagopa.global.exception.CategoryNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,5 +33,12 @@ public class CategoryService {
                 .orElseThrow(CategoryNotFoundException::new);
 
         return CategoryTreeResponseDto.from(root);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTreeResponseDto> findCategories() {
+        return categoryRepository.findRootCategories().stream()
+                .map(CategoryTreeResponseDto::from)
+                .toList();
     }
 }
