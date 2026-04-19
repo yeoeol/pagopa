@@ -32,4 +32,11 @@ public class CategoryService {
 
         return CategoryTreeResponseDto.from(root);
     }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTreeResponseDto> findCategoryTree() {
+        return categoryRepository.findRootCategories().stream()
+                .map(CategoryTreeResponseDto::from)
+                .toList();
+    }
 }

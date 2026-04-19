@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.product.dto.request;
+package com.commerce.pagopa.domain.seller.product.dto.request;
 
 import jakarta.validation.constraints.*;
 
