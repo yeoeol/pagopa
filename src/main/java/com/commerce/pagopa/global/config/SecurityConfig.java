@@ -80,6 +80,8 @@ public class SecurityConfig {
                         // 관리자 (ADMIN)
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
+                        .requestMatchers("/actuator/**").permitAll()
+
                         // 그 외의 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
