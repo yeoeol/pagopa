@@ -80,7 +80,9 @@ public class SecurityConfig {
                         // 관리자 (ADMIN)
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers("/actuator/**").permitAll()
+                        // 모니터링 관련
+                        .requestMatchers("/actuator/health/**", "/actuator/prometheus").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         // 판매자 (SELLER)
                         .requestMatchers("/api/v1/seller/**").hasRole("SELLER")
