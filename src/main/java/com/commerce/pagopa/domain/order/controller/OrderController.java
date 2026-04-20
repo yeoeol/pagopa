@@ -7,6 +7,7 @@ import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.service.OrderService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import io.micrometer.core.annotation.Counted;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @Counted("my.order")
     @PostMapping("/cart")
     public ResponseEntity<ApiResponse<OrderResponseDto>> orderFromCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -34,6 +36,7 @@ public class OrderController {
                 .body(ApiResponse.ok(orderService.orderFromCart(userDetails.getUserId(), requestDto)));
     }
 
+    @Counted("my.order")
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponseDto>> order(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -64,6 +67,7 @@ public class OrderController {
         );
     }
 
+    @Counted("my.order")
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> cancelOrder(

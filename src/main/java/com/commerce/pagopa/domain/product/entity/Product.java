@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.product.entity;
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import java.util.Optional;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "products")
-public class Product {
+public class Product extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

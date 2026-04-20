@@ -28,6 +28,13 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.ok(adminProductService.findAll(pageable)));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProductResponseDto>> getProduct(
+            @PathVariable("id") Long productId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(adminProductService.find(productId)));
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<Void>> changeStatus(
             @PathVariable("id") Long productId,
