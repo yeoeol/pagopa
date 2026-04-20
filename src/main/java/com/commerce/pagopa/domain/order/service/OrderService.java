@@ -15,6 +15,7 @@ import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.*;
+import io.micrometer.core.annotation.Counted;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class OrderService {
     private final CartRepository cartRepository;
 
     // 바로 주문
+    @Counted("my.order")
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
@@ -50,6 +52,7 @@ public class OrderService {
     }
 
     // 장바구니 목록 주문
+    @Counted("my.order")
     @Transactional
     public OrderResponseDto orderFromCart(Long userId, CartOrderRequestDto requestDto) {
         List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
@@ -72,6 +75,7 @@ public class OrderService {
         return OrderResponseDto.from(orderRepository.save(order));
     }
 
+    @Counted("my.order")
     @Transactional
     public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
