@@ -36,6 +36,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
+    // Logstash
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
+
     // Azure Blob Storage
     implementation 'com.azure.spring:spring-cloud-azure-starter-storage-blob:7.1.0'
 
