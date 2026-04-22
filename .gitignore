@@ -36,3 +36,8 @@ application.yml
 
 ### VS Code ###
 .vscode/
+
+# Runtime data
+logs/
+prometheus-data/
+grafana-data/

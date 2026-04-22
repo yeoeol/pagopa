@@ -6,7 +6,10 @@ USER root
 # 필요한 빌드 도구 및 fluent-plugin-elasticsearch 설치
 RUN apk add --no-cache --update --virtual .build-deps \
         sudo build-base ruby-dev \
- && sudo gem install fluent-plugin-elasticsearch \
+ && sudo gem install fluent-plugin-elasticsearch -v 6.0.0 \
+ && if sudo gem list -i elasticsearch > /dev/null; then sudo gem uninstall elasticsearch -aIx; fi \
+ && if sudo gem list -i elasticsearch-api > /dev/null; then sudo gem uninstall elasticsearch-api -aIx; fi \
+ && sudo gem install elasticsearch -v 8.13.0 \
  && sudo gem sources --clear-all \
  && apk del .build-deps \
  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem

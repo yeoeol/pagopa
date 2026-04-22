@@ -41,6 +41,7 @@
     <springProfile name="local | dev">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
             <appender-ref ref="FLUENTD"/> <!-- 개발 중에도 EFK에서 확인 가능하도록 추가 -->
         </root>
         <logger name="org.hibernate.SQL" level="DEBUG"/>
