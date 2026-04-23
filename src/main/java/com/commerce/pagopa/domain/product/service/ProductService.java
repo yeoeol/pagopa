@@ -7,6 +7,8 @@ import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +21,7 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> findAll() {
+    public List<ProductResponseDto> findAllByCategory() {
         return productRepository.findAll()
                 .stream()
                 .map(ProductResponseDto::from)
@@ -40,6 +42,14 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(ProductNotFoundException::new);
         return ProductResponseDto.from(product);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> findAllByCategory(Long categoryId, Pageable pageable) {
+        Page<Product> productPage = productRepository.findAllByCategoryIdAndStatusIn(
+                categoryId, List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT), pageable
+        );
+        return productPage.map(ProductResponseDto::from);
     }
 
     @Transactional(readOnly = true)
