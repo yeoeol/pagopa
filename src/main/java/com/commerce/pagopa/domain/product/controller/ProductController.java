@@ -28,7 +28,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getAll() {
         return ResponseEntity.ok(
-                ApiResponse.ok(productService.findAll())
+                ApiResponse.ok(productService.findAllWithActiveAndSoldOut())
         );
     }
 

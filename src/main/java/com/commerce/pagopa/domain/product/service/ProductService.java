@@ -3,6 +3,7 @@ package com.commerce.pagopa.domain.product.service;
 import com.commerce.pagopa.domain.product.dto.request.ProductSearch;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,15 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public List<ProductResponseDto> findAllWithActiveAndSoldOut() {
+        return productRepository.findAll()
+                .stream()
+                .filter(this::isActiveOrSoldOut)
+                .map(ProductResponseDto::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public ProductResponseDto find(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(ProductNotFoundException::new);
@@ -39,5 +49,10 @@ public class ProductService {
         ).stream()
                 .map(ProductResponseDto::from)
                 .toList();
+    }
+
+    private boolean isActiveOrSoldOut(Product product) {
+        ProductStatus status = product.getStatus();
+        return ProductStatus.ACTIVE.equals(status) || ProductStatus.SOLDOUT.equals(status);
     }
 }
