@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -85,7 +86,7 @@ public class ProductController {
     @GetMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getProductsByCategory(
             @PathVariable("categoryId") Long categoryId,
-            @PageableDefault(size = 10, page = 0) Pageable pageable
+            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(productService.findAllByCategory(categoryId, pageable))
