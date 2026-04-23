@@ -1,6 +1,7 @@
 package com.commerce.pagopa.domain.product.repository;
 
 import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -35,4 +37,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> searchProducts(@Param("name") String name);
 
     Page<Product> findAllBySellerId(Long userId, Pageable pageable);
+
+    Page<Product> findAllByCategoryIdAndStatusIn(
+            Long categoryId,
+            Collection<ProductStatus> statuses,
+            Pageable pageable
+    );
 }
