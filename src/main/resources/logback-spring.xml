@@ -4,6 +4,9 @@
 
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
+    <springProperty name="FLUENTD_HOST" source="logging.fluentd.host" defaultValue="localhost"/>
+    <springProperty name="FLUENTD_PORT" source="logging.fluentd.port" defaultValue="24224"/>
+
     <!-- 1. 콘솔 Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -27,7 +30,7 @@
 
     <!-- 3. Fluentd(Logstash) 전송용 Appender 추가 -->
     <appender name="FLUENTD" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:24224</destination>
+        <destination>${FLUENTD_HOST}:${FLUENTD_PORT}</destination>
 
         <!-- 네트워크 단절 시 안정성을 위한 재시도 옵션 -->
         <keepAliveDuration>5 minutes</keepAliveDuration>
@@ -57,9 +60,11 @@
     </springProfile>
 
     <!-- 기본 설정 (프로파일 지정 없을 때) -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FLUENTD"/>
-    </root>
+    <springProfile name="default">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FLUENTD"/>
+        </root>
+    </springProfile>
 
 </configuration>
