@@ -1,8 +1,10 @@
 package com.commerce.pagopa.auth.jwt;
 
+import com.commerce.pagopa.auth.handler.ApiAuthenticationEntryPoint;
 import com.commerce.pagopa.auth.jwt.resolver.TokenResolver;
 import com.commerce.pagopa.domain.user.entity.enums.Role;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
+import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,23 +33,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String token = tokenResolver.resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Long userId = jwtTokenProvider.getUserId(token);
-            String email = jwtTokenProvider.getEmail(token);
-            String role = jwtTokenProvider.getRole(token);
+        if (token != null) {
+            ErrorCode tokenValidationErrorCode = jwtTokenProvider.getTokenValidationErrorCode(token);
 
-            CustomUserDetails principal = new CustomUserDetails(userId, email, Role.valueOf(role));
+            if (tokenValidationErrorCode == null) {
+                Long userId = jwtTokenProvider.getUserId(token);
+                String email = jwtTokenProvider.getEmail(token);
+                String role = jwtTokenProvider.getRole(token);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    principal,
-                    "",
-                    principal.getAuthorities()
-            );
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+                CustomUserDetails principal = new CustomUserDetails(userId, email, Role.valueOf(role));
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        principal,
+                        "",
+                        principal.getAuthorities()
+                );
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                SecurityContextHolder.clearContext();
+                request.setAttribute(ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE, tokenValidationErrorCode);
+            }
         }
 
         filterChain.doFilter(request, response);

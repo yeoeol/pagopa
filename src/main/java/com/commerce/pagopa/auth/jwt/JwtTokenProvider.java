@@ -1,9 +1,13 @@
 package com.commerce.pagopa.auth.jwt;
 
-import io.jsonwebtoken.*;
+import com.commerce.pagopa.global.response.ErrorCode;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -73,21 +77,26 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
+        return getTokenValidationErrorCode(token) == null;
+    }
+
+    public ErrorCode getTokenValidationErrorCode(String token) {
         try {
             parseClaims(token);
-            return true;
+            return null;
         } catch (ExpiredJwtException e) {
-            log.warn("[JWT] 만료된 토큰: {}", e.getMessage());
+            log.warn("[JWT] expired token: {}", e.getMessage());
+            return ErrorCode.EXPIRED_TOKEN;
         } catch (UnsupportedJwtException e) {
-            log.warn("[JWT] 지원하지 않는 토큰 형식: {}", e.getMessage());
+            log.warn("[JWT] unsupported token: {}", e.getMessage());
         } catch (MalformedJwtException e) {
-            log.warn("[JWT] 잘못된 토큰 구조: {}", e.getMessage());
+            log.warn("[JWT] malformed token: {}", e.getMessage());
         } catch (SignatureException e) {
-            log.warn("[JWT] 서명 불일치: {}", e.getMessage());
+            log.warn("[JWT] signature mismatch: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.warn("[JWT] 토큰이 비어있음: {}", e.getMessage());
+            log.warn("[JWT] empty token: {}", e.getMessage());
         }
-        return false;
+        return ErrorCode.INVALID_TOKEN;
     }
 
     public long getAccessTokenExpiry() {

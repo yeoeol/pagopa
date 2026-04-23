@@ -14,9 +14,6 @@
 -- scraps: 11001+
 -- search_histories: 12001+
 -- refresh_tokens: 13001+
-
-USE pagopa;
-
 INSERT INTO categories (category_id, name, depth, parent_id)
 VALUES
     (1001, '라이프스타일', 0, NULL),
