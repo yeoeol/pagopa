@@ -43,6 +43,7 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType("application/json;charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error(errorCode)));
     }
 
