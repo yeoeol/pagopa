@@ -35,4 +35,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> searchProducts(@Param("name") String name);
 
     Page<Product> findAllBySellerId(Long userId, Pageable pageable);
+
+    Page<Product> findAllByCategoryId(Long categoryId, Pageable pageable);
 }
