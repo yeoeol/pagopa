@@ -65,4 +65,11 @@ public class AuthService {
 
         return TokenResponseDto.of(userId, accessToken, refreshToken);
     }
+
+    @Transactional
+    public void withdraw(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        user.withdraw();
+    }
 }

@@ -4,6 +4,7 @@ import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.JwtTokenType;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
+import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
 import jakarta.servlet.http.Cookie;
@@ -13,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,6 +64,14 @@ public class AuthController {
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
 
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    @PatchMapping("/withdraw")
+    public ResponseEntity<ApiResponse<Void>> withdraw(
+            @AuthenticationPrincipal(expression = "userId") Long userId
+    ) {
+        authService.withdraw(userId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
