@@ -26,10 +26,10 @@ public class JwtCookieUtil {
         return cookie;
     }
 
-    public static String getRefreshToken(Cookie[] cookies) {
+    public static String extractTokenFromCookies(JwtTokenType tokenType, Cookie[] cookies) {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (JwtTokenType.REFRESH_TOKEN.getCookieName().equals(cookie.getName())) {
+                if (tokenType.getCookieName().equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

@@ -6,7 +6,9 @@ import com.commerce.pagopa.domain.user.entity.RefreshToken;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.UserNotFoundException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,19 +28,27 @@ public class AuthService {
 
     @Transactional
     public TokenResponseDto reissueToken(String refreshToken) {
-        boolean isValid = jwtTokenProvider.validateToken(refreshToken);
-        if (isValid) {
-            RefreshToken token = refreshTokenRepository.findByToken(refreshToken).orElseThrow();
+        ErrorCode tokenValidationErrorCode = jwtTokenProvider.getTokenValidationErrorCode(refreshToken);
+        if (tokenValidationErrorCode == null) {
+            RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
+
+            // 기존에 저장되어 있던 토큰과 파라미터로 넘어온 토큰이 일치하는지 검증
+            if (!token.getToken().equals(refreshToken)) {
+                throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            }
 
             Long userId = token.getUserId();
             User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
             return issueAccessTokenAndRefreshToken(userId, user.getEmail(), user.getRoleName());
         }
-        return null;
+
+        throw new BusinessException(tokenValidationErrorCode);
     }
 
-    private TokenResponseDto issueAccessTokenAndRefreshToken(Long userId, String email, String role) {
+    @Transactional
+    public TokenResponseDto issueAccessTokenAndRefreshToken(Long userId, String email, String role) {
         String accessToken = jwtTokenProvider.generateAccessToken(
                 userId, email, role
         );

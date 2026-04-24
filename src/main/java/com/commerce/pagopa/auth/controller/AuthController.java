@@ -4,9 +4,7 @@ import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.JwtTokenType;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
-import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.global.util.CookieUtil;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +50,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        String refreshToken = JwtCookieUtil.getRefreshToken(request.getCookies());
+        String refreshToken = JwtCookieUtil.extractTokenFromCookies(JwtTokenType.REFRESH_TOKEN, request.getCookies());
         TokenResponseDto tokenResponseDto = authService.reissueToken(refreshToken);
 
         Cookie accessTokenCookie = JwtCookieUtil.createJwtCookie(
