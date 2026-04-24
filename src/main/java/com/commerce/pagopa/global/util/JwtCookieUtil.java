@@ -1,8 +1,11 @@
 package com.commerce.pagopa.global.util;
 
 import com.commerce.pagopa.auth.jwt.JwtTokenType;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.servlet.http.Cookie;
 
+// TODO: setSecure() -> HTTPS, setSameSite() -> CSRF 적용
 public class JwtCookieUtil {
 
     public static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
@@ -21,5 +24,16 @@ public class JwtCookieUtil {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
         return cookie;
+    }
+
+    public static String getRefreshToken(Cookie[] cookies) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (JwtTokenType.REFRESH_TOKEN.getCookieName().equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        throw new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
     }
 }

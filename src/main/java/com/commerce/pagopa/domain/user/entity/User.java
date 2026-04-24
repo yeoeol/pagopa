@@ -109,6 +109,10 @@ public class User extends BaseTimeEntity {
         this.role = Role.ROLE_SELLER;
     }
 
+    public String getRoleName() {
+        return role.name();
+    }
+
     private void validateActiveUserStatus() {
         if (this.userStatus != UserStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);

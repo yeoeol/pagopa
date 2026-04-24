@@ -6,6 +6,7 @@ import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.util.CookieUtil;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,14 +49,11 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<Void>> refresh(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request,
             HttpServletResponse response
     ) {
-        TokenResponseDto tokenResponseDto = authService.issueAccessTokenAndRefreshToken(
-                userDetails.getUserId(),
-                userDetails.getEmail(),
-                userDetails.getRoleName()
-        );
+        String refreshToken = JwtCookieUtil.getRefreshToken(request.getCookies());
+        TokenResponseDto tokenResponseDto = authService.reissueToken(refreshToken);
 
         Cookie accessTokenCookie = JwtCookieUtil.createJwtCookie(
                 JwtTokenType.ACCESS_TOKEN,
