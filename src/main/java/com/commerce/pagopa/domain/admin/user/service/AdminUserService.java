@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.admin.user.service;
 
 import com.commerce.pagopa.domain.admin.user.dto.response.UserResponseDto;
 import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminUserService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${app.ban.seconds}")
     private long banSeconds;
@@ -44,6 +46,9 @@ public class AdminUserService {
     public void withdraw(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
+
+        refreshTokenRepository.deleteByUserId(userId);
+
         user.withdraw();
     }
 

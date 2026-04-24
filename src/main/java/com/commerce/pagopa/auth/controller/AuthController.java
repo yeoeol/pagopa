@@ -69,9 +69,14 @@ public class AuthController {
 
     @PatchMapping("/withdraw")
     public ResponseEntity<ApiResponse<Void>> withdraw(
-            @AuthenticationPrincipal(expression = "userId") Long userId
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            HttpServletResponse response
     ) {
         authService.withdraw(userId);
+
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.ACCESS_TOKEN));
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
+
         return ResponseEntity.ok(ApiResponse.ok());
     }
 

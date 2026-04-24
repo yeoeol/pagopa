@@ -2,11 +2,14 @@ package com.commerce.pagopa.auth.oauth.service;
 
 import com.commerce.pagopa.auth.oauth.userinfo.OAuth2UserInfo;
 import com.commerce.pagopa.auth.oauth.userinfo.OAuth2UserInfoFactory;
+import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.entity.enums.Provider;
 import com.commerce.pagopa.domain.user.entity.enums.Role;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -15,6 +18,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,6 +26,7 @@ import java.util.UUID;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final AuthService authService;
 
     @Value("${app.azure.base-url}")
     private String azureBaseUrl;
@@ -47,17 +52,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User saveOrUpdate(OAuth2UserInfo userInfo, Provider provider) {
-        return userRepository
-                .findByProviderAndProviderId(provider, userInfo.getProviderId())
-                .orElseGet(() -> userRepository.save(
-                        User.create(
-                                userInfo.getEmail(),
-                                "user_" + UUID.randomUUID().toString().substring(0, 8),
-                                azureBaseUrl + "/default.png",
-                                provider,
-                                userInfo.getProviderId(),
-                                Role.ROLE_USER
-                        )
-                ));
+        Optional<User> optionalUser = userRepository
+                .findByProviderAndProviderId(provider, userInfo.getProviderId());
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (authService.validateActiveUser(user.getId())) {
+                return user;
+            }
+            throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
+        }
+
+        return userRepository.save(
+                User.create(
+                        userInfo.getEmail(),
+                        "user_" + UUID.randomUUID().toString().substring(0, 8),
+                        azureBaseUrl + "/default.png",
+                        provider,
+                        userInfo.getProviderId(),
+                        Role.ROLE_USER
+                )
+        );
     }
 }

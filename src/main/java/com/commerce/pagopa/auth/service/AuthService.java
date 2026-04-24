@@ -4,6 +4,7 @@ import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.domain.user.entity.RefreshToken;
 import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.domain.user.entity.enums.UserStatus;
 import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
@@ -70,6 +71,20 @@ public class AuthService {
     public void withdraw(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
+
+        refreshTokenRepository.deleteByUserId(userId);
+
         user.withdraw();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean validateActiveUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        return isActiveUser(user);
+    }
+
+    private boolean isActiveUser(User user) {
+        return user.getUserStatus().equals(UserStatus.ACTIVE);
     }
 }
