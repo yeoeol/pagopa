@@ -1,9 +1,13 @@
 package com.commerce.pagopa.auth.controller;
 
+import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.JwtTokenType;
+import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
+import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
@@ -37,6 +42,33 @@ public class AuthController {
             request.getSession(false).invalidate();
         }
         SecurityContextHolder.clearContext();
+
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<Void>> refresh(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletResponse response
+    ) {
+        TokenResponseDto tokenResponseDto = authService.issueAccessTokenAndRefreshToken(
+                userDetails.getUserId(),
+                userDetails.getEmail(),
+                userDetails.getRoleName()
+        );
+
+        Cookie accessTokenCookie = JwtCookieUtil.createJwtCookie(
+                JwtTokenType.ACCESS_TOKEN,
+                tokenResponseDto.accessToken(),
+                jwtTokenProvider.getAccessTokenExpiry() / 1000
+        );
+        Cookie refreshTokenCookie = JwtCookieUtil.createJwtCookie(
+                JwtTokenType.REFRESH_TOKEN,
+                tokenResponseDto.refreshToken(),
+                jwtTokenProvider.getRefreshTokenExpiry() / 1000
+        );
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
 
         return ResponseEntity.ok(ApiResponse.ok());
     }

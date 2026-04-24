@@ -39,4 +39,8 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return email;
     }
+
+    public String getRoleName() {
+        return role.name();
+    }
 }

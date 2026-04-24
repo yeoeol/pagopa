@@ -1,5 +1,6 @@
 package com.commerce.pagopa.auth.controller;
 
+import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
@@ -25,7 +26,8 @@ class AuthControllerTest {
     @Test
     void logout_clearsAccessTokenCookieAndDeletesRefreshToken() {
         AuthService authService = mock(AuthService.class);
-        AuthController authController = new AuthController(authService);
+        JwtTokenProvider jwtTokenProvider = mock(JwtTokenProvider.class);
+        AuthController authController = new AuthController(authService, jwtTokenProvider);
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.getSession();
         MockHttpServletResponse response = new MockHttpServletResponse();
