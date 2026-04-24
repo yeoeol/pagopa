@@ -1,10 +1,12 @@
 package com.commerce.pagopa.auth.oauth.handler;
 
 import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
-import com.commerce.pagopa.domain.user.entity.RefreshToken;
-import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
+import com.commerce.pagopa.auth.jwt.JwtTokenType;
+import com.commerce.pagopa.auth.jwt.TokenResponseDto;
+import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +21,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${app.oauth2.redirect-url}")
     private String oauth2RedirectUrl;
@@ -33,22 +35,25 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     ) throws IOException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        String accessToken = jwtTokenProvider.generateAccessToken(
-                oAuth2User.getUserId(), oAuth2User.getEmail(), oAuth2User.getRole()
+        TokenResponseDto tokenResponseDto = authService.issueAccessTokenAndRefreshToken(
+                oAuth2User.getUserId(),
+                oAuth2User.getEmail(),
+                oAuth2User.getRole()
         );
-        String refreshToken = jwtTokenProvider.generateRefreshToken(oAuth2User.getUserId());
 
-        // RefreshToken이 존재하면 업데이트, 없으면 새로 생성 후 저장
-        refreshTokenRepository.findByUserId(oAuth2User.getUserId())
-                .ifPresentOrElse(
-                        rt -> rt.updateToken(refreshToken),
-                        () -> refreshTokenRepository.save(RefreshToken.create(
-                                oAuth2User.getUserId(),
-                                refreshToken
-                        ))
-                );
+        Cookie accessTokenCookie = JwtCookieUtil.createJwtCookie(
+                JwtTokenType.ACCESS_TOKEN,
+                tokenResponseDto.accessToken(),
+                jwtTokenProvider.getAccessTokenExpiry() / 1000
+        );
+        Cookie refreshTokenCookie = JwtCookieUtil.createJwtCookie(
+                JwtTokenType.REFRESH_TOKEN,
+                tokenResponseDto.refreshToken(),
+                jwtTokenProvider.getRefreshTokenExpiry() / 1000
+        );
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
 
-        response.addCookie(JwtCookieUtil.createJwtCookie(accessToken, jwtTokenProvider.getAccessTokenExpiry() / 1000));
         response.sendRedirect(oauth2RedirectUrl);
     }
 }

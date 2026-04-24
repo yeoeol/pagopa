@@ -1,5 +1,8 @@
 package com.commerce.pagopa.auth.service;
 
+import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
+import com.commerce.pagopa.auth.jwt.TokenResponseDto;
+import com.commerce.pagopa.domain.user.entity.RefreshToken;
 import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,9 +13,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public void logout(Long userId) {
         refreshTokenRepository.deleteByUserId(userId);
+    }
+
+    @Transactional
+    public TokenResponseDto issueAccessTokenAndRefreshToken(Long userId, String email, String role) {
+        String accessToken = jwtTokenProvider.generateAccessToken(
+                userId, email, role
+        );
+        String refreshToken = jwtTokenProvider.generateRefreshToken(userId);
+
+        refreshTokenRepository.findByUserId(userId)
+                .ifPresentOrElse(
+                        rt -> rt.updateToken(refreshToken),
+                        () -> refreshTokenRepository.save(RefreshToken.create(
+                                userId,
+                                refreshToken
+                        ))
+                );
+
+        return TokenResponseDto.of(userId, accessToken, refreshToken);
     }
 }

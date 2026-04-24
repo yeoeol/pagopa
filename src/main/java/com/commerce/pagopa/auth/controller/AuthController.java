@@ -1,5 +1,6 @@
 package com.commerce.pagopa.auth.controller;
 
+import com.commerce.pagopa.auth.jwt.JwtTokenType;
 import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
@@ -28,7 +29,9 @@ public class AuthController {
             HttpServletResponse response
     ) {
         authService.logout(userId);
-        response.addCookie(JwtCookieUtil.deleteJwtCookie());
+
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.ACCESS_TOKEN));
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
 
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
