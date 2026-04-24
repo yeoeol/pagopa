@@ -102,4 +102,8 @@ public class JwtTokenProvider {
     public long getAccessTokenExpiry() {
         return accessTokenExpiry;
     }
+
+    public long getRefreshTokenExpiry() {
+        return refreshTokenExpiry;
+    }
 }

@@ -78,6 +78,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/v1/seller/**").hasRole("SELLER")
 
+                        .requestMatchers("/api/v1/auth/refresh").permitAll()
                         .requestMatchers("/api/v1/auth/**").authenticated()
 
                         .anyRequest().authenticated()
