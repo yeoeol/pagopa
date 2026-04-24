@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value =
             "UPDATE User u " +
             "SET u.userStatus = 'ACTIVE', " +

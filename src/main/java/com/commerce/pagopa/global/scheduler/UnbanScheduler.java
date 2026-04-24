@@ -15,6 +15,7 @@ public class UnbanScheduler {
     private final UserRepository userRepository;
 
     /**
+     * TODO: 다중 인스턴스 실행 시 단일 실행 보장
      * 매 분 실행
      */
     @Transactional
