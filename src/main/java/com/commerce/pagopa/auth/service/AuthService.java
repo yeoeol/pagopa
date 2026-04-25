@@ -76,15 +76,4 @@ public class AuthService {
 
         user.withdraw();
     }
-
-    @Transactional(readOnly = true)
-    public boolean validateActiveUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
-        return isActiveUser(user);
-    }
-
-    private boolean isActiveUser(User user) {
-        return user.getUserStatus().equals(UserStatus.ACTIVE);
-    }
 }

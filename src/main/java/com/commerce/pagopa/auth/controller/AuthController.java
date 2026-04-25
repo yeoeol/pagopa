@@ -4,7 +4,6 @@ import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.JwtTokenType;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
-import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
 import jakarta.servlet.http.Cookie;
@@ -31,15 +30,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         authService.logout(userId);
-
-        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.ACCESS_TOKEN));
-        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
-
-        if (request.getSession(false) != null) {
-            request.getSession(false).invalidate();
-        }
-        SecurityContextHolder.clearContext();
-
+        clearCookieAndSession(request, response);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
@@ -70,18 +61,26 @@ public class AuthController {
     @PatchMapping("/withdraw")
     public ResponseEntity<ApiResponse<Void>> withdraw(
             @AuthenticationPrincipal(expression = "userId") Long userId,
+            HttpServletRequest request,
             HttpServletResponse response
     ) {
         authService.withdraw(userId);
-
-        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.ACCESS_TOKEN));
-        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
-
+        clearCookieAndSession(request, response);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<Void>> checkAuthenticated() {
         return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    private static void clearCookieAndSession(HttpServletRequest request, HttpServletResponse response) {
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.ACCESS_TOKEN));
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
+
+        if (request.getSession(false) != null) {
+            request.getSession(false).invalidate();
+        }
+        SecurityContextHolder.clearContext();
     }
 }
