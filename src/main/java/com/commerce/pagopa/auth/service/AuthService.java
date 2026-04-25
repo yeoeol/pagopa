@@ -4,6 +4,7 @@ import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.domain.user.entity.RefreshToken;
 import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.domain.user.entity.enums.UserStatus;
 import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
@@ -64,5 +65,15 @@ public class AuthService {
                 );
 
         return TokenResponseDto.of(userId, accessToken, refreshToken);
+    }
+
+    @Transactional
+    public void withdraw(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        refreshTokenRepository.deleteByUserId(userId);
+
+        user.withdraw();
     }
 }

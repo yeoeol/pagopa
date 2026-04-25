@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,15 +30,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         authService.logout(userId);
-
-        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.ACCESS_TOKEN));
-        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
-
-        if (request.getSession(false) != null) {
-            request.getSession(false).invalidate();
-        }
-        SecurityContextHolder.clearContext();
-
+        clearCookieAndSession(request, response);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
@@ -69,8 +58,29 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @PatchMapping("/withdraw")
+    public ResponseEntity<ApiResponse<Void>> withdraw(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        authService.withdraw(userId);
+        clearCookieAndSession(request, response);
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<Void>> checkAuthenticated() {
         return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    private static void clearCookieAndSession(HttpServletRequest request, HttpServletResponse response) {
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.ACCESS_TOKEN));
+        response.addCookie(JwtCookieUtil.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
+
+        if (request.getSession(false) != null) {
+            request.getSession(false).invalidate();
+        }
+        SecurityContextHolder.clearContext();
     }
 }
