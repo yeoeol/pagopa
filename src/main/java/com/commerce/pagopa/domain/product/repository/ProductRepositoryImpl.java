@@ -25,6 +25,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression nameContains(String name) {
-        return hasText(name) ? product.name.contains(name) : null;
+        return hasText(name) ? product.name.containsIgnoreCase(name) : null;
     }
 }

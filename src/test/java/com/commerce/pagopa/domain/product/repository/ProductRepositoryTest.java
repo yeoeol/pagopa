@@ -73,7 +73,7 @@ class ProductRepositoryTest {
                 BigDecimal.valueOf(1500),
                 30, category, user
         );
-        productRepository.saveAll(List.of(product1, product2, product3));
+        products = productRepository.saveAll(List.of(product1, product2, product3));
     }
 
     @Test
@@ -104,11 +104,12 @@ class ProductRepositoryTest {
     void searchProducts_one() {
         List<Product> results = productRepository.searchProducts(new ProductSearchCondition("A"));
         assertThat(results).hasSize(1);
+        assertThat(results.getFirst()).isEqualTo(products.getFirst());
     }
 
     @Test
     void searchProducts_List() {
         List<Product> results = productRepository.searchProducts(new ProductSearchCondition("roduc"));
-        assertThat(results).hasSize(3);
+        assertThat(results).hasSize(products.size());
     }
 }
