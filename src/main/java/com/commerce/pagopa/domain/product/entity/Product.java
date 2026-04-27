@@ -4,6 +4,9 @@ import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.exception.ProductOutOfStockException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,7 +16,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Getter
@@ -112,14 +114,22 @@ public class Product extends BaseTimeEntity {
         this.status = ProductStatus.HIDDEN;
     }
 
-    public void clearImages() {
-        this.images.clear();
+    // 재고 증가 (비즈니스 로직 캡슐화)
+    public void increaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST_QUANTITY);
+        }
+        this.stock += quantity;
     }
 
-    public Optional<ProductImage> getThumbnail() {
-        return images.stream()
-                .filter(ProductImage::isThumbnail)
-                .findFirst()
-                .or(() -> images.stream().findFirst());
+    // 재고 감소 (비즈니스 로직 캡슐화)
+    public void decreaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST_QUANTITY);
+        }
+        if (this.stock < quantity) {
+            throw new ProductOutOfStockException();
+        }
+        this.stock -= quantity;
     }
 }

@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.product.service;
 
-import com.commerce.pagopa.domain.product.dto.request.ProductSearch;
+import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
@@ -53,10 +53,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> search(ProductSearch productSearch) {
-        return productRepository.searchProducts(
-                productSearch.productName()
-        ).stream()
+    public List<ProductResponseDto> search(ProductSearchCondition condition) {
+        return productRepository.searchProducts(condition).stream()
                 .map(ProductResponseDto::from)
                 .toList();
     }

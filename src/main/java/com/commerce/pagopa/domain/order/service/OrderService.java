@@ -64,7 +64,8 @@ public class OrderService {
         Order order = createOrderProcess(user, requestDto.paymentMethod(), requestDto.delivery());
 
         for (Cart cart : carts) {
-            processOrderProduct(order, cart.getProduct(), cart.getQuantity());
+            Product product = cart.getProduct();
+            processOrderProduct(order, product, cart.getQuantity());
         }
 
         String orderName = getOrderName(order);
@@ -83,13 +84,8 @@ public class OrderService {
         order.markAsCancelled();
 
         for (OrderProduct orderProduct : order.getOrderProducts()) {
-            int updatedRows = productRepository.increaseStock(
-                    orderProduct.getProduct().getId(),
-                    orderProduct.getQuantity()
-            );
-            if (updatedRows == 0) {
-                throw new ProductNotFoundException();
-            }
+            Product product = orderProduct.getProduct();
+            product.increaseStock(orderProduct.getQuantity());
         }
     }
 
@@ -128,10 +124,7 @@ public class OrderService {
     }
 
     private void processOrderProduct(Order order, Product product, int quantity) {
-        int updatedRows = productRepository.decreaseStock(product.getId(), quantity);
-        if (updatedRows == 0) {
-            throw new ProductOutOfStockException();
-        }
+        product.decreaseStock(quantity);
 
         OrderProduct orderProduct = OrderProduct.create(
                 quantity,
