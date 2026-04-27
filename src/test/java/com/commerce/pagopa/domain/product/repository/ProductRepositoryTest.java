@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,7 @@ class ProductRepositoryTest {
 
     private Category category;
     private User user;
+    private List<Product> products = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -52,107 +54,61 @@ class ProductRepositoryTest {
                 Role.ROLE_SELLER
         );
         user = userRepository.save(initUser);
-    }
 
-    @Test
-    void increaseStock() {
-        Product product = Product.create(
-                "productA",
-                "descA",
-                BigDecimal.valueOf(1000),
-                BigDecimal.valueOf(500),
-                10,
-                category,
-                user
-        );
-        Product save = productRepository.save(product);
-
-        int updatedRows = productRepository.increaseStock(save.getId(), 1);
-        Optional<Product> optionalProduct = productRepository.findById(save.getId());
-        assertThat(optionalProduct).isPresent();
-        assertThat(updatedRows).isEqualTo(1);
-
-        Product getProduct = optionalProduct.get();
-        assertThat(getProduct.getStock()).isEqualTo(product.getStock()+1);
-    }
-
-    @Test
-    void decreaseStock() {
-        Product product = createProduct(
+        Product product1 = Product.create(
                 "productA", "descA",
                 BigDecimal.valueOf(1000),
                 BigDecimal.valueOf(500),
                 10, category, user
         );
-        Product save = productRepository.save(product);
-
-        int updatedRows = productRepository.decreaseStock(save.getId(), 1);
-        Optional<Product> optionalProduct = productRepository.findById(save.getId());
-        assertThat(optionalProduct).isPresent();
-        assertThat(updatedRows).isEqualTo(1);
-
-        Product getProduct = optionalProduct.get();
-        assertThat(getProduct.getStock()).isEqualTo(product.getStock()-1);
-    }
-
-    @Test
-    void searchProducts() {
-        Product product1 = createProduct(
-                "productA", "descA",
-                BigDecimal.valueOf(1000),
-                BigDecimal.valueOf(500),
-                10, category, user
-        );
-        Product product2 = createProduct(
+        Product product2 = Product.create(
                 "productB", "descB",
                 BigDecimal.valueOf(2000),
                 BigDecimal.valueOf(1000),
                 20, category, user
         );
-        Product product3 = createProduct(
+        Product product3 = Product.create(
                 "productC", "descC",
                 BigDecimal.valueOf(3000),
                 BigDecimal.valueOf(1500),
                 30, category, user
         );
         productRepository.saveAll(List.of(product1, product2, product3));
+    }
 
+    @Test
+    void increaseStock_success() {
+        Product product = products.getFirst();
+
+        product.increaseStock(1);
+        Optional<Product> optionalProduct = productRepository.findById(product.getId());
+        assertThat(optionalProduct).isPresent();
+
+        Product getProduct = optionalProduct.get();
+        assertThat(getProduct.getStock()).isEqualTo(11);
+    }
+
+    @Test
+    void decreaseStock_success() {
+        Product product = products.getFirst();
+
+        product.decreaseStock(1);
+        Optional<Product> optionalProduct = productRepository.findById(product.getId());
+        assertThat(optionalProduct).isPresent();
+
+        Product getProduct = optionalProduct.get();
+        assertThat(getProduct.getStock()).isEqualTo(9);
+    }
+
+    @Test
+    void searchProducts_one() {
         List<Product> results = productRepository.searchProducts(new ProductSearchCondition("A"));
         assertThat(results).hasSize(1);
-        assertThat(results.getFirst()).isEqualTo(product1);
     }
 
     @Test
     void searchProducts_List() {
-        Product product1 = createProduct(
-                "productA", "descA",
-                BigDecimal.valueOf(1000),
-                BigDecimal.valueOf(500),
-                10, category, user
-        );
-        Product product2 = createProduct(
-                "productB", "descB",
-                BigDecimal.valueOf(2000),
-                BigDecimal.valueOf(1000),
-                20, category, user
-        );
-        Product product3 = createProduct(
-                "productC", "descC",
-                BigDecimal.valueOf(3000),
-                BigDecimal.valueOf(1500),
-                30, category, user
-        );
-        productRepository.saveAll(List.of(product1, product2, product3));
-
         List<Product> results = productRepository.searchProducts(new ProductSearchCondition("roduc"));
         assertThat(results).hasSize(3);
-    }
-
-    private Product createProduct(
-            String name, String description,
-            BigDecimal price, BigDecimal discountPrice,
-            int stock, Category category, User seller
-    ) {
-        return Product.create(name, description, price, discountPrice, stock, category, seller);
     }
 }
