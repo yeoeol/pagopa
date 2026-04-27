@@ -53,10 +53,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> search(ProductSearchCondition productSearchCondition) {
-        return productRepository.searchProducts(
-                productSearchCondition.productName()
-        ).stream()
+    public List<ProductResponseDto> search(ProductSearchCondition condition) {
+        return productRepository.searchProducts(condition).stream()
                 .map(ProductResponseDto::from)
                 .toList();
     }

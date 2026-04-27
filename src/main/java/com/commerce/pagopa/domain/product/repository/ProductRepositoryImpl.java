@@ -5,11 +5,11 @@ import com.commerce.pagopa.domain.product.entity.Product;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
 import static com.commerce.pagopa.domain.product.entity.QProduct.product;
+import static org.springframework.util.StringUtils.hasText;
 
 @RequiredArgsConstructor
 public class ProductRepositoryImpl implements ProductRepositoryCustom {
@@ -25,6 +25,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression nameEq(String name) {
-        return StringUtils.hasText(name) ? null : product.name.eq(name);
+        return hasText(name) ? product.name.contains(name) : null;
     }
 }

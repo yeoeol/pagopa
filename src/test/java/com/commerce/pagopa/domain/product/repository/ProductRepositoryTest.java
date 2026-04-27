@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.product.repository;
 
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.category.repository.CategoryRepository;
+import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.entity.enums.Provider;
@@ -116,7 +117,7 @@ class ProductRepositoryTest {
         );
         productRepository.saveAll(List.of(product1, product2, product3));
 
-        List<Product> results = productRepository.searchProducts("A");
+        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("A"));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst()).isEqualTo(product1);
     }
@@ -143,7 +144,7 @@ class ProductRepositoryTest {
         );
         productRepository.saveAll(List.of(product1, product2, product3));
 
-        List<Product> results = productRepository.searchProducts("roduc");
+        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("roduc"));
         assertThat(results).hasSize(3);
     }
 
