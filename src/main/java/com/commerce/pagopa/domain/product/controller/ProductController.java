@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.product.controller;
 
-import com.commerce.pagopa.domain.product.dto.request.ProductSearch;
+import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.service.ProductService;
 import com.commerce.pagopa.domain.searchhistory.service.SearchHistoryService;
@@ -57,11 +57,11 @@ public class ProductController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @ModelAttribute ProductSearch productSearch,
+            @Valid @ModelAttribute ProductSearchCondition productSearchCondition,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        String keyword = productSearch.productName();
+        String keyword = productSearchCondition.productName();
         
         // 검색어가 있을 때만 기록
         if (keyword != null && !keyword.isBlank()) {
@@ -76,7 +76,7 @@ public class ProductController {
         }
 
         return ResponseEntity.ok(
-                ApiResponse.ok(productService.search(productSearch))
+                ApiResponse.ok(productService.search(productSearchCondition))
         );
     }
 
