@@ -20,11 +20,11 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     public List<Product> searchProducts(ProductSearchCondition condition) {
         return queryFactory
                 .selectFrom(product)
-                .where(nameEq(condition.productName()))
+                .where(nameContains(condition.productName()))
                 .fetch();
     }
 
-    private BooleanExpression nameEq(String name) {
+    private BooleanExpression nameContains(String name) {
         return hasText(name) ? product.name.contains(name) : null;
     }
 }
