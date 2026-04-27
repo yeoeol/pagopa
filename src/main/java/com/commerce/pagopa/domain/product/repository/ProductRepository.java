@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, ProductRepositoryCustom {
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value =
             "UPDATE Product p " +
             "SET p.stock = p.stock + :quantity " +
@@ -21,7 +21,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
                     "AND :quantity > 0")
     int increaseStock(@Param("productId") Long productId, @Param("quantity") int quantity);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value =
             "UPDATE Product p " +
             "SET p.stock = p.stock - :quantity " +
