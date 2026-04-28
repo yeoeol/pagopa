@@ -26,7 +26,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findAllByUserId(@Param("sellerId") Long sellerId, Pageable pageable);
 
     /**
-     * 특정 상태(ORDERED)이면서 지정된 시간(created_at) 이전에 생성된 주문들을 조회
+     * 특정 상태(ORDERED)이면서 지정된 시간(created_at) 이하(이전 포함) 생성된 주문들을 조회
      */
-    List<Order> findByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime dateTime);
+    List<Order> findByStatusAndCreatedAtLessThanEqual(OrderStatus status, LocalDateTime dateTime);
 }

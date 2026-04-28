@@ -28,8 +28,8 @@ public class OrderScheduler {
         // 15분 이전 시간 계산
         LocalDateTime timeoutTime = LocalDateTime.now().minusMinutes(15);
         
-        // 상태가 ORDERED 이면서 생성 시간이 15분 이전인 주문들 조회
-        List<Order> unpaidOrders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.ORDERED, timeoutTime);
+        // 상태가 ORDERED 이면서 생성 시간이 15분 이하(정확히 15분 전 포함)인 주문들 조회
+        List<Order> unpaidOrders = orderRepository.findByStatusAndCreatedAtLessThanEqual(OrderStatus.ORDERED, timeoutTime);
 
         if (!unpaidOrders.isEmpty()) {
             log.info("[OrderScheduler] 15분 경과 미결제 주문 {}건 자동 취소 시작", unpaidOrders.size());
