@@ -49,7 +49,7 @@ public class CartService {
             cart = cartRepository.save(Cart.create(requestDto.quantity(), user, product));
         }
 
-        return CartResponseDto.from(cart);
+        return CartResponseDto.of(cart, user, product);
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +65,7 @@ public class CartService {
 
     @Transactional
     public CartResponseDto updateQuantity(Long cartId, boolean isAdd) {
-        Cart cart = cartRepository.findById(cartId)
+        Cart cart = cartRepository.findByIdWithFetch(cartId)
                 .orElseThrow(CartNotFoundException::new);
 
         if (isAdd) {
