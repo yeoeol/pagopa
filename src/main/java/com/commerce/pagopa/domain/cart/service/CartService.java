@@ -49,7 +49,7 @@ public class CartService {
             cart = cartRepository.save(Cart.create(requestDto.quantity(), user, product));
         }
 
-        return CartResponseDto.of(cart, user, product);
+        return CartResponseDto.from(cart);
     }
 
     @Transactional(readOnly = true)
