@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,4 +24,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                 "JOIN op.product p " +
             "WHERE p.seller.id = :sellerId")
     Page<Order> findAllByUserId(@Param("sellerId") Long sellerId, Pageable pageable);
+
+    /**
+     * 특정 상태(ORDERED)이면서 지정된 시간(created_at) 이전에 생성된 주문들을 조회
+     */
+    List<Order> findByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime dateTime);
 }
