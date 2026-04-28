@@ -65,7 +65,7 @@ public class CartService {
 
     @Transactional
     public CartResponseDto updateQuantity(Long cartId, boolean isAdd) {
-        Cart cart = cartRepository.findById(cartId)
+        Cart cart = cartRepository.findByIdWithFetch(cartId)
                 .orElseThrow(CartNotFoundException::new);
 
         if (isAdd) {
