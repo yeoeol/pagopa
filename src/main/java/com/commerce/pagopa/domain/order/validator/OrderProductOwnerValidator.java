@@ -1,28 +1,31 @@
 package com.commerce.pagopa.domain.order.validator;
 
+import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
 import com.commerce.pagopa.domain.order.repository.OrderProductRepository;
+import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Component("orderProductOwnerValidator")
 @RequiredArgsConstructor
-public class OrderProductOwnerValidator {
+public class OrderProductOwnerValidator extends OwnerValidator<OrderProduct> {
 
     private final OrderProductRepository orderProductRepository;
 
-    @Transactional(readOnly = true)
-    public boolean isOwner(Long orderProductId, Long userId) {
-        if (orderProductId == null || userId == null) {
-            return false;
-        }
+    @Override
+    protected Optional<OrderProduct> findResource(Long orderProductId) {
+        return orderProductRepository.findByIdWithOrderAndUser(orderProductId);
+    }
 
-        OrderProduct orderProduct = orderProductRepository.findByIdWithOrderAndUser(orderProductId).orElse(null);
-        if (orderProduct == null || orderProduct.getOrder() == null || orderProduct.getOrder().getUser() == null) {
-            return false;
+    @Override
+    protected Long extractOwnerId(OrderProduct orderProduct) {
+        Order order = orderProduct.getOrder();
+        if (order == null || order.getUser() == null) {
+            return null;
         }
-
-        return orderProduct.getOrder().getUser().getId().equals(userId);
+        return order.getUser().getId();
     }
 }

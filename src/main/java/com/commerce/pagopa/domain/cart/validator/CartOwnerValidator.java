@@ -2,25 +2,25 @@ package com.commerce.pagopa.domain.cart.validator;
 
 import com.commerce.pagopa.domain.cart.entity.Cart;
 import com.commerce.pagopa.domain.cart.repository.CartRepository;
+import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Component("cartOwnerValidator")
 @RequiredArgsConstructor
-public class CartOwnerValidator {
+public class CartOwnerValidator extends OwnerValidator<Cart> {
 
     private final CartRepository cartRepository;
 
-    @Transactional(readOnly = true)
-    public boolean isOwner(Long cartId, Long userId) {
-        if (cartId == null || userId == null) {
-            return false;
-        }
-        Cart cart = cartRepository.findById(cartId).orElse(null);
-        if (cart == null || cart.getUser() == null) {
-            return false;
-        }
-        return cart.getUser().getId().equals(userId);
+    @Override
+    protected Optional<Cart> findResource(Long cartId) {
+        return cartRepository.findById(cartId);
+    }
+
+    @Override
+    protected Long extractOwnerId(Cart cart) {
+        return cart.getUser() == null ? null : cart.getUser().getId();
     }
 }

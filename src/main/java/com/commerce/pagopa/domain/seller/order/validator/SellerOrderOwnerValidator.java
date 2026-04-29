@@ -3,31 +3,29 @@ package com.commerce.pagopa.domain.seller.order.validator;
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Component("sellerOrderOwnerValidator")
 @RequiredArgsConstructor
-public class SellerOrderOwnerValidator {
+public class SellerOrderOwnerValidator extends OwnerValidator<Order> {
 
     private final OrderRepository orderRepository;
 
-    @Transactional(readOnly = true)
-    public boolean isOwner(Long orderId, Long userId) {
-        if (orderId == null || userId == null) {
-            return false;
-        }
+    @Override
+    protected Optional<Order> findResource(Long orderId) {
+        return orderRepository.findById(orderId);
+    }
 
-        Order order = orderRepository.findById(orderId).orElse(null);
-        if (order == null) {
-            return false;
+    @Override
+    protected Long extractOwnerId(Order order) {
+        if (order.getOrderProducts().isEmpty()) {
+            return null;
         }
-
         User seller = order.getOrderProducts().getFirst().getProduct().getSeller();
-        if (seller == null) {
-            return false;
-        }
-        return seller.getId().equals(userId);
+        return seller == null ? null : seller.getId();
     }
 }
