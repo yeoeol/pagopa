@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.order.validator;
 
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,8 @@ public class OrderOwnerValidator extends OwnerValidator<Order, Long> {
 
     @Override
     protected Long extractOwnerId(Order order) {
-        return order.getUser() == null ? null : order.getUser().getId();
+        return Optional.ofNullable(order.getUser())
+                .map(User::getId)
+                .orElse(null);
     }
 }

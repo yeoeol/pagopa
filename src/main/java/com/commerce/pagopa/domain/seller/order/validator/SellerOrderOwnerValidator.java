@@ -26,6 +26,8 @@ public class SellerOrderOwnerValidator extends OwnerValidator<Order, Long> {
             return null;
         }
         User seller = order.getOrderProducts().getFirst().getProduct().getSeller();
-        return seller == null ? null : seller.getId();
+        return Optional.ofNullable(seller)
+                .map(User::getId)
+                .orElse(null);
     }
 }

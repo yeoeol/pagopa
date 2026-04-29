@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.review.validator;
 
 import com.commerce.pagopa.domain.review.entity.Review;
 import com.commerce.pagopa.domain.review.repository.ReviewRepository;
+import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,8 @@ public class ReviewOwnerValidator extends OwnerValidator<Review, Long> {
 
     @Override
     protected Long extractOwnerId(Review review) {
-        return review.getUser() == null ? null : review.getUser().getId();
+        return Optional.ofNullable(review.getUser())
+                .map(User::getId)
+                .orElse(null);
     }
 }

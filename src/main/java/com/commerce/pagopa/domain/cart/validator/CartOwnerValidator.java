@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.cart.validator;
 
 import com.commerce.pagopa.domain.cart.entity.Cart;
 import com.commerce.pagopa.domain.cart.repository.CartRepository;
+import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,8 @@ public class CartOwnerValidator extends OwnerValidator<Cart, Long> {
 
     @Override
     protected Long extractOwnerId(Cart cart) {
-        return cart.getUser() == null ? null : cart.getUser().getId();
+        return Optional.ofNullable(cart.getUser())
+                .map(User::getId)
+                .orElse(null);
     }
 }

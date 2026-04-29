@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.searchhistory.validator;
 
 import com.commerce.pagopa.domain.searchhistory.entity.SearchHistory;
 import com.commerce.pagopa.domain.searchhistory.repository.SearchHistoryRepository;
+import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.util.CookieUtil;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +45,8 @@ public class SearchHistoryOwnerValidator extends OwnerValidator<SearchHistory, L
 
     @Override
     protected Long extractOwnerId(SearchHistory searchHistory) {
-        return searchHistory.getUser() == null ? null : searchHistory.getUser().getId();
+        return Optional.ofNullable(searchHistory.getUser())
+                .map(User::getId)
+                .orElse(null);
     }
 }

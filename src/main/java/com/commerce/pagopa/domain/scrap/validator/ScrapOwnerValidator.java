@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.scrap.validator;
 
 import com.commerce.pagopa.domain.scrap.entity.Scrap;
 import com.commerce.pagopa.domain.scrap.repository.ScrapRepository;
+import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,8 @@ public class ScrapOwnerValidator extends OwnerValidator<Scrap, Long> {
 
     @Override
     protected Long extractOwnerId(Scrap scrap) {
-        return scrap.getUser() == null ? null : scrap.getUser().getId();
+        return Optional.ofNullable(scrap.getUser())
+                .map(User::getId)
+                .orElse(null);
     }
 }
