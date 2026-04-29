@@ -7,7 +7,7 @@ import java.util.List;
 
 public record ProductResponseDto(
         Long productId,
-        String name,
+        String productName,
         String description,
         BigDecimal price,
         BigDecimal discountPrice,

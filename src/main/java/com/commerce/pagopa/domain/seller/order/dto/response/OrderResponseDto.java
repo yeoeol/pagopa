@@ -1,5 +1,7 @@
 package com.commerce.pagopa.domain.seller.order.dto.response;
 
+import com.commerce.pagopa.domain.order.dto.response.DeliveryResponseDto;
+import com.commerce.pagopa.domain.order.dto.response.OrderProductResponseDto;
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;

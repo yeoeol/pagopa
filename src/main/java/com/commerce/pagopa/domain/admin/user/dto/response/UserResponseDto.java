@@ -26,7 +26,7 @@ public record UserResponseDto(
                 user.getProfileImage(),
                 user.getProvider(),
                 user.getProviderId(),
-                user.getRole().name(),
+                user.getRoleName(),
                 user.getUserStatus(),
                 user.getWithdrawnAt(),
                 user.getBanEndDate()

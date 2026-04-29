@@ -2,11 +2,11 @@ package com.commerce.pagopa.domain.seller.product.service;
 
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.category.repository.CategoryRepository;
+import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.seller.product.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.entity.ProductImage;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
-import com.commerce.pagopa.domain.seller.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
