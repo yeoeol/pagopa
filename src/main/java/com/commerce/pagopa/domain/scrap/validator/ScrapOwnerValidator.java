@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Component("scrapOwnerValidator")
 @RequiredArgsConstructor
-public class ScrapOwnerValidator extends OwnerValidator<Scrap> {
+public class ScrapOwnerValidator extends OwnerValidator<Scrap, Long> {
 
     private final ScrapRepository scrapRepository;
 

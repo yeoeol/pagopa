@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Component("reviewOwnerValidator")
 @RequiredArgsConstructor
-public class ReviewOwnerValidator extends OwnerValidator<Review> {
+public class ReviewOwnerValidator extends OwnerValidator<Review, Long> {
 
     private final ReviewRepository reviewRepository;
 

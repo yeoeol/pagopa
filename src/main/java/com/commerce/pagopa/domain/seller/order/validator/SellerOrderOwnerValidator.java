@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Component("sellerOrderOwnerValidator")
 @RequiredArgsConstructor
-public class SellerOrderOwnerValidator extends OwnerValidator<Order> {
+public class SellerOrderOwnerValidator extends OwnerValidator<Order, Long> {
 
     private final OrderRepository orderRepository;
 

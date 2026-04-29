@@ -3,41 +3,47 @@ package com.commerce.pagopa.domain.searchhistory.validator;
 import com.commerce.pagopa.domain.searchhistory.entity.SearchHistory;
 import com.commerce.pagopa.domain.searchhistory.repository.SearchHistoryRepository;
 import com.commerce.pagopa.global.util.CookieUtil;
+import com.commerce.pagopa.global.validator.OwnerValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Component("searchHistoryOwnerValidator")
 @RequiredArgsConstructor
-public class SearchHistoryOwnerValidator {
+public class SearchHistoryOwnerValidator extends OwnerValidator<SearchHistory, Long> {
 
     private final SearchHistoryRepository searchHistoryRepository;
     private final HttpServletRequest request;
 
+    @Override
     @Transactional(readOnly = true)
     public boolean isOwner(Long searchHistoryId, Long userId) {
-        if (searchHistoryId == null) {
+        return findResource(searchHistoryId).map(history -> {
+            // 로그인 회원 검증
+            Long ownerId = extractOwnerId(history);
+            if (userId != null && ownerId != null) {
+                return ownerId.equals(userId);
+            }
+
+            // 비로그인 사용자 검증: 세션 ID 비교
+            if (userId == null && history.getUser() == null && history.getSessionId() != null) {
+                String sessionId = CookieUtil.getSessionIdFromCookie(request);
+                return history.getSessionId().equals(sessionId);
+            }
             return false;
-        }
+        }).orElse(false);
+    }
 
-        SearchHistory searchHistory = searchHistoryRepository.findById(searchHistoryId).orElse(null);
-        if (searchHistory == null) {
-            return false; // 이미 삭제됐거나 존재하지 않음
-        }
+    @Override
+    protected Optional<SearchHistory> findResource(Long searchHistoryId) {
+        return searchHistoryRepository.findById(searchHistoryId);
+    }
 
-        // 로그인한 회원인 경우 (userId 비교)
-        if (userId != null && searchHistory.getUser() != null) {
-            return searchHistory.getUser().getId().equals(userId);
-        }
-
-        // 비로그인 사용자(세션 ID)인 경우 쿠키 값을 확인
-        if (userId == null && searchHistory.getUser() == null && searchHistory.getSessionId() != null) {
-            String sessionId = CookieUtil.getSessionIdFromCookie(request);
-            return searchHistory.getSessionId().equals(sessionId);
-        }
-
-        // 그 외의 경우는 본인의 검색 기록이 아님
-        return false;
+    @Override
+    protected Long extractOwnerId(SearchHistory searchHistory) {
+        return searchHistory.getUser() == null ? null : searchHistory.getUser().getId();
     }
 }

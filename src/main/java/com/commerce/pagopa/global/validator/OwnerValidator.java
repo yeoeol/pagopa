@@ -4,10 +4,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-public abstract class OwnerValidator<T> {
+public abstract class OwnerValidator<T, ID> {
 
     @Transactional(readOnly = true)
-    public boolean isOwner(Long resourceId, Long userId) {
+    public boolean isOwner(ID resourceId, Long userId) {
         if (resourceId == null || userId == null) {
             return false;
         }
@@ -19,7 +19,7 @@ public abstract class OwnerValidator<T> {
                 .orElse(false);
     }
 
-    protected abstract Optional<T> findResource(Long resourceId);
+    protected abstract Optional<T> findResource(ID resourceId);
 
     protected abstract Long extractOwnerId(T resource);
 }
