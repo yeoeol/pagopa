@@ -1,8 +1,8 @@
 package com.commerce.pagopa.domain.admin.product.controller;
 
 import com.commerce.pagopa.domain.admin.product.dto.request.ProductStatusChangeRequestDto;
-import com.commerce.pagopa.domain.admin.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.admin.product.service.AdminProductService;
+import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

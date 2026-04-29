@@ -1,7 +1,7 @@
 package com.commerce.pagopa.domain.admin.product.service;
 
 import com.commerce.pagopa.domain.admin.product.dto.request.ProductStatusChangeRequestDto;
-import com.commerce.pagopa.domain.admin.product.dto.response.ProductResponseDto;
+import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;

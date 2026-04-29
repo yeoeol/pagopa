@@ -20,8 +20,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value =
             "SELECT DISTINCT o " +
             "FROM Order o " +
-                "JOIN o.orderProducts op " +
-                "JOIN op.product p " +
+                "JOIN FETCH o.orderProducts op " +
+                "JOIN FETCH op.product p " +
             "WHERE p.seller.id = :sellerId")
     Page<Order> findAllByUserId(@Param("sellerId") Long sellerId, Pageable pageable);
 
