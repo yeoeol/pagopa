@@ -5,7 +5,6 @@ import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
-import com.commerce.pagopa.global.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +25,7 @@ public class AdminProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDto find(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.getById(productId);
         return ProductResponseDto.from(product);
     }
 
@@ -38,8 +36,7 @@ public class AdminProductService {
 
     @Transactional
     public void changeStatus(Long productId, ProductStatusChangeRequestDto requestDto) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.getById(productId);
         ProductStatus status = requestDto.status();
 
         switch (status) {

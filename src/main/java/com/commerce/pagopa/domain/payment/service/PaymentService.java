@@ -9,10 +9,8 @@ import com.commerce.pagopa.domain.payment.dto.response.PaymentResponseDto;
 import com.commerce.pagopa.domain.payment.entity.Payment;
 import com.commerce.pagopa.domain.payment.repository.PaymentRepository;
 import com.commerce.pagopa.global.exception.OrderCannotPayException;
-import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import com.commerce.pagopa.global.exception.PaymentCancelException;
 import com.commerce.pagopa.global.exception.PaymentConfirmException;
-import com.commerce.pagopa.global.exception.PaymentNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +35,7 @@ public class PaymentService {
      */
     @Transactional
     public PaymentResponseDto requestPayment(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(OrderNotFoundException::new);
+        Order order = orderRepository.getById(orderId);
         validateOrderPayable(order);
 
         Payment payment = paymentRepository.findByOrder(order)
@@ -60,11 +58,9 @@ public class PaymentService {
      */
     @Transactional(noRollbackFor = {PaymentCancelException.class, PaymentConfirmException.class})
     public void confirmPayment(PaymentApproveRequestDto requestDto) {
-        Order order = orderRepository.findByOrderNumber(requestDto.orderId())
-                .orElseThrow(OrderNotFoundException::new);
+        Order order = orderRepository.getByOrderNumber(requestDto.orderId());
 
-        Payment payment = paymentRepository.findByOrder(order)
-                .orElseThrow(PaymentNotFoundException::new);
+        Payment payment = paymentRepository.getByOrder(order);
 
         payment.validateConfirmable();
         validateOrderPayable(order);

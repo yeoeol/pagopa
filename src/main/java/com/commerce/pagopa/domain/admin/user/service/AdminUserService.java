@@ -4,7 +4,6 @@ import com.commerce.pagopa.domain.admin.user.dto.response.UserResponseDto;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
-import com.commerce.pagopa.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -30,22 +29,19 @@ public class AdminUserService {
 
     @Transactional
     public void ban(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.getById(userId);
         user.ban(banSeconds);
     }
 
     @Transactional
     public void unban(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.getById(userId);
         user.unban();
     }
 
     @Transactional
     public void withdraw(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.getById(userId);
 
         refreshTokenRepository.deleteByUserId(userId);
 
@@ -54,8 +50,7 @@ public class AdminUserService {
 
     @Transactional
     public void updateSellerRole(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.getById(userId);
         user.updateSellerRole();
     }
 }

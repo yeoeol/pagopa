@@ -9,7 +9,6 @@ import com.commerce.pagopa.domain.scrap.validator.ScrapTargetValidator;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.exception.UserNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,7 @@ public class ScrapService {
 
     @Transactional
     public ScrapResponseDto addScrap(Long userId, ScrapAddRequestDto requestDto) {
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.getById(userId);
 
         validateTarget(requestDto.targetType(), requestDto.targetId());
 

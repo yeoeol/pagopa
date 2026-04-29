@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.user.repository;
 
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.entity.enums.Provider;
+import com.commerce.pagopa.global.exception.UserNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +22,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "WHERE u.banEndDate < :now " +
                 "AND u.userStatus = 'BANNED'")
     void bulkUnbanBefore(@Param("now") LocalDateTime now);
+
+    default User getById(Long id) {
+        return findById(id).orElseThrow(UserNotFoundException::new);
+    }
 }

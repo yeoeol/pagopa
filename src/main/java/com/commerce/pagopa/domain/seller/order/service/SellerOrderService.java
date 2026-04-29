@@ -5,7 +5,6 @@ import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.seller.order.dto.request.OrderStatusChangeRequestDto;
 import com.commerce.pagopa.domain.seller.order.dto.response.OrderResponseDto;
-import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,15 +25,13 @@ public class SellerOrderService {
 
     @Transactional(readOnly = true)
     public OrderResponseDto find(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(OrderNotFoundException::new);
+        Order order = orderRepository.getById(orderId);
         return OrderResponseDto.from(order);
     }
 
     @Transactional
     public void changeStatus(Long orderId, OrderStatusChangeRequestDto requestDto) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(OrderNotFoundException::new);
+        Order order = orderRepository.getById(orderId);
         OrderStatus status = requestDto.status();
 
         switch (status) {

@@ -4,7 +4,6 @@ import com.commerce.pagopa.domain.category.dto.response.CategorySimpleResponseDt
 import com.commerce.pagopa.domain.category.dto.response.CategoryTreeResponseDto;
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.category.repository.CategoryRepository;
-import com.commerce.pagopa.global.exception.CategoryNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +26,7 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public CategoryTreeResponseDto findChildCategories(Long categoryId) {
-        Category root = categoryRepository.findById(categoryId)
-                .orElseThrow(CategoryNotFoundException::new);
+        Category root = categoryRepository.getById(categoryId);
 
         return CategoryTreeResponseDto.from(root);
     }

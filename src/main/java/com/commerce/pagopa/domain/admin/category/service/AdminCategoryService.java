@@ -7,7 +7,6 @@ import com.commerce.pagopa.domain.admin.category.dto.request.ChildCategoryCreate
 import com.commerce.pagopa.domain.admin.category.dto.request.RootCategoryCreateRequestDto;
 import com.commerce.pagopa.domain.category.entity.Category;
 import com.commerce.pagopa.domain.category.repository.CategoryRepository;
-import com.commerce.pagopa.global.exception.CategoryNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +27,7 @@ public class AdminCategoryService {
 
     @Transactional
     public CategoryResponseDto createChild(ChildCategoryCreateRequestDto requestDto) {
-        Category parent = categoryRepository.findById(requestDto.parentId())
-                .orElseThrow(CategoryNotFoundException::new);
+        Category parent = categoryRepository.getById(requestDto.parentId());
 
         Category child = parent.createChild(requestDto.name());
         Category savedChild = categoryRepository.save(child);
@@ -39,8 +37,7 @@ public class AdminCategoryService {
 
     @Transactional
     public CategorySimpleResponseDto update(Long categoryId, CategoryUpdateRequestDto requestDto) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.getById(categoryId);
         category.update(requestDto.name());
 
         return CategorySimpleResponseDto.from(category);

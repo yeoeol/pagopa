@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.order.repository;
 
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
+import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserIdAndStatus(Long userId, OrderStatus status);
-    
+
     Optional<Order> findByOrderNumber(String orderNumber);
 
     @Query(value =
@@ -29,4 +30,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * 특정 상태(ORDERED)이면서 지정된 시간(created_at) 이하(이전 포함) 생성된 주문들을 조회
      */
     List<Order> findByStatusAndCreatedAtLessThanEqual(OrderStatus status, LocalDateTime dateTime);
+
+    default Order getById(Long id) {
+        return findById(id).orElseThrow(OrderNotFoundException::new);
+    }
+
+    default Order getByOrderNumber(String orderNumber) {
+        return findByOrderNumber(orderNumber).orElseThrow(OrderNotFoundException::new);
+    }
 }

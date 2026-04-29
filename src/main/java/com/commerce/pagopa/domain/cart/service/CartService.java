@@ -8,9 +8,6 @@ import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
-import com.commerce.pagopa.global.exception.CartNotFoundException;
-import com.commerce.pagopa.global.exception.ProductNotFoundException;
-import com.commerce.pagopa.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,10 +25,8 @@ public class CartService {
 
     @Transactional
     public CartResponseDto addCart(Long userId, CartAddRequestDto requestDto, boolean isAdd) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
-        Product product = productRepository.findById(requestDto.productId())
-                .orElseThrow(ProductNotFoundException::new);
+        User user = userRepository.getById(userId);
+        Product product = productRepository.getById(requestDto.productId());
 
         Cart cart;
         Optional<Cart> optionalCart = cartRepository.findByUserAndProduct(user, product);
@@ -54,8 +49,7 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public List<CartResponseDto> findUserCart(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.getById(userId);
 
         List<Cart> carts = cartRepository.findByUser(user);
         return carts.stream()
@@ -65,8 +59,7 @@ public class CartService {
 
     @Transactional
     public CartResponseDto updateQuantity(Long cartId, boolean isAdd) {
-        Cart cart = cartRepository.findByIdWithFetch(cartId)
-                .orElseThrow(CartNotFoundException::new);
+        Cart cart = cartRepository.getByIdWithFetch(cartId);
 
         if (isAdd) {
             cart.addQuantity();

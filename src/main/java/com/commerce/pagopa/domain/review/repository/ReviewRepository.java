@@ -2,6 +2,7 @@ package com.commerce.pagopa.domain.review.repository;
 
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.review.entity.Review;
+import com.commerce.pagopa.global.exception.ReviewNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,4 +17,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             WHERE op.product = :product
             """)
     List<Review> findAllByOrderProduct_Product(Product product);
+
+    default Review getById(Long id) {
+        return findById(id).orElseThrow(ReviewNotFoundException::new);
+    }
 }
