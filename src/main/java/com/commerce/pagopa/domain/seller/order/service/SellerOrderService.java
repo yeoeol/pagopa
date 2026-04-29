@@ -25,13 +25,13 @@ public class SellerOrderService {
 
     @Transactional(readOnly = true)
     public OrderResponseDto find(Long orderId) {
-        Order order = orderRepository.getById(orderId);
+        Order order = orderRepository.findByIdOrThrow(orderId);
         return OrderResponseDto.from(order);
     }
 
     @Transactional
     public void changeStatus(Long orderId, OrderStatusChangeRequestDto requestDto) {
-        Order order = orderRepository.getById(orderId);
+        Order order = orderRepository.findByIdOrThrow(orderId);
         OrderStatus status = requestDto.status();
 
         switch (status) {

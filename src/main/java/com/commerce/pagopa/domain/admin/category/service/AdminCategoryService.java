@@ -27,7 +27,7 @@ public class AdminCategoryService {
 
     @Transactional
     public CategoryResponseDto createChild(ChildCategoryCreateRequestDto requestDto) {
-        Category parent = categoryRepository.getById(requestDto.parentId());
+        Category parent = categoryRepository.findByIdOrThrow(requestDto.parentId());
 
         Category child = parent.createChild(requestDto.name());
         Category savedChild = categoryRepository.save(child);
@@ -37,7 +37,7 @@ public class AdminCategoryService {
 
     @Transactional
     public CategorySimpleResponseDto update(Long categoryId, CategoryUpdateRequestDto requestDto) {
-        Category category = categoryRepository.getById(categoryId);
+        Category category = categoryRepository.findByIdOrThrow(categoryId);
         category.update(requestDto.name());
 
         return CategorySimpleResponseDto.from(category);

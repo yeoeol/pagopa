@@ -18,7 +18,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             """)
     List<Review> findAllByOrderProduct_Product(Product product);
 
-    default Review getById(Long id) {
+    default Review findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ReviewNotFoundException::new);
     }
 }

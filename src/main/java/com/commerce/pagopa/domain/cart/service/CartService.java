@@ -25,8 +25,8 @@ public class CartService {
 
     @Transactional
     public CartResponseDto addCart(Long userId, CartAddRequestDto requestDto, boolean isAdd) {
-        User user = userRepository.getById(userId);
-        Product product = productRepository.getById(requestDto.productId());
+        User user = userRepository.findByIdOrThrow(userId);
+        Product product = productRepository.findByIdOrThrow(requestDto.productId());
 
         Cart cart;
         Optional<Cart> optionalCart = cartRepository.findByUserAndProduct(user, product);
@@ -49,7 +49,7 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public List<CartResponseDto> findUserCart(Long userId) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
 
         List<Cart> carts = cartRepository.findByUser(user);
         return carts.stream()
@@ -59,7 +59,7 @@ public class CartService {
 
     @Transactional
     public CartResponseDto updateQuantity(Long cartId, boolean isAdd) {
-        Cart cart = cartRepository.getByIdWithFetch(cartId);
+        Cart cart = cartRepository.findByIdWithFetchOrThrow(cartId);
 
         if (isAdd) {
             cart.addQuantity();

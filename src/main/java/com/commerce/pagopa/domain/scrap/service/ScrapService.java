@@ -26,7 +26,7 @@ public class ScrapService {
 
     @Transactional
     public ScrapResponseDto addScrap(Long userId, ScrapAddRequestDto requestDto) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
 
         validateTarget(requestDto.targetType(), requestDto.targetId());
 

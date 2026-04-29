@@ -24,7 +24,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             "AND c.depth = 0")
     Page<Category> findRootCategories(Pageable pageable);
 
-    default Category getById(Long id) {
+    default Category findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(CategoryNotFoundException::new);
     }
 }

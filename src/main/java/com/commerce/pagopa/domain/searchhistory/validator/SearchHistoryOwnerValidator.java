@@ -22,6 +22,10 @@ public class SearchHistoryOwnerValidator extends OwnerValidator<SearchHistory, L
     @Override
     @Transactional(readOnly = true)
     public boolean isOwner(Long searchHistoryId, Long userId) {
+        if (searchHistoryId == null) {
+            return false;
+        }
+
         return findResource(searchHistoryId).map(history -> {
             // 로그인 회원 검증
             Long ownerId = extractOwnerId(history);

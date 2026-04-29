@@ -25,7 +25,7 @@ public class AdminProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDto find(Long productId) {
-        Product product = productRepository.getById(productId);
+        Product product = productRepository.findByIdOrThrow(productId);
         return ProductResponseDto.from(product);
     }
 
@@ -36,7 +36,7 @@ public class AdminProductService {
 
     @Transactional
     public void changeStatus(Long productId, ProductStatusChangeRequestDto requestDto) {
-        Product product = productRepository.getById(productId);
+        Product product = productRepository.findByIdOrThrow(productId);
         ProductStatus status = requestDto.status();
 
         switch (status) {

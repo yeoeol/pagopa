@@ -4,6 +4,9 @@ import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.order.service.OrderService;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +24,15 @@ public class OrderScheduler {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
 
-    @Value("${app.order.unpaid-before-min}")
-    private Long beforeMin;
+    @Value("${app.order.unpaid-before-min:15}")
+    private long beforeMin;
+
+    @PostConstruct
+    void validateBeforeMin() {
+        if (beforeMin <= 0) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "app.order.unpaid-before-min must be greater than 0");
+        }
+    }
 
     /**
      * 1분마다 실행되며, 주문 생성 후 15분이 지나도록 결제되지 않은(ORDERED) 주문을 찾아 자동 취소합니다.

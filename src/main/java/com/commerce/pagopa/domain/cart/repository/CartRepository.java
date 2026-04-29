@@ -46,7 +46,7 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
                     "AND c.user.id = :userId")
     List<Cart> findAllByIdInAndUserId(@Param("cartIds") List<Long> cartIds, @Param("userId") Long userId);
 
-    default Cart getByIdWithFetch(Long id) {
+    default Cart findByIdWithFetchOrThrow(Long id) {
         return findByIdWithFetch(id).orElseThrow(CartNotFoundException::new);
     }
 }

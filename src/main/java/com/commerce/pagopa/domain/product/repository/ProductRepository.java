@@ -19,7 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
             Pageable pageable
     );
 
-    default Product getById(Long id) {
+    default Product findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ProductNotFoundException::new);
     }
 }

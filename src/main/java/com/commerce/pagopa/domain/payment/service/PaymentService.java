@@ -35,7 +35,7 @@ public class PaymentService {
      */
     @Transactional
     public PaymentResponseDto requestPayment(Long orderId) {
-        Order order = orderRepository.getById(orderId);
+        Order order = orderRepository.findByIdOrThrow(orderId);
         validateOrderPayable(order);
 
         Payment payment = paymentRepository.findByOrder(order)

@@ -26,7 +26,7 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public CategoryTreeResponseDto findChildCategories(Long categoryId) {
-        Category root = categoryRepository.getById(categoryId);
+        Category root = categoryRepository.findByIdOrThrow(categoryId);
 
         return CategoryTreeResponseDto.from(root);
     }

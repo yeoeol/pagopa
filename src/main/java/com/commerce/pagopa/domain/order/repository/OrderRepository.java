@@ -31,7 +31,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     List<Order> findByStatusAndCreatedAtLessThanEqual(OrderStatus status, LocalDateTime dateTime);
 
-    default Order getById(Long id) {
+    default Order findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(OrderNotFoundException::new);
     }
 

@@ -19,13 +19,13 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponseDto find(Long userId) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
         return UserResponseDto.from(user);
     }
 
     @Transactional
     public UserResponseDto update(Long userId, UserUpdateRequestDto requestDto) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
 
         // 기존 이미지 삭제
         if (StringUtils.hasText(requestDto.profileImage())) {

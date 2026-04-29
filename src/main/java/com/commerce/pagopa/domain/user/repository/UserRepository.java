@@ -23,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 "AND u.userStatus = 'BANNED'")
     void bulkUnbanBefore(@Param("now") LocalDateTime now);
 
-    default User getById(Long id) {
+    default User findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(UserNotFoundException::new);
     }
 }

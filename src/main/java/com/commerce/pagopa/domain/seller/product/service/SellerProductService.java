@@ -33,15 +33,15 @@ public class SellerProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDto find(Long productId) {
-        Product product = productRepository.getById(productId);
+        Product product = productRepository.findByIdOrThrow(productId);
         return ProductResponseDto.from(product);
     }
 
     @Transactional
     public ProductResponseDto register(Long sellerId, ProductRegisterRequestDto requestDto) {
-        User seller = userRepository.getById(sellerId);
+        User seller = userRepository.findByIdOrThrow(sellerId);
 
-        Category category = categoryRepository.getById(requestDto.categoryId());
+        Category category = categoryRepository.findByIdOrThrow(requestDto.categoryId());
 
         // 소분류에만 상품 등록이 가능
         if (!category.isLeaf()) {

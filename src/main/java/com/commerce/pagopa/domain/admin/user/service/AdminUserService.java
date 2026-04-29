@@ -29,19 +29,19 @@ public class AdminUserService {
 
     @Transactional
     public void ban(Long userId) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
         user.ban(banSeconds);
     }
 
     @Transactional
     public void unban(Long userId) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
         user.unban();
     }
 
     @Transactional
     public void withdraw(Long userId) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
 
         refreshTokenRepository.deleteByUserId(userId);
 
@@ -50,7 +50,7 @@ public class AdminUserService {
 
     @Transactional
     public void updateSellerRole(Long userId) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
         user.updateSellerRole();
     }
 }

@@ -29,7 +29,7 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
         OrderProduct orderProduct = orderProductRepository.getById(requestDto.orderProductId());
 
         Review review = Review.create(requestDto.rating(), requestDto.content(), user, orderProduct);
@@ -52,7 +52,7 @@ public class ReviewService {
 
     @Transactional
     public void update(Long reviewId, ReviewUpdateRequestDto requestDto) {
-        Review review = reviewRepository.getById(reviewId);
+        Review review = reviewRepository.findByIdOrThrow(reviewId);
 
         review.update(requestDto.rating(), requestDto.content());
     }
@@ -64,7 +64,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> findAllByProduct(Long productId) {
-        Product product = productRepository.getById(productId);
+        Product product = productRepository.findByIdOrThrow(productId);
 
         return reviewRepository.findAllByOrderProduct_Product(product).stream()
                 .map(ReviewResponseDto::from)
