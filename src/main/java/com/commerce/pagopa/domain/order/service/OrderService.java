@@ -10,6 +10,9 @@ import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.domain.payment.entity.Payment;
+import com.commerce.pagopa.domain.payment.repository.PaymentRepository;
+import com.commerce.pagopa.domain.payment.service.PaymentService;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
@@ -31,6 +34,8 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
+    private final PaymentService paymentService;
+    private final PaymentRepository paymentRepository;
 
     // 바로 주문
     @Counted("my.order")
@@ -77,9 +82,27 @@ public class OrderService {
 
     @Counted("my.order")
     @Transactional
-    public void cancelOrder(Long orderId) {
+    public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
         Order order = orderRepository.findByIdOrThrow(orderId);
         order.markAsCancelled();
+
+        Payment payment = paymentRepository.getByOrderIdAndPaymentKeyOrThrow(orderId, requestDto.paymentKey());
+
+        paymentService.cancelPayment(payment, requestDto.cancelReason());
+
+        for (OrderProduct orderProduct : order.getOrderProducts()) {
+            Product product = orderProduct.getProduct();
+            product.increaseStock(orderProduct.getQuantity());
+        }
+    }
+
+    // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소
+    @Transactional
+    public void cancelUnpaidOrder(Long orderId) {
+        Order order = orderRepository.findByIdOrThrow(orderId);
+        order.markAsCancelled();
+
+        paymentService.cancelPaymentByOrder(order);
 
         for (OrderProduct orderProduct : order.getOrderProducts()) {
             Product product = orderProduct.getProduct();

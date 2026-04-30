@@ -7,10 +7,10 @@ import com.commerce.pagopa.domain.payment.PaymentProperties;
 import com.commerce.pagopa.domain.payment.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.domain.payment.dto.response.PaymentResponseDto;
 import com.commerce.pagopa.domain.payment.entity.Payment;
+import com.commerce.pagopa.domain.payment.entity.enums.PaymentStatus;
 import com.commerce.pagopa.domain.payment.repository.PaymentRepository;
-import com.commerce.pagopa.global.exception.OrderCannotPayException;
-import com.commerce.pagopa.global.exception.PaymentCancelException;
-import com.commerce.pagopa.global.exception.PaymentConfirmException;
+import com.commerce.pagopa.global.exception.*;
+import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -60,7 +60,7 @@ public class PaymentService {
     public void confirmPayment(PaymentApproveRequestDto requestDto) {
         Order order = orderRepository.getByOrderNumber(requestDto.orderId());
 
-        Payment payment = paymentRepository.getByOrder(order);
+        Payment payment = paymentRepository.getByOrderOrThrow(order);
 
         payment.validateConfirmable();
         validateOrderPayable(order);
@@ -69,7 +69,26 @@ public class PaymentService {
         callTossConfirmApi(requestDto, payment, order);
     }
 
-    private static void validateAmount(BigDecimal amount, Payment payment, Order order) {
+    /**
+     * 승인된 결제를 paymentKey로 취소 (유저 요청용, Toss API 호출)
+     */
+    @Transactional
+    public void cancelPayment(Payment payment, String cancelReason) {
+        payment.validateCancelable();
+        callTossCancelApi(cancelReason, payment);
+    }
+
+    /**
+     * Toss 미승인 결제를 로컬에서만 취소 (스케줄러용 — paymentKey 없는 READY/IN_PROGRESS 건)
+     */
+    @Transactional
+    public void cancelPaymentByOrder(Order order) {
+        paymentRepository.findByOrder(order)
+                .filter(p -> p.getStatus() != PaymentStatus.PAID)
+                .ifPresent(Payment::cancel);
+    }
+
+    private void validateAmount(BigDecimal amount, Payment payment, Order order) {
         if (payment.getAmount().compareTo(amount) != 0) {
             payment.fail();
             order.markAsCancelled();
@@ -100,6 +119,27 @@ public class PaymentService {
         payment.success(requestDto.paymentKey());
         order.markAsPaid();
         log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
+    }
+
+    private void callTossCancelApi(String reason, Payment payment) {
+        Map<String, String> payload = Map.of(
+                "cancelReason", reason
+        );
+
+        String paymentKey = payment.getPaymentKey();
+        try {
+            tossRestClient.post()
+                    .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}", paymentKey, e);
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
+        }
+
+        payment.cancel();
+        log.info("[Payment] 결제 취소 성공 - paymentKey={}, reason={}", paymentKey, reason);
     }
 
     private static void validateOrderPayable(Order order) {

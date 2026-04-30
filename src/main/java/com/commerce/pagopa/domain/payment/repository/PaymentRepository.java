@@ -10,7 +10,13 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByOrder(Order order);
 
-    default Payment getByOrder(Order order) {
+    Optional<Payment> findByOrder_IdAndPaymentKey(Long orderId, String paymentKey);
+
+    default Payment getByOrderOrThrow(Order order) {
         return findByOrder(order).orElseThrow(PaymentNotFoundException::new);
+    }
+
+    default Payment getByOrderIdAndPaymentKeyOrThrow(Long orderId, String paymentKey) {
+        return findByOrder_IdAndPaymentKey(orderId, paymentKey).orElseThrow(PaymentNotFoundException::new);
     }
 }
