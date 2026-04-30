@@ -18,15 +18,15 @@ public class SellerOrderService {
     private final OrderRepository orderRepository;
 
     @Transactional(readOnly = true)
-    public Page<OrderResponseDto> findAll(Long userId, Pageable pageable) {
-        Page<Order> orderPage = orderRepository.findAllByUserId(userId, pageable);
-        return orderPage.map(OrderResponseDto::from);
+    public Page<OrderResponseDto> findAll(Long sellerId, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findAllBySellerId(sellerId, pageable);
+        return orderPage.map(order -> OrderResponseDto.from(order, sellerId));
     }
 
     @Transactional(readOnly = true)
-    public OrderResponseDto find(Long orderId) {
+    public OrderResponseDto find(Long orderId, Long sellerId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
-        return OrderResponseDto.from(order);
+        return OrderResponseDto.from(order, sellerId);
     }
 
     @Transactional
