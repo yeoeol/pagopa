@@ -5,7 +5,6 @@ import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.payment.PaymentProperties;
 import com.commerce.pagopa.domain.payment.dto.request.PaymentApproveRequestDto;
-import com.commerce.pagopa.domain.order.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.domain.payment.dto.response.PaymentResponseDto;
 import com.commerce.pagopa.domain.payment.entity.Payment;
 import com.commerce.pagopa.domain.payment.entity.enums.PaymentStatus;
@@ -74,11 +73,8 @@ public class PaymentService {
      * 승인된 결제를 paymentKey로 취소 (유저 요청용, Toss API 호출)
      */
     @Transactional
-    public void cancelPayment(String paymentKey, String cancelReason) {
-        Payment payment = paymentRepository.getByPaymentKeyOrThrow(paymentKey);
-
+    public void cancelPayment(Payment payment, String cancelReason) {
         payment.validateCancelable();
-
         callTossCancelApi(cancelReason, payment);
     }
 
