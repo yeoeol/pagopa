@@ -2,27 +2,28 @@ package com.commerce.pagopa.domain.payment.validator;
 
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Component("paymentOwnerValidator")
 @RequiredArgsConstructor
-public class PaymentOwnerValidator {
+public class PaymentOwnerValidator extends OwnerValidator<Order, String> {
 
     private final OrderRepository orderRepository;
 
-    @Transactional(readOnly = true)
-    public boolean isOwner(String orderNumber, Long userId) {
-        if (orderNumber == null || userId == null) {
-            return false;
-        }
+    @Override
+    protected Optional<Order> findResource(String orderNumber) {
+        return orderRepository.findByOrderNumber(orderNumber);
+    }
 
-        Order order = orderRepository.findByOrderNumber(orderNumber).orElse(null);
-        if (order == null || order.getUser() == null) {
-            return false;
-        }
-
-        return order.getUser().getId().equals(userId);
+    @Override
+    protected Long extractOwnerId(Order order) {
+        return Optional.ofNullable(order.getUser())
+                .map(User::getId)
+                .orElse(null);
     }
 }

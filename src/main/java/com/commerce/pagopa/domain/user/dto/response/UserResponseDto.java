@@ -15,7 +15,7 @@ public record UserResponseDto(
                 user.getEmail(),
                 user.getNickname(),
                 user.getProfileImage(),
-                user.getRole().name()
+                user.getRoleName()
         );
     }
 }

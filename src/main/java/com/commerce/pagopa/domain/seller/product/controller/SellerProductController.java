@@ -1,7 +1,7 @@
 package com.commerce.pagopa.domain.seller.product.controller;
 
+import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.seller.product.dto.request.ProductRegisterRequestDto;
-import com.commerce.pagopa.domain.seller.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.seller.product.service.SellerProductService;
 import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.validation.Valid;

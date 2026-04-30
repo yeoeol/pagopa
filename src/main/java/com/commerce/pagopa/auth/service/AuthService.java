@@ -4,11 +4,9 @@ import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.domain.user.entity.RefreshToken;
 import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.entity.enums.UserStatus;
 import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.exception.UserNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,7 +38,7 @@ public class AuthService {
             }
 
             Long userId = token.getUserId();
-            User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+            User user = userRepository.findByIdOrThrow(userId);
 
             return issueAccessTokenAndRefreshToken(userId, user.getEmail(), user.getRoleName());
         }
@@ -69,8 +67,7 @@ public class AuthService {
 
     @Transactional
     public void withdraw(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByIdOrThrow(userId);
 
         refreshTokenRepository.deleteByUserId(userId);
 

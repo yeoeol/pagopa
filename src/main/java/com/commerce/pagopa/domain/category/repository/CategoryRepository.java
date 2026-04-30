@@ -1,6 +1,7 @@
 package com.commerce.pagopa.domain.category.repository;
 
 import com.commerce.pagopa.domain.category.entity.Category;
+import com.commerce.pagopa.global.exception.CategoryNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             "WHERE c.parent is NULL " +
             "AND c.depth = 0")
     Page<Category> findRootCategories(Pageable pageable);
+
+    default Category findByIdOrThrow(Long id) {
+        return findById(id).orElseThrow(CategoryNotFoundException::new);
+    }
 }
