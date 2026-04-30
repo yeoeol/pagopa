@@ -5,7 +5,6 @@ import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.seller.order.dto.request.OrderStatusChangeRequestDto;
 import com.commerce.pagopa.domain.seller.order.dto.response.OrderResponseDto;
-import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,22 +18,20 @@ public class SellerOrderService {
     private final OrderRepository orderRepository;
 
     @Transactional(readOnly = true)
-    public Page<OrderResponseDto> findAll(Long userId, Pageable pageable) {
-        Page<Order> orderPage = orderRepository.findAllByUserId(userId, pageable);
-        return orderPage.map(OrderResponseDto::from);
+    public Page<OrderResponseDto> findAll(Long sellerId, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findAllBySellerId(sellerId, pageable);
+        return orderPage.map(order -> OrderResponseDto.from(order, sellerId));
     }
 
     @Transactional(readOnly = true)
-    public OrderResponseDto find(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(OrderNotFoundException::new);
-        return OrderResponseDto.from(order);
+    public OrderResponseDto find(Long orderId, Long sellerId) {
+        Order order = orderRepository.findByIdOrThrow(orderId);
+        return OrderResponseDto.from(order, sellerId);
     }
 
     @Transactional
     public void changeStatus(Long orderId, OrderStatusChangeRequestDto requestDto) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(OrderNotFoundException::new);
+        Order order = orderRepository.findByIdOrThrow(orderId);
         OrderStatus status = requestDto.status();
 
         switch (status) {

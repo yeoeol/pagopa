@@ -10,9 +10,6 @@ import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.exception.CategoryNotFoundException;
-import com.commerce.pagopa.global.exception.ProductNotFoundException;
-import com.commerce.pagopa.global.exception.UserNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,18 +33,15 @@ public class SellerProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDto find(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.findByIdOrThrow(productId);
         return ProductResponseDto.from(product);
     }
 
     @Transactional
     public ProductResponseDto register(Long sellerId, ProductRegisterRequestDto requestDto) {
-        User seller = userRepository.findById(sellerId)
-                .orElseThrow(UserNotFoundException::new);
+        User seller = userRepository.findByIdOrThrow(sellerId);
 
-        Category category = categoryRepository.findById(requestDto.categoryId())
-                .orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.findByIdOrThrow(requestDto.categoryId());
 
         // 소분류에만 상품 등록이 가능
         if (!category.isLeaf()) {

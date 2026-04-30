@@ -36,12 +36,11 @@ public class OrderService {
     @Counted("my.order")
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByIdOrThrow(userId);
         Order order = createOrderProcess(user, requestDto.paymentMethod(), requestDto.delivery());
 
         for (OrderProductRequestDto orderProductRequestDto : requestDto.products()) {
-            Product product = productRepository.findById(orderProductRequestDto.productId())
-                    .orElseThrow(ProductNotFoundException::new);
+            Product product = productRepository.findByIdOrThrow(orderProductRequestDto.productId());
             processOrderProduct(order, product, orderProductRequestDto.quantity());
         }
 
@@ -60,7 +59,7 @@ public class OrderService {
             throw new CartNotFoundException();
         }
 
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByIdOrThrow(userId);
         Order order = createOrderProcess(user, requestDto.paymentMethod(), requestDto.delivery());
 
         for (Cart cart : carts) {
@@ -79,8 +78,7 @@ public class OrderService {
     @Counted("my.order")
     @Transactional
     public void cancelOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(OrderNotFoundException::new);
+        Order order = orderRepository.findByIdOrThrow(orderId);
         order.markAsCancelled();
 
         for (OrderProduct orderProduct : order.getOrderProducts()) {
@@ -91,8 +89,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderResponseDto find(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(OrderNotFoundException::new);
+        Order order = orderRepository.findByIdOrThrow(orderId);
         return OrderResponseDto.from(order);
     }
 

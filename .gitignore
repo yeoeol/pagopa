@@ -38,6 +38,9 @@ application.yml
 ### VS Code ###
 .vscode/
 
+### Claude Code ###
+.claude/settings.local.json
+
 # Runtime data
 logs/
 prometheus-data/
