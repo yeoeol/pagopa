@@ -91,6 +91,20 @@ public class OrderService {
         }
     }
 
+    // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소
+    @Transactional
+    public void cancelUnpaidOrder(Long orderId) {
+        Order order = orderRepository.findByIdOrThrow(orderId);
+        order.markAsCancelled();
+
+        paymentService.cancelPaymentByOrder(order);
+
+        for (OrderProduct orderProduct : order.getOrderProducts()) {
+            Product product = orderProduct.getProduct();
+            product.increaseStock(orderProduct.getQuantity());
+        }
+    }
+
     @Transactional(readOnly = true)
     public OrderResponseDto find(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);

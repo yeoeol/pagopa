@@ -8,6 +8,7 @@ import com.commerce.pagopa.domain.payment.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.domain.payment.dto.response.PaymentResponseDto;
 import com.commerce.pagopa.domain.payment.entity.Payment;
+import com.commerce.pagopa.domain.payment.entity.enums.PaymentStatus;
 import com.commerce.pagopa.domain.payment.repository.PaymentRepository;
 import com.commerce.pagopa.global.exception.*;
 import com.commerce.pagopa.global.response.ErrorCode;
@@ -70,7 +71,7 @@ public class PaymentService {
     }
 
     /**
-     * 승인된 결제를 paymentKey로 취소
+     * 승인된 결제를 paymentKey로 취소 (유저 요청용, Toss API 호출)
      */
     @Transactional
     public void cancelPayment(String paymentKey, String cancelReason) {
@@ -79,6 +80,16 @@ public class PaymentService {
         payment.validateCancelable();
 
         callTossCancelApi(cancelReason, payment);
+    }
+
+    /**
+     * Toss 미승인 결제를 로컬에서만 취소 (스케줄러용 — paymentKey 없는 READY/IN_PROGRESS 건)
+     */
+    @Transactional
+    public void cancelPaymentByOrder(Order order) {
+        paymentRepository.findByOrder(order)
+                .filter(p -> p.getStatus() != PaymentStatus.PAID)
+                .ifPresent(Payment::cancel);
     }
 
     private void validateAmount(BigDecimal amount, Payment payment, Order order) {
