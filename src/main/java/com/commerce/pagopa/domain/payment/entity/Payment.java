@@ -70,6 +70,15 @@ public class Payment extends BaseTimeEntity {
         }
     }
 
+    public void validateCancelable() {
+        if (this.status == PaymentStatus.FAILED) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_FAILED);
+        }
+        if (this.status == PaymentStatus.CANCELLED) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_CANCELLED);
+        }
+    }
+
     // 결제 승인 완료
     public void success(String paymentKey) {
         validateConfirmable();
