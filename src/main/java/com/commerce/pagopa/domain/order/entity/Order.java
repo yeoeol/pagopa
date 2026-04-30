@@ -95,10 +95,14 @@ public class Order extends BaseTimeEntity {
     }
 
     public void markAsPaid() {
+        validatePayable();
+        this.updateStatus(OrderStatus.PAID);
+    }
+
+    public void validatePayable() {
         if (this.status != OrderStatus.ORDERED) {
             throw new OrderCannotPayException();
         }
-        this.updateStatus(OrderStatus.PAID);
     }
 
     public void markAsDelivering() {

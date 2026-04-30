@@ -82,6 +82,10 @@ public class Payment extends BaseTimeEntity {
         }
     }
 
+    public boolean isAmountMatched(BigDecimal amount) {
+        return this.amount.compareTo(amount) == 0;
+    }
+
     // 결제 승인 완료
     public void success(String paymentKey) {
         validateConfirmable();

@@ -114,6 +114,10 @@ public class Product extends BaseTimeEntity {
         this.status = ProductStatus.HIDDEN;
     }
 
+    public boolean isActiveOrSoldOut() {
+        return ProductStatus.ACTIVE == this.status || ProductStatus.SOLDOUT == this.status;
+    }
+
     // 재고 증가 (비즈니스 로직 캡슐화)
     public void increaseStock(int quantity) {
         if (quantity <= 0) {
