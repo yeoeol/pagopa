@@ -13,7 +13,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             SELECT DISTINCT r
             FROM Review r
                 JOIN FETCH r.orderProduct op
-                JOIN FETCH r.images ri
+                LEFT JOIN FETCH r.images ri
             WHERE op.product = :product
             """)
     List<Review> findAllByOrderProduct_Product(Product product);
