@@ -28,6 +28,7 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
                 .join(orderProduct.product, product)
                 .where(product.seller.id.eq(sellerId))
                 .distinct()
+                .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -46,10 +47,11 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
         // 2단계: id 집합으로 orderProducts + product 전체를 fetch join
         List<Order> orders = queryFactory
-                .selectFrom(order)
+                .selectFrom(order).distinct()
                 .join(order.orderProducts, orderProduct).fetchJoin()
                 .join(orderProduct.product, product).fetchJoin()
                 .where(order.id.in(orderIds))
+                .orderBy(order.createdAt.desc())
                 .fetch();
 
         return new PageImpl<>(orders, pageable, total);
