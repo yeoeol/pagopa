@@ -5,6 +5,7 @@ import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.payment.PaymentProperties;
 import com.commerce.pagopa.domain.payment.dto.request.PaymentApproveRequestDto;
+import com.commerce.pagopa.domain.order.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.domain.payment.dto.response.PaymentResponseDto;
 import com.commerce.pagopa.domain.payment.entity.Payment;
 import com.commerce.pagopa.domain.payment.repository.PaymentRepository;
@@ -72,15 +73,12 @@ public class PaymentService {
      * 승인된 결제를 paymentKey로 취소
      */
     @Transactional
-    public void cancelPayment(String paymentKey, String reason) {
+    public void cancelPayment(String paymentKey, String cancelReason) {
         Payment payment = paymentRepository.getByPaymentKeyOrThrow(paymentKey);
 
-        Order order = payment.getOrder();
-
         payment.validateCancelable();
-        validateOrderCancelable(order);
 
-        callTossCancelApi(reason, payment, payment.getOrder());
+        callTossCancelApi(cancelReason, payment);
     }
 
     private void validateAmount(BigDecimal amount, Payment payment, Order order) {
@@ -116,7 +114,7 @@ public class PaymentService {
         log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
-    private void callTossCancelApi(String reason, Payment payment, Order order) {
+    private void callTossCancelApi(String reason, Payment payment) {
         Map<String, String> payload = Map.of(
                 "cancelReason", reason
         );
@@ -134,19 +132,12 @@ public class PaymentService {
         }
 
         payment.cancel();
-        order.markAsCancelled();
         log.info("[Payment] 결제 취소 성공 - paymentKey={}, reason={}", paymentKey, reason);
     }
 
     private static void validateOrderPayable(Order order) {
         if (order.getStatus() != OrderStatus.ORDERED) {
             throw new OrderCannotPayException();
-        }
-    }
-
-    private static void validateOrderCancelable(Order order) {
-        if (!(order.getStatus() == OrderStatus.PAID || order.getStatus() == OrderStatus.ORDERED)) {
-            throw new OrderCannotCancelException();
         }
     }
 }

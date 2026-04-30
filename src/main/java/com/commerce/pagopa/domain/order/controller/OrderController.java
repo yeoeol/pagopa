@@ -1,5 +1,6 @@
 package com.commerce.pagopa.domain.order.controller;
 
+import com.commerce.pagopa.domain.order.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.domain.order.dto.request.OrderSearch;
@@ -67,9 +68,10 @@ public class OrderController {
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> cancelOrder(
-            @PathVariable("id") Long orderId
+            @PathVariable("id") Long orderId,
+            @Valid @RequestBody OrderCancelRequestDto requestDto
     ) {
-        orderService.cancelOrder(orderId);
+        orderService.cancelOrder(orderId, requestDto);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 }

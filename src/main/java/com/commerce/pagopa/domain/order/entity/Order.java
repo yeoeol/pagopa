@@ -88,7 +88,7 @@ public class Order extends BaseTimeEntity {
     }
 
     public void markAsCancelled() {
-        if (this.status != OrderStatus.ORDERED) {
+        if (!(this.getStatus() == OrderStatus.ORDERED || this.getStatus() == OrderStatus.PAID)) {
             throw new OrderCannotCancelException();
         }
         this.updateStatus(OrderStatus.CANCELLED);

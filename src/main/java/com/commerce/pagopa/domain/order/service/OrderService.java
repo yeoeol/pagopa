@@ -10,6 +10,7 @@ import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.domain.payment.service.PaymentService;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
@@ -31,6 +32,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
+    private final PaymentService paymentService;
 
     // 바로 주문
     @Counted("my.order")
@@ -77,9 +79,11 @@ public class OrderService {
 
     @Counted("my.order")
     @Transactional
-    public void cancelOrder(Long orderId) {
+    public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
         Order order = orderRepository.findByIdOrThrow(orderId);
         order.markAsCancelled();
+
+        paymentService.cancelPayment(requestDto.paymentKey(), requestDto.cancelReason());
 
         for (OrderProduct orderProduct : order.getOrderProducts()) {
             Product product = orderProduct.getProduct();
