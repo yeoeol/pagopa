@@ -23,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
         return findById(id).orElseThrow(OrderNotFoundException::new);
     }
 
-    default Order getByOrderNumber(String orderNumber) {
+    default Order getByOrderNumberOrThrow(String orderNumber) {
         return findByOrderNumber(orderNumber).orElseThrow(OrderNotFoundException::new);
     }
 }

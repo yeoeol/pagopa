@@ -25,13 +25,10 @@ import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -62,7 +59,7 @@ class PaymentServiceTest {
         Order order = createOrder("order-1");
         order.markAsCancelled();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdOrThrow(1L)).thenReturn(order);
 
         assertThatThrownBy(() -> paymentService.requestPayment(1L))
                 .isInstanceOf(OrderCannotPayException.class)
@@ -78,11 +75,12 @@ class PaymentServiceTest {
         order.markAsPaid();
         Payment payment = createPayment(order, PaymentStatus.PAID);
 
-        when(orderRepository.findByOrderNumber("order-2")).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrder(order)).thenReturn(Optional.of(payment));
+        when(orderRepository.getByOrderNumberOrThrow("order-2")).thenReturn(order);
+        when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
 
-        assertThatThrownBy(() -> paymentService.confirmPayment(new PaymentApproveRequestDto("paid-key", "order-2", amount(10000))))
-                .isInstanceOf(BusinessException.class)
+        assertThatThrownBy(() -> paymentService.confirmPayment(
+                new PaymentApproveRequestDto("paid-key", "order-2", amount(10000)))
+        ).isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_ALREADY_COMPLETED);
 
@@ -94,11 +92,12 @@ class PaymentServiceTest {
         Order order = createOrder("order-3");
         Payment payment = createPayment(order, PaymentStatus.IN_PROGRESS);
 
-        when(orderRepository.findByOrderNumber("order-3")).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrder(order)).thenReturn(Optional.of(payment));
+        when(orderRepository.getByOrderNumberOrThrow("order-3")).thenReturn(order);
+        when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
 
-        assertThatThrownBy(() -> paymentService.confirmPayment(new PaymentApproveRequestDto("payment-key", "order-3", amount(9000))))
-                .isInstanceOf(PaymentCancelException.class);
+        assertThatThrownBy(() -> paymentService.confirmPayment(
+                new PaymentApproveRequestDto("payment-key", "order-3", amount(9000)))
+        ).isInstanceOf(PaymentCancelException.class);
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
@@ -110,8 +109,8 @@ class PaymentServiceTest {
         Order order = createOrder("order-4");
         Payment payment = createPayment(order, PaymentStatus.IN_PROGRESS);
 
-        when(orderRepository.findByOrderNumber("order-4")).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrder(order)).thenReturn(Optional.of(payment));
+        when(orderRepository.getByOrderNumberOrThrow("order-4")).thenReturn(order);
+        when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
         mockTossConfirmFailure("order-4");
 
         assertThatThrownBy(() -> paymentService.confirmPayment(new PaymentApproveRequestDto("payment-key", "order-4", amount(10000))))
@@ -128,8 +127,8 @@ class PaymentServiceTest {
         Order order = createOrder("order-5");
         Payment payment = createPayment(order, PaymentStatus.IN_PROGRESS);
 
-        when(orderRepository.findByOrderNumber("order-5")).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrder(order)).thenReturn(Optional.of(payment));
+        when(orderRepository.getByOrderNumberOrThrow("order-5")).thenReturn(order);
+        when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
         mockTossConfirmSuccess("order-5");
 
         paymentService.confirmPayment(new PaymentApproveRequestDto("payment-key", "order-5", amount(10000)));

@@ -32,7 +32,7 @@ public class ProductService {
     public List<ProductResponseDto> findAllWithActiveAndSoldOut() {
         return productRepository.findAll()
                 .stream()
-                .filter(this::isActiveOrSoldOut)
+                .filter(Product::isActiveOrSoldOut)
                 .map(ProductResponseDto::from)
                 .toList();
     }
@@ -59,8 +59,4 @@ public class ProductService {
                 .toList();
     }
 
-    private boolean isActiveOrSoldOut(Product product) {
-        ProductStatus status = product.getStatus();
-        return ProductStatus.ACTIVE.equals(status) || ProductStatus.SOLDOUT.equals(status);
-    }
 }

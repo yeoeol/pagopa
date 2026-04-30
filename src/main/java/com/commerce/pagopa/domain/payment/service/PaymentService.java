@@ -1,7 +1,6 @@
 package com.commerce.pagopa.domain.payment.service;
 
 import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.payment.PaymentProperties;
 import com.commerce.pagopa.domain.payment.dto.request.PaymentApproveRequestDto;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 @Slf4j
@@ -36,7 +34,7 @@ public class PaymentService {
     @Transactional
     public PaymentResponseDto requestPayment(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
-        validateOrderPayable(order);
+        order.validatePayable();
 
         Payment payment = paymentRepository.findByOrder(order)
                 .orElseGet(() -> paymentRepository.save(Payment.create(order)));
@@ -58,13 +56,18 @@ public class PaymentService {
      */
     @Transactional(noRollbackFor = {PaymentCancelException.class, PaymentConfirmException.class})
     public void confirmPayment(PaymentApproveRequestDto requestDto) {
-        Order order = orderRepository.getByOrderNumber(requestDto.orderId());
+        Order order = orderRepository.getByOrderNumberOrThrow(requestDto.orderId());
 
         Payment payment = paymentRepository.getByOrderOrThrow(order);
 
         payment.validateConfirmable();
-        validateOrderPayable(order);
-        validateAmount(requestDto.amount(), payment, order);
+        order.validatePayable();
+
+        if (!payment.isAmountMatched(requestDto.amount())) {
+            payment.fail();
+            order.markAsCancelled();
+            throw new PaymentCancelException();
+        }
 
         callTossConfirmApi(requestDto, payment, order);
     }
@@ -86,14 +89,6 @@ public class PaymentService {
         paymentRepository.findByOrder(order)
                 .filter(p -> p.getStatus() != PaymentStatus.PAID)
                 .ifPresent(Payment::cancel);
-    }
-
-    private void validateAmount(BigDecimal amount, Payment payment, Order order) {
-        if (payment.getAmount().compareTo(amount) != 0) {
-            payment.fail();
-            order.markAsCancelled();
-            throw new PaymentCancelException();
-        }
     }
 
     private void callTossConfirmApi(PaymentApproveRequestDto requestDto, Payment payment, Order order) {
@@ -140,11 +135,5 @@ public class PaymentService {
 
         payment.cancel();
         log.info("[Payment] 결제 취소 성공 - paymentKey={}, reason={}", paymentKey, reason);
-    }
-
-    private static void validateOrderPayable(Order order) {
-        if (order.getStatus() != OrderStatus.ORDERED) {
-            throw new OrderCannotPayException();
-        }
     }
 }
