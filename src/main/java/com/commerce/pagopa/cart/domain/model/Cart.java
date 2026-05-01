@@ -1,6 +1,6 @@
 package com.commerce.pagopa.cart.domain.model;
 
-import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.CartQuantityException;

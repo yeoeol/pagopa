@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.commerce.pagopa.domain.order.entity.QOrder.order;
 import static com.commerce.pagopa.domain.order.entity.QOrderProduct.orderProduct;
-import static com.commerce.pagopa.domain.product.entity.QProduct.product;
+import static com.commerce.pagopa.product.domain.model.QProduct.product;
 
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepositoryCustom {

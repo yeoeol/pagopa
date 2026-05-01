@@ -1,13 +1,13 @@
-package com.commerce.pagopa.domain.product.repository;
+package com.commerce.pagopa.product.infrastructure.persistence;
 
 import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
-import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.entity.enums.Provider;
 import com.commerce.pagopa.domain.user.entity.enums.Role;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.product.domain.model.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProductRepositoryTest {
 
     @Autowired
-    ProductRepository productRepository;
+    ProductJpaRepository productRepository;
     @Autowired
     CategoryRepository categoryRepository;
     @Autowired

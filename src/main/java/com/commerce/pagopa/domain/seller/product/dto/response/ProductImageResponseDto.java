@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.seller.product.dto.response;
 
-import com.commerce.pagopa.domain.product.entity.ProductImage;
+import com.commerce.pagopa.product.domain.model.ProductImage;
 
 public record ProductImageResponseDto(
         Long productImageId,

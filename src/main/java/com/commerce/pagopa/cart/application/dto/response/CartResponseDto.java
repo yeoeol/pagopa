@@ -1,7 +1,7 @@
 package com.commerce.pagopa.cart.application.dto.response;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
-import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
+import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
 
 public record CartResponseDto(

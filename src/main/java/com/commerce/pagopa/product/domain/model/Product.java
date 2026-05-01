@@ -1,13 +1,15 @@
-package com.commerce.pagopa.domain.product.entity;
+package com.commerce.pagopa.product.domain.model;
 
 import com.commerce.pagopa.category.domain.model.Category;
-import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.ProductOutOfStockException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
+
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,7 +48,6 @@ public class Product extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ProductStatus status;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -118,7 +119,6 @@ public class Product extends BaseTimeEntity {
         return ProductStatus.ACTIVE == this.status || ProductStatus.SOLDOUT == this.status;
     }
 
-    // 재고 증가 (비즈니스 로직 캡슐화)
     public void increaseStock(int quantity) {
         if (quantity <= 0) {
             throw new BusinessException(ErrorCode.BAD_REQUEST_QUANTITY);
@@ -126,7 +126,6 @@ public class Product extends BaseTimeEntity {
         this.stock += quantity;
     }
 
-    // 재고 감소 (비즈니스 로직 캡슐화)
     public void decreaseStock(int quantity) {
         if (quantity <= 0) {
             throw new BusinessException(ErrorCode.BAD_REQUEST_QUANTITY);

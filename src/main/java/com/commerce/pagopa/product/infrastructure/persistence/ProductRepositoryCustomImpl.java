@@ -1,18 +1,18 @@
-package com.commerce.pagopa.domain.product.repository;
+package com.commerce.pagopa.product.infrastructure.persistence;
 
-import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.product.domain.model.Product;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import static com.commerce.pagopa.domain.product.entity.QProduct.product;
+import static com.commerce.pagopa.product.domain.model.QProduct.product;
 import static org.springframework.util.StringUtils.hasText;
 
 @RequiredArgsConstructor
-public class ProductRepositoryImpl implements ProductRepositoryCustom {
+public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 

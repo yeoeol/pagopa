@@ -1,6 +1,6 @@
 package com.commerce.pagopa.scrap.infrastructure.external;
 
-import com.commerce.pagopa.domain.product.repository.ProductRepository;
+import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
 import com.commerce.pagopa.scrap.application.port.ScrapTargetValidator;
 import com.commerce.pagopa.scrap.domain.model.EntityType;

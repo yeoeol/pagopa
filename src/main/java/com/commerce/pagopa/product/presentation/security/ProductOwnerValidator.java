@@ -1,10 +1,12 @@
-package com.commerce.pagopa.domain.product.validator;
+package com.commerce.pagopa.product.presentation.security;
 
-import com.commerce.pagopa.domain.product.entity.Product;
-import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
+import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.product.domain.repository.ProductRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

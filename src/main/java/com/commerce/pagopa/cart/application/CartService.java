@@ -4,8 +4,8 @@ import com.commerce.pagopa.cart.application.dto.request.CartAddRequestDto;
 import com.commerce.pagopa.cart.application.dto.response.CartResponseDto;
 import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.cart.domain.model.Cart;
-import com.commerce.pagopa.domain.product.entity.Product;
-import com.commerce.pagopa.domain.product.repository.ProductRepository;
+import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 

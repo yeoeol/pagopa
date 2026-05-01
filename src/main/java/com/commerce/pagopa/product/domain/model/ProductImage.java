@@ -1,6 +1,7 @@
-package com.commerce.pagopa.domain.product.entity;
+package com.commerce.pagopa.product.domain.model;
 
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,9 +32,7 @@ public class ProductImage {
     private Product product;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private ProductImage(
-            String imageUrl, int displayOrder, boolean isThumbnail
-    ) {
+    private ProductImage(String imageUrl, int displayOrder, boolean isThumbnail) {
         this.imageUrl = imageUrl;
         this.displayOrder = displayOrder;
         this.isThumbnail = isThumbnail;

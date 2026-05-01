@@ -1,12 +1,14 @@
-package com.commerce.pagopa.domain.product.service;
+package com.commerce.pagopa.product.application;
 
-import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
-import com.commerce.pagopa.domain.product.entity.Product;
-import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
-import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
+import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
+import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
+import com.commerce.pagopa.product.domain.repository.ProductRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,14 +21,6 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-
-    @Transactional(readOnly = true)
-    public List<ProductResponseDto> findAllByCategory() {
-        return productRepository.findAll()
-                .stream()
-                .map(ProductResponseDto::from)
-                .toList();
-    }
 
     @Transactional(readOnly = true)
     public List<ProductResponseDto> findAllWithActiveAndSoldOut() {
@@ -58,5 +52,4 @@ public class ProductService {
                 .map(ProductResponseDto::from)
                 .toList();
     }
-
 }

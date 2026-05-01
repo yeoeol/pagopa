@@ -1,16 +1,19 @@
-package com.commerce.pagopa.domain.product.controller;
+package com.commerce.pagopa.product.presentation;
 
-import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
-import com.commerce.pagopa.domain.product.service.ProductService;
-import com.commerce.pagopa.searchhistory.application.SearchHistoryService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.CookieUtil;
+import com.commerce.pagopa.product.application.ProductService;
+import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
+import com.commerce.pagopa.searchhistory.application.SearchHistoryService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,7 +43,7 @@ public class ProductController {
     }
 
     /**
-     *  상품 상세 조회
+     * 상품 상세 조회
      */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponseDto>> getDetail(
@@ -52,7 +55,7 @@ public class ProductController {
     }
 
     /**
-     * 상품 검색 
+     * 상품 검색
      */
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
@@ -62,14 +65,11 @@ public class ProductController {
             HttpServletResponse response
     ) {
         String keyword = productSearchCondition.productName();
-        
-        // 검색어가 있을 때만 기록
+
         if (keyword != null && !keyword.isBlank()) {
             if (userDetails != null) {
-                // 로그인 사용자 검색 기록 저장
                 searchHistoryService.saveHistory(userDetails.getUserId(), null, keyword);
             } else {
-                // 비로그인 사용자: 쿠키에서 세션 ID 확인, 없으면 발급
                 String sessionId = CookieUtil.getOrCreateGuestSessionId(request, response);
                 searchHistoryService.saveHistory(null, sessionId, keyword);
             }

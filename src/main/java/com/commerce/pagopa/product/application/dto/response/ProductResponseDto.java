@@ -1,6 +1,6 @@
-package com.commerce.pagopa.domain.product.dto.response;
+package com.commerce.pagopa.product.application.dto.response;
 
-import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.product.domain.model.Product;
 
 import java.math.BigDecimal;
 import java.util.List;
