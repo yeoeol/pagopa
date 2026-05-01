@@ -3,7 +3,7 @@ package com.commerce.pagopa.domain.product.controller;
 import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
 import com.commerce.pagopa.domain.product.service.ProductService;
-import com.commerce.pagopa.domain.searchhistory.service.SearchHistoryService;
+import com.commerce.pagopa.searchhistory.application.SearchHistoryService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.CookieUtil;
