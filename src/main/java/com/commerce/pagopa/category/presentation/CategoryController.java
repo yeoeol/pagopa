@@ -1,0 +1,45 @@
+package com.commerce.pagopa.category.presentation;
+
+import com.commerce.pagopa.category.application.CategoryService;
+import com.commerce.pagopa.category.application.dto.response.CategorySimpleResponseDto;
+import com.commerce.pagopa.category.application.dto.response.CategoryTreeResponseDto;
+import com.commerce.pagopa.global.response.ApiResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/categories")
+public class CategoryController {
+
+    private final CategoryService categoryService;
+
+    // 최상위 카테고리 목록 조회
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CategorySimpleResponseDto>>> getRootCategories() {
+        return ResponseEntity.ok(
+                ApiResponse.ok(categoryService.findRootCategories())
+        );
+    }
+
+    // 특정 카테고리의 하위 카테고리 목록 조회
+    @GetMapping("/{categoryId}/children")
+    public ResponseEntity<ApiResponse<CategoryTreeResponseDto>> getChildCategories(
+            @PathVariable("categoryId") Long categoryId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(categoryService.findChildCategories(categoryId))
+        );
+    }
+
+    @GetMapping("/tree")
+    public ResponseEntity<ApiResponse<List<CategoryTreeResponseDto>>> getCategoryTree(
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(categoryService.findCategoryTree())
+        );
+    }
+}

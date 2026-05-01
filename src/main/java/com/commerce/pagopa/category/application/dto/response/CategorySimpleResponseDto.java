@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.admin.category.dto.response;
+package com.commerce.pagopa.category.application.dto.response;
 
 import com.commerce.pagopa.category.domain.model.Category;
 

@@ -1,7 +1,7 @@
 package com.commerce.pagopa.domain.product.repository;
 
-import com.commerce.pagopa.domain.category.entity.Category;
-import com.commerce.pagopa.domain.category.repository.CategoryRepository;
+import com.commerce.pagopa.category.domain.model.Category;
+import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.domain.product.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.user.entity.User;

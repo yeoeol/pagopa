@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.user.service;
 
-import com.commerce.pagopa.domain.image.service.ImageService;
+import com.commerce.pagopa.image.application.ImageService;
 import com.commerce.pagopa.domain.user.dto.request.UserUpdateRequestDto;
 import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
 import com.commerce.pagopa.domain.user.entity.User;
