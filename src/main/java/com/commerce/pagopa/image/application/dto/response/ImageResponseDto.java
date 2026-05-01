@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.image.dto.response;
+package com.commerce.pagopa.image.application.dto.response;
 
 public record ImageResponseDto(
         String imageUrl

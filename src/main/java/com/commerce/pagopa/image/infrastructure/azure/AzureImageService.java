@@ -1,14 +1,14 @@
-package com.commerce.pagopa.domain.image.service.impl;
+package com.commerce.pagopa.image.infrastructure.azure;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlobHttpHeaders;
-import com.commerce.pagopa.domain.image.ImageCategory;
-import com.commerce.pagopa.domain.image.dto.response.ImageResponseDto;
-import com.commerce.pagopa.domain.image.service.ImageService;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.image.application.ImageService;
+import com.commerce.pagopa.image.application.dto.response.ImageResponseDto;
+import com.commerce.pagopa.image.domain.model.ImageCategory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -62,9 +62,7 @@ public class AzureImageService implements ImageService {
             String imageUrl = baseUrl + "/" + blobName;
             log.info("[Azure] 이미지 업로드 성공: blobName={}, size={}bytes", blobName, file.getSize());
 
-            return ImageResponseDto.of(
-                    imageUrl
-            );
+            return ImageResponseDto.of(imageUrl);
 
         } catch (IOException e) {
             log.error("[Azure] 이미지 업로드 실패: {}", e.getMessage());
@@ -103,7 +101,7 @@ public class AzureImageService implements ImageService {
     private String extractBlobName(String imageUrl) {
         String containerName = blobContainerClient.getBlobContainerName();
         int containerIdx = imageUrl.indexOf(containerName);
-        return imageUrl.substring(containerIdx + containerName.length()+1);
+        return imageUrl.substring(containerIdx + containerName.length() + 1);
     }
 
     private String generateBlobName(String originalFilename, ImageCategory category) {

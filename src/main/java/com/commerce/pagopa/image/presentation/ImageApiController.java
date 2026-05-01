@@ -1,10 +1,12 @@
-package com.commerce.pagopa.domain.image.controller;
+package com.commerce.pagopa.image.presentation;
 
-import com.commerce.pagopa.domain.image.ImageCategory;
-import com.commerce.pagopa.domain.image.dto.response.ImageResponseDto;
-import com.commerce.pagopa.domain.image.service.ImageService;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.image.application.ImageService;
+import com.commerce.pagopa.image.application.dto.response.ImageResponseDto;
+import com.commerce.pagopa.image.domain.model.ImageCategory;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

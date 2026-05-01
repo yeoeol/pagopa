@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.image;
+package com.commerce.pagopa.image.domain.model;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
