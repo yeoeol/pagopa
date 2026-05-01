@@ -1,10 +1,10 @@
-package com.commerce.pagopa.domain.scrap.controller;
+package com.commerce.pagopa.scrap.presentation;
 
-import com.commerce.pagopa.domain.scrap.dto.request.ScrapAddRequestDto;
-import com.commerce.pagopa.domain.scrap.dto.response.ScrapResponseDto;
-import com.commerce.pagopa.domain.scrap.service.ScrapService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.scrap.application.ScrapService;
+import com.commerce.pagopa.scrap.application.dto.request.ScrapAddRequestDto;
+import com.commerce.pagopa.scrap.application.dto.response.ScrapResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

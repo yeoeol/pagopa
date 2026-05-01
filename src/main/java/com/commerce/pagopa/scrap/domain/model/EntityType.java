@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.scrap.entity.enums;
+package com.commerce.pagopa.scrap.domain.model;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

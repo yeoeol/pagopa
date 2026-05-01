@@ -1,15 +1,15 @@
-package com.commerce.pagopa.domain.scrap.service;
+package com.commerce.pagopa.scrap.application;
 
-import com.commerce.pagopa.domain.scrap.dto.request.ScrapAddRequestDto;
-import com.commerce.pagopa.domain.scrap.dto.response.ScrapResponseDto;
-import com.commerce.pagopa.domain.scrap.entity.Scrap;
-import com.commerce.pagopa.domain.scrap.entity.enums.EntityType;
-import com.commerce.pagopa.domain.scrap.repository.ScrapRepository;
-import com.commerce.pagopa.domain.scrap.validator.ScrapTargetValidator;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.scrap.application.dto.request.ScrapAddRequestDto;
+import com.commerce.pagopa.scrap.application.dto.response.ScrapResponseDto;
+import com.commerce.pagopa.scrap.application.port.ScrapTargetValidator;
+import com.commerce.pagopa.scrap.domain.model.EntityType;
+import com.commerce.pagopa.scrap.domain.model.Scrap;
+import com.commerce.pagopa.scrap.domain.repository.ScrapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

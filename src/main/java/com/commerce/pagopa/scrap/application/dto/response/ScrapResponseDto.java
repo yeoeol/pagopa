@@ -1,7 +1,7 @@
-package com.commerce.pagopa.domain.scrap.dto.response;
+package com.commerce.pagopa.scrap.application.dto.response;
 
-import com.commerce.pagopa.domain.scrap.entity.Scrap;
 import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
+import com.commerce.pagopa.scrap.domain.model.Scrap;
 
 public record ScrapResponseDto(
         Long scrapId,

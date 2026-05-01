@@ -1,6 +1,5 @@
-package com.commerce.pagopa.domain.scrap.entity;
+package com.commerce.pagopa.scrap.domain.model;
 
-import com.commerce.pagopa.domain.scrap.entity.enums.EntityType;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
