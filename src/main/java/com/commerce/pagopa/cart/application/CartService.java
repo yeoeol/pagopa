@@ -1,14 +1,16 @@
-package com.commerce.pagopa.domain.cart.service;
+package com.commerce.pagopa.cart.application;
 
-import com.commerce.pagopa.domain.cart.dto.request.CartAddRequestDto;
-import com.commerce.pagopa.domain.cart.dto.response.CartResponseDto;
-import com.commerce.pagopa.domain.cart.entity.Cart;
-import com.commerce.pagopa.domain.cart.repository.CartRepository;
+import com.commerce.pagopa.cart.application.dto.request.CartAddRequestDto;
+import com.commerce.pagopa.cart.application.dto.response.CartResponseDto;
+import com.commerce.pagopa.cart.domain.repository.CartRepository;
+import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface ReviewJpaRepository extends JpaRepository<Review, Long>, ReviewRepository {
 
+    @Override
     @Query("""
             SELECT DISTINCT r
             FROM Review r

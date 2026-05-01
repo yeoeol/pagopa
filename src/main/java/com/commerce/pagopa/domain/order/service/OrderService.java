@@ -1,7 +1,7 @@
 package com.commerce.pagopa.domain.order.service;
 
-import com.commerce.pagopa.domain.cart.entity.Cart;
-import com.commerce.pagopa.domain.cart.repository.CartRepository;
+import com.commerce.pagopa.cart.domain.model.Cart;
+import com.commerce.pagopa.cart.infrastructure.persistence.CartJpaRepository;
 import com.commerce.pagopa.domain.order.dto.request.*;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.entity.Address;
@@ -33,7 +33,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final CartRepository cartRepository;
+    private final CartJpaRepository cartRepository;
     private final PaymentService paymentService;
     private final PaymentRepository paymentRepository;
 

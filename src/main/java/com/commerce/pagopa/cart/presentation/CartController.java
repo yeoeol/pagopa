@@ -1,11 +1,13 @@
-package com.commerce.pagopa.domain.cart.controller;
+package com.commerce.pagopa.cart.presentation;
 
-import com.commerce.pagopa.domain.cart.dto.request.CartAddRequestDto;
-import com.commerce.pagopa.domain.cart.dto.response.CartResponseDto;
-import com.commerce.pagopa.domain.cart.service.CartService;
+import com.commerce.pagopa.cart.application.dto.request.CartAddRequestDto;
+import com.commerce.pagopa.cart.application.dto.response.CartResponseDto;
+import com.commerce.pagopa.cart.application.CartService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

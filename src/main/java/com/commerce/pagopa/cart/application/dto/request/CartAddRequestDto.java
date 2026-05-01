@@ -1,5 +1,4 @@
-package com.commerce.pagopa.domain.cart.dto.request;
-
+package com.commerce.pagopa.cart.application.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

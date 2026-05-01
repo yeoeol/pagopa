@@ -1,10 +1,12 @@
-package com.commerce.pagopa.domain.cart.entity;
+package com.commerce.pagopa.cart.domain.model;
 
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.CartQuantityException;
+
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
