@@ -1,12 +1,14 @@
-package com.commerce.pagopa.domain.user.controller;
+package com.commerce.pagopa.user.presentation;
 
-import com.commerce.pagopa.domain.user.dto.request.UserUpdateRequestDto;
-import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
-import com.commerce.pagopa.domain.user.service.UserService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.user.application.UserService;
+import com.commerce.pagopa.user.application.dto.request.UserUpdateRequestDto;
+import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,5 +39,4 @@ public class UserApiController {
                 ApiResponse.ok(userService.update(userDetails.getUserId(), requestDto))
         );
     }
-
 }

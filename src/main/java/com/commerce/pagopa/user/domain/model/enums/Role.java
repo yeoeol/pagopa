@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.user.entity.enums;
+package com.commerce.pagopa.user.domain.model.enums;
 
 public enum Role {
     ROLE_USER,

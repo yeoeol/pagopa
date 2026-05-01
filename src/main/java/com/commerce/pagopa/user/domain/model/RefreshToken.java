@@ -1,6 +1,7 @@
-package com.commerce.pagopa.domain.user.entity;
+package com.commerce.pagopa.user.domain.model;
 
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,6 +1,6 @@
-package com.commerce.pagopa.domain.user.dto.response;
+package com.commerce.pagopa.user.application.dto.response;
 
-import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.user.domain.model.User;
 
 public record UserResponseDto(
         Long userId,

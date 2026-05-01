@@ -2,7 +2,7 @@ package com.commerce.pagopa.domain.order.validator;
 
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
-import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

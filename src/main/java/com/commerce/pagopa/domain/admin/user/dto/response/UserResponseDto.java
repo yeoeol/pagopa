@@ -1,8 +1,8 @@
 package com.commerce.pagopa.domain.admin.user.dto.response;
 
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.entity.enums.Provider;
-import com.commerce.pagopa.domain.user.entity.enums.UserStatus;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 
 import java.time.LocalDateTime;
 

@@ -2,7 +2,7 @@ package com.commerce.pagopa.cart.presentation.security;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cart.infrastructure.persistence.CartJpaRepository;
-import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 
 import lombok.RequiredArgsConstructor;

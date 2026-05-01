@@ -1,7 +1,7 @@
 package com.commerce.pagopa.review.presentation.security;
 
 import com.commerce.pagopa.global.validator.OwnerValidator;
-import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.review.domain.model.Review;
 import com.commerce.pagopa.review.domain.repository.ReviewRepository;
 

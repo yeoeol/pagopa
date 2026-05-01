@@ -2,7 +2,7 @@ package com.commerce.pagopa.auth.jwt;
 
 import com.commerce.pagopa.auth.handler.ApiAuthenticationEntryPoint;
 import com.commerce.pagopa.auth.jwt.resolver.TokenResolver;
-import com.commerce.pagopa.domain.user.entity.enums.Role;
+import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.servlet.FilterChain;

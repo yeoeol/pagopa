@@ -1,6 +1,6 @@
 package com.commerce.pagopa.searchhistory.presentation.security;
 
-import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.util.CookieUtil;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;

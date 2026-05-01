@@ -1,11 +1,13 @@
-package com.commerce.pagopa.domain.user.service;
+package com.commerce.pagopa.user.application;
 
 import com.commerce.pagopa.image.application.ImageService;
-import com.commerce.pagopa.domain.user.dto.request.UserUpdateRequestDto;
-import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.user.application.dto.request.UserUpdateRequestDto;
+import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;

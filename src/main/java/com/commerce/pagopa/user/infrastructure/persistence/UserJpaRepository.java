@@ -1,8 +1,9 @@
-package com.commerce.pagopa.domain.user.repository;
+package com.commerce.pagopa.user.infrastructure.persistence;
 
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.entity.enums.Provider;
-import com.commerce.pagopa.global.exception.UserNotFoundException;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,9 +12,12 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserJpaRepository extends JpaRepository<User, Long>, UserRepository {
+
+    @Override
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 
+    @Override
     @Modifying(clearAutomatically = true)
     @Query(value =
             "UPDATE User u " +
@@ -22,8 +26,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "WHERE u.banEndDate < :now " +
                 "AND u.userStatus = 'BANNED'")
     void bulkUnbanBefore(@Param("now") LocalDateTime now);
-
-    default User findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(UserNotFoundException::new);
-    }
 }

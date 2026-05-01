@@ -1,12 +1,14 @@
-package com.commerce.pagopa.domain.user.entity;
+package com.commerce.pagopa.user.domain.model;
 
-import com.commerce.pagopa.domain.user.entity.enums.Provider;
-import com.commerce.pagopa.domain.user.entity.enums.Role;
-import com.commerce.pagopa.domain.user.entity.enums.UserStatus;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.user.domain.model.enums.Role;
+import com.commerce.pagopa.user.domain.model.enums.UserStatus;
+
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

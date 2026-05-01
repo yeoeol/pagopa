@@ -6,8 +6,8 @@ import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

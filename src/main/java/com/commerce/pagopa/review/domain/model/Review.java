@@ -1,7 +1,7 @@
 package com.commerce.pagopa.review.domain.model;
 
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
-import com.commerce.pagopa.domain.user.entity.User;
+import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 
 import jakarta.persistence.*;

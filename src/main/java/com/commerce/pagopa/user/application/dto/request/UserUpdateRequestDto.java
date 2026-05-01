@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.user.dto.request;
+package com.commerce.pagopa.user.application.dto.request;
 
 public record UserUpdateRequestDto(
         String nickname,

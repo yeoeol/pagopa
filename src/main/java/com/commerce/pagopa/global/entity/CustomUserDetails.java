@@ -1,6 +1,6 @@
 package com.commerce.pagopa.global.entity;
 
-import com.commerce.pagopa.domain.user.entity.enums.Role;
+import com.commerce.pagopa.user.domain.model.enums.Role;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;

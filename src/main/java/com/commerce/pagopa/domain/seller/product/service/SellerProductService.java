@@ -7,8 +7,8 @@ import com.commerce.pagopa.domain.seller.product.dto.request.ProductRegisterRequ
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.ProductImage;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
