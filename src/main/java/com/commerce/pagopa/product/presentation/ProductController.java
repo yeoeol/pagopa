@@ -1,8 +1,8 @@
 package com.commerce.pagopa.product.presentation;
 
 import com.commerce.pagopa.global.entity.CustomUserDetails;
+import com.commerce.pagopa.global.cookie.GuestSessionCookieFactory;
 import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.global.util.CookieUtil;
 import com.commerce.pagopa.product.application.ProductService;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
@@ -31,6 +31,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final SearchHistoryService searchHistoryService;
+    private final GuestSessionCookieFactory guestSessionCookieFactory;
 
     /**
      * 상품 목록 조회
@@ -70,7 +71,7 @@ public class ProductController {
             if (userDetails != null) {
                 searchHistoryService.saveHistory(userDetails.getUserId(), null, keyword);
             } else {
-                String sessionId = CookieUtil.getOrCreateGuestSessionId(request, response);
+                String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
                 searchHistoryService.saveHistory(null, sessionId, keyword);
             }
         }

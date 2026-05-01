@@ -2,12 +2,13 @@ package com.commerce.pagopa.product.infrastructure.persistence;
 
 import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.entity.enums.Provider;
-import com.commerce.pagopa.domain.user.entity.enums.Role;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.user.domain.model.enums.Role;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProductRepositoryTest {
 
     @Autowired
-    ProductJpaRepository productRepository;
+    ProductRepository productRepository;
     @Autowired
     CategoryRepository categoryRepository;
     @Autowired
@@ -73,7 +74,9 @@ class ProductRepositoryTest {
                 BigDecimal.valueOf(1500),
                 30, category, user
         );
-        products = productRepository.saveAll(List.of(product1, product2, product3));
+        products.add(productRepository.save(product1));
+        products.add(productRepository.save(product2));
+        products.add(productRepository.save(product3));
     }
 
     @Test
