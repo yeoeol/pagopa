@@ -1,9 +1,10 @@
-package com.commerce.pagopa.domain.review.dto.request;
+package com.commerce.pagopa.review.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
 import org.hibernate.validator.constraints.Range;
 
 import java.util.List;

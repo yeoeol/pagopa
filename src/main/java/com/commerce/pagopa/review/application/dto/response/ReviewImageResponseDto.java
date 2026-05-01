@@ -1,6 +1,6 @@
-package com.commerce.pagopa.domain.review.dto.response;
+package com.commerce.pagopa.review.application.dto.response;
 
-import com.commerce.pagopa.domain.review.entity.ReviewImage;
+import com.commerce.pagopa.review.domain.model.ReviewImage;
 
 public record ReviewImageResponseDto(
         String imageUrl,

@@ -1,8 +1,7 @@
-package com.commerce.pagopa.domain.review.entity;
+package com.commerce.pagopa.review.domain.model;
 
-import com.commerce.pagopa.domain.product.entity.Product;
-import com.commerce.pagopa.domain.product.entity.ProductImage;
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

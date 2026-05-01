@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.admin.review.service;
 
-import com.commerce.pagopa.domain.review.repository.ReviewRepository;
+import com.commerce.pagopa.review.domain.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

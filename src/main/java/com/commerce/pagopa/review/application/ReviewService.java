@@ -1,18 +1,20 @@
-package com.commerce.pagopa.domain.review.service;
+package com.commerce.pagopa.review.application;
 
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
 import com.commerce.pagopa.domain.order.repository.OrderProductRepository;
-import com.commerce.pagopa.domain.review.dto.request.ReviewUpdateRequestDto;
 import com.commerce.pagopa.domain.product.entity.Product;
 import com.commerce.pagopa.domain.product.repository.ProductRepository;
-import com.commerce.pagopa.domain.review.dto.request.ReviewCreateRequestDto;
-import com.commerce.pagopa.domain.review.dto.response.ReviewResponseDto;
-import com.commerce.pagopa.domain.review.entity.Review;
-import com.commerce.pagopa.domain.review.entity.ReviewImage;
-import com.commerce.pagopa.domain.review.repository.ReviewRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
+import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
+import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
+import com.commerce.pagopa.review.domain.model.Review;
+import com.commerce.pagopa.review.domain.model.ReviewImage;
+import com.commerce.pagopa.review.domain.repository.ReviewRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +55,6 @@ public class ReviewService {
     @Transactional
     public void update(Long reviewId, ReviewUpdateRequestDto requestDto) {
         Review review = reviewRepository.findByIdOrThrow(reviewId);
-
         review.update(requestDto.rating(), requestDto.content());
     }
 
@@ -65,8 +66,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> findAllByProduct(Long productId) {
         Product product = productRepository.findByIdOrThrow(productId);
-
-        return reviewRepository.findAllByOrderProduct_Product(product).stream()
+        return reviewRepository.findAllByProduct(product).stream()
                 .map(ReviewResponseDto::from)
                 .toList();
     }

@@ -1,13 +1,16 @@
-package com.commerce.pagopa.domain.review.controller;
+package com.commerce.pagopa.review.presentation;
 
-import com.commerce.pagopa.domain.review.dto.request.ReviewUpdateRequestDto;
-import com.commerce.pagopa.domain.review.dto.request.ReviewCreateRequestDto;
-import com.commerce.pagopa.domain.review.dto.response.ReviewResponseDto;
-import com.commerce.pagopa.domain.review.service.ReviewService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.review.application.ReviewService;
+import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
+import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
+import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
