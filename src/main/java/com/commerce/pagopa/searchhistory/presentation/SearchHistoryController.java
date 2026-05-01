@@ -1,10 +1,10 @@
-package com.commerce.pagopa.domain.searchhistory.controller;
+package com.commerce.pagopa.searchhistory.presentation;
 
-import com.commerce.pagopa.domain.searchhistory.dto.response.SearchHistoryResponseDto;
-import com.commerce.pagopa.domain.searchhistory.service.SearchHistoryService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.CookieUtil;
+import com.commerce.pagopa.searchhistory.application.SearchHistoryService;
+import com.commerce.pagopa.searchhistory.application.dto.response.SearchHistoryResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

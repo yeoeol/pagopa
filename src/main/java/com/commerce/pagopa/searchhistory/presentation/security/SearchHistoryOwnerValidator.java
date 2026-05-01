@@ -1,10 +1,10 @@
-package com.commerce.pagopa.domain.searchhistory.validator;
+package com.commerce.pagopa.searchhistory.presentation.security;
 
-import com.commerce.pagopa.domain.searchhistory.entity.SearchHistory;
-import com.commerce.pagopa.domain.searchhistory.repository.SearchHistoryRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.util.CookieUtil;
 import com.commerce.pagopa.global.validator.OwnerValidator;
+import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
+import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

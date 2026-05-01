@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.searchhistory.entity;
+package com.commerce.pagopa.searchhistory.domain.model;
 
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;

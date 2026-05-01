@@ -1,10 +1,10 @@
-package com.commerce.pagopa.domain.searchhistory.service;
+package com.commerce.pagopa.searchhistory.application;
 
-import com.commerce.pagopa.domain.searchhistory.dto.response.SearchHistoryResponseDto;
-import com.commerce.pagopa.domain.searchhistory.entity.SearchHistory;
-import com.commerce.pagopa.domain.searchhistory.repository.SearchHistoryRepository;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.searchhistory.application.dto.response.SearchHistoryResponseDto;
+import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
+import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public class SearchHistoryService {
                     searchHistoryRepository.save(history);
                 }
             }
-        } 
+        }
         // 비로그인 사용자 (세션 기반)
         else if (sessionId != null && !sessionId.isBlank()) {
             Optional<SearchHistory> existingHistory = searchHistoryRepository.findBySessionIdAndKeyword(sessionId, keyword);
@@ -63,7 +63,7 @@ public class SearchHistoryService {
                     .map(SearchHistoryResponseDto::from)
                     .toList();
         }
-        
+
         return List.of();
     }
 
