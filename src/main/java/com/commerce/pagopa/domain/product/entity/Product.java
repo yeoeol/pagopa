@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.product.entity;
 
-import com.commerce.pagopa.domain.category.entity.Category;
+import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.domain.product.entity.enums.ProductStatus;
 import com.commerce.pagopa.domain.user.entity.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;

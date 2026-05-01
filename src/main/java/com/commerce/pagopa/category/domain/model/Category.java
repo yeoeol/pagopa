@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.category.entity;
+package com.commerce.pagopa.category.domain.model;
 
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;

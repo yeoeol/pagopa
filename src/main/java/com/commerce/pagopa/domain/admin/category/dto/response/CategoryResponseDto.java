@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.admin.category.dto.response;
 
-import com.commerce.pagopa.domain.category.entity.Category;
+import com.commerce.pagopa.category.domain.model.Category;
 
 public record CategoryResponseDto(
         Long categoryId,

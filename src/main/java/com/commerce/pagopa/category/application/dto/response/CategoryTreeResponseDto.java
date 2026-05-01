@@ -1,6 +1,6 @@
-package com.commerce.pagopa.domain.category.dto.response;
+package com.commerce.pagopa.category.application.dto.response;
 
-import com.commerce.pagopa.domain.category.entity.Category;
+import com.commerce.pagopa.category.domain.model.Category;
 
 import java.util.List;
 

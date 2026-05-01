@@ -1,9 +1,9 @@
-package com.commerce.pagopa.domain.category.service;
+package com.commerce.pagopa.category.application;
 
-import com.commerce.pagopa.domain.category.dto.response.CategorySimpleResponseDto;
-import com.commerce.pagopa.domain.category.dto.response.CategoryTreeResponseDto;
-import com.commerce.pagopa.domain.category.entity.Category;
-import com.commerce.pagopa.domain.category.repository.CategoryRepository;
+import com.commerce.pagopa.category.application.dto.response.CategorySimpleResponseDto;
+import com.commerce.pagopa.category.application.dto.response.CategoryTreeResponseDto;
+import com.commerce.pagopa.category.domain.model.Category;
+import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,8 +1,8 @@
-package com.commerce.pagopa.domain.category.controller;
+package com.commerce.pagopa.category.presentation;
 
-import com.commerce.pagopa.domain.category.dto.response.CategorySimpleResponseDto;
-import com.commerce.pagopa.domain.category.dto.response.CategoryTreeResponseDto;
-import com.commerce.pagopa.domain.category.service.CategoryService;
+import com.commerce.pagopa.category.application.CategoryService;
+import com.commerce.pagopa.category.application.dto.response.CategorySimpleResponseDto;
+import com.commerce.pagopa.category.application.dto.response.CategoryTreeResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
