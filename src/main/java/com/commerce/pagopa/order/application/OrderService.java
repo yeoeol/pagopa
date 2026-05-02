@@ -87,7 +87,7 @@ public class OrderService {
         List<Long> targetCartIds = carts.stream()
                     .map(Cart::getId)
                     .toList();
-        cartRepository.deleteAllByIds(targetCartIds);
+        cartRepository.deleteAllByIdIn(targetCartIds);
         return OrderResponseDto.from(orderRepository.save(order));
     }
 

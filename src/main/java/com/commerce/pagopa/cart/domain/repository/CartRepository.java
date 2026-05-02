@@ -18,7 +18,7 @@ public interface CartRepository {
 
     void deleteById(Long id);
 
-    void deleteAllByIds(Collection<Long> ids);
+    void deleteAllByIdIn(Collection<Long> ids);
 
     // FETCH JOIN 적용하여 연관 엔티티(user, product, product.images)를 한 번에 조회
     List<Cart> findByUser(User user);
