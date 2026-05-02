@@ -1,7 +1,7 @@
 package com.commerce.pagopa.review.application;
 
-import com.commerce.pagopa.domain.order.entity.OrderProduct;
-import com.commerce.pagopa.domain.order.repository.OrderProductRepository;
+import com.commerce.pagopa.order.domain.model.OrderProduct;
+import com.commerce.pagopa.order.domain.repository.OrderProductRepository;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.user.domain.model.User;
@@ -32,7 +32,7 @@ public class ReviewService {
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
         User user = userRepository.findByIdOrThrow(userId);
-        OrderProduct orderProduct = orderProductRepository.getById(requestDto.orderProductId());
+        OrderProduct orderProduct = orderProductRepository.getByIdOrThrow(requestDto.orderProductId());
 
         Review review = Review.create(requestDto.rating(), requestDto.content(), user, orderProduct);
 

@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.seller.order.validator;
+package com.commerce.pagopa.order.presentation.security;
 
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component("sellerOrderOwnerValidator")
+@Component("orderOwnerValidator")
 @RequiredArgsConstructor
-public class SellerOrderOwnerValidator extends OwnerValidator<Order, Long> {
+public class OrderOwnerValidator extends OwnerValidator<Order, Long> {
 
     private final OrderRepository orderRepository;
 
@@ -22,11 +22,7 @@ public class SellerOrderOwnerValidator extends OwnerValidator<Order, Long> {
 
     @Override
     protected Long extractOwnerId(Order order) {
-        if (order.getOrderProducts().isEmpty()) {
-            return null;
-        }
-        User seller = order.getOrderProducts().getFirst().getProduct().getSeller();
-        return Optional.ofNullable(seller)
+        return Optional.ofNullable(order.getUser())
                 .map(User::getId)
                 .orElse(null);
     }

@@ -1,49 +1,33 @@
-package com.commerce.pagopa.domain.seller.order.dto.response;
+package com.commerce.pagopa.order.application.dto.response;
 
-import com.commerce.pagopa.order.application.dto.response.DeliveryResponseDto;
-import com.commerce.pagopa.order.application.dto.response.OrderProductResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public record OrderResponseDto(
         Long orderId,
         String orderNumber,
-        String orderName,
         BigDecimal totalAmount,
         OrderStatus status,
         PaymentMethod paymentMethod,
-        LocalDateTime orderDate,
         UserResponseDto user,
         DeliveryResponseDto delivery,
         List<OrderProductResponseDto> orderProducts
 ) {
-    public static OrderResponseDto from(Order order, Long sellerId) {
-        List<OrderProduct> sellerProducts = order.getOrderProducts().stream()
-                .filter(op -> op.getProduct().getSeller().getId().equals(sellerId))
-                .toList();
-
-        BigDecimal sellerTotal = sellerProducts.stream()
-                .map(OrderProduct::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+    public static OrderResponseDto from(Order order) {
         return new OrderResponseDto(
                 order.getId(),
                 order.getOrderNumber(),
-                order.getOrderName(),
-                sellerTotal,
+                order.getTotalAmount(),
                 order.getStatus(),
                 order.getPaymentMethod(),
-                order.getCreatedAt(),
                 UserResponseDto.from(order.getUser()),
                 DeliveryResponseDto.from(order.getDelivery()),
-                sellerProducts.stream()
+                order.getOrderProducts().stream()
                         .map(OrderProductResponseDto::from)
                         .toList()
         );

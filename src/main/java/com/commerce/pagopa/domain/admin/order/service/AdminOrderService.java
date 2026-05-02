@@ -1,8 +1,8 @@
 package com.commerce.pagopa.domain.admin.order.service;
 
 import com.commerce.pagopa.domain.admin.order.dto.response.OrderResponseDto;
-import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
