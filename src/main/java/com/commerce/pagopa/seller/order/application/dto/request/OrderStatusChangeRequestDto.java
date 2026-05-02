@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.seller.order.dto.request;
+package com.commerce.pagopa.seller.order.application.dto.request;
 
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import jakarta.validation.constraints.NotNull;

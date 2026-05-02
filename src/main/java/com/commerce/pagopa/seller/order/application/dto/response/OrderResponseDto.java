@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.seller.order.dto.response;
+package com.commerce.pagopa.seller.order.application.dto.response;
 
 import com.commerce.pagopa.order.application.dto.response.DeliveryResponseDto;
 import com.commerce.pagopa.order.application.dto.response.OrderProductResponseDto;

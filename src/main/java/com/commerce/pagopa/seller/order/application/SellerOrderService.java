@@ -1,10 +1,10 @@
-package com.commerce.pagopa.domain.seller.order.service;
+package com.commerce.pagopa.seller.order.application;
 
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
-import com.commerce.pagopa.domain.seller.order.dto.request.OrderStatusChangeRequestDto;
-import com.commerce.pagopa.domain.seller.order.dto.response.OrderResponseDto;
+import com.commerce.pagopa.seller.order.application.dto.request.OrderStatusChangeRequestDto;
+import com.commerce.pagopa.seller.order.application.dto.response.OrderResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,8 +1,8 @@
-package com.commerce.pagopa.domain.seller.order.controller;
+package com.commerce.pagopa.seller.order.presentation;
 
-import com.commerce.pagopa.domain.seller.order.dto.request.OrderStatusChangeRequestDto;
-import com.commerce.pagopa.domain.seller.order.dto.response.OrderResponseDto;
-import com.commerce.pagopa.domain.seller.order.service.SellerOrderService;
+import com.commerce.pagopa.seller.order.application.SellerOrderService;
+import com.commerce.pagopa.seller.order.application.dto.request.OrderStatusChangeRequestDto;
+import com.commerce.pagopa.seller.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

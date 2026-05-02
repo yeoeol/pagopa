@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.seller.order.validator;
+package com.commerce.pagopa.seller.order.presentation.security;
 
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;

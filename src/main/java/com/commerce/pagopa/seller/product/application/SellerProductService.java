@@ -1,9 +1,9 @@
-package com.commerce.pagopa.domain.seller.product.service;
+package com.commerce.pagopa.seller.product.application;
 
 import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.domain.seller.product.dto.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.seller.product.application.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.ProductImage;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;

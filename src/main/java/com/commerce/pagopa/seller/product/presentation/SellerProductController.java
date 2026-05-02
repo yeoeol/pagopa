@@ -1,8 +1,8 @@
-package com.commerce.pagopa.domain.seller.product.controller;
+package com.commerce.pagopa.seller.product.presentation;
 
 import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.domain.seller.product.dto.request.ProductRegisterRequestDto;
-import com.commerce.pagopa.domain.seller.product.service.SellerProductService;
+import com.commerce.pagopa.seller.product.application.SellerProductService;
+import com.commerce.pagopa.seller.product.application.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
