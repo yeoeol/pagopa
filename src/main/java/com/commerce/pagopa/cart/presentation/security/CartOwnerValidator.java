@@ -1,7 +1,7 @@
 package com.commerce.pagopa.cart.presentation.security;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
-import com.commerce.pagopa.cart.infrastructure.persistence.CartJpaRepository;
+import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CartOwnerValidator extends OwnerValidator<Cart, Long> {
 
-    private final CartJpaRepository cartRepository;
+    private final CartRepository cartRepository;
 
     @Override
     protected Optional<Cart> findResource(Long cartId) {

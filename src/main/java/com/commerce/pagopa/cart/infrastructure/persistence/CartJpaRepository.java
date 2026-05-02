@@ -37,7 +37,7 @@ public interface CartJpaRepository extends JpaRepository<Cart, Long>, CartReposi
     Optional<Cart> findByUserAndProduct(User user, Product product);
 
     @Override
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value =
             "DELETE FROM Cart c " +
             "WHERE c.user.id = :userId")

@@ -7,13 +7,18 @@ import com.commerce.pagopa.global.exception.CartNotFoundException;
 
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface CartRepository {
     Cart save(Cart cart);
 
+    Optional<Cart> findById(Long id);
+
     void deleteById(Long id);
+
+    void deleteAllByIds(Collection<Long> ids);
 
     // FETCH JOIN 적용하여 연관 엔티티(user, product, product.images)를 한 번에 조회
     List<Cart> findByUser(User user);

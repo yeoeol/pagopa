@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+import static org.springframework.util.StringUtils.hasText;
+
 // TODO: setSecure() -> HTTPS, setSameSite() -> CSRF 적용
 @Component
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class GuestSessionCookieFactory {
     public String getOrCreateGuestSessionId(HttpServletRequest request, HttpServletResponse response) {
         String sessionId = CookieUtil.getSessionIdFromCookie(request);
 
-        if (sessionId != null) {
+        if (hasText(sessionId)) {
             return sessionId;
         }
 

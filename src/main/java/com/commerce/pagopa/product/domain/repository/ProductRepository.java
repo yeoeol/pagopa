@@ -4,6 +4,7 @@ import com.commerce.pagopa.global.exception.ProductNotFoundException;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
+import lombok.NonNull;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +35,7 @@ public interface ProductRepository {
             Pageable pageable
     );
 
-    List<Product> searchProducts(ProductSearchCondition condition);
+    List<Product> searchProducts(@NonNull ProductSearchCondition condition);
 
     default Product findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ProductNotFoundException::new);

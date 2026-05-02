@@ -4,6 +4,8 @@ import com.commerce.pagopa.product.application.dto.request.ProductSearchConditio
 import com.commerce.pagopa.product.domain.model.Product;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -17,7 +19,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Product> searchProducts(ProductSearchCondition condition) {
+    public List<Product> searchProducts(@NonNull ProductSearchCondition condition) {
         return queryFactory
                 .selectFrom(product)
                 .where(nameContains(condition.productName()))

@@ -7,6 +7,7 @@ import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -47,7 +48,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> search(ProductSearchCondition condition) {
+    public List<ProductResponseDto> search(@NonNull ProductSearchCondition condition) {
         return productRepository.searchProducts(condition).stream()
                 .map(ProductResponseDto::from)
                 .toList();
