@@ -2,7 +2,6 @@ package com.commerce.pagopa.order.domain.model;
 
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
-import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
@@ -86,19 +85,6 @@ public class Order extends BaseTimeEntity {
 
     public void assignOrderName(String orderName) {
         this.orderName = orderName;
-    }
-
-    public boolean hasProductSoldBy(Long sellerId) {
-        if (sellerId == null) {
-            return false;
-        }
-
-        return orderProducts.stream()
-                .map(OrderProduct::getProduct)
-                .filter(product -> product != null && product.getSeller() != null)
-                .map(Product::getSeller)
-                .map(User::getId)
-                .anyMatch(sellerId::equals);
     }
 
     public void markAsCancelled() {
