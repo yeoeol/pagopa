@@ -6,7 +6,7 @@ import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
 import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
-import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
+import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

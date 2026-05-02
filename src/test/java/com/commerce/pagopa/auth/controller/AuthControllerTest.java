@@ -3,6 +3,8 @@ package com.commerce.pagopa.auth.controller;
 import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
+import com.commerce.pagopa.global.config.CookieSettings;
+import com.commerce.pagopa.global.cookie.JwtCookieFactory;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
@@ -30,7 +32,11 @@ class AuthControllerTest {
     void setUpBefore() {
         authService = mock(AuthService.class);
         jwtTokenProvider = mock(JwtTokenProvider.class);
-        authController = new AuthController(authService, jwtTokenProvider);
+        authController = new AuthController(
+                authService,
+                jwtTokenProvider,
+                new JwtCookieFactory(new CookieSettings(true))
+        );
     }
 
     @AfterEach

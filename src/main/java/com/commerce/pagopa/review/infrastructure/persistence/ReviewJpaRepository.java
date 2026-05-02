@@ -1,6 +1,6 @@
 package com.commerce.pagopa.review.infrastructure.persistence;
 
-import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.review.domain.model.Review;
 import com.commerce.pagopa.review.domain.repository.ReviewRepository;
 
@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface ReviewJpaRepository extends JpaRepository<Review, Long>, ReviewRepository {
 
+    @Override
     @Query("""
             SELECT DISTINCT r
             FROM Review r

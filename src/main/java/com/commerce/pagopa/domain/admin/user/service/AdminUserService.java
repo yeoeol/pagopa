@@ -1,9 +1,9 @@
 package com.commerce.pagopa.domain.admin.user.service;
 
 import com.commerce.pagopa.domain.admin.user.dto.response.UserResponseDto;
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.RefreshTokenRepository;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;

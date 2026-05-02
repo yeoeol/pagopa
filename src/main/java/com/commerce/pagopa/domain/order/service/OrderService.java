@@ -1,7 +1,7 @@
 package com.commerce.pagopa.domain.order.service;
 
-import com.commerce.pagopa.domain.cart.entity.Cart;
-import com.commerce.pagopa.domain.cart.repository.CartRepository;
+import com.commerce.pagopa.cart.domain.model.Cart;
+import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.domain.order.dto.request.*;
 import com.commerce.pagopa.domain.order.dto.response.OrderResponseDto;
 import com.commerce.pagopa.domain.order.entity.Address;
@@ -13,13 +13,16 @@ import com.commerce.pagopa.domain.order.repository.OrderRepository;
 import com.commerce.pagopa.domain.payment.entity.Payment;
 import com.commerce.pagopa.domain.payment.repository.PaymentRepository;
 import com.commerce.pagopa.domain.payment.service.PaymentService;
-import com.commerce.pagopa.domain.product.entity.Product;
-import com.commerce.pagopa.domain.product.repository.ProductRepository;
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.global.exception.*;
+
 import io.micrometer.core.annotation.Counted;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +79,10 @@ public class OrderService {
         order.assignOrderName(orderName);
 
         // 주문 완료 후 장바구니 항목 삭제
-        cartRepository.deleteAllById(requestDto.cartIds());
+        List<Long> targetCartIds = carts.stream()
+                    .map(Cart::getId)
+                    .toList();
+        cartRepository.deleteAllByIds(targetCartIds);
         return OrderResponseDto.from(orderRepository.save(order));
     }
 

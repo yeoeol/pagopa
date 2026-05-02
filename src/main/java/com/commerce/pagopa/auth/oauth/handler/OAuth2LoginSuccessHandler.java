@@ -5,11 +5,14 @@ import com.commerce.pagopa.auth.jwt.JwtTokenType;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
-import com.commerce.pagopa.global.util.JwtCookieUtil;
+import com.commerce.pagopa.global.cookie.JwtCookieFactory;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -23,6 +26,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtCookieFactory jwtCookieFactory;
 
     @Value("${app.oauth2.redirect-url}")
     private String oauth2RedirectUrl;
@@ -41,12 +45,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 oAuth2User.getRole()
         );
 
-        Cookie accessTokenCookie = JwtCookieUtil.createJwtCookie(
+        Cookie accessTokenCookie = jwtCookieFactory.createJwtCookie(
                 JwtTokenType.ACCESS_TOKEN,
                 tokenResponseDto.accessToken(),
                 jwtTokenProvider.getAccessTokenExpiry() / 1000
         );
-        Cookie refreshTokenCookie = JwtCookieUtil.createJwtCookie(
+        Cookie refreshTokenCookie = jwtCookieFactory.createJwtCookie(
                 JwtTokenType.REFRESH_TOKEN,
                 tokenResponseDto.refreshToken(),
                 jwtTokenProvider.getRefreshTokenExpiry() / 1000

@@ -2,10 +2,10 @@ package com.commerce.pagopa.auth.service;
 
 import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
-import com.commerce.pagopa.domain.user.entity.RefreshToken;
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.repository.RefreshTokenRepository;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.user.domain.model.RefreshToken;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.RefreshTokenRepository;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;

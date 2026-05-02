@@ -1,7 +1,7 @@
 package com.commerce.pagopa.domain.order.dto.response;
 
 import com.commerce.pagopa.domain.order.entity.OrderProduct;
-import com.commerce.pagopa.domain.product.dto.response.ProductResponseDto;
+import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 
 import java.math.BigDecimal;
 

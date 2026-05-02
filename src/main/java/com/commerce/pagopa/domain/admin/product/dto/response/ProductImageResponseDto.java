@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.admin.product.dto.response;
 
-import com.commerce.pagopa.domain.product.entity.ProductImage;
+import com.commerce.pagopa.product.domain.model.ProductImage;
 
 public record ProductImageResponseDto(
         String imageUrl,

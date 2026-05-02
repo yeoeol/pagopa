@@ -1,7 +1,7 @@
 package com.commerce.pagopa.searchhistory.application;
 
-import com.commerce.pagopa.domain.user.entity.User;
-import com.commerce.pagopa.domain.user.repository.UserRepository;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.searchhistory.application.dto.response.SearchHistoryResponseDto;
 import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
 import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;

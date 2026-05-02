@@ -1,6 +1,6 @@
 package com.commerce.pagopa.review.domain.repository;
 
-import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.global.exception.ReviewNotFoundException;
 import com.commerce.pagopa.review.domain.model.Review;
 

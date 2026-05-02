@@ -1,7 +1,7 @@
 package com.commerce.pagopa.review.application.dto.response;
 
 import com.commerce.pagopa.domain.order.dto.response.OrderProductResponseDto;
-import com.commerce.pagopa.domain.user.dto.response.UserResponseDto;
+import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 import com.commerce.pagopa.review.domain.model.Review;
 
 import java.util.List;

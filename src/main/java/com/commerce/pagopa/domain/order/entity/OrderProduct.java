@@ -1,6 +1,6 @@
 package com.commerce.pagopa.domain.order.entity;
 
-import com.commerce.pagopa.domain.product.entity.Product;
+import com.commerce.pagopa.product.domain.model.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
