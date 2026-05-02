@@ -20,14 +20,11 @@ public class ImageApiController {
 
     @PostMapping("/upload/{category}")
     public ResponseEntity<ApiResponse<ImageResponseDto>> upload(
-            @PathVariable("category") String category,
+            @PathVariable("category") ImageCategory category,
             @RequestParam("file") MultipartFile file
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(imageService.upload(
-                        file,
-                        ImageCategory.valueOf(category.toUpperCase()))
-                )
+                ApiResponse.ok(imageService.upload(file, category))
         );
     }
 

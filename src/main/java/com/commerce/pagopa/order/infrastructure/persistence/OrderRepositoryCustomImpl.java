@@ -28,7 +28,6 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .join(orderProduct.product, product)
                 .where(product.seller.id.eq(sellerId))
                 .distinct()
-                .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
