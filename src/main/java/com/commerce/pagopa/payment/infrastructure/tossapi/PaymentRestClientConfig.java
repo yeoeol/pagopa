@@ -1,7 +1,6 @@
-package com.commerce.pagopa.global.config;
+package com.commerce.pagopa.payment.infrastructure.tossapi;
 
-import com.commerce.pagopa.domain.payment.PaymentProperties;
-import com.commerce.pagopa.global.config.properties.TossPaymentProperties;
+import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,7 @@ import java.util.Base64;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(TossPaymentProperties.class)
-public class PaymentConfig {
+public class PaymentRestClientConfig {
 
     private final PaymentProperties paymentProperties;
 

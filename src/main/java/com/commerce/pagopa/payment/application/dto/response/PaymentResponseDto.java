@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.payment.dto.response;
+package com.commerce.pagopa.payment.application.dto.response;
 
 import java.math.BigDecimal;
 

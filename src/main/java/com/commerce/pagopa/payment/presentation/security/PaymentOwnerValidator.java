@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.payment.validator;
+package com.commerce.pagopa.payment.presentation.security;
 
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;

@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.payment.entity.enums;
+package com.commerce.pagopa.payment.domain.model.enums;
 
 public enum PaymentStatus {
     READY,      // 결제 대기

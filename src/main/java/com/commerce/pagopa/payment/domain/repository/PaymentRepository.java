@@ -1,13 +1,15 @@
-package com.commerce.pagopa.domain.payment.repository;
+package com.commerce.pagopa.payment.domain.repository;
 
 import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.payment.entity.Payment;
+import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.global.exception.PaymentNotFoundException;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface PaymentRepository extends JpaRepository<Payment, Long> {
+public interface PaymentRepository {
+
+    Payment save(Payment payment);
+
     Optional<Payment> findByOrder(Order order);
 
     Optional<Payment> findByOrder_IdAndPaymentKey(Long orderId, String paymentKey);

@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.payment.dto.request;
+package com.commerce.pagopa.payment.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

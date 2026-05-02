@@ -1,4 +1,4 @@
-package com.commerce.pagopa.domain.payment;
+package com.commerce.pagopa.payment.application.port;
 
 public interface PaymentProperties {
     String getBaseUrl();

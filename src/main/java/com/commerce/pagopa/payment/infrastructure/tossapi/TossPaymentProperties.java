@@ -1,6 +1,6 @@
-package com.commerce.pagopa.global.config.properties;
+package com.commerce.pagopa.payment.infrastructure.tossapi;
 
-import com.commerce.pagopa.domain.payment.PaymentProperties;
+import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

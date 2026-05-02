@@ -1,7 +1,7 @@
-package com.commerce.pagopa.domain.payment.entity;
+package com.commerce.pagopa.payment.domain.model;
 
 import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.payment.entity.enums.PaymentStatus;
+import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;

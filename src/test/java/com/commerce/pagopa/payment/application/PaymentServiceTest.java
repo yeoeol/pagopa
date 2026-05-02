@@ -1,14 +1,14 @@
-package com.commerce.pagopa.domain.payment.service;
+package com.commerce.pagopa.payment.application;
 
 import com.commerce.pagopa.domain.order.entity.Order;
 import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
 import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
 import com.commerce.pagopa.domain.order.repository.OrderRepository;
-import com.commerce.pagopa.domain.payment.PaymentProperties;
-import com.commerce.pagopa.domain.payment.dto.request.PaymentApproveRequestDto;
-import com.commerce.pagopa.domain.payment.entity.Payment;
-import com.commerce.pagopa.domain.payment.entity.enums.PaymentStatus;
-import com.commerce.pagopa.domain.payment.repository.PaymentRepository;
+import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
+import com.commerce.pagopa.payment.application.port.PaymentProperties;
+import com.commerce.pagopa.payment.domain.model.Payment;
+import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
+import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.OrderCannotPayException;
 import com.commerce.pagopa.global.exception.PaymentCancelException;

@@ -1,8 +1,8 @@
-package com.commerce.pagopa.domain.payment.controller;
+package com.commerce.pagopa.payment.presentation;
 
-import com.commerce.pagopa.domain.payment.dto.request.PaymentApproveRequestDto;
-import com.commerce.pagopa.domain.payment.dto.response.PaymentResponseDto;
-import com.commerce.pagopa.domain.payment.service.PaymentService;
+import com.commerce.pagopa.payment.application.PaymentService;
+import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
+import com.commerce.pagopa.payment.application.dto.response.PaymentResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
