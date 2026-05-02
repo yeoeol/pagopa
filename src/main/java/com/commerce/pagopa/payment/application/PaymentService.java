@@ -1,7 +1,7 @@
 package com.commerce.pagopa.payment.application;
 
-import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResponseDto;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;

@@ -1,6 +1,6 @@
 package com.commerce.pagopa.payment.infrastructure.persistence;
 
-import com.commerce.pagopa.domain.order.entity.Order;
+import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
 

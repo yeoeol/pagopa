@@ -1,9 +1,9 @@
 package com.commerce.pagopa.payment.application;
 
-import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
-import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
-import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
+import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
+import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;

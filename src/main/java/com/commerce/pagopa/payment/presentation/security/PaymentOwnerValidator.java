@@ -1,7 +1,7 @@
 package com.commerce.pagopa.payment.presentation.security;
 
-import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import lombok.RequiredArgsConstructor;

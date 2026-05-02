@@ -1,8 +1,8 @@
 package com.commerce.pagopa.domain.seller.order.service;
 
-import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.entity.enums.OrderStatus;
-import com.commerce.pagopa.domain.order.repository.OrderRepository;
+import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
+import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.domain.seller.order.dto.request.OrderStatusChangeRequestDto;
 import com.commerce.pagopa.domain.seller.order.dto.response.OrderResponseDto;
 import lombok.RequiredArgsConstructor;

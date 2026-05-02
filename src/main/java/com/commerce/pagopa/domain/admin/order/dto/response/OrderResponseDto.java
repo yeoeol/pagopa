@@ -1,10 +1,10 @@
 package com.commerce.pagopa.domain.admin.order.dto.response;
 
 import com.commerce.pagopa.domain.admin.user.dto.response.UserResponseDto;
-import com.commerce.pagopa.domain.order.dto.response.DeliveryResponseDto;
-import com.commerce.pagopa.domain.order.dto.response.OrderProductResponseDto;
-import com.commerce.pagopa.domain.order.entity.Order;
-import com.commerce.pagopa.domain.order.entity.enums.PaymentMethod;
+import com.commerce.pagopa.order.application.dto.response.DeliveryResponseDto;
+import com.commerce.pagopa.order.application.dto.response.OrderProductResponseDto;
+import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.util.List;
