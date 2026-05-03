@@ -3,17 +3,14 @@ package com.commerce.pagopa.order.application;
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
-import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
+import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto.OrderProductRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderSearch;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
-import com.commerce.pagopa.order.domain.model.Address;
-import com.commerce.pagopa.order.domain.model.Delivery;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
-import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.payment.domain.model.Payment;
@@ -31,7 +28,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -49,18 +47,18 @@ public class OrderService {
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
         User user = userRepository.findByIdOrThrow(userId);
-        Order order = createOrder(user, requestDto.paymentMethod(), requestDto.delivery());
+        Order order = Order.init(
+                generateOrderNumber(),
+                requestDto.paymentMethod(),
+                user,
+                requestDto.delivery().toDelivery()
+        );
 
-        // 상품 단위 입력 → 셀러 단위로 그룹핑
-        List<OrderProductRequest> items = requestDto.products().stream()
-                .map(req -> {
-                    Product product = productRepository.findByIdOrThrow(req.productId());
-                    return new OrderProductRequest(product, req.quantity());
-                })
-                .toList();
-
-        attachSellerOrders(order, items);
-        order.assignOrderName(getOrderName(order));
+        for (OrderProductRequestDto req : requestDto.products()) {
+            Product product = productRepository.findByIdOrThrow(req.productId());
+            addProductToOrder(order, product, req.quantity());
+        }
+        order.refresh();
 
         return OrderResponseDto.from(orderRepository.save(order));
     }
@@ -75,20 +73,17 @@ public class OrderService {
         }
 
         User user = userRepository.findByIdOrThrow(userId);
-        Order order = createOrder(user, requestDto.paymentMethod(), requestDto.delivery());
-
-        List<OrderProductRequest> items = carts.stream()
-                .map(cart -> new OrderProductRequest(cart.getProduct(), cart.getQuantity()))
-                .toList();
-
-        attachSellerOrders(order, items);
-        order.assignOrderName(getOrderName(order));
+        Order order = Order.init(
+                generateOrderNumber(),
+                requestDto.paymentMethod(),
+                user,
+                requestDto.delivery().toDelivery()
+        );
+        carts.forEach(cart -> addProductToOrder(order, cart.getProduct(), cart.getQuantity()));
+        order.refresh();
 
         // 주문 완료 후 장바구니 항목 삭제
-        List<Long> targetCartIds = carts.stream()
-                .map(Cart::getId)
-                .toList();
-        cartRepository.deleteAllByIdIn(targetCartIds);
+        cartRepository.deleteAllByIdIn(carts.stream().map(Cart::getId).toList());
 
         return OrderResponseDto.from(orderRepository.save(order));
     }
@@ -100,10 +95,9 @@ public class OrderService {
         order.cancel();
 
         Payment payment = paymentRepository.getByOrderIdAndPaymentKeyOrThrow(orderId, requestDto.paymentKey());
-
         paymentService.cancelPayment(payment, payment.getAmount(), requestDto.cancelReason());
 
-        restoreStock(order);
+        order.restoreStock();
     }
 
     // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소
@@ -114,7 +108,7 @@ public class OrderService {
 
         paymentService.cancelPaymentByOrder(order);
 
-        restoreStock(order);
+        order.restoreStock();
     }
 
     @Transactional(readOnly = true)
@@ -131,73 +125,16 @@ public class OrderService {
                 .toList();
     }
 
-    private Order createOrder(User user, PaymentMethod paymentMethod, DeliveryRequestDto deliveryDto) {
-        Address address = new Address(
-                deliveryDto.zipcode(),
-                deliveryDto.address(),
-                deliveryDto.detailAddress()
-        );
-        Delivery delivery = Delivery.create(
-                address,
-                deliveryDto.recipientName(),
-                deliveryDto.recipientPhone(),
-                deliveryDto.deliveryRequestMemo()
-        );
-        return Order.init(getOrderNumber(), paymentMethod, user, delivery);
-    }
-
     /**
-     * 상품 목록을 셀러별로 그룹핑하여 SellerOrder를 생성하고 Order에 부착
-     * 재고 차감도 함께 처리
+     * 한 상품을 Order의 적절한 SellerOrder에 추가하고, 재고를 차감
      */
-    private void attachSellerOrders(Order order, List<OrderProductRequest> items) {
-        // 셀러별 그룹핑 (입력 순서 유지)
-        Map<User, List<OrderProductRequest>> bySeller = new LinkedHashMap<>();
-        for (OrderProductRequest item : items) {
-            bySeller.computeIfAbsent(item.product().getSeller(), k -> new ArrayList<>()).add(item);
-        }
-
-        int seq = 1;
-        for (Map.Entry<User, List<OrderProductRequest>> entry : bySeller.entrySet()) {
-            User seller = entry.getKey();
-            String sellerOrderNumber = "%s-%d".formatted(order.getOrderNumber(), seq++);
-            SellerOrder sellerOrder = SellerOrder.create(seller, sellerOrderNumber);
-
-            for (OrderProductRequest item : entry.getValue()) {
-                Product product = item.product();
-                product.decreaseStock(item.quantity());
-                OrderProduct op = OrderProduct.create(item.quantity(), product.getPrice(), product);
-                sellerOrder.addOrderProduct(op);
-            }
-
-            order.addSellerOrder(sellerOrder);
-        }
+    private void addProductToOrder(Order order, Product product, int quantity) {
+        SellerOrder sellerOrder = order.findOrCreateSellerOrderFor(product.getSeller());
+        product.decreaseStock(quantity);
+        sellerOrder.addOrderProduct(OrderProduct.create(quantity, product.getPrice(), product));
     }
 
-    private void restoreStock(Order order) {
-        for (SellerOrder so : order.getSellerOrders()) {
-            for (OrderProduct op : so.getOrderProducts()) {
-                op.getProduct().increaseStock(op.getQuantity());
-            }
-        }
-    }
-
-    private static String getOrderName(Order order) {
-        List<OrderProduct> all = order.getSellerOrders().stream()
-                .flatMap(so -> so.getOrderProducts().stream())
-                .toList();
-        if (all.isEmpty()) {
-            return "";
-        }
-        String firstName = all.getFirst().getProduct().getName();
-        return all.size() > 1
-                ? "%s 외 %d건".formatted(firstName, all.size() - 1)
-                : firstName;
-    }
-
-    private static String getOrderNumber() {
+    private static String generateOrderNumber() {
         return UUID.randomUUID().toString().substring(0, 8);
     }
-
-    private record OrderProductRequest(Product product, int quantity) {}
 }

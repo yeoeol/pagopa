@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -58,6 +59,7 @@ public class Order extends BaseTimeEntity {
         this.user = user;
         this.delivery = delivery;
         this.totalAmount = BigDecimal.ZERO;
+        this.orderName = "";
     }
 
     public static Order init(String orderNumber, PaymentMethod paymentMethod, User user, Delivery delivery) {
@@ -69,20 +71,51 @@ public class Order extends BaseTimeEntity {
                 .build();
     }
 
+    /**
+     * 한 Order에는 셀러당 SellerOrder가 정확히 1개 존재한다는 도메인 규칙을 강제
+     * 해당 셀러의 SellerOrder가 이미 있으면 반환, 없으면 sellerOrderNumber 생성하여 추가 후 반환
+     */
+    public SellerOrder findOrCreateSellerOrderFor(User seller) {
+        for (SellerOrder so : sellerOrders) {
+            if (Objects.equals(so.getSeller(), seller)) {
+                return so;
+            }
+        }
+        SellerOrder newSellerOrder = SellerOrder.create(seller, "%s-%d".formatted(orderNumber, sellerOrders.size() + 1));
+        addSellerOrder(newSellerOrder);
+        return newSellerOrder;
+    }
+
     public void addSellerOrder(SellerOrder sellerOrder) {
         this.sellerOrders.add(sellerOrder);
         sellerOrder.assignOrder(this);
         recalcTotal();
     }
 
-    public void recalcTotal() {
+    /** 항목 추가가 끝난 뒤 Service가 호출 — totalAmount와 orderName을 일괄 재계산 */
+    public void refresh() {
+        recalcTotal();
+        this.orderName = deriveOrderName();
+    }
+
+    private void recalcTotal() {
         this.totalAmount = sellerOrders.stream()
                 .map(SellerOrder::getSellerTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public void assignOrderName(String orderName) {
-        this.orderName = orderName;
+    /** 첫 상품명을 기준으로 "{name} 외 N건" 형식의 표시용 이름을 도출 */
+    private String deriveOrderName() {
+        List<OrderProduct> all = sellerOrders.stream()
+                .flatMap(so -> so.getOrderProducts().stream())
+                .toList();
+        if (all.isEmpty()) {
+            return "";
+        }
+        String firstName = all.getFirst().getProduct().getName();
+        return all.size() > 1
+                ? "%s 외 %d건".formatted(firstName, all.size() - 1)
+                : firstName;
     }
 
     /**
@@ -136,5 +169,10 @@ public class Order extends BaseTimeEntity {
 
         activeSellerOrders.forEach(SellerOrder::validateCancelable);    // 원자성을 위해 미리 검증
         activeSellerOrders.forEach(SellerOrder::cancel);
+    }
+
+    /** 모든 SellerOrder의 상품 재고를 복원한다. */
+    public void restoreStock() {
+        sellerOrders.forEach(SellerOrder::restoreStock);
     }
 }

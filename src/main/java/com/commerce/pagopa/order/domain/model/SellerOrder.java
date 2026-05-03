@@ -119,6 +119,11 @@ public class SellerOrder extends BaseTimeEntity {
         return this.status == SellerOrderStatus.COMPLETED;
     }
 
+    /** 이 셀러 주문에 속한 모든 상품의 재고를 복원한다. */
+    public void restoreStock() {
+        orderProducts.forEach(OrderProduct::restoreStock);
+    }
+
     private void recalcTotal() {
         this.sellerTotalAmount = orderProducts.stream()
                 .map(OrderProduct::getTotalPrice)
