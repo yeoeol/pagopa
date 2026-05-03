@@ -72,8 +72,8 @@ public class Order extends BaseTimeEntity {
     }
 
     /**
-     * 한 Order에는 셀러당 SellerOrder가 정확히 1개 존재한다는 도메인 규칙을 강제
-     * 해당 셀러의 SellerOrder가 이미 있으면 반환, 없으면 sellerOrderNumber 생성하여 추가 후 반환
+     * 한 Order에는 판매자당 SellerOrder가 정확히 1개 존재한다는 도메인 규칙을 강제
+     * 해당 판매자의 SellerOrder가 이미 있으면 반환, 없으면 sellerOrderNumber 생성하여 추가 후 반환
      */
     public SellerOrder findOrCreateSellerOrderFor(User seller) {
         for (SellerOrder so : sellerOrders) {
@@ -161,18 +161,17 @@ public class Order extends BaseTimeEntity {
         sellerOrders.forEach(SellerOrder::pay);
     }
 
-    /** 전체 주문 취소: 취소 가능한 SellerOrder만 취소(이미 CANCELLED는 스킵). 발송 후 SellerOrder가 있으면 예외 발생 */
+    /**
+     * 전체 주문 취소: 취소 가능한 SellerOrder만 취소(이미 CANCELLED는 스킵).
+     * 발송 후 SellerOrder가 하나라도 있으면 예외 발생 — 원자성 보장 위해 먼저 검증한 뒤 mutation.
+     * 각 SellerOrder.cancel()이 자신의 재고를 함께 복원하므로 여기서 별도 처리 불필요.
+     */
     public void cancel() {
         List<SellerOrder> activeSellerOrders = sellerOrders.stream()
                 .filter(so -> !so.isCancelled())
                 .toList();
 
-        activeSellerOrders.forEach(SellerOrder::validateCancelable);    // 원자성을 위해 미리 검증
+        activeSellerOrders.forEach(SellerOrder::validateCancelable);
         activeSellerOrders.forEach(SellerOrder::cancel);
-    }
-
-    /** 모든 SellerOrder의 상품 재고를 복원한다. */
-    public void restoreStock() {
-        sellerOrders.forEach(SellerOrder::restoreStock);
     }
 }

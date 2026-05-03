@@ -96,8 +96,6 @@ public class OrderService {
 
         Payment payment = paymentRepository.getByOrderIdAndPaymentKeyOrThrow(orderId, requestDto.paymentKey());
         paymentService.cancelPayment(payment, payment.getAmount(), requestDto.cancelReason());
-
-        order.restoreStock();
     }
 
     // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소
@@ -107,8 +105,6 @@ public class OrderService {
         order.cancel();
 
         paymentService.cancelPaymentByOrder(order);
-
-        order.restoreStock();
     }
 
     @Transactional(readOnly = true)
@@ -135,6 +131,6 @@ public class OrderService {
     }
 
     private static String generateOrderNumber() {
-        return UUID.randomUUID().toString().substring(0, 8);
+        return UUID.randomUUID().toString().replace("-", "");
     }
 }

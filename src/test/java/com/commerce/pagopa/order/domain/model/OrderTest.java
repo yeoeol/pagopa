@@ -59,6 +59,53 @@ class OrderTest {
         assertThat(deliveringSellerOrder.getStatus()).isEqualTo(SellerOrderStatus.DELIVERING);
     }
 
+    @Test
+    void cancel_doesNotRestoreStockTwiceForAlreadyCancelledSellerOrder() {
+        // 시나리오: SellerOrder#1은 사전에 부분 취소되어 재고 복원이 이미 1회 일어남.
+        // 그 후 전체 Order.cancel() 호출 시 SellerOrder#1은 건드리지 않고 SellerOrder#2만 취소되어야 함.
+
+        Product product1 = newProduct("seller-1", 10);
+        Product product2 = newProduct("seller-2", 10);
+
+        Order order = newOrder();
+
+        SellerOrder so1 = SellerOrder.create(product1.getSeller(), "order-1-1");
+        product1.decreaseStock(1);   // 주문 placement 시 차감
+        so1.addOrderProduct(OrderProduct.create(1, new BigDecimal("10000"), product1));
+        so1.pay();
+        order.addSellerOrder(so1);
+
+        SellerOrder so2 = SellerOrder.create(product2.getSeller(), "order-1-2");
+        product2.decreaseStock(1);
+        so2.addOrderProduct(OrderProduct.create(1, new BigDecimal("10000"), product2));
+        so2.pay();
+        order.addSellerOrder(so2);
+
+        // SellerOrder#1만 사전에 취소 → product1 재고 9 → 10으로 복원
+        so1.cancel();
+        assertThat(product1.getStock()).isEqualTo(10);
+        assertThat(product2.getStock()).isEqualTo(9);
+
+        // 전체 주문 취소 — so1은 스킵되고 so2만 취소되어야 함
+        order.cancel();
+
+        assertThat(product1.getStock()).isEqualTo(10);  // 중복 복원되지 않음
+        assertThat(product2.getStock()).isEqualTo(10);
+    }
+
+    private Product newProduct(String sellerProviderId, int stock) {
+        User seller = newUser(sellerProviderId, Role.ROLE_SELLER);
+        return Product.create(
+                "product-" + sellerProviderId,
+                "description",
+                new BigDecimal("10000"),
+                null,
+                stock,
+                null,
+                seller
+        );
+    }
+
     private Order newOrder() {
         Address address = new Address("12345", "address", "detail");
         Delivery delivery = Delivery.create(address, "buyer", "01012345678", null);

@@ -104,11 +104,13 @@ public class SellerOrder extends BaseTimeEntity {
     }
 
     /**
-     * 결제 전(PENDING_PAYMENT) 또는 발송 전(READY) 상태에서만 취소 가능
+     * 결제 전(PENDING_PAYMENT) 또는 발송 전(READY) 상태에서만 취소 가능.
+     * 취소 시 차감했던 상품 재고를 함께 복원한다 — 상태 전이와 재고 복원은 1회성으로 atomic하게 묶임.
      */
     public void cancel() {
         validateCancelable();
         this.status = SellerOrderStatus.CANCELLED;
+        orderProducts.forEach(OrderProduct::restoreStock);
     }
 
     public boolean isCancelled() {
@@ -117,11 +119,6 @@ public class SellerOrder extends BaseTimeEntity {
 
     public boolean isCompleted() {
         return this.status == SellerOrderStatus.COMPLETED;
-    }
-
-    /** 이 셀러 주문에 속한 모든 상품의 재고를 복원한다. */
-    public void restoreStock() {
-        orderProducts.forEach(OrderProduct::restoreStock);
     }
 
     private void recalcTotal() {

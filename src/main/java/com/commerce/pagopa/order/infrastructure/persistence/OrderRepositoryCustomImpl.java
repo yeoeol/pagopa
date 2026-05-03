@@ -21,7 +21,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     /**
-     * 셀러가 관여한 Order 목록을 페이징으로 조회
+     * 판매자가 관여한 Order 목록을 페이징으로 조회
      */
     @Override
     public Page<Order> findAllBySellerId(Long sellerId, Pageable pageable) {

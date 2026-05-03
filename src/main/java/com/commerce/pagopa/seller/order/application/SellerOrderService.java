@@ -22,11 +22,6 @@ public class SellerOrderService {
     private final OrderRepository orderRepository;
     private final SellerOrderRepository sellerOrderRepository;
 
-    /**
-     * 셀러의 주문(=SellerOrder) 목록 페이징 조회.
-     * NOTE: PR #3에서는 OrderRepository.findAllBySellerId 경유 후 SellerOrder를 매칭한다.
-     * PR #4에서 SellerOrderRepository로 직접 페이징 조회로 단순화 예정.
-     */
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> findAll(Long sellerId, Pageable pageable) {
         Page<Order> orderPage = orderRepository.findAllBySellerId(sellerId, pageable);
@@ -43,8 +38,7 @@ public class SellerOrderService {
     }
 
     /**
-     * 셀러가 자기 SellerOrder의 상태를 변경한다.
-     * 입력은 기존 호환을 위해 OrderStatus를 사용하지만, PAID는 셀러가 변경할 수 없다(결제 단계는 PaymentService 소관)
+     * 입력은 기존 호환을 위해 OrderStatus를 사용하지만, PAID는 판매자가 변경할 수 없음(결제 단계는 PaymentService 소관)
      */
     @Transactional
     public void changeStatus(Long orderId, Long sellerId, OrderStatusChangeRequestDto requestDto) {
@@ -55,7 +49,7 @@ public class SellerOrderService {
             case DELIVERING -> so.deliver();
             case COMPLETED -> so.complete();
             case CANCELLED -> so.cancel();
-            case PAID, ORDERED -> throw new BusinessException(ErrorCode.ORDER_CANNOT_DELIVER, "셀러가 변경할 수 없는 상태입니다: " + status);
+            case PAID, ORDERED -> throw new BusinessException(ErrorCode.ORDER_CANNOT_DELIVER, "판매자가 변경할 수 없는 상태입니다: " + status);
         }
     }
 }

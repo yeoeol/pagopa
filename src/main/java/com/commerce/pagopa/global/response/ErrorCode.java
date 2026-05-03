@@ -60,13 +60,13 @@ public enum ErrorCode {
     // ORDER PRODUCT
     ORDER_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_PRODUCT_001", "존재하지 않는 주문 상품입니다."),
 
-    // SELLER ORDER (셀러별 출고 단위)
-    SELLER_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "SELLER_ORDER_001", "존재하지 않는 셀러 주문입니다."),
-    SELLER_ORDER_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "SELLER_ORDER_002", "취소할 수 없는 셀러 주문 상태입니다."),
-    SELLER_ORDER_CANNOT_DELIVER(HttpStatus.BAD_REQUEST, "SELLER_ORDER_003", "발송 처리할 수 없는 셀러 주문 상태입니다."),
-    SELLER_ORDER_CANNOT_COMPLETE(HttpStatus.BAD_REQUEST, "SELLER_ORDER_004", "배송 완료 처리할 수 없는 셀러 주문 상태입니다."),
-    SELLER_ORDER_CANNOT_PAY(HttpStatus.BAD_REQUEST, "SELLER_ORDER_005", "결제 승인할 수 없는 셀러 주문 상태입니다."),
-    SELLER_ORDER_NOT_FOR_THIS_SELLER(HttpStatus.NOT_FOUND, "SELLER_ORDER_006", "해당 셀러의 주문을 찾을 수 없습니다."),
+    // SELLER ORDER (판매자별 출고 단위)
+    SELLER_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "SELLER_ORDER_001", "존재하지 않는 판매자 주문입니다."),
+    SELLER_ORDER_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "SELLER_ORDER_002", "취소할 수 없는 판매자 주문 상태입니다."),
+    SELLER_ORDER_CANNOT_DELIVER(HttpStatus.BAD_REQUEST, "SELLER_ORDER_003", "발송 처리할 수 없는 판매자 주문 상태입니다."),
+    SELLER_ORDER_CANNOT_COMPLETE(HttpStatus.BAD_REQUEST, "SELLER_ORDER_004", "배송 완료 처리할 수 없는 판매자 주문 상태입니다."),
+    SELLER_ORDER_CANNOT_PAY(HttpStatus.BAD_REQUEST, "SELLER_ORDER_005", "결제 승인할 수 없는 판매자 주문 상태입니다."),
+    SELLER_ORDER_NOT_FOR_THIS_SELLER(HttpStatus.NOT_FOUND, "SELLER_ORDER_006", "해당 판매자의 주문을 찾을 수 없습니다."),
 
     // REVIEW
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW_001", "존재하지 않는 리뷰입니다."),

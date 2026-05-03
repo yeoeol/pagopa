@@ -137,6 +137,6 @@ public class PaymentService {
         }
 
         payment.cancel();
-        log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}, reason={}", paymentKey, cancelAmount, reason);
+        log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount);
     }
 }

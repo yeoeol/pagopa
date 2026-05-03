@@ -21,6 +21,7 @@ public record OrderResponseDto(
         List<OrderProductResponseDto> orderProducts
 ) {
     public static OrderResponseDto from(Order order) {
+        // 클라이언트는 SellerOrder 구분 없이 평탄화된 상품 목록 조회
         List<OrderProductResponseDto> flatProducts = order.getSellerOrders().stream()
                 .flatMap(so -> so.getOrderProducts().stream())
                 .map(OrderProductResponseDto::from)

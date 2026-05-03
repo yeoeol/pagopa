@@ -142,43 +142,50 @@ VALUES
 -- =========================
 -- 9. seller_orders
 -- =========================
-INSERT INTO seller_orders (seller_total_amount, order_id, seller_id, seller_order_number, status, created_at)
+INSERT INTO seller_orders (seller_order_id, seller_total_amount, order_id, seller_id, seller_order_number, status, created_at)
 VALUES
-    (10000,1,3,'SO-1','READY',NOW()),
-    (20000,2,3,'SO-2','READY',NOW()),
-    (15000,3,4,'SO-3','PENDING_PAYMENT',NOW()),
-    (18000,4,4,'SO-4','READY',NOW()),
-    (22000,5,9,'SO-5','READY',NOW()),
-    (30000,6,9,'SO-6','READY',NOW()),
-    (40000,7,3,'SO-7','READY',NOW()),
-    (12000,8,3,'SO-8','READY',NOW()),
-    (9000,9,4,'SO-9','READY',NOW()),
-    (5000,10,4,'SO-10','READY',NOW());
+    (1, 10000,1,3,'SO-1','READY',NOW()),
+    (2, 20000,2,3,'SO-2','READY',NOW()),
+    (3, 15000,3,4,'SO-3','PENDING_PAYMENT',NOW()),
+    (4, 18000,4,4,'SO-4','READY',NOW()),
+    (5, 22000,5,9,'SO-5','READY',NOW()),
+    (6, 30000,6,9,'SO-6','READY',NOW()),
+    (7, 40000,7,3,'SO-7','READY',NOW()),
+    (8, 12000,8,3,'SO-8','READY',NOW()),
+    (9, 9000,9,4,'SO-9','READY',NOW()),
+    (10, 5000,10,4,'SO-10','READY',NOW());
 
 -- =========================
 -- 10. order_product
 -- =========================
-INSERT INTO order_product (price, quantity, product_id, seller_order_id)
+INSERT INTO order_product (order_product_id, price, quantity, product_id, seller_order_id)
 VALUES
-    (10000,1,1,1),(20000,2,2,2),(15000,1,3,3),(18000,1,4,4),
-    (22000,1,5,5),(30000,2,6,6),(40000,1,7,7),(12000,1,8,8),
-    (9000,1,9,9),(5000,1,10,10);
+    (1, 10000,1,1,1),
+    (2, 20000,2,2,2),
+    (3, 15000,1,3,3),
+    (4, 18000,1,4,4),
+    (5, 22000,1,5,5),
+    (6, 30000,2,6,6),
+    (7, 40000,1,7,7),
+    (8, 12000,1,8,8),
+    (9,  9000,1,9,9),
+    (10, 5000,1,10,10);
 
 -- =========================
 -- 11. reviews
 -- =========================
-INSERT INTO reviews (rating, order_product_id, user_id, content, created_at)
+INSERT INTO reviews (review_id, rating, order_product_id, user_id, content, created_at)
 VALUES
-    (5,1,1,'좋아요',NOW()),
-    (4,2,2,'괜찮아요',NOW()),
-    (3,3,6,'보통',NOW()),
-    (5,4,7,'추천',NOW()),
-    (2,5,8,'별로',NOW()),
-    (5,6,10,'최고',NOW()),
-    (4,7,1,'굿',NOW()),
-    (5,8,2,'만족',NOW()),
-    (3,9,6,'그냥',NOW()),
-    (5,10,7,'좋음',NOW());
+    (1, 5,1,1,'좋아요',NOW()),
+    (2, 4,2,2,'괜찮아요',NOW()),
+    (3, 3,3,6,'보통',NOW()),
+    (4, 5,4,7,'추천',NOW()),
+    (5, 2,5,8,'별로',NOW()),
+    (6, 5,6,10,'최고',NOW()),
+    (7, 4,7,1,'굿',NOW()),
+    (8, 5,8,2,'만족',NOW()),
+    (9, 3,9,6,'그냥',NOW()),
+    (10, 5,10,7,'좋음',NOW());
 
 -- =========================
 -- 12. product_images
@@ -206,7 +213,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- =========================
--- 12. review_images
+-- 13. review_images
 -- =========================
 INSERT INTO review_images (display_order, review_id, image_url)
 VALUES
