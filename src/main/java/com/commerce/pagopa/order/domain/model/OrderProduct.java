@@ -26,18 +26,18 @@ public class OrderProduct {
     private BigDecimal price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @JoinColumn(name = "seller_order_id")
+    private SellerOrder sellerOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private OrderProduct(int quantity, BigDecimal price, Order order, Product product) {
+    private OrderProduct(int quantity, BigDecimal price, SellerOrder sellerOrder, Product product) {
         this.quantity = quantity;
         this.price = price;
-        this.order = order;
+        this.sellerOrder = sellerOrder;
         this.product = product;
     }
 
@@ -49,8 +49,8 @@ public class OrderProduct {
                 .build();
     }
 
-    public void assignOrder(Order order) {
-        this.order = order;
+    void assignSellerOrder(SellerOrder sellerOrder) {
+        this.sellerOrder = sellerOrder;
     }
 
     public BigDecimal getTotalPrice() {

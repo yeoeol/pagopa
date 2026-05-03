@@ -1,7 +1,6 @@
 package com.commerce.pagopa.order.domain.repository;
 
 import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,14 +17,15 @@ public interface OrderRepository {
 
     Page<Order> findAll(Pageable pageable);
 
-    List<Order> findByUserIdAndStatus(Long userId, OrderStatus status);
+    List<Order> findByUserId(Long userId);
 
     Optional<Order> findByOrderNumber(String orderNumber);
 
     /**
-     * 특정 상태(ORDERED)이면서 지정된 시간(created_at) 이하(이전 포함) 생성된 주문들을 조회
+     * 결제 미완료이며 createdAt이 timeoutTime 이하인 주문 조회
+     * 자동 취소 스케줄러에서 사용
      */
-    List<Order> findByStatusAndCreatedAtLessThanEqual(OrderStatus status, LocalDateTime dateTime);
+    List<Order> findUnpaidCreatedBefore(LocalDateTime timeoutTime);
 
     Page<Order> findAllBySellerId(Long sellerId, Pageable pageable);
 

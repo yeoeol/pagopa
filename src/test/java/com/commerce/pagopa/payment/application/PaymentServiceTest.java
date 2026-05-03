@@ -1,6 +1,9 @@
 package com.commerce.pagopa.payment.application;
 
+import com.commerce.pagopa.order.domain.model.Address;
+import com.commerce.pagopa.order.domain.model.Delivery;
 import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
@@ -57,7 +60,7 @@ class PaymentServiceTest {
     @Test
     void requestPayment_throwsWhenOrderIsCancelled() {
         Order order = createOrder("order-1");
-        order.markAsCancelled();
+        order.cancel();
 
         when(orderRepository.findByIdOrThrow(1L)).thenReturn(order);
 
@@ -72,7 +75,7 @@ class PaymentServiceTest {
     @Test
     void confirmPayment_throwsAlreadyCompletedBeforeCallingToss() {
         Order order = createOrder("order-2");
-        order.markAsPaid();
+        order.pay();
         Payment payment = createPayment(order, PaymentStatus.PAID);
 
         when(orderRepository.getByOrderNumberOrThrow("order-2")).thenReturn(order);
@@ -155,9 +158,16 @@ class PaymentServiceTest {
     }
 
     private Order createOrder(String orderNumber) {
-        Order order = Order.init(orderNumber, PaymentMethod.CARD, null);
-        ReflectionTestUtils.setField(order, "totalAmount", amount(10000));
+        Address address = new Address("12345", "주소", "상세");
+        Delivery delivery = Delivery.create(address, "수령인", "01012345678", null);
+        Order order = Order.init(orderNumber, PaymentMethod.CARD, null, delivery);
         ReflectionTestUtils.setField(order, "orderName", "테스트 주문");
+
+        // SellerOrder 1건을 부착해 totalAmount=10000 으로 만든다 (테스트 시나리오용)
+        SellerOrder so = SellerOrder.create(null, orderNumber + "-1");
+        ReflectionTestUtils.setField(so, "sellerTotalAmount", amount(10000));
+        order.addSellerOrder(so);
+
         return order;
     }
 

@@ -21,6 +21,11 @@ public record OrderResponseDto(
         List<OrderProductResponseDto> orderProducts
 ) {
     public static OrderResponseDto from(Order order) {
+        List<OrderProductResponseDto> flatProducts = order.getSellerOrders().stream()
+                .flatMap(so -> so.getOrderProducts().stream())
+                .map(OrderProductResponseDto::from)
+                .toList();
+
         return new OrderResponseDto(
                 order.getId(),
                 order.getOrderNumber(),
@@ -30,9 +35,7 @@ public record OrderResponseDto(
                 order.getPaymentMethod(),
                 UserResponseDto.from(order.getUser()),
                 DeliveryResponseDto.from(order.getDelivery()),
-                order.getOrderProducts().stream()
-                        .map(OrderProductResponseDto::from)
-                        .toList()
+                flatProducts
         );
     }
 }

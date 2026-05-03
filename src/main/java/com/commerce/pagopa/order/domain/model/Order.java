@@ -2,12 +2,10 @@ package com.commerce.pagopa.order.domain.model;
 
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
+import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.exception.OrderCannotCancelException;
 import com.commerce.pagopa.global.exception.OrderCannotPayException;
-import com.commerce.pagopa.global.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -39,93 +37,104 @@ public class Order extends BaseTimeEntity {
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
-
-    @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // 한 Order의 모든 SellerOrder는 동일 배송지로 발송된다.
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "delivery_id", nullable = false)
     private Delivery delivery;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<OrderProduct> orderProducts = new ArrayList<>();
+    private final List<SellerOrder> sellerOrders = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(String orderNumber, OrderStatus status, PaymentMethod paymentMethod, User user) {
+    private Order(String orderNumber, PaymentMethod paymentMethod, User user, Delivery delivery) {
         this.orderNumber = orderNumber;
-        this.status = status;
         this.paymentMethod = paymentMethod;
         this.user = user;
+        this.delivery = delivery;
+        this.totalAmount = BigDecimal.ZERO;
     }
 
-    public static Order init(String orderNumber, PaymentMethod paymentMethod, User user) {
+    public static Order init(String orderNumber, PaymentMethod paymentMethod, User user, Delivery delivery) {
         return Order.builder()
                 .orderNumber(orderNumber)
-                .status(OrderStatus.ORDERED)
                 .paymentMethod(paymentMethod)
                 .user(user)
+                .delivery(delivery)
                 .build();
     }
 
-    public void addOrderProduct(OrderProduct orderProduct) {
-        this.orderProducts.add(orderProduct);
-        orderProduct.assignOrder(this);
-        calcTotalAmount();
+    public void addSellerOrder(SellerOrder sellerOrder) {
+        this.sellerOrders.add(sellerOrder);
+        sellerOrder.assignOrder(this);
+        recalcTotal();
     }
 
-    public void assignDelivery(Delivery delivery) {
-        this.delivery = delivery;
-        delivery.assignOrder(this);
+    public void recalcTotal() {
+        this.totalAmount = sellerOrders.stream()
+                .map(SellerOrder::getSellerTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public void assignOrderName(String orderName) {
         this.orderName = orderName;
     }
 
-    public void markAsCancelled() {
-        if (!(this.getStatus() == OrderStatus.ORDERED || this.getStatus() == OrderStatus.PAID)) {
-            throw new OrderCannotCancelException();
+    /**
+     * - 비어있음: ORDERED (초기 생성, SellerOrder 미부착)
+     * - 모두 PENDING_PAYMENT → ORDERED
+     * - 모두 CANCELLED → CANCELLED
+     * - 모두 COMPLETED → COMPLETED
+     * - 모두 READY → PAID
+     * - 그 외 (혼재) → DELIVERING (= 진행 중)
+     */
+    public OrderStatus getStatus() {
+        if (sellerOrders.isEmpty()) {
+            return OrderStatus.ORDERED;
         }
-        this.updateStatus(OrderStatus.CANCELLED);
+        if (allSellerOrdersAre(SellerOrderStatus.PENDING_PAYMENT)) {
+            return OrderStatus.ORDERED;
+        }
+        if (allSellerOrdersAre(SellerOrderStatus.CANCELLED)) {
+            return OrderStatus.CANCELLED;
+        }
+        if (allSellerOrdersAre(SellerOrderStatus.COMPLETED)) {
+            return OrderStatus.COMPLETED;
+        }
+        if (allSellerOrdersAre(SellerOrderStatus.READY)) {
+            return OrderStatus.PAID;
+        }
+        return OrderStatus.DELIVERING;
     }
 
-    public void markAsPaid() {
-        validatePayable();
-        this.updateStatus(OrderStatus.PAID);
+    private boolean allSellerOrdersAre(SellerOrderStatus status) {
+        return sellerOrders.stream().allMatch(so -> so.getStatus() == status);
     }
 
     public void validatePayable() {
-        if (this.status != OrderStatus.ORDERED) {
+        if (getStatus() != OrderStatus.ORDERED) {
             throw new OrderCannotPayException();
         }
     }
 
-    public void markAsDelivering() {
-        if (this.status != OrderStatus.PAID) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_DELIVER);
-        }
-        this.updateStatus(OrderStatus.DELIVERING);
+    /** 결제 승인 시: 모든 SellerOrder를 READY로 전환 */
+    public void pay() {
+        validatePayable();
+        sellerOrders.forEach(SellerOrder::pay);
     }
 
-    public void markAsCompleted() {
-        if (this.status != OrderStatus.DELIVERING) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_COMPLETE);
-        }
-        this.updateStatus(OrderStatus.COMPLETED);
-    }
+    /** 전체 주문 취소: 취소 가능한 SellerOrder만 취소(이미 CANCELLED는 스킵). 발송 후 SellerOrder가 있으면 예외 발생 */
+    public void cancel() {
+        List<SellerOrder> activeSellerOrders = sellerOrders.stream()
+                .filter(so -> !so.isCancelled())
+                .toList();
 
-    private void updateStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    private void calcTotalAmount() {
-        this.totalAmount = orderProducts.stream()
-                .map(OrderProduct::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        activeSellerOrders.forEach(SellerOrder::validateCancelable);    // 원자성을 위해 미리 검증
+        activeSellerOrders.forEach(SellerOrder::cancel);
     }
 }
