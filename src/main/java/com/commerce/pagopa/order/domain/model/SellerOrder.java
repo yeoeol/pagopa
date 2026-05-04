@@ -81,6 +81,7 @@ public class SellerOrder extends BaseTimeEntity {
             throw new BusinessException(ErrorCode.SELLER_ORDER_CANNOT_PAY);
         }
         this.status = SellerOrderStatus.READY;
+        notifyOrderStatusChanged();
     }
 
     public void deliver() {
@@ -88,6 +89,7 @@ public class SellerOrder extends BaseTimeEntity {
             throw new BusinessException(ErrorCode.SELLER_ORDER_CANNOT_DELIVER);
         }
         this.status = SellerOrderStatus.DELIVERING;
+        notifyOrderStatusChanged();
     }
 
     public void complete() {
@@ -95,6 +97,7 @@ public class SellerOrder extends BaseTimeEntity {
             throw new BusinessException(ErrorCode.SELLER_ORDER_CANNOT_COMPLETE);
         }
         this.status = SellerOrderStatus.COMPLETED;
+        notifyOrderStatusChanged();
     }
 
     public void validateCancelable() {
@@ -104,13 +107,20 @@ public class SellerOrder extends BaseTimeEntity {
     }
 
     /**
-     * 결제 전(PENDING_PAYMENT) 또는 발송 전(READY) 상태에서만 취소 가능.
-     * 취소 시 차감했던 상품 재고를 함께 복원한다 — 상태 전이와 재고 복원은 1회성으로 atomic하게 묶임.
+     * 결제 전(PENDING_PAYMENT) 또는 발송 전(READY) 상태에서만 취소 가능
+     * 취소 시 차감했던 상품 재고를 함께 복원
      */
     public void cancel() {
         validateCancelable();
         this.status = SellerOrderStatus.CANCELLED;
         orderProducts.forEach(OrderProduct::restoreStock);
+        notifyOrderStatusChanged();
+    }
+
+    private void notifyOrderStatusChanged() {
+        if (order != null) {
+            order.recomputeStatus();
+        }
     }
 
     public boolean isCancelled() {

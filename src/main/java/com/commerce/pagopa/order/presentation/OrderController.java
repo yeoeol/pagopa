@@ -10,13 +10,14 @@ import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,12 +57,13 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<OrderResponseDto>>> getOrders(
+    public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @ModelAttribute OrderSearch orderSearch
+            @ModelAttribute OrderSearch orderSearch,
+            @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(orderService.findAll(userDetails.getUserId(), orderSearch))
+                ApiResponse.ok(orderService.findAll(userDetails.getUserId(), orderSearch, pageable))
         );
     }
 

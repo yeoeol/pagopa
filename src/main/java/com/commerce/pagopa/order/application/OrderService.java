@@ -11,6 +11,7 @@ import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.payment.domain.model.Payment;
@@ -25,6 +26,8 @@ import io.micrometer.core.annotation.Counted;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,11 +117,10 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch) {
-        return orderRepository.findByUserId(userId).stream()
-                .filter(order -> orderSearch.status() == null || order.getStatus() == orderSearch.status())
-                .map(OrderResponseDto::from)
-                .toList();
+    public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
+        OrderStatus status = orderSearch == null ? null : orderSearch.status();
+        return orderRepository.findAllByUserIdAndStatus(userId, status, pageable)
+                .map(OrderResponseDto::from);
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.commerce.pagopa.order.domain.repository;
 
 import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ public interface OrderRepository {
 
     Page<Order> findAll(Pageable pageable);
 
-    List<Order> findByUserId(Long userId);
+    Page<Order> findAllByUserIdAndStatus(Long userId, OrderStatus status, Pageable pageable);
 
     Optional<Order> findByOrderNumber(String orderNumber);
 

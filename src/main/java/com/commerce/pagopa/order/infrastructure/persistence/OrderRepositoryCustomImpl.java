@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +30,6 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .join(order.sellerOrders, sellerOrder)
                 .where(sellerOrder.seller.id.eq(sellerId))
                 .distinct()
-                .orderBy(order.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -41,7 +39,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         }
 
         long total = queryFactory
-                .select(order.id.countDistinct())
+                .select(order.countDistinct())
                 .from(order)
                 .join(order.sellerOrders, sellerOrder)
                 .where(sellerOrder.seller.id.eq(sellerId))
@@ -58,7 +56,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     @Override
-    public List<Order> findUnpaidCreatedBefore(@Param("timeoutTime") LocalDateTime timeoutTime) {
+    public List<Order> findUnpaidCreatedBefore(LocalDateTime timeoutTime) {
         return queryFactory
                 .selectFrom(order).distinct()
                 .join(order.sellerOrders, sellerOrder)

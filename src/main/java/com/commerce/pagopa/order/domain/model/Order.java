@@ -20,7 +20,9 @@ import java.util.Objects;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+        @Index(name = "idx_orders_user_status", columnList = "user_id,status")
+})
 public class Order extends BaseTimeEntity {
 
     @Id
@@ -36,6 +38,14 @@ public class Order extends BaseTimeEntity {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal totalAmount;
+
+    /**
+     * sync는 SellerOrder의 상태 전이 메서드(pay/deliver/complete/cancel)와
+     * Order.addSellerOrder/refresh가 자동으로 트리거
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -60,6 +70,7 @@ public class Order extends BaseTimeEntity {
         this.delivery = delivery;
         this.totalAmount = BigDecimal.ZERO;
         this.orderName = "";
+        this.status = OrderStatus.ORDERED;
     }
 
     public static Order init(String orderNumber, PaymentMethod paymentMethod, User user, Delivery delivery) {
@@ -87,15 +98,30 @@ public class Order extends BaseTimeEntity {
     }
 
     public void addSellerOrder(SellerOrder sellerOrder) {
+        for (SellerOrder so : sellerOrders) {
+            if (Objects.equals(so.getSeller(), sellerOrder.getSeller())) {
+                return;
+            }
+        }
         this.sellerOrders.add(sellerOrder);
         sellerOrder.assignOrder(this);
         recalcTotal();
+        recomputeStatus();
     }
 
-    /** 항목 추가가 끝난 뒤 Service가 호출 — totalAmount와 orderName을 일괄 재계산 */
+    /** 항목 추가가 끝난 뒤 Service가 호출 — totalAmount/orderName/status를 일괄 재계산 */
     public void refresh() {
         recalcTotal();
         this.orderName = deriveOrderName();
+        recomputeStatus();
+    }
+
+    /**
+     * SellerOrder의 상태 전이 메서드(pay/deliver/complete/cancel)가 호출하는 sync 트리거
+     * 같은 패키지에서만 호출 — 외부에서는 도메인 메서드를 통해 간접 트리거
+     */
+    void recomputeStatus() {
+        this.status = deriveStatus();
     }
 
     private void recalcTotal() {
@@ -126,7 +152,7 @@ public class Order extends BaseTimeEntity {
      * - 모두 READY → PAID
      * - 그 외 (혼재) → DELIVERING (= 진행 중)
      */
-    public OrderStatus getStatus() {
+    private OrderStatus deriveStatus() {
         if (sellerOrders.isEmpty()) {
             return OrderStatus.ORDERED;
         }
@@ -150,7 +176,7 @@ public class Order extends BaseTimeEntity {
     }
 
     public void validatePayable() {
-        if (getStatus() != OrderStatus.ORDERED) {
+        if (status != OrderStatus.ORDERED) {
             throw new OrderCannotPayException();
         }
     }
