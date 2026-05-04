@@ -2,6 +2,8 @@ package com.commerce.pagopa.order.domain.repository;
 
 import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.global.exception.SellerOrderNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -11,13 +13,15 @@ public interface SellerOrderRepository {
 
     Optional<SellerOrder> findById(Long id);
 
-    Optional<SellerOrder> findBySellerIdAndOrderId(Long sellerId, Long orderId);
+    Page<SellerOrder> findBySellerId(Long sellerId, Pageable pageable);
+
+    Optional<SellerOrder> findByIdAndSellerId(Long id, Long sellerId);
 
     default SellerOrder findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(SellerOrderNotFoundException::new);
     }
 
-    default SellerOrder getBySellerIdAndOrderIdOrThrow(Long sellerId, Long orderId) {
-        return findBySellerIdAndOrderId(sellerId, orderId).orElseThrow(SellerOrderNotFoundException::new);
+    default SellerOrder getByIdAndSellerIdOrThrow(Long id, Long sellerId) {
+        return findByIdAndSellerId(id, sellerId).orElseThrow(SellerOrderNotFoundException::new);
     }
 }

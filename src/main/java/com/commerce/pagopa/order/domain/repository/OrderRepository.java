@@ -28,8 +28,6 @@ public interface OrderRepository {
      */
     List<Order> findUnpaidCreatedBefore(LocalDateTime timeoutTime);
 
-    Page<Order> findAllBySellerId(Long sellerId, Pageable pageable);
-
     default Order findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(OrderNotFoundException::new);
     }

@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record OrderResponseDto(
+public record SellerOrderResponseDto(
         Long orderId,
         Long sellerOrderId,
         String orderNumber,
@@ -25,8 +25,8 @@ public record OrderResponseDto(
         DeliveryResponseDto delivery,
         List<OrderProductResponseDto> orderProducts
 ) {
-    public static OrderResponseDto from(SellerOrder sellerOrder) {
-        return new OrderResponseDto(
+    public static SellerOrderResponseDto from(SellerOrder sellerOrder) {
+        return new SellerOrderResponseDto(
                 sellerOrder.getOrder().getId(),
                 sellerOrder.getId(),
                 sellerOrder.getOrder().getOrderNumber(),

@@ -67,6 +67,7 @@ public enum ErrorCode {
     SELLER_ORDER_CANNOT_COMPLETE(HttpStatus.BAD_REQUEST, "SELLER_ORDER_004", "배송 완료 처리할 수 없는 판매자 주문 상태입니다."),
     SELLER_ORDER_CANNOT_PAY(HttpStatus.BAD_REQUEST, "SELLER_ORDER_005", "결제 승인할 수 없는 판매자 주문 상태입니다."),
     SELLER_ORDER_NOT_FOR_THIS_SELLER(HttpStatus.NOT_FOUND, "SELLER_ORDER_006", "해당 판매자의 주문을 찾을 수 없습니다."),
+    SELLER_ORDER_NOT_PROCESS(HttpStatus.BAD_REQUEST, "SELLER_ORDER_007", "처리할 수 없는 주문 상태입니다."),
 
     // REVIEW
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW_001", "존재하지 않는 리뷰입니다."),
