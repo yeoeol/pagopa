@@ -2,7 +2,6 @@ package com.commerce.pagopa.order.application.dto.response;
 
 import com.commerce.pagopa.order.domain.model.Address;
 import com.commerce.pagopa.order.domain.model.Delivery;
-import com.commerce.pagopa.order.domain.model.enums.DeliveryStatus;
 
 public record DeliveryResponseDto(
         Long deliveryId,
@@ -11,8 +10,7 @@ public record DeliveryResponseDto(
         String zipcode,
         String address,
         String detailAddress,
-        String deliveryRequestMemo,
-        DeliveryStatus status
+        String deliveryRequestMemo
 ) {
     public static DeliveryResponseDto from(Delivery delivery) {
         Address address = delivery.getAddress();
@@ -23,8 +21,7 @@ public record DeliveryResponseDto(
                 address != null ? address.getZipcode() : null,
                 address != null ? address.getAddress() : null,
                 address != null ? address.getDetailAddress() : null,
-                delivery.getDeliveryRequestMemo(),
-                delivery.getStatus()
+                delivery.getDeliveryRequestMemo()
         );
     }
 }

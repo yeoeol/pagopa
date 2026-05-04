@@ -2,7 +2,6 @@ package com.commerce.pagopa.order.infrastructure.scheduler;
 
 import com.commerce.pagopa.order.application.OrderService;
 import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
@@ -35,14 +34,13 @@ public class OrderScheduler {
     }
 
     /**
-     * 1분마다 실행되며, 주문 생성 후 {beforeMin}분이 지나도록 결제되지 않은(ORDERED) 주문을 찾아 자동 취소합니다.
+     * 1분마다 실행되며, 주문 생성 후 {beforeMin}분이 지나도록 결제되지 않은 주문을 자동 취소
      */
     @Scheduled(cron = "0 * * * * *") // 매 분 0초에 실행
     public void cancelUnpaidOrders() {
         LocalDateTime timeoutTime = LocalDateTime.now().minusMinutes(beforeMin);
 
-        // 상태가 ORDERED 이면서 생성 시간이 { beforeMin }분 이하
-        List<Order> unpaidOrders = orderRepository.findByStatusAndCreatedAtLessThanEqual(OrderStatus.ORDERED, timeoutTime);
+        List<Order> unpaidOrders = orderRepository.findUnpaidCreatedBefore(timeoutTime);
 
         if (!unpaidOrders.isEmpty()) {
             log.info("[OrderScheduler] {}분 경과 미결제 주문 {}건 자동 취소 시작", beforeMin, unpaidOrders.size());

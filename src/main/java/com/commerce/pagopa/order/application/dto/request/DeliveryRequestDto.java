@@ -1,5 +1,8 @@
 package com.commerce.pagopa.order.application.dto.request;
 
+import com.commerce.pagopa.order.domain.model.Address;
+import com.commerce.pagopa.order.domain.model.Delivery;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
@@ -23,4 +26,8 @@ public record DeliveryRequestDto(
 
         String deliveryRequestMemo
 ) {
+    public Delivery toDelivery() {
+        Address addr = new Address(zipcode, address, detailAddress);
+        return Delivery.create(addr, recipientName, recipientPhone, deliveryRequestMemo);
+    }
 }

@@ -3,17 +3,15 @@ package com.commerce.pagopa.order.application;
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
-import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
+import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto.OrderProductRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderSearch;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
-import com.commerce.pagopa.order.domain.model.Address;
-import com.commerce.pagopa.order.domain.model.Delivery;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
-import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
+import com.commerce.pagopa.order.domain.model.SellerOrder;
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.payment.domain.model.Payment;
@@ -28,6 +26,8 @@ import io.micrometer.core.annotation.Counted;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,15 +50,18 @@ public class OrderService {
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
         User user = userRepository.findByIdOrThrow(userId);
-        Order order = createOrderProcess(user, requestDto.paymentMethod(), requestDto.delivery());
+        Order order = Order.init(
+                generateOrderNumber(),
+                requestDto.paymentMethod(),
+                user,
+                requestDto.delivery().toDelivery()
+        );
 
-        for (OrderProductRequestDto orderProductRequestDto : requestDto.products()) {
-            Product product = productRepository.findByIdOrThrow(orderProductRequestDto.productId());
-            processOrderProduct(order, product, orderProductRequestDto.quantity());
+        for (OrderProductRequestDto req : requestDto.products()) {
+            Product product = productRepository.findByIdOrThrow(req.productId());
+            addProductToOrder(order, product, req.quantity());
         }
-
-        String orderName = getOrderName(order);
-        order.assignOrderName(orderName);
+        order.refresh();
 
         return OrderResponseDto.from(orderRepository.save(order));
     }
@@ -73,21 +76,18 @@ public class OrderService {
         }
 
         User user = userRepository.findByIdOrThrow(userId);
-        Order order = createOrderProcess(user, requestDto.paymentMethod(), requestDto.delivery());
-
-        for (Cart cart : carts) {
-            Product product = cart.getProduct();
-            processOrderProduct(order, product, cart.getQuantity());
-        }
-
-        String orderName = getOrderName(order);
-        order.assignOrderName(orderName);
+        Order order = Order.init(
+                generateOrderNumber(),
+                requestDto.paymentMethod(),
+                user,
+                requestDto.delivery().toDelivery()
+        );
+        carts.forEach(cart -> addProductToOrder(order, cart.getProduct(), cart.getQuantity()));
+        order.refresh();
 
         // 주문 완료 후 장바구니 항목 삭제
-        List<Long> targetCartIds = carts.stream()
-                    .map(Cart::getId)
-                    .toList();
-        cartRepository.deleteAllByIdIn(targetCartIds);
+        cartRepository.deleteAllByIdIn(carts.stream().map(Cart::getId).toList());
+
         return OrderResponseDto.from(orderRepository.save(order));
     }
 
@@ -95,30 +95,19 @@ public class OrderService {
     @Transactional
     public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
         Order order = orderRepository.findByIdOrThrow(orderId);
-        order.markAsCancelled();
+        order.cancel();
 
         Payment payment = paymentRepository.getByOrderIdAndPaymentKeyOrThrow(orderId, requestDto.paymentKey());
-
-        paymentService.cancelPayment(payment, requestDto.cancelReason());
-
-        for (OrderProduct orderProduct : order.getOrderProducts()) {
-            Product product = orderProduct.getProduct();
-            product.increaseStock(orderProduct.getQuantity());
-        }
+        paymentService.cancelPayment(payment, payment.getAmount(), requestDto.cancelReason());
     }
 
     // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소
     @Transactional
     public void cancelUnpaidOrder(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
-        order.markAsCancelled();
+        order.cancel();
 
         paymentService.cancelPaymentByOrder(order);
-
-        for (OrderProduct orderProduct : order.getOrderProducts()) {
-            Product product = orderProduct.getProduct();
-            product.increaseStock(orderProduct.getQuantity());
-        }
     }
 
     @Transactional(readOnly = true)
@@ -128,52 +117,22 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch) {
-        return orderRepository.findByUserIdAndStatus(userId, orderSearch.status()).stream()
-                .map(OrderResponseDto::from)
-                .toList();
+    public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
+        OrderStatus status = orderSearch == null ? null : orderSearch.status();
+        return orderRepository.findAllByUserIdAndStatus(userId, status, pageable)
+                .map(OrderResponseDto::from);
     }
 
-    private Order createOrderProcess(User user, PaymentMethod paymentMethod, DeliveryRequestDto deliveryDto) {
-        Order order = Order.init(getOrderNumber(), paymentMethod, user);
-
-        // 배송 정보 생성 및 연관관계 매핑
-        Address address = new Address(
-                deliveryDto.zipcode(),
-                deliveryDto.address(),
-                deliveryDto.detailAddress()
-        );
-        Delivery delivery = Delivery.create(
-                address,
-                deliveryDto.recipientName(),
-                deliveryDto.recipientPhone(),
-                deliveryDto.deliveryRequestMemo()
-        );
-        order.assignDelivery(delivery);
-
-        return order;
-    }
-
-    private void processOrderProduct(Order order, Product product, int quantity) {
+    /**
+     * 한 상품을 Order의 적절한 SellerOrder에 추가하고, 재고를 차감
+     */
+    private void addProductToOrder(Order order, Product product, int quantity) {
+        SellerOrder sellerOrder = order.findOrCreateSellerOrderFor(product.getSeller());
         product.decreaseStock(quantity);
-
-        OrderProduct orderProduct = OrderProduct.create(
-                quantity,
-                product.getPrice(),
-                product
-        );
-        order.addOrderProduct(orderProduct);
+        sellerOrder.addOrderProduct(OrderProduct.create(quantity, product.getPrice(), product));
     }
 
-    private static String getOrderName(Order order) {
-        return order.getOrderProducts().size() > 1
-                ? "%s 외 %s건".formatted(
-                order.getOrderProducts().getFirst().getProduct().getName(),
-                order.getOrderProducts().size() - 1)
-                : order.getOrderProducts().getFirst().getProduct().getName();
-    }
-
-    private static String getOrderNumber() {
-        return UUID.randomUUID().toString().substring(0, 8);
+    private static String generateOrderNumber() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 }

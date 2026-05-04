@@ -23,7 +23,10 @@ public class OrderProductOwnerValidator extends OwnerValidator<OrderProduct, Lon
 
     @Override
     protected Long extractOwnerId(OrderProduct orderProduct) {
-        Order order = orderProduct.getOrder();
+        if (orderProduct.getSellerOrder() == null) {
+            return null;
+        }
+        Order order = orderProduct.getSellerOrder().getOrder();
         if (order == null) {
             return null;
         }

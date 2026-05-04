@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Slf4j
@@ -65,7 +66,7 @@ public class PaymentService {
 
         if (!payment.isAmountMatched(requestDto.amount())) {
             payment.fail();
-            order.markAsCancelled();
+            order.cancel();
             throw new PaymentCancelException();
         }
 
@@ -73,12 +74,13 @@ public class PaymentService {
     }
 
     /**
-     * 승인된 결제를 paymentKey로 취소 (유저 요청용, Toss API 호출)
+     * 승인된 결제를 paymentKey로 취소 (유저 요청용, Toss API 호출).
+     * cancelAmount는 항상 명시 — 전체 취소 시에는 payment.getAmount() 전달, 부분 취소 시에는 해당 금액 전달
      */
     @Transactional
-    public void cancelPayment(Payment payment, String cancelReason) {
+    public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
         payment.validateCancelable();
-        callTossCancelApi(cancelReason, payment);
+        callTossCancelApi(cancelReason, cancelAmount, payment);
     }
 
     /**
@@ -106,19 +108,20 @@ public class PaymentService {
                     .toBodilessEntity();
         } catch (Exception e) {
             payment.fail();
-            order.markAsCancelled();
+            order.cancel();
             log.error("[Payment] 토스 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
             throw new PaymentConfirmException();
         }
 
         payment.success(requestDto.paymentKey());
-        order.markAsPaid();
+        order.pay();
         log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
-    private void callTossCancelApi(String reason, Payment payment) {
+    private void callTossCancelApi(String reason, BigDecimal cancelAmount, Payment payment) {
         Map<String, String> payload = Map.of(
-                "cancelReason", reason
+                "cancelReason", reason,
+                "cancelAmount", cancelAmount.toString()
         );
 
         String paymentKey = payment.getPaymentKey();
@@ -129,11 +132,11 @@ public class PaymentService {
                     .retrieve()
                     .toBodilessEntity();
         } catch (Exception e) {
-            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}", paymentKey, e);
+            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount, e);
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
         }
 
         payment.cancel();
-        log.info("[Payment] 결제 취소 성공 - paymentKey={}, reason={}", paymentKey, reason);
+        log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount);
     }
 }

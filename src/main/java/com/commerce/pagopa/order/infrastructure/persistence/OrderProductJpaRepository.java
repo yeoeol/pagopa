@@ -11,11 +11,10 @@ import java.util.Optional;
 public interface OrderProductJpaRepository extends JpaRepository<OrderProduct, Long>, OrderProductRepository {
 
     @Override
-    @Query(value =
-            "SELECT op " +
-            "FROM OrderProduct op " +
-                    "JOIN FETCH op.order o " +
-                    "JOIN FETCH o.user u " +
-                        "WHERE op.id = :id")
+    @Query("SELECT op FROM OrderProduct op " +
+           "JOIN FETCH op.sellerOrder so " +
+           "JOIN FETCH so.order o " +
+           "JOIN FETCH o.user u " +
+           "WHERE op.id = :id")
     Optional<OrderProduct> findByIdWithOrderAndUser(@Param("id") Long id);
 }

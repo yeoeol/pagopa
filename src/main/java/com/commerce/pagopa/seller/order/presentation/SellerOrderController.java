@@ -44,10 +44,11 @@ public class SellerOrderController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<Void>> changeStatus(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
             @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderStatusChangeRequestDto requestDto
     ) {
-        sellerOrderService.changeStatus(orderId, requestDto);
+        sellerOrderService.changeStatus(orderId, userId, requestDto);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 }
