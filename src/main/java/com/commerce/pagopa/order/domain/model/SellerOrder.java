@@ -1,5 +1,6 @@
 package com.commerce.pagopa.order.domain.model;
 
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
@@ -74,6 +75,26 @@ public class SellerOrder extends BaseTimeEntity {
         this.orderProducts.add(orderProduct);
         orderProduct.assignSellerOrder(this);
         recalcTotal();
+    }
+
+    /**
+     * 입력은 기존 호환을 위해 OrderStatus를 사용
+     * PAID는 판매자가 변경할 수 없음(결제 단계는 PaymentService 소관)
+     */
+    public void changeStatus(OrderStatus status) {
+        switch (status) {
+            case DELIVERING -> deliver();
+            case COMPLETED -> complete();
+            case CANCELLED -> cancel();
+            case PAID, ORDERED -> throw new BusinessException(
+                    ErrorCode.ORDER_CANNOT_DELIVER,
+                    "판매자가 변경할 수 없는 상태입니다: " + status
+            );
+            default -> throw new BusinessException(
+                    ErrorCode.SELLER_ORDER_NOT_PROCESS,
+                    "처리할 수 없는 주문 상태입니다: " + status.getDescription()
+            );
+        }
     }
 
     public void pay() {

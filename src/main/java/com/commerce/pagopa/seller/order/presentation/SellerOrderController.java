@@ -2,7 +2,7 @@ package com.commerce.pagopa.seller.order.presentation;
 
 import com.commerce.pagopa.seller.order.application.SellerOrderService;
 import com.commerce.pagopa.seller.order.application.dto.request.OrderStatusChangeRequestDto;
-import com.commerce.pagopa.seller.order.application.dto.response.OrderResponseDto;
+import com.commerce.pagopa.seller.order.application.dto.response.SellerOrderResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class SellerOrderController {
     private final SellerOrderService sellerOrderService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getSellerOrders(
+    public ResponseEntity<ApiResponse<Page<SellerOrderResponseDto>>> getSellerOrders(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @PageableDefault(size = 10, page = 0, sort = "createdAt") Pageable pageable
     ) {
@@ -32,23 +32,23 @@ public class SellerOrderController {
         );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<OrderResponseDto>> getSellerOrder(
+    @GetMapping("/{sellerOrderId}")
+    public ResponseEntity<ApiResponse<SellerOrderResponseDto>> getSellerOrder(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @PathVariable("id") Long orderId
+            @PathVariable("sellerOrderId") Long sellerOrderId
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(sellerOrderService.find(orderId, userId))
+                ApiResponse.ok(sellerOrderService.find(sellerOrderId, userId))
         );
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/{sellerOrderId}/status")
     public ResponseEntity<ApiResponse<Void>> changeStatus(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @PathVariable("id") Long orderId,
+            @PathVariable("sellerOrderId") Long sellerOrderId,
             @Valid @RequestBody OrderStatusChangeRequestDto requestDto
     ) {
-        sellerOrderService.changeStatus(orderId, userId, requestDto);
+        sellerOrderService.changeStatus(sellerOrderId, userId, requestDto);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 }
