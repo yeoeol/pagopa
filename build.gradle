@@ -29,21 +29,18 @@ repositories {
 
 dependencies {
     // Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // Infra
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
-
-    implementation("io.github.openfeign.querydsl:querydsl-core:${queryDslVersion}")
-    implementation("io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion")
-    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
-
-    // Logstash
     implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
 
     // Azure Blob Storage
@@ -55,8 +52,17 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
     // DB
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    implementation("io.github.openfeign.querydsl:querydsl-core:${queryDslVersion}")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion")
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
+
     runtimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'com.h2database:h2'
+
+    // API Specification (Swagger API)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

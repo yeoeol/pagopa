@@ -34,12 +34,14 @@ public class ProductController {
     private final GuestSessionCookieFactory guestSessionCookieFactory;
 
     /**
-     * 상품 목록 조회
+     * 상품 목록 페이징 조회
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getAll() {
+    public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getAll(
+            @PageableDefault(size = 10, page = 0) Pageable pageable
+    ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(productService.findAllWithActiveAndSoldOut())
+                ApiResponse.ok(productService.findAllWithActiveAndSoldOut(pageable))
         );
     }
 
