@@ -78,6 +78,11 @@ public class CartController {
             @PathVariable("id") Long cartId
     ) {
         CartResponseDto response = cartService.decrementQuantity(cartId);
+        if (response == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NO_CONTENT)
+                    .body(ApiResponse.ok(null));
+        }
         return ResponseEntity.ok(
                 ApiResponse.ok(response) // 수량이 0이 되어 삭제된 경우 response는 null
         );
