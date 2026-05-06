@@ -7,7 +7,6 @@ import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,18 +27,16 @@ public class CartController {
 
     private final CartService cartService;
 
-    // TODO: 장바구니 추가 API 의도에 맞게 수정
-    @Operation(summary = "장바구니 추가", description = "장바구니에 상품을 추가합니다.")
+    @Operation(
+            summary = "장바구니 추가",
+            description = "장바구니에 상품을 추가합니다. 이미 담긴 상품이면 요청 수량만큼 누적됩니다."
+    )
     @PostMapping
     public ResponseEntity<ApiResponse<CartResponseDto>> addCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody CartAddRequestDto requestDto,
-            @Parameter(
-                    description = "true : 수량 증가 / false : 수량 감소"
-            )
-            @RequestParam(defaultValue = "true") boolean isAdd
+            @Valid @RequestBody CartAddRequestDto requestDto
     ) {
-        CartResponseDto response = cartService.addCart(userDetails.getUserId(), requestDto, isAdd);
+        CartResponseDto response = cartService.addCart(userDetails.getUserId(), requestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(response));
@@ -56,17 +53,36 @@ public class CartController {
         );
     }
 
-    @Operation(summary = "장바구니 품목 수량 수정", description = "장바구니 품목의 수량을 조정합니다.")
-    @PatchMapping("/{id}")
+    @Operation(
+            summary = "장바구니 품목 수량 증가",
+            description = "장바구니 품목의 수량을 1 증가시킵니다."
+    )
+    @PostMapping("/{id}/increment")
     @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
-    public ResponseEntity<ApiResponse<CartResponseDto>> updateQuantity(
-            @PathVariable("id") Long cartId,
-            @Parameter(
-                    description = "true : 수량 증가 / false : 수량 감소"
-            )
-            @RequestParam(required = false, defaultValue = "true") boolean isAdd
+    public ResponseEntity<ApiResponse<CartResponseDto>> incrementQuantity(
+            @PathVariable("id") Long cartId
     ) {
-        CartResponseDto response = cartService.updateQuantity(cartId, isAdd);
+        CartResponseDto response = cartService.incrementQuantity(cartId);
+        return ResponseEntity.ok(
+                ApiResponse.ok(response)
+        );
+    }
+
+    @Operation(
+            summary = "장바구니 품목 수량 감소",
+            description = "장바구니 품목의 수량을 1 감소시킵니다. 수량이 0이 되면 해당 품목이 삭제되고 null을 반환합니다."
+    )
+    @PostMapping("/{id}/decrement")
+    @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
+    public ResponseEntity<ApiResponse<CartResponseDto>> decrementQuantity(
+            @PathVariable("id") Long cartId
+    ) {
+        CartResponseDto response = cartService.decrementQuantity(cartId);
+        if (response == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NO_CONTENT)
+                    .body(ApiResponse.ok(null));
+        }
         return ResponseEntity.ok(
                 ApiResponse.ok(response) // 수량이 0이 되어 삭제된 경우 response는 null
         );
