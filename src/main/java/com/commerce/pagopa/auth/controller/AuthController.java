@@ -8,6 +8,8 @@ import com.commerce.pagopa.global.cookie.JwtCookieFactory;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.util.JwtCookieUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "AUTH API", description = "인증 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
@@ -28,6 +31,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtCookieFactory jwtCookieFactory;
 
+    @Operation(summary = "로그아웃", description = "리프레쉬 토큰을 삭제하고 세션을 clear합니다.")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
             @AuthenticationPrincipal(expression = "userId") Long userId,
@@ -39,6 +43,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "JWT 토큰 재발급", description = "유효한 리프레쉬 토큰을 사용하여 액세스 토큰과 리프레쉬 토큰을 재발급합니다.")
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<Void>> refresh(
             HttpServletRequest request,
@@ -63,6 +68,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 정보를 기록하고 세션을 clear합니다.")
     @PatchMapping("/withdraw")
     public ResponseEntity<ApiResponse<Void>> withdraw(
             @AuthenticationPrincipal(expression = "userId") Long userId,
@@ -71,11 +77,6 @@ public class AuthController {
     ) {
         authService.withdraw(userId);
         clearCookieAndSession(request, response);
-        return ResponseEntity.ok(ApiResponse.ok());
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> checkAuthenticated() {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 

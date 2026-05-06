@@ -50,6 +50,12 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
 
@@ -64,8 +70,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/v1/orders/**").hasRole("USER")
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").hasAnyRole("USER", "SELLER")
-                        .requestMatchers("/api/v1/reviews/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").permitAll()
+                        .requestMatchers("/api/v1/reviews/**").permitAll()
 
                         .requestMatchers("/api/v1/scraps/**").hasRole("USER")
 

@@ -24,12 +24,9 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> findAllWithActiveAndSoldOut() {
-        return productRepository.findAll()
-                .stream()
-                .filter(Product::isActiveOrSoldOut)
-                .map(ProductResponseDto::from)
-                .toList();
+    public Page<ProductResponseDto> findAllWithActiveAndSoldOut(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAll(pageable);
+        return productPage.map(ProductResponseDto::from);
     }
 
     @Transactional(readOnly = true)
