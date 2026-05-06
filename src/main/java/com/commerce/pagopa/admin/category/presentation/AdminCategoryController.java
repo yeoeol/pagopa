@@ -24,7 +24,7 @@ public class AdminCategoryController {
 
     private final AdminCategoryService adminCategoryService;
 
-    @Operation(summary = "최상위 카테고리 생성", description = "depth=0인 최상위(루트) 카테고리를 생성합니다.")
+    @Operation(summary = "대분류(최상위) 카테고리 생성", description = "depth=0인 대분류(최상위) 카테고리를 생성합니다.")
     @PostMapping("/root")
     public ResponseEntity<ApiResponse<CategorySimpleResponseDto>> createRoot(
             @Valid @RequestBody RootCategoryCreateRequestDto requestDto
