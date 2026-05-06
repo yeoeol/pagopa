@@ -36,7 +36,7 @@ public class CartController {
             @Parameter(
                     description = "true : 수량 증가 / false : 수량 감소"
             )
-            @RequestParam(required = false, defaultValue = "true") boolean isAdd
+            @RequestParam(defaultValue = "true") boolean isAdd
     ) {
         CartResponseDto response = cartService.addCart(userDetails.getUserId(), requestDto, isAdd);
         return ResponseEntity

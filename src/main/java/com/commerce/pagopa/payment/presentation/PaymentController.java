@@ -30,7 +30,7 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    @Operation(summary = "결제 요청", description = "프론트엔드에서 토스페이먼츠 결제창(SDK) 승인 성공 후, 백엔드에 최종 승인을 요청합니다.")
+    @Operation(summary = "결제 승인", description = "프론트엔드에서 토스페이먼츠 결제창(SDK) 승인 성공 후, 백엔드에 최종 승인을 요청합니다.")
     @PostMapping("/confirm")
     @PreAuthorize("@paymentOwnerValidator.isOwner(#requestDto.orderId(), principal.userId)")
     public ResponseEntity<ApiResponse<Void>> confirmPayment(

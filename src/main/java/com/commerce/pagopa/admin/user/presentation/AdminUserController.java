@@ -45,9 +45,9 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @Operation(summary = "사용자 삭제", description = "사용자를 삭제합니다.")
+    @Operation(summary = "사용자 탈퇴 처리", description = "사용자 상태를 WITHDRAWN으로 변경하고 리프레시 토큰을 삭제합니다.")
     @PatchMapping("/{id}/withdraw")
-    public ResponseEntity<ApiResponse<Void>> withdrawn(@PathVariable("id") Long userId) {
+    public ResponseEntity<ApiResponse<Void>> withdraw(@PathVariable("id") Long userId) {
         adminUserService.withdraw(userId);
         return ResponseEntity.ok(ApiResponse.ok());
     }

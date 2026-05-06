@@ -34,7 +34,15 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-        return new PageImpl<>(products);
+
+        Long total = queryFactory
+                .select(product.count())
+                .from(product)
+                .where(statusEq(ProductStatus.ACTIVE)
+                        .or(statusEq(ProductStatus.SOLDOUT)))
+                .fetchOne();
+
+        return new PageImpl<>(products, pageable, total == null ? 0L : total);
     }
 
     @Override
