@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "ADMIN CATEGORY API", description = "관리자용 카테고리 관리 API")
+@Tag(name = "ADMIN CATEGORY API", description = "관리자 - 카테고리 관리 API")
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
