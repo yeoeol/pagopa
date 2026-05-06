@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,25 +25,18 @@ public class CartService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public CartResponseDto addCart(Long userId, CartAddRequestDto requestDto, boolean isAdd) {
+    public CartResponseDto addCart(Long userId, CartAddRequestDto requestDto) {
         User user = userRepository.findByIdOrThrow(userId);
         Product product = productRepository.findByIdOrThrow(requestDto.productId());
 
-        Cart cart;
-        Optional<Cart> optionalCart = cartRepository.findByUserAndProduct(user, product);
-        if (optionalCart.isPresent()) {
-            cart = optionalCart.get();
-            if (isAdd) { cart.addQuantity(); }
-            else {
-                cart.reduceQuantity();
-                if (cart.getQuantity() == 0) {
-                    delete(cart.getId());
-                    return null;
-                }
-            }
-        } else {
-            cart = cartRepository.save(Cart.create(requestDto.quantity(), user, product));
-        }
+        Cart cart = cartRepository.findByUserAndProduct(user, product)
+                .map(existing -> {
+                    existing.addQuantity(requestDto.quantity());
+                    return existing;
+                })
+                .orElseGet(() -> cartRepository.save(
+                        Cart.create(requestDto.quantity(), user, product))
+                );
 
         return CartResponseDto.from(cart);
     }
@@ -60,17 +52,19 @@ public class CartService {
     }
 
     @Transactional
-    public CartResponseDto updateQuantity(Long cartId, boolean isAdd) {
+    public CartResponseDto incrementQuantity(Long cartId) {
         Cart cart = cartRepository.findByIdWithFetchOrThrow(cartId);
+        cart.addQuantity(1);
+        return CartResponseDto.from(cart);
+    }
 
-        if (isAdd) {
-            cart.addQuantity();
-        } else {
-            cart.reduceQuantity();
-            if (cart.getQuantity() == 0) {
-                delete(cart.getId());
-                return null; // 삭제된 경우 null 반환
-            }
+    @Transactional
+    public CartResponseDto decrementQuantity(Long cartId) {
+        Cart cart = cartRepository.findByIdWithFetchOrThrow(cartId);
+        cart.reduceQuantity();
+        if (cart.getQuantity() == 0) {
+            delete(cart.getId());
+            return null;
         }
         return CartResponseDto.from(cart);
     }
