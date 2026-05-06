@@ -75,8 +75,7 @@ public class OrderController {
         );
     }
 
-    // TODO: fix - paymentKey 전달 -> orderId로 조회한 Order의 Payment에서 조회
-    @Operation(summary = "주문 취소", description = "주문을 취소합니다.")
+    @Operation(summary = "주문 전체 취소", description = "주문을 전체 취소합니다.")
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> cancelOrder(
