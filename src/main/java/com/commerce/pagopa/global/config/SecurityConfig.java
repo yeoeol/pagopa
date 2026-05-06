@@ -70,8 +70,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/v1/orders/**").hasRole("USER")
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").hasAnyRole("USER", "SELLER")
-                        .requestMatchers("/api/v1/reviews/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").permitAll()
+                        .requestMatchers("/api/v1/reviews/**").permitAll()
 
                         .requestMatchers("/api/v1/scraps/**").hasRole("USER")
 

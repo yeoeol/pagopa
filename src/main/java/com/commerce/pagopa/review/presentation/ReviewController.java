@@ -41,14 +41,6 @@ public class ReviewController {
                 .body(ApiResponse.ok(reviewService.create(userDetails.getUserId(), requestDto)));
     }
 
-    @Operation(summary = "리뷰 조회", description = "작성한 리뷰를 조회합니다.")
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<ReviewResponseDto>>> getAll() {
-        return ResponseEntity.ok(
-                ApiResponse.ok(reviewService.findAll())
-        );
-    }
-
     @Operation(summary = "리뷰 수정", description = "작성한 리뷰를 수정합니다.")
     @PatchMapping("/{id}")
     @PreAuthorize("@reviewOwnerValidator.isOwner(#reviewId, principal.userId)")

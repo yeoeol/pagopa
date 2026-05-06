@@ -28,6 +28,7 @@ public class CartController {
 
     private final CartService cartService;
 
+    // TODO: 장바구니 추가 API 의도에 맞게 수정
     @Operation(summary = "장바구니 추가", description = "장바구니에 상품을 추가합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<CartResponseDto>> addCart(
@@ -85,6 +86,7 @@ public class CartController {
 
     @Operation(summary = "장바구니 비우기", description = "장바구니 품목들을 전체 삭제합니다.")
     @DeleteMapping
+    @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> deleteAllCart(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
