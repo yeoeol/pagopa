@@ -17,7 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "SELLER ORDER API", description = "판매자 주문 관리 API")
+@Tag(name = "SELLER ORDER API", description = "판매자 - 주문 관리 API")
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SELLER')")
