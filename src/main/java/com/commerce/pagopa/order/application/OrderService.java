@@ -97,7 +97,7 @@ public class OrderService {
         Order order = orderRepository.findByIdOrThrow(orderId);
         order.cancel();
 
-        Payment payment = paymentRepository.getByOrderIdAndPaymentKeyOrThrow(orderId, requestDto.paymentKey());
+        Payment payment = paymentRepository.getByOrderOrThrow(order);
         paymentService.cancelPayment(payment, payment.getAmount(), requestDto.cancelReason());
     }
 
