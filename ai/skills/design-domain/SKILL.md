@@ -28,6 +28,6 @@ order.cancel()
 - Methods (behavior)
 - Explanation of business rules
 
-## Example
+## Usage Example
 
 "Design order domain model"
