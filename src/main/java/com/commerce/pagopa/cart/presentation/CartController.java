@@ -6,6 +6,8 @@ import com.commerce.pagopa.cart.application.CartService;
 import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "CART API", description = "장바구니 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/cart")
@@ -23,6 +26,7 @@ public class CartController {
 
     private final CartService cartService;
 
+    @Operation(summary = "장바구니 추가", description = "장바구니에 상품을 추가합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<CartResponseDto>> addCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -35,6 +39,7 @@ public class CartController {
                 .body(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "장바구니 조회", description = "장바구니 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<List<CartResponseDto>>> getCart(
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -45,6 +50,7 @@ public class CartController {
         );
     }
 
+    @Operation(summary = "장바구니 품목 수량 수정", description = "장바구니 품목의 수량을 조정합니다.")
     @PatchMapping("/{id}")
     @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
     public ResponseEntity<ApiResponse<CartResponseDto>> updateQuantity(
@@ -57,6 +63,7 @@ public class CartController {
         );
     }
 
+    @Operation(summary = "장바구니 품목 삭제", description = "장바구니에서 특정 품목을 삭제합니다.")
     @DeleteMapping("/{id}")
     @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> deleteCart(
@@ -68,6 +75,7 @@ public class CartController {
         );
     }
 
+    @Operation(summary = "장바구니 비우기", description = "장바구니 품목들을 전체 삭제합니다.")
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> deleteAllCart(
             @AuthenticationPrincipal CustomUserDetails userDetails
