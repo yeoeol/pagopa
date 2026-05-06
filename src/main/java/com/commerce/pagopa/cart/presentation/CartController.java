@@ -7,7 +7,9 @@ import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -30,7 +32,10 @@ public class CartController {
     @PostMapping
     public ResponseEntity<ApiResponse<CartResponseDto>> addCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody CartAddRequestDto requestDto,
+            @Valid @RequestBody CartAddRequestDto requestDto,
+            @Parameter(
+                    description = "true : 수량 증가 / false : 수량 감소"
+            )
             @RequestParam(required = false, defaultValue = "true") boolean isAdd
     ) {
         CartResponseDto response = cartService.addCart(userDetails.getUserId(), requestDto, isAdd);
@@ -55,7 +60,10 @@ public class CartController {
     @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
     public ResponseEntity<ApiResponse<CartResponseDto>> updateQuantity(
             @PathVariable("id") Long cartId,
-            @RequestParam boolean isAdd
+            @Parameter(
+                    description = "true : 수량 증가 / false : 수량 감소"
+            )
+            @RequestParam(required = false, defaultValue = "true") boolean isAdd
     ) {
         CartResponseDto response = cartService.updateQuantity(cartId, isAdd);
         return ResponseEntity.ok(
