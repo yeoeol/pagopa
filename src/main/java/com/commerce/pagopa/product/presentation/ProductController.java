@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,7 +39,7 @@ public class ProductController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getAll(
-            @PageableDefault(size = 10, page = 0) Pageable pageable
+            @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(productService.findAllWithActiveAndSoldOut(pageable))
@@ -63,7 +64,7 @@ public class ProductController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @ModelAttribute ProductSearchCondition productSearchCondition,
+            @ParameterObject @Valid @ModelAttribute ProductSearchCondition productSearchCondition,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
@@ -89,7 +90,7 @@ public class ProductController {
     @GetMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getProductsByCategory(
             @PathVariable("categoryId") Long categoryId,
-            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+            @ParameterObject @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(productService.findAllByCategory(categoryId, pageable))
