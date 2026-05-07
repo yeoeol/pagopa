@@ -6,6 +6,7 @@ import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.OrderCannotPayException;
+import com.commerce.pagopa.global.exception.SellerOrderNotFoundException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -181,7 +182,29 @@ public class Order extends BaseTimeEntity {
         }
     }
 
-    /** 결제 승인 시: 모든 SellerOrder를 READY로 전환 */
+    /**
+     * 이 Order에 속한 SellerOrder를 id로 조회, 없으면 예외
+     */
+    public SellerOrder findSellerOrder(Long sellerOrderId) {
+        return sellerOrders.stream()
+                .filter(so -> so.getId().equals(sellerOrderId))
+                .findFirst()
+                .orElseThrow(SellerOrderNotFoundException::new);
+    }
+
+    /**
+     * 취소되지 않은 SellerOrder들의 금액 합 — 환불 대상 잔여 금액 계산용
+     */
+    public BigDecimal calculateActiveAmount() {
+        return sellerOrders.stream()
+                .filter(so -> !so.isCancelled())
+                .map(SellerOrder::getSellerTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * 결제 승인 시: 모든 SellerOrder를 READY로 전환
+     */
     public void pay() {
         validatePayable();
         sellerOrders.forEach(SellerOrder::pay);

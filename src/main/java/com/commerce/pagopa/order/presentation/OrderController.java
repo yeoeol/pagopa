@@ -85,4 +85,16 @@ public class OrderController {
         orderService.cancelOrder(orderId, requestDto);
         return ResponseEntity.ok(ApiResponse.ok());
     }
+
+    @Operation(summary = "판매자 주문 부분 취소", description = "주문 내 특정 판매자의 출고 단위(SellerOrder)만 취소합니다. 발송 전(READY) 상태에서만 가능합니다.")
+    @PatchMapping("/{orderId}/seller-orders/{sellerOrderId}/cancel")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
+    public ResponseEntity<ApiResponse<Void>> cancelSellerOrder(
+            @PathVariable("orderId") Long orderId,
+            @PathVariable("sellerOrderId") Long sellerOrderId,
+            @Valid @RequestBody OrderCancelRequestDto requestDto
+    ) {
+        orderService.cancelSellerOrder(orderId, sellerOrderId, requestDto);
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
 }

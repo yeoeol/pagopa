@@ -31,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -95,10 +96,32 @@ public class OrderService {
     @Transactional
     public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
         Order order = orderRepository.findByIdOrThrow(orderId);
+
+        BigDecimal remainingAmount = order.calculateActiveAmount();
         order.cancel();
 
         Payment payment = paymentRepository.getByOrderOrThrow(order);
-        paymentService.cancelPayment(payment, payment.getAmount(), requestDto.cancelReason());
+        paymentService.cancelPayment(payment, remainingAmount, requestDto.cancelReason());
+    }
+
+    /**
+     * 단일 SellerOrder 부분 취소
+     */
+    @Counted("my.order")
+    @Transactional
+    public void cancelSellerOrder(Long orderId, Long sellerOrderId, OrderCancelRequestDto requestDto) {
+        Order order = orderRepository.findByIdOrThrow(orderId);
+        SellerOrder sellerOrder = order.findSellerOrder(sellerOrderId);
+
+        BigDecimal cancelAmount = sellerOrder.getSellerTotalAmount();
+        sellerOrder.cancelByBuyer();
+
+        Payment payment = paymentRepository.getByOrderOrThrow(order);
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            paymentService.cancelPayment(payment, cancelAmount, requestDto.cancelReason());
+        } else {
+            paymentService.cancelPaymentPartial(payment, cancelAmount, requestDto.cancelReason());
+        }
     }
 
     // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소
