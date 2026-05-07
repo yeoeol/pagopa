@@ -77,7 +77,7 @@ public class Payment extends BaseTimeEntity {
         if (this.status == PaymentStatus.CANCELLED) {
             throw new BusinessException(ErrorCode.PAYMENT_ALREADY_CANCELLED);
         }
-        if (this.status != PaymentStatus.PAID) {
+        if (this.status != PaymentStatus.PAID && this.status != PaymentStatus.PARTIAL_CANCELLED) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
         }
     }
@@ -98,9 +98,14 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.FAILED;
     }
 
-    // 결제 취소
+    // 결제 전체 취소
     public void cancel() {
         this.status = PaymentStatus.CANCELLED;
+    }
+
+    // 결제 부분 취소
+    public void cancelPartial() {
+        this.status = PaymentStatus.PARTIAL_CANCELLED;
     }
 
 }
