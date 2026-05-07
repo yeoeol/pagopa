@@ -74,21 +74,12 @@ public class PaymentService {
     }
 
     /**
-     * 승인된 결제를 paymentKey로 전체 취소 (Toss API 호출 + Payment 상태 → CANCELLED)
+     * 승인된 결제를 paymentKey로 환불 취소 (Toss API 호출 + 누적 환불 금액 갱신)
      */
     @Transactional
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
         cancelTossPayment(payment, cancelAmount, cancelReason);
-        payment.cancel();
-    }
-
-    /**
-     * 승인된 결제를 paymentKey로 부분 취소 (Toss API 호출 + Payment 상태 → PARTIAL_CANCELLED)
-     */
-    @Transactional
-    public void cancelPaymentPartial(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        cancelTossPayment(payment, cancelAmount, cancelReason);
-        payment.cancelPartial();
+        payment.cancel(cancelAmount);
     }
 
     /**
@@ -98,7 +89,7 @@ public class PaymentService {
     public void cancelPaymentByOrder(Order order) {
         paymentRepository.findByOrder(order)
                 .filter(p -> p.getStatus() != PaymentStatus.PAID)
-                .ifPresent(Payment::cancel);
+                .ifPresent(Payment::cancelUnpaid);
     }
 
     private void callTossConfirmApi(PaymentApproveRequestDto requestDto, Payment payment, Order order) {
@@ -130,7 +121,7 @@ public class PaymentService {
      * Payment 상태 전이(cancel / cancelPartial)는 호출자가 결정
      */
     private void cancelTossPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        payment.validateCancelable();
+        payment.validateCancelable(cancelAmount);
 
         Map<String, String> payload = Map.of(
                 "cancelReason", cancelReason,

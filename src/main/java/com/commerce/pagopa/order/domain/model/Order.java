@@ -205,13 +205,6 @@ public class Order extends BaseTimeEntity {
     }
 
     /**
-     * 이 Order의 모든 SellerOrder가 CANCELLED 상태인지 — Payment 전체 취소 여부 결정용
-     */
-    public boolean isAllSellerOrdersCancelled() {
-        return !sellerOrders.isEmpty() && sellerOrders.stream().allMatch(SellerOrder::isCancelled);
-    }
-
-    /**
      * 결제 승인 시: 모든 SellerOrder를 READY로 전환
      */
     public void pay() {

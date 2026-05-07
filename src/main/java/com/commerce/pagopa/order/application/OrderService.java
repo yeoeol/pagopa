@@ -118,11 +118,7 @@ public class OrderService {
         sellerOrder.cancelByBuyer();
 
         Payment payment = paymentRepository.getByOrderOrThrow(order);
-        if (order.isAllSellerOrdersCancelled()) {
-            paymentService.cancelPayment(payment, cancelAmount, requestDto.cancelReason());
-        } else {
-            paymentService.cancelPaymentPartial(payment, cancelAmount, requestDto.cancelReason());
-        }
+        paymentService.cancelPayment(payment, cancelAmount, requestDto.cancelReason());
     }
 
     // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소

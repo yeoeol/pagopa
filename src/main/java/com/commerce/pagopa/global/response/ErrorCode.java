@@ -91,6 +91,7 @@ public enum ErrorCode {
     PAYMENT_ALREADY_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT_008", "이미 실패한 결제 건입니다."),
     PAYMENT_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "PAYMENT_009", "이미 취소된 결제 건입니다."),
     PAYMENT_NOT_CANCELABLE(HttpStatus.BAD_REQUEST, "PAYMENT_009", "결제를 취소할 수 없습니다."),
+    PAYMENT_CANCEL_AMOUNT_INVALID(HttpStatus.BAD_REQUEST, "PAYMENT_010", "취소 금액이 잘못되었습니다."),
 
     ;
     private final HttpStatus httpStatus;
