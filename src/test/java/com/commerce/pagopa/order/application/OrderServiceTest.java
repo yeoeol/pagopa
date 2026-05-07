@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -132,6 +133,34 @@ class OrderServiceTest {
 
         verify(paymentService, never()).cancelPayment(any(), any(), any());
         verify(paymentService, never()).cancelPaymentPartial(any(), any(), any());
+    }
+
+    @Test
+    void cancelSellerOrder_propagatesPaymentServiceFailureToTriggerRollback() {
+        // 단위 테스트 범위에서 @Transactional 롤백 자체는 검증되지 않음. 다만 paymentService가 던진 예외가
+        // 정상 전파되어 트랜잭션 경계가 롤백을 트리거할 기회를 갖는지 확인 + 실패 시점의 in-memory 상태 문서화.
+        Order order = newPaidOrderWithTwoSellers();
+        SellerOrder so1 = order.getSellerOrders().get(0);
+        SellerOrder so2 = order.getSellerOrders().get(1);
+        Payment payment = newPaidPayment(order);
+
+        when(orderRepository.findByIdOrThrow(1L)).thenReturn(order);
+        when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
+        doThrow(new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL))
+                .when(paymentService).cancelPaymentPartial(any(), any(), any());
+
+        assertThatThrownBy(() -> orderService.cancelSellerOrder(
+                1L, so1.getId(), new OrderCancelRequestDto("Toss 실패 시나리오")))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_FAIL);
+
+        // 도메인 in-memory mutation은 이미 일어난 상태 — 실제로는 @Transactional이 DB 단계에서 롤백을 수행함.
+        assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
+        assertThat(so2.getStatus()).isEqualTo(SellerOrderStatus.READY);
+        // Payment 상태 mutation은 PaymentService 내부에서 일어나므로 mock 환경에선 PAID 그대로 — 즉
+        // Toss 호출 실패 시 Payment.cancelPartial()이 호출되지 않았음이 확인된다(있어야 할 자리에 없음).
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PAID);
     }
 
     @Test

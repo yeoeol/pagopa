@@ -97,6 +97,7 @@ public class OrderService {
     public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
         Order order = orderRepository.findByIdOrThrow(orderId);
 
+        // 주의: cancel() 호출 후에는 활성 SellerOrder가 사라져 0이 되므로 반드시 cancel() 이전에 산정
         BigDecimal remainingAmount = order.calculateActiveAmount();
         order.cancel();
 
