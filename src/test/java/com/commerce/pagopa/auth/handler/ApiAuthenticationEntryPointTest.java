@@ -1,20 +1,20 @@
 package com.commerce.pagopa.auth.handler;
 
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ApiAuthenticationEntryPointTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
     private final ApiAuthenticationEntryPoint authenticationEntryPoint =
-            new ApiAuthenticationEntryPoint(objectMapper);
+            new ApiAuthenticationEntryPoint(jsonMapper);
 
     @Test
     void commence_returnsUnauthorizedResponse_whenNoAuthenticationErrorAttributeExists() throws Exception {
@@ -27,13 +27,13 @@ class ApiAuthenticationEntryPointTest {
                 new InsufficientAuthenticationException("Full authentication is required")
         );
 
-        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        JsonNode body = jsonMapper.readTree(response.getContentAsString());
 
         assertThat(response.getStatus()).isEqualTo(ErrorCode.UNAUTHORIZED.getHttpStatus().value());
         assertThat(response.getContentType()).isEqualTo("application/json;charset=UTF-8");
         assertThat(body.get("success").asBoolean()).isFalse();
-        assertThat(body.get("error").get("code").asText()).isEqualTo(ErrorCode.UNAUTHORIZED.getCode());
-        assertThat(body.get("error").get("message").asText()).isEqualTo(ErrorCode.UNAUTHORIZED.getMessage());
+        assertThat(body.get("error").get("code").asString()).isEqualTo(ErrorCode.UNAUTHORIZED.getCode());
+        assertThat(body.get("error").get("message").asString()).isEqualTo(ErrorCode.UNAUTHORIZED.getMessage());
     }
 
     @Test
@@ -48,12 +48,12 @@ class ApiAuthenticationEntryPointTest {
                 new InsufficientAuthenticationException("Invalid token")
         );
 
-        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        JsonNode body = jsonMapper.readTree(response.getContentAsString());
 
         assertThat(response.getStatus()).isEqualTo(ErrorCode.INVALID_TOKEN.getHttpStatus().value());
         assertThat(body.get("success").asBoolean()).isFalse();
-        assertThat(body.get("error").get("code").asText()).isEqualTo(ErrorCode.INVALID_TOKEN.getCode());
-        assertThat(body.get("error").get("message").asText()).isEqualTo(ErrorCode.INVALID_TOKEN.getMessage());
+        assertThat(body.get("error").get("code").asString()).isEqualTo(ErrorCode.INVALID_TOKEN.getCode());
+        assertThat(body.get("error").get("message").asString()).isEqualTo(ErrorCode.INVALID_TOKEN.getMessage());
     }
 
     @Test
@@ -68,11 +68,11 @@ class ApiAuthenticationEntryPointTest {
                 new InsufficientAuthenticationException("Expired token")
         );
 
-        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        JsonNode body = jsonMapper.readTree(response.getContentAsString());
 
         assertThat(response.getStatus()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getHttpStatus().value());
         assertThat(body.get("success").asBoolean()).isFalse();
-        assertThat(body.get("error").get("code").asText()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getCode());
-        assertThat(body.get("error").get("message").asText()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getMessage());
+        assertThat(body.get("error").get("code").asString()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getCode());
+        assertThat(body.get("error").get("message").asString()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getMessage());
     }
 }

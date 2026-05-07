@@ -2,7 +2,6 @@ package com.commerce.pagopa.auth.handler;
 
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     public static final String AUTH_ERROR_CODE_ATTRIBUTE = "authErrorCode";
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     @Override
     public void commence(
@@ -44,7 +44,7 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error(errorCode)));
+        response.getWriter().write(jsonMapper.writeValueAsString(ApiResponse.error(errorCode)));
     }
 
     private ErrorCode resolveErrorCode(HttpServletRequest request) {
