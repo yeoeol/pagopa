@@ -142,7 +142,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    void cancelPayment_marksCancelledAfterTossSuccess() {
+    void cancelPayment_fullAmount_marksCancelledAfterTossSuccess() {
         Order order = createOrder("order-6");
         Payment payment = createPayment(order, PaymentStatus.PAID);
         mockTossCancelSuccess("paid-key", amount(10000), "사용자 요청");
@@ -150,29 +150,36 @@ class PaymentServiceTest {
         paymentService.cancelPayment(payment, amount(10000), "사용자 요청");
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("10000");
     }
 
     @Test
-    void cancelPaymentPartial_marksPartialCancelledAfterTossSuccess() {
+    void cancelPayment_partialAmount_marksPartialCancelledAfterTossSuccess() {
         Order order = createOrder("order-7");
         Payment payment = createPayment(order, PaymentStatus.PAID);
         mockTossCancelSuccess("paid-key", amount(4000), "셀러1 취소");
 
-        paymentService.cancelPaymentPartial(payment, amount(4000), "셀러1 취소");
+        paymentService.cancelPayment(payment, amount(4000), "셀러1 취소");
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PARTIAL_CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("4000");
     }
 
     @Test
-    void cancelPaymentPartial_allowedWhenAlreadyPartialCancelled() {
+    void cancelPayment_consecutivePartials_finalCallPromotesToCancelled() {
         Order order = createOrder("order-8");
         Payment payment = createPayment(order, PaymentStatus.PAID);
-        payment.cancelPartial(); // 이전 부분 취소가 있던 상태에서 추가 부분 취소
-        mockTossCancelSuccess("paid-key", amount(3000), "셀러2 취소");
+        mockTossCancelSuccess("paid-key", amount(6000), "셀러2 취소");
 
-        paymentService.cancelPaymentPartial(payment, amount(3000), "셀러2 취소");
-
+        // 사전: 4000 부분 취소된 상태
+        payment.cancel(amount(4000));
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PARTIAL_CANCELLED);
+
+        // 추가 6000 → 누적 10000 → 전체 취소로 승격
+        paymentService.cancelPayment(payment, amount(6000), "셀러2 취소");
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("10000");
     }
 
     @Test
@@ -184,6 +191,20 @@ class PaymentServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_ALREADY_CANCELLED);
+
+        verify(tossRestClient, never()).post();
+    }
+
+    @Test
+    void cancelPayment_throwsBeforeTossWhenAmountExceedsRemaining() {
+        Order order = createOrder("order-10");
+        Payment payment = createPayment(order, PaymentStatus.PAID);
+        payment.cancel(amount(7000)); // 사전에 7000 환불 누적됨
+
+        assertThatThrownBy(() -> paymentService.cancelPayment(payment, amount(4000), "초과 취소"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_AMOUNT_INVALID);
 
         verify(tossRestClient, never()).post();
     }
@@ -243,7 +264,9 @@ class PaymentServiceTest {
             payment.fail();
         }
         if (status == PaymentStatus.CANCELLED) {
-            payment.cancel();
+            payment.markInProgress();
+            payment.success("paid-key");
+            payment.cancel(payment.getAmount()); // 전체 환불 처리로 CANCELLED
         }
 
         return payment;
