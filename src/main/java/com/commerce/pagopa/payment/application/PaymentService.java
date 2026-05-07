@@ -78,8 +78,7 @@ public class PaymentService {
      */
     @Transactional
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        payment.validateCancelable();
-        callTossCancelApi(cancelReason, cancelAmount, payment);
+        cancelTossPayment(payment, cancelAmount, cancelReason);
         payment.cancel();
     }
 
@@ -88,8 +87,7 @@ public class PaymentService {
      */
     @Transactional
     public void cancelPaymentPartial(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        payment.validateCancelable();
-        callTossCancelApi(cancelReason, cancelAmount, payment);
+        cancelTossPayment(payment, cancelAmount, cancelReason);
         payment.cancelPartial();
     }
 
@@ -128,9 +126,14 @@ public class PaymentService {
         log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
-    private void callTossCancelApi(String reason, BigDecimal cancelAmount, Payment payment) {
+    /**
+     * Payment 상태 전이(cancel / cancelPartial)는 호출자가 결정
+     */
+    private void cancelTossPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
+        payment.validateCancelable();
+
         Map<String, String> payload = Map.of(
-                "cancelReason", reason,
+                "cancelReason", cancelReason,
                 "cancelAmount", cancelAmount.toString()
         );
 
