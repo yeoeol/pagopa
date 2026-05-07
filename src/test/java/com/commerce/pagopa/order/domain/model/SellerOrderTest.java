@@ -105,6 +105,59 @@ class SellerOrderTest {
                 .isEqualTo(ErrorCode.SELLER_ORDER_CANNOT_CANCEL);
     }
 
+    @Test
+    void cancelByBuyer_allowedInReady() {
+        SellerOrder sellerOrder = newReadySellerOrder();
+
+        sellerOrder.cancelByBuyer();
+
+        assertThat(sellerOrder.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
+        assertThat(sellerOrder.isCancelled()).isTrue();
+    }
+
+    @Test
+    void cancelByBuyer_restoresStockOnReady() {
+        SellerOrder sellerOrder = newReadySellerOrder();
+        Product product = sellerOrder.getOrderProducts().getFirst().getProduct();
+        int stockBefore = product.getStock();
+        product.decreaseStock(1); // 주문 placement 시 차감 흉내
+
+        sellerOrder.cancelByBuyer();
+
+        assertThat(product.getStock()).isEqualTo(stockBefore);
+    }
+
+    @Test
+    void cancelByBuyer_throwsInPendingPayment() {
+        SellerOrder sellerOrder = newPendingSellerOrder();
+
+        assertThatThrownBy(sellerOrder::cancelByBuyer)
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.SELLER_ORDER_CANNOT_CANCEL);
+    }
+
+    @Test
+    void cancelByBuyer_throwsAfterDeliveringWithReturnGuidance() {
+        SellerOrder sellerOrder = newReadySellerOrder();
+        sellerOrder.deliver();
+
+        assertThatThrownBy(sellerOrder::cancelByBuyer)
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("발송 후에는 반품으로 처리하세요");
+    }
+
+    @Test
+    void cancelByBuyer_throwsAfterCompletedWithReturnGuidance() {
+        SellerOrder sellerOrder = newReadySellerOrder();
+        sellerOrder.deliver();
+        sellerOrder.complete();
+
+        assertThatThrownBy(sellerOrder::cancelByBuyer)
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("발송 후에는 반품으로 처리하세요");
+    }
+
     private SellerOrder newPendingSellerOrder() {
         User seller = User.create(
                 "seller@example.com",

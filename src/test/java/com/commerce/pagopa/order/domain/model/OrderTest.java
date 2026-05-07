@@ -1,6 +1,7 @@
 package com.commerce.pagopa.order.domain.model;
 
 import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.exception.SellerOrderNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
@@ -10,6 +11,7 @@ import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.Role;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 
@@ -91,6 +93,61 @@ class OrderTest {
 
         assertThat(product1.getStock()).isEqualTo(10);  // 중복 복원되지 않음
         assertThat(product2.getStock()).isEqualTo(10);
+    }
+
+    @Test
+    void findSellerOrder_returnsMatchingSellerOrder() {
+        Order order = newOrder();
+        SellerOrder so1 = newReadySellerOrder("seller-1", "order-1-1");
+        SellerOrder so2 = newReadySellerOrder("seller-2", "order-1-2");
+        ReflectionTestUtils.setField(so1, "id", 1L);
+        ReflectionTestUtils.setField(so2, "id", 2L);
+        order.addSellerOrder(so1);
+        order.addSellerOrder(so2);
+
+        SellerOrder found = order.findSellerOrder(2L);
+
+        assertThat(found).isSameAs(so2);
+    }
+
+    @Test
+    void findSellerOrder_throwsWhenSellerOrderIdNotInThisOrder() {
+        Order order = newOrder();
+        SellerOrder so1 = newReadySellerOrder("seller-1", "order-1-1");
+        ReflectionTestUtils.setField(so1, "id", 1L);
+        order.addSellerOrder(so1);
+
+        assertThatThrownBy(() -> order.findSellerOrder(999L))
+                .isInstanceOf(SellerOrderNotFoundException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.SELLER_ORDER_NOT_FOUND);
+    }
+
+    @Test
+    void calculateActiveAmount_excludesCancelledSellerOrders() {
+        Order order = newOrder();
+        SellerOrder so1 = newReadySellerOrder("seller-1", "order-1-1");
+        SellerOrder so2 = newReadySellerOrder("seller-2", "order-1-2");
+        order.addSellerOrder(so1);
+        order.addSellerOrder(so2);
+
+        so1.cancelByBuyer();
+
+        assertThat(order.calculateActiveAmount()).isEqualByComparingTo(so2.getSellerTotalAmount());
+    }
+
+    @Test
+    void calculateActiveAmount_returnsZeroWhenAllCancelled() {
+        Order order = newOrder();
+        SellerOrder so1 = newReadySellerOrder("seller-1", "order-1-1");
+        SellerOrder so2 = newReadySellerOrder("seller-2", "order-1-2");
+        order.addSellerOrder(so1);
+        order.addSellerOrder(so2);
+
+        so1.cancelByBuyer();
+        so2.cancelByBuyer();
+
+        assertThat(order.calculateActiveAmount()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     private Product newProduct(String sellerProviderId, int stock) {

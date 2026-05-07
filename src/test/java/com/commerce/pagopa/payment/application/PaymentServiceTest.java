@@ -141,6 +141,53 @@ class PaymentServiceTest {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
     }
 
+    @Test
+    void cancelPayment_marksCancelledAfterTossSuccess() {
+        Order order = createOrder("order-6");
+        Payment payment = createPayment(order, PaymentStatus.PAID);
+        mockTossCancelSuccess("paid-key", amount(10000), "사용자 요청");
+
+        paymentService.cancelPayment(payment, amount(10000), "사용자 요청");
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+    }
+
+    @Test
+    void cancelPaymentPartial_marksPartialCancelledAfterTossSuccess() {
+        Order order = createOrder("order-7");
+        Payment payment = createPayment(order, PaymentStatus.PAID);
+        mockTossCancelSuccess("paid-key", amount(4000), "셀러1 취소");
+
+        paymentService.cancelPaymentPartial(payment, amount(4000), "셀러1 취소");
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PARTIAL_CANCELLED);
+    }
+
+    @Test
+    void cancelPaymentPartial_allowedWhenAlreadyPartialCancelled() {
+        Order order = createOrder("order-8");
+        Payment payment = createPayment(order, PaymentStatus.PAID);
+        payment.cancelPartial(); // 이전 부분 취소가 있던 상태에서 추가 부분 취소
+        mockTossCancelSuccess("paid-key", amount(3000), "셀러2 취소");
+
+        paymentService.cancelPaymentPartial(payment, amount(3000), "셀러2 취소");
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PARTIAL_CANCELLED);
+    }
+
+    @Test
+    void cancelPayment_throwsBeforeTossWhenAlreadyCancelled() {
+        Order order = createOrder("order-9");
+        Payment payment = createPayment(order, PaymentStatus.CANCELLED);
+
+        assertThatThrownBy(() -> paymentService.cancelPayment(payment, amount(10000), "재취소"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_ALREADY_CANCELLED);
+
+        verify(tossRestClient, never()).post();
+    }
+
     private void mockTossConfirmSuccess(String orderId) {
         when(tossRestClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri("/v1/payments/confirm")).thenReturn(requestBodyUriSpec);
@@ -155,6 +202,18 @@ class PaymentServiceTest {
         when(requestBodyUriSpec.body(confirmPayload(orderId))).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toBodilessEntity()).thenThrow(new RuntimeException("toss failure"));
+    }
+
+    private void mockTossCancelSuccess(String paymentKey, BigDecimal cancelAmount, String reason) {
+        Map<String, String> payload = Map.of(
+                "cancelReason", reason,
+                "cancelAmount", cancelAmount.toString()
+        );
+        when(tossRestClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri("/v1/payments/{paymentKey}/cancel", paymentKey)).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.body(payload)).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build());
     }
 
     private Order createOrder(String orderNumber) {
