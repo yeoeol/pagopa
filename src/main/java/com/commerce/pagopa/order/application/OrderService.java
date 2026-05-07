@@ -117,7 +117,7 @@ public class OrderService {
         sellerOrder.cancelByBuyer();
 
         Payment payment = paymentRepository.getByOrderOrThrow(order);
-        if (order.getStatus() == OrderStatus.CANCELLED) {
+        if (order.isAllSellerOrdersCancelled()) {
             paymentService.cancelPayment(payment, cancelAmount, requestDto.cancelReason());
         } else {
             paymentService.cancelPaymentPartial(payment, cancelAmount, requestDto.cancelReason());
