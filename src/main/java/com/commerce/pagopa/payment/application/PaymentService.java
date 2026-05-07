@@ -74,13 +74,23 @@ public class PaymentService {
     }
 
     /**
-     * 승인된 결제를 paymentKey로 취소 (유저 요청용, Toss API 호출).
-     * cancelAmount는 항상 명시 — 전체 취소 시에는 payment.getAmount() 전달, 부분 취소 시에는 해당 금액 전달
+     * 승인된 결제를 paymentKey로 전체 취소 (Toss API 호출 + Payment 상태 → CANCELLED)
      */
     @Transactional
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
         payment.validateCancelable();
         callTossCancelApi(cancelReason, cancelAmount, payment);
+        payment.cancel();
+    }
+
+    /**
+     * 승인된 결제를 paymentKey로 부분 취소 (Toss API 호출 + Payment 상태 → PARTIAL_CANCELLED)
+     */
+    @Transactional
+    public void cancelPaymentPartial(Payment payment, BigDecimal cancelAmount, String cancelReason) {
+        payment.validateCancelable();
+        callTossCancelApi(cancelReason, cancelAmount, payment);
+        payment.cancelPartial();
     }
 
     /**
@@ -136,7 +146,6 @@ public class PaymentService {
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
         }
 
-        payment.cancel();
         log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount);
     }
 }
