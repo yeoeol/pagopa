@@ -88,7 +88,9 @@ public class PaymentService {
     @Transactional
     public void cancelPaymentByOrder(Order order) {
         paymentRepository.findByOrder(order)
-                .filter(p -> p.getStatus() != PaymentStatus.PAID)
+                .filter(p -> p.getPaymentKey() == null
+                        && (p.getStatus() == PaymentStatus.READY
+                            || p.getStatus() == PaymentStatus.IN_PROGRESS))
                 .ifPresent(Payment::cancelUnpaid);
     }
 
