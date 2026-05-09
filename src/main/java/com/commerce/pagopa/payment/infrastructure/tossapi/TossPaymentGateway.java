@@ -28,4 +28,18 @@ public class TossPaymentGateway implements PaymentGateway {
                 .retrieve()
                 .toBodilessEntity();
     }
+
+    @Override
+    public void cancel(String paymentKey, BigDecimal cancelAmount, String cancelReason) {
+        Map<String, String> payload = Map.of(
+                "cancelReason", cancelReason,
+                "cancelAmount", cancelAmount.toString()
+        );
+
+        tossRestClient.post()
+                .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
+                .body(payload)
+                .retrieve()
+                .toBodilessEntity();
+    }
 }

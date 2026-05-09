@@ -212,6 +212,10 @@ public class Order extends BaseTimeEntity {
         sellerOrders.forEach(SellerOrder::pay);
     }
 
+    public void validateCancelable(List<SellerOrder> activeSellerOrders) {
+        activeSellerOrders.forEach(SellerOrder::validateCancelable);
+    }
+
     /**
      * 전체 주문 취소: 취소 가능한 SellerOrder만 취소(이미 CANCELLED는 스킵)
      */
@@ -220,7 +224,7 @@ public class Order extends BaseTimeEntity {
                 .filter(so -> !so.isCancelled())
                 .toList();
 
-        activeSellerOrders.forEach(SellerOrder::validateCancelable);
+        validateCancelable(activeSellerOrders);
         activeSellerOrders.forEach(SellerOrder::cancel);
     }
 }

@@ -15,10 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -28,7 +26,6 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final PaymentProperties paymentProperties;
-    private final RestClient tossRestClient;
     private final PaymentGateway paymentGateway;
     private final PaymentTransactionService paymentTransactionService;
 
@@ -79,10 +76,20 @@ public class PaymentService {
     /**
      * 승인된 결제를 paymentKey로 환불 취소 (Toss API 호출 + 누적 환불 금액 갱신)
      */
-    @Transactional
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        cancelTossPayment(payment, cancelAmount, cancelReason);
-        payment.cancel(cancelAmount);
+        PaymentCancelCommand command = paymentTransactionService.prepareCancel(payment, cancelAmount);
+
+        try {
+            paymentGateway.cancel(command.paymentKey(), command.cancelAmount(), cancelReason);
+        } catch (Exception e) {
+            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}",
+                    command.paymentKey(), command.cancelAmount(), e);
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
+        }
+
+        paymentTransactionService.markCancelSuccess(command.paymentId(), command.cancelAmount());
+        log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}",
+                command.paymentKey(), command.cancelAmount());
     }
 
     /**
@@ -95,31 +102,5 @@ public class PaymentService {
                         && (p.getStatus() == PaymentStatus.READY
                             || p.getStatus() == PaymentStatus.IN_PROGRESS))
                 .ifPresent(Payment::cancelUnpaid);
-    }
-
-    /**
-     * Payment 상태 전이(cancel / cancelPartial)는 호출자가 결정
-     */
-    private void cancelTossPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        payment.validateCancelable(cancelAmount);
-
-        Map<String, String> payload = Map.of(
-                "cancelReason", cancelReason,
-                "cancelAmount", cancelAmount.toString()
-        );
-
-        String paymentKey = payment.getPaymentKey();
-        try {
-            tossRestClient.post()
-                    .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
-                    .body(payload)
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (Exception e) {
-            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount, e);
-            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
-        }
-
-        log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount);
     }
 }

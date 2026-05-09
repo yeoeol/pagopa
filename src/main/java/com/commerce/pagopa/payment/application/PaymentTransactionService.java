@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 class PaymentTransactionService {
@@ -48,5 +50,18 @@ class PaymentTransactionService {
 
         payment.fail();
         order.cancel();
+    }
+
+    @Transactional
+    public PaymentCancelCommand prepareCancel(Payment payment, BigDecimal cancelAmount) {
+        payment.validateCancelable(cancelAmount);
+        return new PaymentCancelCommand(payment.getId(), payment.getPaymentKey(), cancelAmount);
+    }
+
+    @Transactional
+    public void markCancelSuccess(Long paymentId, BigDecimal cancelAmount) {
+        Payment payment = paymentRepository.getByIdOrThrow(paymentId);
+
+        payment.cancel(cancelAmount);
     }
 }
