@@ -216,6 +216,14 @@ public class Order extends BaseTimeEntity {
         activeSellerOrders.forEach(SellerOrder::validateCancelable);
     }
 
+    public void validateCancelable() {
+        List<SellerOrder> activeSellerOrders = sellerOrders.stream()
+                .filter(so -> !so.isCancelled())
+                .toList();
+
+        activeSellerOrders.forEach(SellerOrder::validateCancelable);
+    }
+
     /**
      * 전체 주문 취소: 취소 가능한 SellerOrder만 취소(이미 CANCELLED는 스킵)
      */

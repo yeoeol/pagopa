@@ -24,10 +24,10 @@ import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -53,7 +53,21 @@ class OrderServiceTest {
     @Mock private PaymentService paymentService;
     @Mock private PaymentRepository paymentRepository;
 
-    @InjectMocks private OrderService orderService;
+    private OrderService orderService;
+
+    @BeforeEach
+    void setUp() {
+        OrderTransactionService orderTransactionService =
+                new OrderTransactionService(orderRepository, paymentRepository);
+        orderService = new OrderService(
+                orderRepository,
+                userRepository,
+                productRepository,
+                cartRepository,
+                paymentService,
+                orderTransactionService
+        );
+    }
 
     @Test
     void cancelSellerOrder_callsPaymentServiceWithSellerAmount() {
@@ -127,8 +141,7 @@ class OrderServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_CANCEL_FAIL);
 
-        // 도메인 in-memory mutation은 이미 일어난 상태 — 실제로는 @Transactional이 DB 단계에서 롤백을 수행함.
-        assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
+        assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.READY);
         assertThat(so2.getStatus()).isEqualTo(SellerOrderStatus.READY);
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PAID);
     }
