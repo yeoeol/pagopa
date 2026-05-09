@@ -4,6 +4,7 @@ import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResponseDto;
+import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
@@ -28,6 +29,8 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final PaymentProperties paymentProperties;
     private final RestClient tossRestClient;
+    private final PaymentGateway paymentGateway;
+    private final PaymentTransactionService paymentTransactionService;
 
     /**
      * 주문 생성 직후, 결제 데이터를 준비하고 클라이언트(프론트엔드)가 토스 창을 띄울 수 있도록 DTO 반환
@@ -55,22 +58,22 @@ public class PaymentService {
     /**
      * 토스 결제 창에서 승인 후 Redirect로 돌아왔을 때, 토스 서버로 최종 결제 승인 API 호출
      */
-    @Transactional(noRollbackFor = {PaymentCancelException.class, PaymentConfirmException.class})
     public void confirmPayment(PaymentApproveRequestDto requestDto) {
-        Order order = orderRepository.getByOrderNumberOrThrow(requestDto.orderId());
-
-        Payment payment = paymentRepository.getByOrderOrThrow(order);
-
-        payment.validateConfirmable();
-        order.validatePayable();
-
-        if (!payment.isAmountMatched(requestDto.amount())) {
-            payment.fail();
-            order.cancel();
+        boolean canProceed = paymentTransactionService.prepareConfirm(requestDto);
+        if (!canProceed) {
             throw new PaymentCancelException();
         }
 
-        callTossConfirmApi(requestDto, payment, order);
+        try {
+            paymentGateway.confirm(requestDto.orderId(), requestDto.amount(), requestDto.paymentKey());
+        } catch (Exception e) {
+            log.error("[Payment] 토스 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
+            paymentTransactionService.markConfirmFailure(requestDto.orderId());
+            throw new PaymentConfirmException();
+        }
+
+        paymentTransactionService.markConfirmSuccess(requestDto.orderId(), requestDto.paymentKey());
+        log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
     /**
@@ -92,31 +95,6 @@ public class PaymentService {
                         && (p.getStatus() == PaymentStatus.READY
                             || p.getStatus() == PaymentStatus.IN_PROGRESS))
                 .ifPresent(Payment::cancelUnpaid);
-    }
-
-    private void callTossConfirmApi(PaymentApproveRequestDto requestDto, Payment payment, Order order) {
-        Map<String, String> payload = Map.of(
-                "orderId", requestDto.orderId(),
-                "amount", requestDto.amount().toString(),
-                "paymentKey", requestDto.paymentKey()
-        );
-
-        try {
-            tossRestClient.post()
-                    .uri("/v1/payments/confirm")
-                    .body(payload)
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (Exception e) {
-            payment.fail();
-            order.cancel();
-            log.error("[Payment] 토스 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
-            throw new PaymentConfirmException();
-        }
-
-        payment.success(requestDto.paymentKey());
-        order.pay();
-        log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
     /**

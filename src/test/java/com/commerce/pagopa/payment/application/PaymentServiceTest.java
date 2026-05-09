@@ -8,6 +8,7 @@ import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
+import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
@@ -17,6 +18,7 @@ import com.commerce.pagopa.global.exception.OrderCannotPayException;
 import com.commerce.pagopa.global.exception.PaymentCancelException;
 import com.commerce.pagopa.global.exception.PaymentConfirmException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,6 +48,9 @@ class PaymentServiceTest {
     private PaymentProperties paymentProperties;
 
     @Mock
+    private PaymentGateway paymentGateway;
+
+    @Mock
     private RestClient tossRestClient;
 
     @Mock
@@ -56,6 +61,20 @@ class PaymentServiceTest {
 
     @InjectMocks
     private PaymentService paymentService;
+
+    @BeforeEach
+    void setUp() {
+        PaymentTransactionService paymentTransactionService =
+                new PaymentTransactionService(orderRepository, paymentRepository);
+        paymentService = new PaymentService(
+                paymentRepository,
+                orderRepository,
+                paymentProperties,
+                tossRestClient,
+                paymentGateway,
+                paymentTransactionService
+        );
+    }
 
     @Test
     void requestPayment_throwsWhenOrderIsCancelled() {
@@ -87,7 +106,7 @@ class PaymentServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_ALREADY_COMPLETED);
 
-        verify(tossRestClient, never()).post();
+        verify(paymentGateway, never()).confirm(anyString(), any(BigDecimal.class), anyString());
     }
 
     @Test
@@ -104,7 +123,7 @@ class PaymentServiceTest {
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
-        verify(tossRestClient, never()).post();
+        verify(paymentGateway, never()).confirm(anyString(), any(BigDecimal.class), anyString());
     }
 
     @Test
@@ -210,19 +229,12 @@ class PaymentServiceTest {
     }
 
     private void mockTossConfirmSuccess(String orderId) {
-        when(tossRestClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/v1/payments/confirm")).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.body(confirmPayload(orderId))).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build());
+        doNothing().when(paymentGateway).confirm(orderId, amount(10000), "payment-key");
     }
 
     private void mockTossConfirmFailure(String orderId) {
-        when(tossRestClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/v1/payments/confirm")).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.body(confirmPayload(orderId))).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenThrow(new RuntimeException("toss failure"));
+        doThrow(new RuntimeException("toss failure"))
+                .when(paymentGateway).confirm(orderId, amount(10000), "payment-key");
     }
 
     private void mockTossCancelSuccess(String paymentKey, BigDecimal cancelAmount, String reason) {
@@ -274,13 +286,5 @@ class PaymentServiceTest {
 
     private BigDecimal amount(long value) {
         return BigDecimal.valueOf(value);
-    }
-
-    private Map<String, String> confirmPayload(String orderId) {
-        return Map.of(
-                "orderId", orderId,
-                "amount", amount(10000).toString(),
-                "paymentKey", "payment-key"
-        );
     }
 }
