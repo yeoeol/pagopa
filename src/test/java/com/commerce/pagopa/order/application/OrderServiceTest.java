@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -92,6 +93,9 @@ class OrderServiceTest {
         ArgumentCaptor<BigDecimal> amountCaptor = ArgumentCaptor.forClass(BigDecimal.class);
         verify(paymentService).cancelPayment(eq(payment), amountCaptor.capture(), eq("사이즈 변경"));
         assertThat(amountCaptor.getValue()).isEqualByComparingTo(so1.getSellerTotalAmount());
+
+        // facade 분할 의도 확인: prepareCancelSellerOrder(TX1) + markCancelSellerOrderSuccess(TX2) = 2회 조회
+        verify(orderRepository, times(2)).findByIdOrThrow(1L);
     }
 
     @Test
@@ -124,7 +128,9 @@ class OrderServiceTest {
     }
 
     @Test
-    void cancelSellerOrder_propagatesPaymentServiceFailureToTriggerRollback() {
+    void cancelSellerOrder_propagatesPaymentFailureWithoutMutatingSellerOrder() {
+        // Toss-first 설계: prepareCancel(TX1)은 검증만 하고, paymentService 실패 시
+        // markCancelSellerOrderSuccess(TX2)는 호출되지 않음 → SellerOrder/Payment 모두 원상 유지.
         Order order = newPaidOrderWithTwoSellers();
         SellerOrder so1 = order.getSellerOrders().get(0);
         SellerOrder so2 = order.getSellerOrders().get(1);
@@ -141,9 +147,13 @@ class OrderServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_CANCEL_FAIL);
 
+        // SellerOrder/Payment 도메인 mutation이 애초에 일어나지 않음
         assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.READY);
         assertThat(so2.getStatus()).isEqualTo(SellerOrderStatus.READY);
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PAID);
+
+        // markCancelSellerOrderSuccess(TX2)가 호출되지 않았음을 입증 — Order 재조회 1회뿐(prepareCancel)
+        verify(orderRepository, times(1)).findByIdOrThrow(1L);
     }
 
     @Test
