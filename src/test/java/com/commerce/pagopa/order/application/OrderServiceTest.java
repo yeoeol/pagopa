@@ -24,10 +24,10 @@ import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,10 +54,24 @@ class OrderServiceTest {
     @Mock private PaymentService paymentService;
     @Mock private PaymentRepository paymentRepository;
 
-    @InjectMocks private OrderService orderService;
+    private OrderService orderService;
+
+    @BeforeEach
+    void setUp() {
+        OrderTransactionService orderTransactionService =
+                new OrderTransactionService(orderRepository, paymentRepository);
+        orderService = new OrderService(
+                orderRepository,
+                userRepository,
+                productRepository,
+                cartRepository,
+                paymentService,
+                orderTransactionService
+        );
+    }
 
     @Test
-    void cancelSellerOrder_partial_callsCancelPaymentPartialWhenOthersStillActive() {
+    void cancelSellerOrder_callsPaymentServiceWithSellerAmount() {
         // given: 2개 SellerOrder가 모두 READY
         Order order = newPaidOrderWithTwoSellers();
         SellerOrder so1 = order.getSellerOrders().get(0);
@@ -69,39 +84,18 @@ class OrderServiceTest {
         // when: SellerOrder 1 취소
         orderService.cancelSellerOrder(1L, so1.getId(), new OrderCancelRequestDto("사이즈 변경"));
 
-        // then: SellerOrder 1만 CANCELLED, 2는 READY 유지
+        // then: SellerOrder 1만 CANCELLED, 2는 READY 유지, Order 상태는 혼재 → DELIVERING
         assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
         assertThat(so2.getStatus()).isEqualTo(SellerOrderStatus.READY);
-        // Order 상태는 혼재 → DELIVERING (도메인 deriveStatus 규약)
         assertThat(order.getStatus()).isEqualTo(OrderStatus.DELIVERING);
 
-        // PaymentService.cancelPaymentPartial이 so1 금액으로 호출됨
+        // PaymentService.cancelPayment에 so1 금액 그대로 전달됨 — Partial/Full 결정은 Payment 도메인 책임
         ArgumentCaptor<BigDecimal> amountCaptor = ArgumentCaptor.forClass(BigDecimal.class);
-        verify(paymentService).cancelPaymentPartial(eq(payment), amountCaptor.capture(), eq("사이즈 변경"));
+        verify(paymentService).cancelPayment(eq(payment), amountCaptor.capture(), eq("사이즈 변경"));
         assertThat(amountCaptor.getValue()).isEqualByComparingTo(so1.getSellerTotalAmount());
-        verify(paymentService, never()).cancelPayment(any(), any(), any());
-    }
 
-    @Test
-    void cancelSellerOrder_lastActiveOne_callsFullCancelPaymentAndOrderBecomesCancelled() {
-        // given: 2개 중 1개 이미 CANCELLED, 1개 READY
-        Order order = newPaidOrderWithTwoSellers();
-        SellerOrder so1 = order.getSellerOrders().get(0);
-        SellerOrder so2 = order.getSellerOrders().get(1);
-        so1.cancelByBuyer(); // 사전 부분 취소
-        Payment payment = newPaidPayment(order);
-        payment.cancelPartial(); // 그에 따라 Payment는 PARTIAL_CANCELLED 상태
-
-        when(orderRepository.findByIdOrThrow(1L)).thenReturn(order);
-        when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
-
-        // when: 마지막 남은 SellerOrder 2 취소
-        orderService.cancelSellerOrder(1L, so2.getId(), new OrderCancelRequestDto("재고 없음"));
-
-        // then: 모든 SellerOrder가 CANCELLED → Order CANCELLED → Payment 전체 취소
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
-        verify(paymentService).cancelPayment(eq(payment), eq(so2.getSellerTotalAmount()), eq("재고 없음"));
-        verify(paymentService, never()).cancelPaymentPartial(any(), any(), any());
+        // facade 분할 의도 확인: prepareCancelSellerOrder(TX1) + markCancelSellerOrderSuccess(TX2) = 2회 조회
+        verify(orderRepository, times(2)).findByIdOrThrow(1L);
     }
 
     @Test
@@ -116,7 +110,6 @@ class OrderServiceTest {
                 .isEqualTo(ErrorCode.SELLER_ORDER_NOT_FOUND);
 
         verify(paymentService, never()).cancelPayment(any(), any(), any());
-        verify(paymentService, never()).cancelPaymentPartial(any(), any(), any());
     }
 
     @Test
@@ -132,11 +125,12 @@ class OrderServiceTest {
                 .hasMessageContaining("발송 후에는 반품으로 처리하세요");
 
         verify(paymentService, never()).cancelPayment(any(), any(), any());
-        verify(paymentService, never()).cancelPaymentPartial(any(), any(), any());
     }
 
     @Test
-    void cancelSellerOrder_propagatesPaymentServiceFailureToTriggerRollback() {
+    void cancelSellerOrder_propagatesPaymentFailureWithoutMutatingSellerOrder() {
+        // Toss-first 설계: prepareCancel(TX1)은 검증만 하고, paymentService 실패 시
+        // markCancelSellerOrderSuccess(TX2)는 호출되지 않음 → SellerOrder/Payment 모두 원상 유지.
         Order order = newPaidOrderWithTwoSellers();
         SellerOrder so1 = order.getSellerOrders().get(0);
         SellerOrder so2 = order.getSellerOrders().get(1);
@@ -145,7 +139,7 @@ class OrderServiceTest {
         when(orderRepository.findByIdOrThrow(1L)).thenReturn(order);
         when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
         doThrow(new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL))
-                .when(paymentService).cancelPaymentPartial(any(), any(), any());
+                .when(paymentService).cancelPayment(any(), any(), any());
 
         assertThatThrownBy(() -> orderService.cancelSellerOrder(
                 1L, so1.getId(), new OrderCancelRequestDto("Toss 실패 시나리오")))
@@ -153,10 +147,13 @@ class OrderServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_CANCEL_FAIL);
 
-        // 도메인 in-memory mutation은 이미 일어난 상태 — 실제로는 @Transactional이 DB 단계에서 롤백을 수행함.
-        assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
+        // SellerOrder/Payment 도메인 mutation이 애초에 일어나지 않음
+        assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.READY);
         assertThat(so2.getStatus()).isEqualTo(SellerOrderStatus.READY);
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PAID);
+
+        // markCancelSellerOrderSuccess(TX2)가 호출되지 않았음을 입증 — Order 재조회 1회뿐(prepareCancel)
+        verify(orderRepository, times(1)).findByIdOrThrow(1L);
     }
 
     @Test
@@ -167,7 +164,7 @@ class OrderServiceTest {
         SellerOrder so2 = order.getSellerOrders().get(1);
         so1.cancelByBuyer();
         Payment payment = newPaidPayment(order);
-        payment.cancelPartial();
+        payment.cancel(so1.getSellerTotalAmount()); // Payment에도 사전 부분 환불 누적
 
         when(orderRepository.findByIdOrThrow(1L)).thenReturn(order);
         when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);

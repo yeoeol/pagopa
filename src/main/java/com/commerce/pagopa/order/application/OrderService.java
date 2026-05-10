@@ -14,8 +14,6 @@ import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
-import com.commerce.pagopa.payment.domain.model.Payment;
-import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.user.domain.model.User;
@@ -31,7 +29,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,7 +41,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final PaymentService paymentService;
-    private final PaymentRepository paymentRepository;
+    private final OrderTransactionService orderTransactionService;
 
     // 바로 주문
     @Counted("my.order")
@@ -93,36 +90,22 @@ public class OrderService {
     }
 
     @Counted("my.order")
-    @Transactional
     public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
-        Order order = orderRepository.findByIdOrThrow(orderId);
+        OrderCancelCommand command = orderTransactionService.prepareCancelOrder(orderId);
 
-        // 주의: cancel() 호출 후에는 활성 SellerOrder가 사라져 0이 되므로 반드시 cancel() 이전에 산정
-        BigDecimal remainingAmount = order.calculateActiveAmount();
-        order.cancel();
-
-        Payment payment = paymentRepository.getByOrderOrThrow(order);
-        paymentService.cancelPayment(payment, remainingAmount, requestDto.cancelReason());
+        paymentService.cancelPayment(command.payment(), command.cancelAmount(), requestDto.cancelReason());
+        orderTransactionService.markCancelOrderSuccess(command.orderId());
     }
 
     /**
      * 단일 SellerOrder 부분 취소
      */
     @Counted("my.order")
-    @Transactional
     public void cancelSellerOrder(Long orderId, Long sellerOrderId, OrderCancelRequestDto requestDto) {
-        Order order = orderRepository.findByIdOrThrow(orderId);
-        SellerOrder sellerOrder = order.findSellerOrder(sellerOrderId);
+        SellerOrderCancelCommand command = orderTransactionService.prepareCancelSellerOrder(orderId, sellerOrderId);
 
-        BigDecimal cancelAmount = sellerOrder.getSellerTotalAmount();
-        sellerOrder.cancelByBuyer();
-
-        Payment payment = paymentRepository.getByOrderOrThrow(order);
-        if (order.isAllSellerOrdersCancelled()) {
-            paymentService.cancelPayment(payment, cancelAmount, requestDto.cancelReason());
-        } else {
-            paymentService.cancelPaymentPartial(payment, cancelAmount, requestDto.cancelReason());
-        }
+        paymentService.cancelPayment(command.payment(), command.cancelAmount(), requestDto.cancelReason());
+        orderTransactionService.markCancelSellerOrderSuccess(command.orderId(), command.sellerOrderId());
     }
 
     // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소

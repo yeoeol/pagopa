@@ -4,6 +4,7 @@ import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResponseDto;
+import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
@@ -14,10 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -27,7 +26,8 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final PaymentProperties paymentProperties;
-    private final RestClient tossRestClient;
+    private final PaymentGateway paymentGateway;
+    private final PaymentTransactionService paymentTransactionService;
 
     /**
      * 주문 생성 직후, 결제 데이터를 준비하고 클라이언트(프론트엔드)가 토스 창을 띄울 수 있도록 DTO 반환
@@ -55,42 +55,41 @@ public class PaymentService {
     /**
      * 토스 결제 창에서 승인 후 Redirect로 돌아왔을 때, 토스 서버로 최종 결제 승인 API 호출
      */
-    @Transactional(noRollbackFor = {PaymentCancelException.class, PaymentConfirmException.class})
     public void confirmPayment(PaymentApproveRequestDto requestDto) {
-        Order order = orderRepository.getByOrderNumberOrThrow(requestDto.orderId());
-
-        Payment payment = paymentRepository.getByOrderOrThrow(order);
-
-        payment.validateConfirmable();
-        order.validatePayable();
-
-        if (!payment.isAmountMatched(requestDto.amount())) {
-            payment.fail();
-            order.cancel();
+        boolean canProceed = paymentTransactionService.prepareConfirm(requestDto);
+        if (!canProceed) {
             throw new PaymentCancelException();
         }
 
-        callTossConfirmApi(requestDto, payment, order);
+        try {
+            paymentGateway.confirm(requestDto.orderId(), requestDto.amount(), requestDto.paymentKey());
+        } catch (Exception e) {
+            log.error("[Payment] 토스 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
+            paymentTransactionService.markConfirmFailure(requestDto.orderId());
+            throw new PaymentConfirmException();
+        }
+
+        paymentTransactionService.markConfirmSuccess(requestDto.orderId(), requestDto.paymentKey());
+        log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
     /**
-     * 승인된 결제를 paymentKey로 전체 취소 (Toss API 호출 + Payment 상태 → CANCELLED)
+     * 승인된 결제를 paymentKey로 환불 취소 (Toss API 호출 + 누적 환불 금액 갱신)
      */
-    @Transactional
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        payment.validateCancelable();
-        callTossCancelApi(cancelReason, cancelAmount, payment);
-        payment.cancel();
-    }
+        PaymentCancelCommand command = paymentTransactionService.prepareCancel(payment, cancelAmount);
 
-    /**
-     * 승인된 결제를 paymentKey로 부분 취소 (Toss API 호출 + Payment 상태 → PARTIAL_CANCELLED)
-     */
-    @Transactional
-    public void cancelPaymentPartial(Payment payment, BigDecimal cancelAmount, String cancelReason) {
-        payment.validateCancelable();
-        callTossCancelApi(cancelReason, cancelAmount, payment);
-        payment.cancelPartial();
+        try {
+            paymentGateway.cancel(command.paymentKey(), command.cancelAmount(), cancelReason);
+        } catch (Exception e) {
+            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}",
+                    command.paymentKey(), command.cancelAmount(), e);
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
+        }
+
+        paymentTransactionService.markCancelSuccess(command.paymentId(), command.cancelAmount());
+        log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}",
+                command.paymentKey(), command.cancelAmount());
     }
 
     /**
@@ -99,53 +98,9 @@ public class PaymentService {
     @Transactional
     public void cancelPaymentByOrder(Order order) {
         paymentRepository.findByOrder(order)
-                .filter(p -> p.getStatus() != PaymentStatus.PAID)
-                .ifPresent(Payment::cancel);
-    }
-
-    private void callTossConfirmApi(PaymentApproveRequestDto requestDto, Payment payment, Order order) {
-        Map<String, String> payload = Map.of(
-                "orderId", requestDto.orderId(),
-                "amount", requestDto.amount().toString(),
-                "paymentKey", requestDto.paymentKey()
-        );
-
-        try {
-            tossRestClient.post()
-                    .uri("/v1/payments/confirm")
-                    .body(payload)
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (Exception e) {
-            payment.fail();
-            order.cancel();
-            log.error("[Payment] 토스 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
-            throw new PaymentConfirmException();
-        }
-
-        payment.success(requestDto.paymentKey());
-        order.pay();
-        log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
-    }
-
-    private void callTossCancelApi(String reason, BigDecimal cancelAmount, Payment payment) {
-        Map<String, String> payload = Map.of(
-                "cancelReason", reason,
-                "cancelAmount", cancelAmount.toString()
-        );
-
-        String paymentKey = payment.getPaymentKey();
-        try {
-            tossRestClient.post()
-                    .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
-                    .body(payload)
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (Exception e) {
-            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount, e);
-            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
-        }
-
-        log.info("[Payment] 결제 취소 성공 - paymentKey={}, cancelAmount={}", paymentKey, cancelAmount);
+                .filter(p -> p.getPaymentKey() == null
+                        && (p.getStatus() == PaymentStatus.READY
+                            || p.getStatus() == PaymentStatus.IN_PROGRESS))
+                .ifPresent(Payment::cancelUnpaid);
     }
 }

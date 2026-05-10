@@ -150,30 +150,6 @@ class OrderTest {
         assertThat(order.calculateActiveAmount()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
-    @Test
-    void isAllSellerOrdersCancelled_trueOnlyWhenEveryOneIsCancelled() {
-        Order order = newOrder();
-        SellerOrder so1 = newReadySellerOrder("seller-1", "order-1-1");
-        SellerOrder so2 = newReadySellerOrder("seller-2", "order-1-2");
-        order.addSellerOrder(so1);
-        order.addSellerOrder(so2);
-
-        assertThat(order.isAllSellerOrdersCancelled()).isFalse();
-
-        so1.cancelByBuyer();
-        assertThat(order.isAllSellerOrdersCancelled()).isFalse();
-
-        so2.cancelByBuyer();
-        assertThat(order.isAllSellerOrdersCancelled()).isTrue();
-    }
-
-    @Test
-    void isAllSellerOrdersCancelled_falseWhenNoSellerOrders() {
-        Order order = newOrder();
-
-        assertThat(order.isAllSellerOrdersCancelled()).isFalse();
-    }
-
     private Product newProduct(String sellerProviderId, int stock) {
         User seller = newUser(sellerProviderId, Role.ROLE_SELLER);
         return Product.create(

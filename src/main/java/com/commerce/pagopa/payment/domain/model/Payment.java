@@ -27,6 +27,9 @@ public class Payment extends BaseTimeEntity {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount; // 결제 금액
 
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal cancelledAmount; // 누적 환불 금액 (부분 취소 합산)
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status; // 결제 상태
@@ -42,6 +45,7 @@ public class Payment extends BaseTimeEntity {
     private Payment(Order order, BigDecimal amount, PaymentStatus status) {
         this.order = order;
         this.amount = amount;
+        this.cancelledAmount = BigDecimal.ZERO;
         this.status = status;
     }
 
@@ -70,7 +74,12 @@ public class Payment extends BaseTimeEntity {
         }
     }
 
-    public void validateCancelable() {
+    /**
+     * 환불 누적 처리 가능 여부 검증
+     *  상태: PAID 또는 PARTIAL_CANCELLED 만 허용
+     *  금액: 양수, 그리고 (현재 누적 + 이번 취소액) ≤ 원 결제 금액
+     */
+    public void validateCancelable(BigDecimal cancelAmount) {
         if (this.status == PaymentStatus.FAILED) {
             throw new BusinessException(ErrorCode.PAYMENT_ALREADY_FAILED);
         }
@@ -79,6 +88,19 @@ public class Payment extends BaseTimeEntity {
         }
         if (this.status != PaymentStatus.PAID && this.status != PaymentStatus.PARTIAL_CANCELLED) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
+        }
+        if (cancelAmount == null || cancelAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException(
+                    ErrorCode.PAYMENT_CANCEL_AMOUNT_INVALID,
+                    "취소 금액은 0보다 커야 합니다."
+            );
+        }
+        if (this.cancelledAmount.add(cancelAmount).compareTo(this.amount) > 0) {
+            throw new BusinessException(
+                    ErrorCode.PAYMENT_CANCEL_AMOUNT_INVALID,
+                    "취소 금액이 잔여 환불 가능 금액을 초과합니다. (잔여=%s, 요청=%s)".formatted(
+                            this.amount.subtract(this.cancelledAmount), cancelAmount)
+            );
         }
     }
 
@@ -98,14 +120,29 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.FAILED;
     }
 
-    // 결제 전체 취소
-    public void cancel() {
-        this.status = PaymentStatus.CANCELLED;
+    /**
+     * 환불 누적 취소 — 누적 환불 금액을 더하고, 그 결과에 따라 상태를 자동 결정
+     *  cancelledAmount < amount → PARTIAL_CANCELLED
+     *  cancelledAmount == amount → CANCELLED
+     */
+    public void cancel(BigDecimal cancelAmount) {
+        validateCancelable(cancelAmount);
+        this.cancelledAmount = this.cancelledAmount.add(cancelAmount);
+        this.status = this.cancelledAmount.compareTo(this.amount) == 0
+                ? PaymentStatus.CANCELLED
+                : PaymentStatus.PARTIAL_CANCELLED;
     }
 
-    // 결제 부분 취소
-    public void cancelPartial() {
-        this.status = PaymentStatus.PARTIAL_CANCELLED;
+    /**
+     * 미승인 결제 로컬 취소(스케줄러용) — 환불 누적 없음, 단순히 결제 흐름을 종료
+     * 승인된(PAID) 결제는 환불 절차로만 취소 가능하므로 거부
+     */
+    public void cancelUnpaid() {
+        if (this.status == PaymentStatus.PAID || this.status == PaymentStatus.PARTIAL_CANCELLED) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE,
+                    "승인된 결제는 환불 금액과 함께 cancel(amount)로 취소해야 합니다.");
+        }
+        this.status = PaymentStatus.CANCELLED;
     }
 
 }

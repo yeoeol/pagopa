@@ -19,72 +19,126 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PaymentTest {
 
     @Test
-    void cancel_setsCancelled() {
-        Payment payment = newPaidPayment();
+    void cancel_partialAmount_setsPartialCancelledAndAccumulates() {
+        Payment payment = newPaidPayment(10000);
 
-        payment.cancel();
-
-        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
-    }
-
-    @Test
-    void cancelPartial_setsPartialCancelled() {
-        Payment payment = newPaidPayment();
-
-        payment.cancelPartial();
+        payment.cancel(BigDecimal.valueOf(3000));
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PARTIAL_CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("3000");
     }
 
     @Test
-    void validateCancelable_allowsPaid() {
-        Payment payment = newPaidPayment();
+    void cancel_partialThenRemainder_promotesToCancelled() {
+        Payment payment = newPaidPayment(10000);
+        payment.cancel(BigDecimal.valueOf(3000));
 
-        payment.validateCancelable();
+        payment.cancel(BigDecimal.valueOf(7000));
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("10000");
     }
 
     @Test
-    void validateCancelable_allowsPartialCancelled() {
-        Payment payment = newPaidPayment();
-        payment.cancelPartial();
+    void cancel_fullAmountAtOnce_setsCancelled() {
+        Payment payment = newPaidPayment(10000);
 
-        payment.validateCancelable();
+        payment.cancel(BigDecimal.valueOf(10000));
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("10000");
     }
 
     @Test
-    void validateCancelable_throwsWhenAlreadyCancelled() {
-        Payment payment = newPaidPayment();
-        payment.cancel();
+    void cancel_throwsWhenAmountExceedsRemaining() {
+        Payment payment = newPaidPayment(10000);
+        payment.cancel(BigDecimal.valueOf(7000));
 
-        assertThatThrownBy(payment::validateCancelable)
+        assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(4000)))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_AMOUNT_INVALID);
+    }
+
+    @Test
+    void cancel_throwsWhenAmountIsZeroOrNegative() {
+        Payment payment = newPaidPayment(10000);
+
+        assertThatThrownBy(() -> payment.cancel(BigDecimal.ZERO))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_AMOUNT_INVALID);
+
+        assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(-100)))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_AMOUNT_INVALID);
+    }
+
+    @Test
+    void cancel_throwsWhenAlreadyFullyCancelled() {
+        Payment payment = newPaidPayment(10000);
+        payment.cancel(BigDecimal.valueOf(10000));
+
+        assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(1000)))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_ALREADY_CANCELLED);
     }
 
     @Test
-    void validateCancelable_throwsWhenAlreadyFailed() {
-        Payment payment = newPaidPayment();
+    void cancel_throwsWhenAlreadyFailed() {
+        Payment payment = newPaidPayment(10000);
         payment.fail();
 
-        assertThatThrownBy(payment::validateCancelable)
+        assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(1000)))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_ALREADY_FAILED);
     }
 
     @Test
-    void validateCancelable_throwsWhenStillReady() {
+    void cancel_throwsWhenStillReady() {
         Payment payment = Payment.create(newOrderWithAmount(10000));
 
-        assertThatThrownBy(payment::validateCancelable)
+        assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(1000)))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_NOT_CANCELABLE);
     }
 
-    private Payment newPaidPayment() {
+    @Test
+    void cancelUnpaid_setsCancelledForReadyOrInProgress() {
+        Payment readyPayment = Payment.create(newOrderWithAmount(10000));
+        readyPayment.cancelUnpaid();
+        assertThat(readyPayment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThat(readyPayment.getCancelledAmount()).isEqualByComparingTo("0"); // 누적 금액은 변동 없음
+
+        Payment inProgress = Payment.create(newOrderWithAmount(10000));
+        inProgress.markInProgress();
+        inProgress.cancelUnpaid();
+        assertThat(inProgress.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+    }
+
+    @Test
+    void cancelUnpaid_throwsWhenAlreadyPaid() {
+        Payment payment = newPaidPayment(10000);
+
+        assertThatThrownBy(payment::cancelUnpaid)
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_NOT_CANCELABLE);
+    }
+
+    @Test
+    void create_initializesCancelledAmountToZero() {
         Payment payment = Payment.create(newOrderWithAmount(10000));
+
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("0");
+    }
+
+    private Payment newPaidPayment(long amount) {
+        Payment payment = Payment.create(newOrderWithAmount(amount));
         payment.markInProgress();
         payment.success("payment-key");
         return payment;

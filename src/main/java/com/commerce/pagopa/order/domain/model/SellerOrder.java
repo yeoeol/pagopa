@@ -138,16 +138,20 @@ public class SellerOrder extends BaseTimeEntity {
         notifyOrderStatusChanged();
     }
 
-    /**
-     * 구매자에 의한 부분 취소: 결제 완료(READY) 상태에서만 허용
-     */
-    public void cancelByBuyer() {
+    public void validateBuyerCancelable() {
         if (this.status != SellerOrderStatus.READY) {
             String message = (this.status == SellerOrderStatus.DELIVERING || this.status == SellerOrderStatus.COMPLETED)
                     ? "발송 후에는 반품으로 처리하세요"
                     : "취소할 수 없는 판매자 주문 상태입니다: " + this.status.getDescription();
             throw new BusinessException(ErrorCode.SELLER_ORDER_CANNOT_CANCEL, message);
         }
+    }
+
+    /**
+     * 구매자에 의한 부분 취소: 결제 완료(READY) 상태에서만 허용
+     */
+    public void cancelByBuyer() {
+        validateBuyerCancelable();
         this.status = SellerOrderStatus.CANCELLED;
         orderProducts.forEach(OrderProduct::restoreStock);
         notifyOrderStatusChanged();

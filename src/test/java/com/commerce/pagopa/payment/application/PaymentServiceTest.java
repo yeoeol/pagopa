@@ -8,6 +8,7 @@ import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
+import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
@@ -17,17 +18,14 @@ import com.commerce.pagopa.global.exception.OrderCannotPayException;
 import com.commerce.pagopa.global.exception.PaymentCancelException;
 import com.commerce.pagopa.global.exception.PaymentConfirmException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,16 +44,24 @@ class PaymentServiceTest {
     private PaymentProperties paymentProperties;
 
     @Mock
-    private RestClient tossRestClient;
+    private PaymentGateway paymentGateway;
 
-    @Mock
-    private RestClient.RequestBodyUriSpec requestBodyUriSpec;
-
-    @Mock
-    private RestClient.ResponseSpec responseSpec;
-
-    @InjectMocks
     private PaymentService paymentService;
+    private long paymentIdSequence;
+
+    @BeforeEach
+    void setUp() {
+        paymentIdSequence = 1L;
+        PaymentTransactionService paymentTransactionService =
+                new PaymentTransactionService(orderRepository, paymentRepository);
+        paymentService = new PaymentService(
+                paymentRepository,
+                orderRepository,
+                paymentProperties,
+                paymentGateway,
+                paymentTransactionService
+        );
+    }
 
     @Test
     void requestPayment_throwsWhenOrderIsCancelled() {
@@ -87,7 +93,7 @@ class PaymentServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_ALREADY_COMPLETED);
 
-        verify(tossRestClient, never()).post();
+        verify(paymentGateway, never()).confirm(anyString(), any(BigDecimal.class), anyString());
     }
 
     @Test
@@ -104,7 +110,7 @@ class PaymentServiceTest {
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
-        verify(tossRestClient, never()).post();
+        verify(paymentGateway, never()).confirm(anyString(), any(BigDecimal.class), anyString());
     }
 
     @Test
@@ -142,37 +148,44 @@ class PaymentServiceTest {
     }
 
     @Test
-    void cancelPayment_marksCancelledAfterTossSuccess() {
+    void cancelPayment_fullAmount_marksCancelledAfterTossSuccess() {
         Order order = createOrder("order-6");
         Payment payment = createPayment(order, PaymentStatus.PAID);
-        mockTossCancelSuccess("paid-key", amount(10000), "사용자 요청");
+        mockTossCancelSuccess(payment, amount(10000), "사용자 요청");
 
         paymentService.cancelPayment(payment, amount(10000), "사용자 요청");
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("10000");
     }
 
     @Test
-    void cancelPaymentPartial_marksPartialCancelledAfterTossSuccess() {
+    void cancelPayment_partialAmount_marksPartialCancelledAfterTossSuccess() {
         Order order = createOrder("order-7");
         Payment payment = createPayment(order, PaymentStatus.PAID);
-        mockTossCancelSuccess("paid-key", amount(4000), "셀러1 취소");
+        mockTossCancelSuccess(payment, amount(4000), "셀러1 취소");
 
-        paymentService.cancelPaymentPartial(payment, amount(4000), "셀러1 취소");
+        paymentService.cancelPayment(payment, amount(4000), "셀러1 취소");
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PARTIAL_CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("4000");
     }
 
     @Test
-    void cancelPaymentPartial_allowedWhenAlreadyPartialCancelled() {
+    void cancelPayment_consecutivePartials_finalCallPromotesToCancelled() {
         Order order = createOrder("order-8");
         Payment payment = createPayment(order, PaymentStatus.PAID);
-        payment.cancelPartial(); // 이전 부분 취소가 있던 상태에서 추가 부분 취소
-        mockTossCancelSuccess("paid-key", amount(3000), "셀러2 취소");
+        mockTossCancelSuccess(payment, amount(6000), "셀러2 취소");
 
-        paymentService.cancelPaymentPartial(payment, amount(3000), "셀러2 취소");
-
+        // 사전: 4000 부분 취소된 상태
+        payment.cancel(amount(4000));
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PARTIAL_CANCELLED);
+
+        // 추가 6000 → 누적 10000 → 전체 취소로 승격
+        paymentService.cancelPayment(payment, amount(6000), "셀러2 취소");
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("10000");
     }
 
     @Test
@@ -185,35 +198,35 @@ class PaymentServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.PAYMENT_ALREADY_CANCELLED);
 
-        verify(tossRestClient, never()).post();
+        verify(paymentGateway, never()).cancel(anyString(), any(BigDecimal.class), anyString());
+    }
+
+    @Test
+    void cancelPayment_throwsBeforeTossWhenAmountExceedsRemaining() {
+        Order order = createOrder("order-10");
+        Payment payment = createPayment(order, PaymentStatus.PAID);
+        payment.cancel(amount(7000)); // 사전에 7000 환불 누적됨
+
+        assertThatThrownBy(() -> paymentService.cancelPayment(payment, amount(4000), "초과 취소"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_AMOUNT_INVALID);
+
+        verify(paymentGateway, never()).cancel(anyString(), any(BigDecimal.class), anyString());
     }
 
     private void mockTossConfirmSuccess(String orderId) {
-        when(tossRestClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/v1/payments/confirm")).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.body(confirmPayload(orderId))).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build());
+        doNothing().when(paymentGateway).confirm(orderId, amount(10000), "payment-key");
     }
 
     private void mockTossConfirmFailure(String orderId) {
-        when(tossRestClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/v1/payments/confirm")).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.body(confirmPayload(orderId))).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenThrow(new RuntimeException("toss failure"));
+        doThrow(new RuntimeException("toss failure"))
+                .when(paymentGateway).confirm(orderId, amount(10000), "payment-key");
     }
 
-    private void mockTossCancelSuccess(String paymentKey, BigDecimal cancelAmount, String reason) {
-        Map<String, String> payload = Map.of(
-                "cancelReason", reason,
-                "cancelAmount", cancelAmount.toString()
-        );
-        when(tossRestClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/v1/payments/{paymentKey}/cancel", paymentKey)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.body(payload)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build());
+    private void mockTossCancelSuccess(Payment payment, BigDecimal cancelAmount, String reason) {
+        when(paymentRepository.getByIdOrThrow(payment.getId())).thenReturn(payment);
+        doNothing().when(paymentGateway).cancel(payment.getPaymentKey(), cancelAmount, reason);
     }
 
     private Order createOrder(String orderNumber) {
@@ -232,6 +245,7 @@ class PaymentServiceTest {
 
     private Payment createPayment(Order order, PaymentStatus status) {
         Payment payment = Payment.create(order);
+        ReflectionTestUtils.setField(payment, "id", paymentIdSequence++);
 
         if (status == PaymentStatus.IN_PROGRESS || status == PaymentStatus.PAID) {
             payment.markInProgress();
@@ -243,7 +257,9 @@ class PaymentServiceTest {
             payment.fail();
         }
         if (status == PaymentStatus.CANCELLED) {
-            payment.cancel();
+            payment.markInProgress();
+            payment.success("paid-key");
+            payment.cancel(payment.getAmount()); // 전체 환불 처리로 CANCELLED
         }
 
         return payment;
@@ -251,13 +267,5 @@ class PaymentServiceTest {
 
     private BigDecimal amount(long value) {
         return BigDecimal.valueOf(value);
-    }
-
-    private Map<String, String> confirmPayload(String orderId) {
-        return Map.of(
-                "orderId", orderId,
-                "amount", amount(10000).toString(),
-                "paymentKey", "payment-key"
-        );
     }
 }
