@@ -8,6 +8,8 @@ import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
+import com.commerce.pagopa.payment.application.port.PaymentCancelResult;
+import com.commerce.pagopa.payment.application.port.PaymentConfirmResult;
 import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;
@@ -132,6 +134,24 @@ class PaymentServiceTest {
     }
 
     @Test
+    void confirmPayment_marksPaymentFailedWhenTossResponseRejected() {
+        Order order = createOrder("order-4r");
+        Payment payment = createPayment(order, PaymentStatus.IN_PROGRESS);
+
+        when(orderRepository.getByOrderNumberOrThrow("order-4r")).thenReturn(order);
+        when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
+        mockTossConfirmRejected("order-4r", "ABORTED");
+
+        assertThatThrownBy(() -> paymentService.confirmPayment(new PaymentApproveRequestDto("payment-key", "order-4r", amount(10000))))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CONFIRM_REJECTED);
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+    }
+
+    @Test
     void confirmPayment_marksPaymentPaidWhenTossConfirmSucceeds() {
         Order order = createOrder("order-5");
         Payment payment = createPayment(order, PaymentStatus.IN_PROGRESS);
@@ -151,7 +171,7 @@ class PaymentServiceTest {
     void cancelPayment_fullAmount_marksCancelledAfterTossSuccess() {
         Order order = createOrder("order-6");
         Payment payment = createPayment(order, PaymentStatus.PAID);
-        mockTossCancelSuccess(payment, amount(10000), "사용자 요청");
+        mockTossCancelSuccess(payment, amount(10000), "사용자 요청", "CANCELED");
 
         paymentService.cancelPayment(payment, amount(10000), "사용자 요청");
 
@@ -163,7 +183,7 @@ class PaymentServiceTest {
     void cancelPayment_partialAmount_marksPartialCancelledAfterTossSuccess() {
         Order order = createOrder("order-7");
         Payment payment = createPayment(order, PaymentStatus.PAID);
-        mockTossCancelSuccess(payment, amount(4000), "셀러1 취소");
+        mockTossCancelSuccess(payment, amount(4000), "셀러1 취소", "PARTIAL_CANCELED");
 
         paymentService.cancelPayment(payment, amount(4000), "셀러1 취소");
 
@@ -175,7 +195,7 @@ class PaymentServiceTest {
     void cancelPayment_consecutivePartials_finalCallPromotesToCancelled() {
         Order order = createOrder("order-8");
         Payment payment = createPayment(order, PaymentStatus.PAID);
-        mockTossCancelSuccess(payment, amount(6000), "셀러2 취소");
+        mockTossCancelSuccess(payment, amount(6000), "셀러2 취소", "CANCELED");
 
         // 사전: 4000 부분 취소된 상태
         payment.cancel(amount(4000));
@@ -186,6 +206,36 @@ class PaymentServiceTest {
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
         assertThat(payment.getCancelledAmount()).isEqualByComparingTo("10000");
+    }
+
+    @Test
+    void cancelPayment_throwsCancelFailWhenTossThrows() {
+        Order order = createOrder("order-8c");
+        Payment payment = createPayment(order, PaymentStatus.PAID);
+        mockTossCancelFailure(payment, amount(10000), "사용자 요청");
+
+        assertThatThrownBy(() -> paymentService.cancelPayment(payment, amount(10000), "사용자 요청"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_FAIL);
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void cancelPayment_throwsRejectedWhenTossResponseRejected() {
+        Order order = createOrder("order-8r");
+        Payment payment = createPayment(order, PaymentStatus.PAID);
+        mockTossCancelRejected(payment, amount(10000), "사용자 요청", "ABORTED");
+
+        assertThatThrownBy(() -> paymentService.cancelPayment(payment, amount(10000), "사용자 요청"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CANCEL_REJECTED);
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(payment.getCancelledAmount()).isEqualByComparingTo("0");
     }
 
     @Test
@@ -216,17 +266,34 @@ class PaymentServiceTest {
     }
 
     private void mockTossConfirmSuccess(String orderId) {
-        doNothing().when(paymentGateway).confirm(orderId, amount(10000), "payment-key");
+        when(paymentGateway.confirm(orderId, amount(10000), "payment-key"))
+                .thenReturn(new PaymentConfirmResult(true, "DONE", "payment-key", amount(10000), null));
     }
 
     private void mockTossConfirmFailure(String orderId) {
-        doThrow(new RuntimeException("toss failure"))
-                .when(paymentGateway).confirm(orderId, amount(10000), "payment-key");
+        when(paymentGateway.confirm(orderId, amount(10000), "payment-key"))
+                .thenThrow(new RuntimeException("toss failure"));
     }
 
-    private void mockTossCancelSuccess(Payment payment, BigDecimal cancelAmount, String reason) {
+    private void mockTossConfirmRejected(String orderId, String status) {
+        when(paymentGateway.confirm(orderId, amount(10000), "payment-key"))
+                .thenReturn(new PaymentConfirmResult(false, status, "payment-key", amount(10000), null));
+    }
+
+    private void mockTossCancelSuccess(Payment payment, BigDecimal cancelAmount, String reason, String status) {
         when(paymentRepository.getByIdOrThrow(payment.getId())).thenReturn(payment);
-        doNothing().when(paymentGateway).cancel(payment.getPaymentKey(), cancelAmount, reason);
+        when(paymentGateway.cancel(payment.getPaymentKey(), cancelAmount, reason))
+                .thenReturn(new PaymentCancelResult(true, status, cancelAmount, null, null));
+    }
+
+    private void mockTossCancelFailure(Payment payment, BigDecimal cancelAmount, String reason) {
+        when(paymentGateway.cancel(payment.getPaymentKey(), cancelAmount, reason))
+                .thenThrow(new RuntimeException("toss failure"));
+    }
+
+    private void mockTossCancelRejected(Payment payment, BigDecimal cancelAmount, String reason, String status) {
+        when(paymentGateway.cancel(payment.getPaymentKey(), cancelAmount, reason))
+                .thenReturn(new PaymentCancelResult(false, status, null, null, null));
     }
 
     private Order createOrder(String orderNumber) {
