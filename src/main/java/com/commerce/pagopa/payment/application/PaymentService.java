@@ -4,6 +4,8 @@ import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResponseDto;
+import com.commerce.pagopa.payment.application.port.PaymentCancelResult;
+import com.commerce.pagopa.payment.application.port.PaymentConfirmResult;
 import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;
@@ -61,12 +63,20 @@ public class PaymentService {
             throw new PaymentCancelException();
         }
 
+        PaymentConfirmResult result;
         try {
-            paymentGateway.confirm(requestDto.orderId(), requestDto.amount(), requestDto.paymentKey());
+            result = paymentGateway.confirm(requestDto.orderId(), requestDto.amount(), requestDto.paymentKey());
         } catch (Exception e) {
-            log.error("[Payment] 토스 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
+            log.error("[Payment] 토스 승인 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
             paymentTransactionService.markConfirmFailure(requestDto.orderId());
             throw new PaymentConfirmException();
+        }
+
+        if (!result.success()) {
+            log.error("[Payment] 토스 승인 응답 거절 - orderNumber={}, status={}",
+                    requestDto.orderId(), result.status());
+            paymentTransactionService.markConfirmFailure(requestDto.orderId());
+            throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_REJECTED);
         }
 
         paymentTransactionService.markConfirmSuccess(requestDto.orderId(), requestDto.paymentKey());
@@ -79,12 +89,19 @@ public class PaymentService {
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
         PaymentCancelCommand command = paymentTransactionService.prepareCancel(payment, cancelAmount);
 
+        PaymentCancelResult result;
         try {
-            paymentGateway.cancel(command.paymentKey(), command.cancelAmount(), cancelReason);
+            result = paymentGateway.cancel(command.paymentKey(), command.cancelAmount(), cancelReason);
         } catch (Exception e) {
             log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}",
                     command.paymentKey(), command.cancelAmount(), e);
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
+        }
+
+        if (!result.success()) {
+            log.error("[Payment] 토스 결제 취소 응답 거절 - paymentKey={}, status={}",
+                    command.paymentKey(), result.status());
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_REJECTED);
         }
 
         paymentTransactionService.markCancelSuccess(command.paymentId(), command.cancelAmount());
