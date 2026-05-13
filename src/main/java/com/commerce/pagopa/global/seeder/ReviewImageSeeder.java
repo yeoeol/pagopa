@@ -51,7 +51,7 @@ class ReviewImageSeeder implements Seeder {
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
             ps.setString(1, "https://picsum.photos/seed/r%d/400/400".formatted(i));
-            ps.setInt(2, 0);
+            ps.setInt(2, 0);    // review당 1장 가정 - 복수 이미지 시딩 시 (i / imagesPerReview) % reviewIds.size() 형태로 변경 필요
             ps.setLong(3, reviewIds.get(i));
         });
     }

@@ -48,15 +48,15 @@ class UserSeeder implements Seeder {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        Timestamp now = Timestamp.valueOf(LocalDateTime.of(2026, 1, 1, 0, 0));
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
             // unique 제약: email/nickname은 인덱스로 충돌 회피
-            ps.setString(1, "seed_user_%d@example.com".formatted(i));
+            ps.setString(1, faker.internet().emailAddress("seed_user_%d".formatted(i)));
             ps.setString(2, "%s_%d".formatted(faker.name().firstName(), i));
             ps.setString(3, i % 4 == 0 ? null : "https://picsum.photos/seed/u%d/200".formatted(i));
             ps.setString(4, PROVIDERS[i % PROVIDERS.length]);
-            ps.setString(5, UUID.randomUUID().toString());
+            ps.setString(5, UUID.nameUUIDFromBytes(("seed-provider-" + i).getBytes()).toString());
             ps.setString(6, i % 5 == 0 ? "ROLE_SELLER" : "ROLE_USER");
 
             // 95% ACTIVE, 3% WITHDRAWN, 2% BANNED

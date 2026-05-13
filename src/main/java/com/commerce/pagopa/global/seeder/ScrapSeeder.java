@@ -16,6 +16,9 @@ import java.util.List;
 @RequiredArgsConstructor
 class ScrapSeeder implements Seeder {
 
+    // user별 시작 product offset - product 풀에서 user끼리 겹치지 않게 시작점 분산
+    private static final int USER_START_OFFSET_STRIDE = 31;
+
     private final JdbcTemplate jdbc;
     private final SeedProperties props;
     private final BatchInsertExecutor batch;
@@ -42,16 +45,16 @@ class ScrapSeeder implements Seeder {
             throw new IllegalStateException("buyer/product 부족");
         }
 
-        int total = props.counts().scraps();
-        int buyerSize = buyerIds.size();
-        int productSize = productIds.size();
+        int scrapsToInsert = props.counts().scraps();
+        int buyerCount = buyerIds.size();
+        int productCount = productIds.size();
 
-        // user당 슬롯 수 - unique(user_id, target_type, target_id) 충족 위해 동일 user 안에서 product 중복 회피
-        int slotsPerUser = (total + buyerSize - 1) / buyerSize;
-        if (slotsPerUser > productSize) {
+        // user 한 명당 부여할 scrap 개수 - 한 user 안에서 product 중복 회피 위해 보폭 1로 순회
+        int scrapsPerUser = (scrapsToInsert + buyerCount - 1) / buyerCount;
+        if (scrapsPerUser > productCount) {
             throw new IllegalStateException(
-                    "user당 slot(%d)이 product 수(%d) 초과 - 중복 회피 불가"
-                            .formatted(slotsPerUser, productSize)
+                    "user당 scrap(%d)이 product 수(%d) 초과 - unique 충족 불가"
+                            .formatted(scrapsPerUser, productCount)
             );
         }
 
@@ -62,11 +65,15 @@ class ScrapSeeder implements Seeder {
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            int userIdx = i / slotsPerUser;
-            int slotInUser = i % slotsPerUser;
-            // stride 31로 같은 user 내 product 충돌 회피 (slotsPerUser * 31 < productSize 전제)
-            int productIdx = (int) (((long) slotInUser * 31 + userIdx) % productSize);
+        batch.batchInsert(sql, scrapsToInsert, props.batchSize(), (ps, scrapIdx) -> {
+            int userIdx = scrapIdx / scrapsPerUser;
+            int positionInUser = scrapIdx % scrapsPerUser;
+
+            // 분산 패턴 E - user별 시작점은 31씩 떨어뜨리고, 같은 user 안에서는 +1씩 보폭 1로 진행
+            //   같은 user 내: positionInUser가 0,1,2,...,scrapsPerUser-1 → 슬롯이 1씩 증가 → 충돌 0
+            //   다른 user 간: user_id가 달라 unique 제약과 무관
+            int userStartOffset = (int) (((long) userIdx * USER_START_OFFSET_STRIDE) % productCount);
+            int productIdx = (userStartOffset + positionInUser) % productCount;
 
             ps.setLong(1, productIds.get(productIdx));
             ps.setString(2, "PRODUCT");

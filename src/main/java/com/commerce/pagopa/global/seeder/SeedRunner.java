@@ -34,8 +34,14 @@ class SeedRunner implements ApplicationRunner {
             }
             long t = System.currentTimeMillis();
             log.info("[seed] >>> {}", seeder.name());
-            seeder.seed();
-            log.info("[seed] <<< {} ({}ms)", seeder.name(), System.currentTimeMillis() - t);
+            try {
+                seeder.seed();
+                log.info("[seed] <<< {} ({}ms)", seeder.name(), System.currentTimeMillis() - t);
+            } catch (Exception e) {
+                log.error("[seed] failed {} after {}ms", seeder.name(), System.currentTimeMillis() - t, e);
+                throw new RuntimeException("Seeding failed for: " + seeder.name(), e);
+            }
+
         }
         log.info("[seed] done ({}ms)", System.currentTimeMillis() - total);
     }

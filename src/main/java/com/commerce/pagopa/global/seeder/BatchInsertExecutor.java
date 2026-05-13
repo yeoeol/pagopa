@@ -33,6 +33,12 @@ public class BatchInsertExecutor {
      * binder.bind(ps, globalIndex) - globalIndex는 0..totalRows-1 전역 인덱스
      */
     public void batchInsert(String sql, int totalRows, int batchSize, RowBinder binder) {
+        if (totalRows < 0) {
+            throw new IllegalArgumentException("totalRows must be non-negative");
+        }
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("batchSize must be positive");
+        }
         int chunks = (totalRows + batchSize - 1) / batchSize;
         for (int c = 0; c < chunks; c++) {
             int from = c * batchSize;
