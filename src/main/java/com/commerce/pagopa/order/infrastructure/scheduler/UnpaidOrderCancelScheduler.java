@@ -18,7 +18,9 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OrderScheduler {
+public class UnpaidOrderCancelScheduler {
+
+    private static final int CHUNK_SIZE = 500;
 
     private final OrderRepository orderRepository;
     private final OrderService orderService;
@@ -29,30 +31,44 @@ public class OrderScheduler {
     @PostConstruct
     void validateBeforeMin() {
         if (beforeMin <= 0) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "app.order.unpaid-before-min must be greater than 0");
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "app.order.unpaid-before-min must be greater than 0"
+            );
         }
     }
 
     /**
-     * 1분마다 실행되며, 주문 생성 후 {beforeMin}분이 지나도록 결제되지 않은 주문을 자동 취소
+     * 매 분 0초 - 만료 미결제 주문 자동 취소
+     * 청크(LIMIT) 단위 반복 - 단위 시간당 DB 피크 부하 평탄화, 사용자 요청과 공존
      */
-    @Scheduled(cron = "0 * * * * *") // 매 분 0초에 실행
+    @Scheduled(cron = "0 * * * * *")
     public void cancelUnpaidOrders() {
         LocalDateTime timeoutTime = LocalDateTime.now().minusMinutes(beforeMin);
+        long totalCanceled = 0;
+        int chunkNo = 0;
 
-        List<Order> unpaidOrders = orderRepository.findUnpaidCreatedBefore(timeoutTime);
+        while (true) {
+            List<Order> unpaidOrderChunk = orderRepository.findUnpaidCreatedBefore(timeoutTime, CHUNK_SIZE);
+            if (unpaidOrderChunk.isEmpty()) break;
 
-        if (!unpaidOrders.isEmpty()) {
-            log.info("[OrderScheduler] {}분 경과 미결제 주문 {}건 자동 취소 시작", beforeMin, unpaidOrders.size());
-
-            for (Order order : unpaidOrders) {
+            chunkNo++;
+            for (Order order : unpaidOrderChunk) {
                 try {
                     orderService.cancelUnpaidOrder(order.getId());
-                    log.info("[OrderScheduler] 자동 취소 완료 - Order ID: {}", order.getId());
+                    totalCanceled++;
                 } catch (Exception e) {
-                    log.error("[OrderScheduler] 자동 취소 실패 - Order ID: {}", order.getId(), e);
+                    log.error("[UnpaidOrderCancelScheduler] 자동 취소 실패 - Order ID: {}", order.getId(), e);
                 }
             }
+
+            // 청크 미완 = 대상 소진 - 다음 cron까지 대기
+            if (unpaidOrderChunk.size() < CHUNK_SIZE) break;
+        }
+
+        if (totalCanceled > 0) {
+            log.info("[UnpaidOrderCancelScheduler] {}분 경과 미결제 주문 {}건 자동 취소 (chunks={})",
+                    beforeMin, totalCanceled, chunkNo);
         }
     }
 }
