@@ -20,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UnpaidOrderCancelScheduler {
 
+    private static final int MAX_CHUNKS_PER_EXECUTION = 10;
     private static final int CHUNK_SIZE = 500;
     private static final long PAUSE_BETWEEN_CHUNKS_MS = 100;
 
@@ -50,6 +51,12 @@ public class UnpaidOrderCancelScheduler {
         int chunkNo = 0;
 
         while (true) {
+            // 최대 청크 수 제한
+            if (chunkNo >= MAX_CHUNKS_PER_EXECUTION) {
+                log.warn("[UnpaidOrderCancelScheduler] 최대 청크 수 도달 ({}), 나머지는 다음 실행에서 처리", MAX_CHUNKS_PER_EXECUTION);
+                break;
+            }
+
             List<Order> unpaidOrderChunk = orderRepository.findUnpaidCreatedBefore(timeoutTime, CHUNK_SIZE);
             if (unpaidOrderChunk.isEmpty()) break;
 
