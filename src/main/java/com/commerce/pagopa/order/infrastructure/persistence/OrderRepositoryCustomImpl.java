@@ -18,12 +18,15 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Order> findUnpaidCreatedBefore(LocalDateTime timeoutTime) {
+    public List<Order> findUnpaidCreatedBefore(LocalDateTime timeoutTime, int limit) {
         return queryFactory
                 .selectFrom(order).distinct()
                 .join(order.sellerOrders, sellerOrder)
                 .where(sellerOrder.status.eq(SellerOrderStatus.PENDING_PAYMENT)
                         .and(order.createdAt.loe(timeoutTime))
-                ).fetch();
+                )
+                .orderBy(order.createdAt.asc())
+                .limit(limit)
+                .fetch();
     }
 }

@@ -280,11 +280,11 @@ class OrderAggregateSeeder implements Seeder {
         /** 상태 분포 - Order 단위로 결정, 자식 SellerOrder/Payment 일괄 적용 */
         StatusPick pickStatus(int orderIdx) {
             int r = orderIdx % 100;
-            if (r < 10) return new StatusPick("ORDERED",    "PENDING_PAYMENT", "READY");
-            if (r < 30) return new StatusPick("PAID",       "READY",           "PAID");
-            if (r < 50) return new StatusPick("DELIVERING", "DELIVERING",      "PAID");
-            if (r < 90) return new StatusPick("COMPLETED",  "COMPLETED",       "PAID");
-            return         new StatusPick("CANCELLED",  "CANCELLED",       "CANCELLED");
+            if (r < 10) return new StatusPick("CANCELLED",  "CANCELLED",  "CANCELLED"); // 만료 취소
+            if (r < 30) return new StatusPick("PAID",       "READY",      "PAID");
+            if (r < 50) return new StatusPick("DELIVERING", "DELIVERING", "PAID");
+            if (r < 90) return new StatusPick("COMPLETED",  "COMPLETED",  "PAID");
+            return         new StatusPick("CANCELLED",  "CANCELLED",  "CANCELLED");     // 사용자 취소
         }
     }
 }
