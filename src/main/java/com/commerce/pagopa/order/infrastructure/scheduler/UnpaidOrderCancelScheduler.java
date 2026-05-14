@@ -21,6 +21,7 @@ import java.util.List;
 public class UnpaidOrderCancelScheduler {
 
     private static final int CHUNK_SIZE = 500;
+    private static final long PAUSE_BETWEEN_CHUNKS_MS = 100;
 
     private final OrderRepository orderRepository;
     private final OrderService orderService;
@@ -64,6 +65,15 @@ public class UnpaidOrderCancelScheduler {
 
             // 청크 미완 = 대상 소진 - 다음 cron까지 대기
             if (unpaidOrderChunk.size() < CHUNK_SIZE) break;
+
+            // DB CPU 피크 방지
+            try {
+                Thread.sleep(PAUSE_BETWEEN_CHUNKS_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("[UnpaidOrderCancelScheduler] 인터럽트 - 청크 처리 중단");
+                break;
+            }
         }
 
         if (totalCanceled > 0) {
