@@ -29,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,8 +56,12 @@ public class OrderService {
                 requestDto.delivery().toDelivery()
         );
 
-        for (OrderProductRequestDto req : requestDto.products()) {
-            Product product = productRepository.findByIdOrThrow(req.productId());
+        // 데드락 회피: 모든 트랜잭션이 productId 오름차순으로 락 획득
+        List<OrderProductRequestDto> sorted = requestDto.products().stream()
+                .sorted(Comparator.comparing(OrderProductRequestDto::productId))
+                .toList();
+        for (OrderProductRequestDto req : sorted) {
+            Product product = productRepository.findByIdForUpdateOrThrow(req.productId());
             addProductToOrder(order, product, req.quantity());
         }
         order.refresh();
@@ -80,7 +85,13 @@ public class OrderService {
                 user,
                 requestDto.delivery().toDelivery()
         );
-        carts.forEach(cart -> addProductToOrder(order, cart.getProduct(), cart.getQuantity()));
+        // 데드락 회피: productId 오름차순 정렬 후 락 획득
+        carts.stream()
+                .sorted(Comparator.comparing(cart -> cart.getProduct().getId()))
+                .forEach(cart -> {
+                    Product product = productRepository.findByIdForUpdateOrThrow(cart.getProduct().getId());
+                    addProductToOrder(order, product, cart.getQuantity());
+                });
         order.refresh();
 
         // 주문 완료 후 장바구니 항목 삭제
