@@ -22,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -48,7 +48,7 @@ class StockConcurrencyTest {
 
     @Container
     @ServiceConnection
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0");
+    static MySQLContainer mysql = new MySQLContainer("mysql:8.0");
 
     @DynamicPropertySource
     static void hikariProps(DynamicPropertyRegistry registry) {
@@ -112,9 +112,9 @@ class StockConcurrencyTest {
         pool.shutdown();
 
         int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
-        log.info("[no-contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}, finalStock={}",
+        log.info("[contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}, finalStock={}",
                 N, finished, elapsedMs, success.get(), soldOut.get(), other.get(), finalStock);
-        errorCounts.forEach((k, v) -> System.out.println("  [other] " + k + " x" + v));
+        errorCounts.forEach((k, v) -> log.warn("  [other] {} x{}", k, v));
 
         assertThat(success.get()).isEqualTo(10);
         assertThat(soldOut.get()).isEqualTo(N-10);

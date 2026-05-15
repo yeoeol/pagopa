@@ -16,6 +16,7 @@ import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.product.infrastructure.persistence.ProductJpaRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.global.exception.*;
@@ -61,10 +62,15 @@ public class OrderService {
                 .sorted(Comparator.comparing(OrderProductRequestDto::productId))
                 .toList();
         for (OrderProductRequestDto req : sorted) {
+            if (!productRepository.existsById(req.productId())) {
+                throw new ProductNotFoundException();
+            }
+
             int updated = productRepository.decreaseStock(req.productId(), req.quantity());
             if (updated == 0) {
                 throw new ProductOutOfStockException();
             }
+
             Product product = productRepository.findByIdOrThrow(req.productId());
             addProductToOrder(order, product, req.quantity());
         }
