@@ -16,6 +16,7 @@ import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.product.infrastructure.persistence.ProductJpaRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.global.exception.*;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +57,20 @@ public class OrderService {
                 requestDto.delivery().toDelivery()
         );
 
-        for (OrderProductRequestDto req : requestDto.products()) {
+        // 데드락 회피: 모든 트랜잭션이 productId 오름차순으로 행 락 획득
+        List<OrderProductRequestDto> sorted = requestDto.products().stream()
+                .sorted(Comparator.comparing(OrderProductRequestDto::productId))
+                .toList();
+        for (OrderProductRequestDto req : sorted) {
+            if (!productRepository.existsById(req.productId())) {
+                throw new ProductNotFoundException();
+            }
+
+            int updated = productRepository.decreaseStock(req.productId(), req.quantity());
+            if (updated == 0) {
+                throw new ProductOutOfStockException();
+            }
+
             Product product = productRepository.findByIdOrThrow(req.productId());
             addProductToOrder(order, product, req.quantity());
         }
@@ -80,7 +95,16 @@ public class OrderService {
                 user,
                 requestDto.delivery().toDelivery()
         );
-        carts.forEach(cart -> addProductToOrder(order, cart.getProduct(), cart.getQuantity()));
+        // 데드락 회피: productId 오름차순 정렬 후 행 락 획득
+        carts.stream()
+                .sorted(Comparator.comparing(cart -> cart.getProduct().getId()))
+                .forEach(cart -> {
+                    int updated = productRepository.decreaseStock(cart.getProduct().getId(), cart.getQuantity());
+                    if (updated == 0) {
+                        throw new ProductOutOfStockException();
+                    }
+                    addProductToOrder(order, cart.getProduct(), cart.getQuantity());
+                });
         order.refresh();
 
         // 주문 완료 후 장바구니 항목 삭제
@@ -131,11 +155,11 @@ public class OrderService {
     }
 
     /**
-     * 한 상품을 Order의 적절한 SellerOrder에 추가하고, 재고를 차감
+     * 한 상품을 Order의 적절한 SellerOrder에 추가
+     * 재고 차감은 ProductRepository.decreaseStock(id, qty) 단일 atomic UPDATE로 별도 처리
      */
     private void addProductToOrder(Order order, Product product, int quantity) {
         SellerOrder sellerOrder = order.findOrCreateSellerOrderFor(product.getSeller());
-        product.decreaseStock(quantity);
         sellerOrder.addOrderProduct(OrderProduct.create(quantity, product.getPrice(), product));
     }
 
