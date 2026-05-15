@@ -37,6 +37,8 @@ public interface ProductRepository {
 
     List<Product> searchProducts(@NonNull ProductSearchCondition condition);
 
+    int decreaseStock(Long productId, int quantity);
+
     default Product findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ProductNotFoundException::new);
     }
