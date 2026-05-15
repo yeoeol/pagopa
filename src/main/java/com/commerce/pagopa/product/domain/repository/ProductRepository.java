@@ -37,13 +37,7 @@ public interface ProductRepository {
 
     List<Product> searchProducts(@NonNull ProductSearchCondition condition);
 
-    Optional<Product> findByIdForUpdate(Long id);
-
     default Product findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ProductNotFoundException::new);
-    }
-
-    default Product findByIdForUpdateOrThrow(Long id) {
-        return findByIdForUpdate(id).orElseThrow(ProductNotFoundException::new);
     }
 }
