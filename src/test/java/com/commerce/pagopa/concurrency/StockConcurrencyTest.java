@@ -12,6 +12,7 @@ import com.commerce.pagopa.support.fixture.CategoryFixture;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
 import com.commerce.pagopa.support.fixture.ProductFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
+import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +20,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.mysql.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @SpringBootTest
-@Testcontainers
+@Import(TestcontainersConfig.class)
 class StockConcurrencyTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer mysql = new MySQLContainer("mysql:8.0");
 
     @DynamicPropertySource
     static void hikariProps(DynamicPropertyRegistry registry) {

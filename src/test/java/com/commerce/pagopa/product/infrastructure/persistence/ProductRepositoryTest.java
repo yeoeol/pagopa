@@ -9,12 +9,14 @@ import com.commerce.pagopa.support.fixture.CategoryFixture;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
 import com.commerce.pagopa.support.fixture.ProductFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
+import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @SpringBootTest
+@Import(TestcontainersConfig.class)
 class ProductRepositoryTest {
 
     @Autowired
