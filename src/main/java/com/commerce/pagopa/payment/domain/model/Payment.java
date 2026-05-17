@@ -86,7 +86,9 @@ public class Payment extends BaseTimeEntity {
         if (this.status == PaymentStatus.CANCELLED) {
             throw new BusinessException(ErrorCode.PAYMENT_ALREADY_CANCELLED);
         }
-        if (this.status != PaymentStatus.PAID && this.status != PaymentStatus.PARTIAL_CANCELLED) {
+        if (this.status != PaymentStatus.PAID
+                && this.status != PaymentStatus.PARTIAL_CANCELLED
+                && this.status != PaymentStatus.CANCELLING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
         }
         if (cancelAmount == null || cancelAmount.compareTo(BigDecimal.ZERO) <= 0) {

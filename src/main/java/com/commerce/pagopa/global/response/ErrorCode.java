@@ -94,6 +94,7 @@ public enum ErrorCode {
     PAYMENT_CANCEL_AMOUNT_INVALID(HttpStatus.BAD_REQUEST, "PAYMENT_011", "취소 금액이 잘못되었습니다."),
     PAYMENT_CONFIRM_REJECTED(HttpStatus.BAD_REQUEST, "PAYMENT_012", "결제 승인이 거절되었습니다."),
     PAYMENT_CANCEL_REJECTED(HttpStatus.BAD_REQUEST, "PAYMENT_013", "결제 취소가 거절되었습니다."),
+    PAYMENT_CANCEL_IN_PROGRESS(HttpStatus.CONFLICT, "PAYMENT_014", "이미 결제 취소가 진행 중입니다."),
 
     ;
     private final HttpStatus httpStatus;

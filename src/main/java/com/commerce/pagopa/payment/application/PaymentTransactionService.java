@@ -64,4 +64,9 @@ class PaymentTransactionService {
 
         payment.cancel(cancelAmount);
     }
+
+    @Transactional
+    public int releaseCancelLock(Long paymentId) {
+        return paymentRepository.releaseCancelLock(paymentId);
+    }
 }
