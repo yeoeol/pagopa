@@ -2,12 +2,12 @@ package com.commerce.pagopa.payment.domain.model;
 
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.order.domain.model.Address;
-import com.commerce.pagopa.order.domain.model.Delivery;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
+import com.commerce.pagopa.support.fixture.DeliveryFixture;
+import com.commerce.pagopa.support.fixture.PaymentFixture;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -20,7 +20,7 @@ class PaymentTest {
 
     @Test
     void cancel_partialAmount_setsPartialCancelledAndAccumulates() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
 
         payment.cancel(BigDecimal.valueOf(3000));
 
@@ -30,7 +30,7 @@ class PaymentTest {
 
     @Test
     void cancel_partialThenRemainder_promotesToCancelled() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
         payment.cancel(BigDecimal.valueOf(3000));
 
         payment.cancel(BigDecimal.valueOf(7000));
@@ -41,7 +41,7 @@ class PaymentTest {
 
     @Test
     void cancel_fullAmountAtOnce_setsCancelled() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
 
         payment.cancel(BigDecimal.valueOf(10000));
 
@@ -51,7 +51,7 @@ class PaymentTest {
 
     @Test
     void cancel_throwsWhenAmountExceedsRemaining() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
         payment.cancel(BigDecimal.valueOf(7000));
 
         assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(4000)))
@@ -62,7 +62,7 @@ class PaymentTest {
 
     @Test
     void cancel_throwsWhenAmountIsZeroOrNegative() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
 
         assertThatThrownBy(() -> payment.cancel(BigDecimal.ZERO))
                 .isInstanceOf(BusinessException.class)
@@ -77,7 +77,7 @@ class PaymentTest {
 
     @Test
     void cancel_throwsWhenAlreadyFullyCancelled() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
         payment.cancel(BigDecimal.valueOf(10000));
 
         assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(1000)))
@@ -88,7 +88,7 @@ class PaymentTest {
 
     @Test
     void cancel_throwsWhenAlreadyFailed() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
         payment.fail();
 
         assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(1000)))
@@ -99,7 +99,7 @@ class PaymentTest {
 
     @Test
     void cancel_throwsWhenStillReady() {
-        Payment payment = Payment.create(newOrderWithAmount(10000));
+        Payment payment = PaymentFixture.aReadyPayment(newOrderWithAmount(10000));
 
         assertThatThrownBy(() -> payment.cancel(BigDecimal.valueOf(1000)))
                 .isInstanceOf(BusinessException.class)
@@ -109,12 +109,12 @@ class PaymentTest {
 
     @Test
     void cancelUnpaid_setsCancelledForReadyOrInProgress() {
-        Payment readyPayment = Payment.create(newOrderWithAmount(10000));
+        Payment readyPayment = PaymentFixture.aReadyPayment(newOrderWithAmount(10000));
         readyPayment.cancelUnpaid();
         assertThat(readyPayment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
         assertThat(readyPayment.getCancelledAmount()).isEqualByComparingTo("0"); // 누적 금액은 변동 없음
 
-        Payment inProgress = Payment.create(newOrderWithAmount(10000));
+        Payment inProgress = PaymentFixture.aReadyPayment(newOrderWithAmount(10000));
         inProgress.markInProgress();
         inProgress.cancelUnpaid();
         assertThat(inProgress.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
@@ -122,7 +122,7 @@ class PaymentTest {
 
     @Test
     void cancelUnpaid_throwsWhenAlreadyPaid() {
-        Payment payment = newPaidPayment(10000);
+        Payment payment = PaymentFixture.aPaidPayment(newOrderWithAmount(10000));
 
         assertThatThrownBy(payment::cancelUnpaid)
                 .isInstanceOf(BusinessException.class)
@@ -132,22 +132,14 @@ class PaymentTest {
 
     @Test
     void create_initializesCancelledAmountToZero() {
-        Payment payment = Payment.create(newOrderWithAmount(10000));
+        Payment payment = PaymentFixture.aReadyPayment(newOrderWithAmount(10000));
 
         assertThat(payment.getCancelledAmount()).isEqualByComparingTo("0");
     }
 
-    private Payment newPaidPayment(long amount) {
-        Payment payment = Payment.create(newOrderWithAmount(amount));
-        payment.markInProgress();
-        payment.success("payment-key");
-        return payment;
-    }
-
+    // buyer/seller가 필요 없는 결제 단위 테스트용 — totalAmount만 정확한 가짜 Order
     private Order newOrderWithAmount(long amount) {
-        Address address = new Address("12345", "주소", "상세");
-        Delivery delivery = Delivery.create(address, "수령인", "01012345678", null);
-        Order order = Order.init("order-1", PaymentMethod.CARD, null, delivery);
+        Order order = Order.init("order-1", PaymentMethod.CARD, null, DeliveryFixture.aDelivery());
 
         SellerOrder so = SellerOrder.create(null, "order-1-1");
         ReflectionTestUtils.setField(so, "sellerTotalAmount", BigDecimal.valueOf(amount));

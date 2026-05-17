@@ -4,9 +4,11 @@ import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;
 import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.support.fixture.OrderProductFixture;
+import com.commerce.pagopa.support.fixture.ProductFixture;
+import com.commerce.pagopa.support.fixture.SellerOrderFixture;
+import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -159,26 +161,10 @@ class SellerOrderTest {
     }
 
     private SellerOrder newPendingSellerOrder() {
-        User seller = User.create(
-                "seller@example.com",
-                "seller",
-                null,
-                Provider.GOOGLE,
-                "seller-provider-id",
-                Role.ROLE_SELLER
-        );
-        Product product = Product.create(
-                "product",
-                "description",
-                new BigDecimal("10000"),
-                null,
-                10,
-                null,
-                seller
-        );
-
-        SellerOrder sellerOrder = SellerOrder.create(seller, "ORD20260502-001-1");
-        sellerOrder.addOrderProduct(OrderProduct.create(1, new BigDecimal("10000"), product));
+        User seller = UserFixture.aSeller("seller-provider-id");
+        Product product = ProductFixture.aProduct(null, seller, new BigDecimal("10000"));
+        SellerOrder sellerOrder = SellerOrderFixture.aSellerOrder(seller, "ORD20260502-001-1");
+        sellerOrder.addOrderProduct(OrderProductFixture.anOrderProduct(product));
         return sellerOrder;
     }
 

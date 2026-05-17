@@ -12,21 +12,21 @@ public final class ProductFixture {
     }
 
     public static Product aProduct(Category category, User seller) {
-        return aProduct(category, seller, 10, BigDecimal.ONE);
+        return aProduct("test-product", "test-description", category, seller, 10, BigDecimal.ONE);
     }
 
     public static Product aProduct(Category category, User seller, int stock) {
-        return aProduct(category, seller, stock, BigDecimal.ONE);
+        return aProduct("test-product", "test-description", category, seller, stock, BigDecimal.ONE);
     }
 
     public static Product aProduct(Category category, User seller, BigDecimal price) {
-        return aProduct(category, seller, 10, price);
+        return aProduct("test-product", "test-description", category, seller, 10, price);
     }
 
-    public static Product aProduct(Category category, User seller, int stock, BigDecimal price) {
+    public static Product aProduct(String name, String description, Category category, User seller, int stock, BigDecimal price) {
         return Product.create(
-                "test-product",
-                "test-description",
+                name,
+                description,
                 price,
                 null,
                 stock,

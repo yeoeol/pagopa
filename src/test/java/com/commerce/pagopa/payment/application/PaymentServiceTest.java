@@ -1,9 +1,8 @@
 package com.commerce.pagopa.payment.application;
 
-import com.commerce.pagopa.order.domain.model.Address;
-import com.commerce.pagopa.order.domain.model.Delivery;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
+import com.commerce.pagopa.support.fixture.DeliveryFixture;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
@@ -297,9 +296,7 @@ class PaymentServiceTest {
     }
 
     private Order createOrder(String orderNumber) {
-        Address address = new Address("12345", "주소", "상세");
-        Delivery delivery = Delivery.create(address, "수령인", "01012345678", null);
-        Order order = Order.init(orderNumber, PaymentMethod.CARD, null, delivery);
+        Order order = Order.init(orderNumber, PaymentMethod.CARD, null, DeliveryFixture.aDelivery());
         ReflectionTestUtils.setField(order, "orderName", "테스트 주문");
 
         // SellerOrder 1건을 부착해 totalAmount=10000 으로 만든다 (테스트 시나리오용)
