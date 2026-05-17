@@ -20,9 +20,9 @@ import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
 import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.support.fixture.ProductFixture;
+import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -181,7 +181,7 @@ class OrderServiceTest {
     private Order newPaidOrderWithTwoSellers() {
         Address address = new Address("12345", "주소", "상세");
         Delivery delivery = Delivery.create(address, "수령인", "01012345678", null);
-        User buyer = newUser("buyer", Role.ROLE_USER);
+        User buyer = UserFixture.aBuyer("buyer");
         Order order = Order.init("ORD-1", PaymentMethod.CARD, buyer, delivery);
         ReflectionTestUtils.setField(order, "id", 1L);
 
@@ -197,31 +197,12 @@ class OrderServiceTest {
     }
 
     private SellerOrder newReadySellerOrder(String sellerProviderId, String sellerOrderNumber, BigDecimal price) {
-        User seller = newUser(sellerProviderId, Role.ROLE_SELLER);
-        Product product = Product.create(
-                "product-" + sellerProviderId,
-                "description",
-                price,
-                null,
-                10,
-                null,
-                seller
-        );
+        User seller = UserFixture.aSeller(sellerProviderId);
+        Product product = ProductFixture.aProduct(null, seller, price);
         SellerOrder so = SellerOrder.create(seller, sellerOrderNumber);
         so.addOrderProduct(OrderProduct.create(1, price, product));
         so.pay();
         return so;
-    }
-
-    private User newUser(String providerId, Role role) {
-        return User.create(
-                providerId + "@example.com",
-                providerId,
-                null,
-                Provider.GOOGLE,
-                providerId,
-                role
-        );
     }
 
     private Payment newPaidPayment(Order order) {

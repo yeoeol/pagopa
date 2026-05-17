@@ -1,6 +1,5 @@
 package com.commerce.pagopa.concurrency;
 
-import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.global.exception.ProductOutOfStockException;
 import com.commerce.pagopa.order.application.OrderService;
@@ -9,10 +8,11 @@ import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-
+import com.commerce.pagopa.support.fixture.CategoryFixture;
+import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
+import com.commerce.pagopa.support.fixture.ProductFixture;
+import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,11 +26,9 @@ import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
@@ -68,16 +66,11 @@ class StockConcurrencyTest {
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 1000, 10000})
     void stock_10_으로_N명이_동시_주문하면_정확히_10명만_성공(int N) throws Exception {
-        Category root = createRootCategory("root");
-        Category child1 = createChildCategory(root);
-        Category child2 = createChildCategory(child1);
-        categoryRepository.save(root);
+        CategoryTree tree = CategoryFixture.aTree();
+        categoryRepository.save(tree.root());
 
-        User seller = userRepository.save(
-                createUser("test" + N, "test" + N, "test", Provider.NAVER, "3baac1ad-2c18-3922-81e8-4d032629ce92" + N, Role.ROLE_SELLER)
-        );
-
-        Product product = productRepository.save(createProduct("test", "test", BigDecimal.ONE, BigDecimal.ONE, 10, child2, seller));
+        User seller = userRepository.save(UserFixture.aSeller("contention-" + N));
+        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller));
 
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
 
@@ -125,22 +118,15 @@ class StockConcurrencyTest {
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 1000, 10000})
     void 서로_다른_N개_상품에_각각_1명씩_주문하면_경합없이_모두_성공(int N) throws Exception {
-        Category root = createRootCategory("root");
-        Category child1 = createChildCategory(root);
-        Category child2 = createChildCategory(child1);
-        categoryRepository.save(root);
+        CategoryTree tree = CategoryFixture.aTree();
+        categoryRepository.save(tree.root());
 
-        String suffix = "diff_" + N + "_" + UUID.randomUUID();
-        User seller = userRepository.save(
-                createUser("e_" + suffix, "n_" + suffix, "test", Provider.NAVER, suffix, Role.ROLE_SELLER)
-        );
+        User seller = userRepository.save(UserFixture.aSeller("no-contention-" + N));
 
         // N개 상품 미리 생성, 각 stock=1 → 동시 주문 시 row 경합 0
         List<Product> products = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
-            products.add(productRepository.save(
-                    createProduct("p" + i, "test", BigDecimal.ONE, BigDecimal.ONE, 1, child2, seller)
-            ));
+            products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 1)));
         }
 
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
@@ -183,43 +169,5 @@ class StockConcurrencyTest {
         assertThat(success.get()).isEqualTo(N);
         assertThat(soldOut.get()).isZero();
         assertThat(other.get()).isZero();
-    }
-
-    Category createRootCategory(String name) {
-        return Category.createRoot(name);
-    }
-
-    Category createChildCategory(Category parent) {
-        return parent.createChild("child1");
-    }
-
-    User createUser(
-            String email, String nickname, String profileImage,
-            Provider provider, String providerId, Role role
-    ) {
-        return User.create(
-                email,
-                nickname,
-                profileImage,
-                provider,
-                providerId,
-                role
-        );
-    }
-
-    Product createProduct(
-            String name, String description, BigDecimal price,
-            BigDecimal discountPrice, int stock,
-            Category category, User seller
-    ) {
-        return Product.create(
-                name,
-                description,
-                price,
-                discountPrice,
-                stock,
-                category,
-                seller
-        );
     }
 }
