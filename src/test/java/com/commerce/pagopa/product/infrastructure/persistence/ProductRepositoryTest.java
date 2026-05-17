@@ -5,14 +5,18 @@ import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.support.fixture.CategoryFixture;
+import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
+import com.commerce.pagopa.support.fixture.ProductFixture;
+import com.commerce.pagopa.support.fixture.UserFixture;
+import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -24,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @SpringBootTest
+@Import(TestcontainersConfig.class)
 class ProductRepositoryTest {
 
     @Autowired
@@ -39,40 +44,36 @@ class ProductRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        Category rootCategory = Category.createRoot("루트카테고리");
-        Category child1 = rootCategory.createChild("자식카테고리1");
-        Category child2 = child1.createChild("자식카테고리2");
-        categoryRepository.save(rootCategory);
-        categoryRepository.save(child1);
-        category = categoryRepository.save(child2);
+        CategoryTree tree = CategoryFixture.aTree();
+        categoryRepository.save(tree.root());
+        category = tree.leaf();
 
-        User initUser = User.create(
-                "emailA",
-                "nicknameA",
-                "profileImageA",
-                Provider.GOOGLE,
-                "unique_providerIdA",
-                Role.ROLE_SELLER
-        );
-        user = userRepository.save(initUser);
+        user = userRepository.save(UserFixture.aSeller("product-repo-test"));
 
-        Product product1 = Product.create(
-                "productA", "descA",
-                BigDecimal.valueOf(1000),
-                BigDecimal.valueOf(500),
-                10, category, user
+        // 검색 테스트가 productA/B/C name으로 매칭하므로 fixture 디폴트 대신 명시 생성
+        Product product1 = ProductFixture.aProduct(
+                "productA",
+                "descA",
+                category,
+                user,
+                10,
+                BigDecimal.valueOf(1000)
         );
-        Product product2 = Product.create(
-                "productB", "descB",
-                BigDecimal.valueOf(2000),
-                BigDecimal.valueOf(1000),
-                20, category, user
+        Product product2 = ProductFixture.aProduct(
+                "productB",
+                "descB",
+                category,
+                user,
+                20,
+                BigDecimal.valueOf(2000)
         );
-        Product product3 = Product.create(
-                "productC", "descC",
-                BigDecimal.valueOf(3000),
-                BigDecimal.valueOf(1500),
-                30, category, user
+        Product product3 = ProductFixture.aProduct(
+                "productC",
+                "descC",
+                category,
+                user,
+                30,
+                BigDecimal.valueOf(3000)
         );
         products.add(productRepository.save(product1));
         products.add(productRepository.save(product2));

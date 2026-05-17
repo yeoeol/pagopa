@@ -4,12 +4,14 @@ import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.SellerOrderNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;
 import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.support.fixture.OrderFixture;
+import com.commerce.pagopa.support.fixture.OrderProductFixture;
+import com.commerce.pagopa.support.fixture.ProductFixture;
+import com.commerce.pagopa.support.fixture.SellerOrderFixture;
+import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -19,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrderTest {
+
+    private static final BigDecimal PRICE = new BigDecimal("10000");
 
     @Test
     void getStatus_returnsPaidWhenAllSellerOrdersAreReady() {
@@ -66,20 +70,22 @@ class OrderTest {
         // 시나리오: SellerOrder#1은 사전에 부분 취소되어 재고 복원이 이미 1회 일어남.
         // 그 후 전체 Order.cancel() 호출 시 SellerOrder#1은 건드리지 않고 SellerOrder#2만 취소되어야 함.
 
-        Product product1 = newProduct("seller-1", 10);
-        Product product2 = newProduct("seller-2", 10);
+        User seller1 = UserFixture.aSeller("seller-1");
+        User seller2 = UserFixture.aSeller("seller-2");
+        Product product1 = ProductFixture.aProduct(null, seller1, PRICE);
+        Product product2 = ProductFixture.aProduct(null, seller2, PRICE);
 
         Order order = newOrder();
 
-        SellerOrder so1 = SellerOrder.create(product1.getSeller(), "order-1-1");
+        SellerOrder so1 = SellerOrderFixture.aSellerOrder(seller1, "order-1-1");
         product1.decreaseStock(1);   // 주문 placement 시 차감
-        so1.addOrderProduct(OrderProduct.create(1, new BigDecimal("10000"), product1));
+        so1.addOrderProduct(OrderProductFixture.anOrderProduct(product1));
         so1.pay();
         order.addSellerOrder(so1);
 
-        SellerOrder so2 = SellerOrder.create(product2.getSeller(), "order-1-2");
+        SellerOrder so2 = SellerOrderFixture.aSellerOrder(seller2, "order-1-2");
         product2.decreaseStock(1);
-        so2.addOrderProduct(OrderProduct.create(1, new BigDecimal("10000"), product2));
+        so2.addOrderProduct(OrderProductFixture.anOrderProduct(product2));
         so2.pay();
         order.addSellerOrder(so2);
 
@@ -150,56 +156,16 @@ class OrderTest {
         assertThat(order.calculateActiveAmount()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
-    private Product newProduct(String sellerProviderId, int stock) {
-        User seller = newUser(sellerProviderId, Role.ROLE_SELLER);
-        return Product.create(
-                "product-" + sellerProviderId,
-                "description",
-                new BigDecimal("10000"),
-                null,
-                stock,
-                null,
-                seller
-        );
-    }
-
     private Order newOrder() {
-        Address address = new Address("12345", "address", "detail");
-        Delivery delivery = Delivery.create(address, "buyer", "01012345678", null);
-        return Order.init(
-                "order-1",
-                PaymentMethod.CARD,
-                newUser("buyer", Role.ROLE_USER),
-                delivery
-        );
+        return OrderFixture.anOrder("order-1", UserFixture.aBuyer("buyer"));
     }
 
     private SellerOrder newReadySellerOrder(String providerId, String sellerOrderNumber) {
-        User seller = newUser(providerId, Role.ROLE_SELLER);
-        Product product = Product.create(
-                "product-" + providerId,
-                "description",
-                new BigDecimal("10000"),
-                null,
-                10,
-                null,
-                seller
-        );
-
-        SellerOrder sellerOrder = SellerOrder.create(seller, sellerOrderNumber);
-        sellerOrder.addOrderProduct(OrderProduct.create(1, new BigDecimal("10000"), product));
+        User seller = UserFixture.aSeller(providerId);
+        Product product = ProductFixture.aProduct(null, seller, PRICE);
+        SellerOrder sellerOrder = SellerOrderFixture.aSellerOrder(seller, sellerOrderNumber);
+        sellerOrder.addOrderProduct(OrderProductFixture.anOrderProduct(product));
         sellerOrder.pay();
         return sellerOrder;
-    }
-
-    private User newUser(String providerId, Role role) {
-        return User.create(
-                providerId + "@example.com",
-                providerId,
-                null,
-                Provider.GOOGLE,
-                providerId,
-                role
-        );
     }
 }
