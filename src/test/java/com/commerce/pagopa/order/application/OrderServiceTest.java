@@ -168,6 +168,7 @@ class OrderServiceTest {
 
         when(orderRepository.findByIdOrThrow(1L)).thenReturn(order);
         when(paymentRepository.getByOrderOrThrow(order)).thenReturn(payment);
+        when(paymentRepository.acquireCancelLock(any())).thenReturn(1);
 
         // when: 전체 주문 취소
         orderService.cancelOrder(1L, new OrderCancelRequestDto("전체 취소"));

@@ -1,5 +1,7 @@
 package com.commerce.pagopa.order.application;
 
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
@@ -26,6 +28,12 @@ class OrderTransactionService {
 
         order.validateCancelable();
         payment.validateCancelable(cancelAmount);
+
+        // 외부 PG 호출 직전 단일 트랜잭션만 통과시켜 중복 환불 방지
+        int acquired = paymentRepository.acquireCancelLock(payment.getId());
+        if (acquired == 0) {
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_IN_PROGRESS);
+        }
 
         return new OrderCancelCommand(order.getId(), payment, cancelAmount);
     }

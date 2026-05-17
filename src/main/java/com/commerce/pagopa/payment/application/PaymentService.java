@@ -95,12 +95,14 @@ public class PaymentService {
         } catch (Exception e) {
             log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}",
                     command.paymentKey(), command.cancelAmount(), e);
+            releaseCancelLockSafely(command.paymentId());
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
         }
 
         if (!result.success()) {
             log.error("[Payment] 토스 결제 취소 응답 거절 - paymentKey={}, status={}",
                     command.paymentKey(), result.status());
+            releaseCancelLockSafely(command.paymentId());
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_REJECTED);
         }
 
@@ -119,5 +121,16 @@ public class PaymentService {
                         && (p.getStatus() == PaymentStatus.READY
                             || p.getStatus() == PaymentStatus.IN_PROGRESS))
                 .ifPresent(Payment::cancelUnpaid);
+    }
+
+    /**
+     * 취소 락 해제 — 정상 시 1 반환, 0이면 락 상태 불일치(이미 다른 곳에서 전이됨)
+     * 운영자 인지용 WARN만 남기고 원본 예외(PAYMENT_CANCEL_FAIL/REJECTED)는 그대로 전파
+     */
+    private void releaseCancelLockSafely(Long paymentId) {
+        int released = paymentTransactionService.releaseCancelLock(paymentId);
+        if (released == 0) {
+            log.warn("[Payment] 취소 락 해제 시 영향 행이 0 — 락 상태 불일치 가능. paymentId={}", paymentId);
+        }
     }
 }
