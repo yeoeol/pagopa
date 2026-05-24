@@ -16,7 +16,6 @@ import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.product.infrastructure.persistence.ProductJpaRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.global.exception.*;
