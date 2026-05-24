@@ -44,6 +44,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final PaymentService paymentService;
     private final OrderTransactionService orderTransactionService;
+    private final OrderStockRestoreService orderStockRestoreService;
 
     // 바로 주문
     @Counted("my.order")
@@ -136,7 +137,8 @@ public class OrderService {
     @Transactional
     public void cancelUnpaidOrder(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
-        order.cancel();
+
+        orderStockRestoreService.cancelOrderAndRestoreStock(order);
 
         paymentService.cancelPaymentByOrder(order);
     }

@@ -2,6 +2,7 @@ package com.commerce.pagopa.payment.application;
 
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
+import com.commerce.pagopa.order.application.OrderStockRestoreService;
 import com.commerce.pagopa.support.fixture.DeliveryFixture;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
@@ -14,6 +15,7 @@ import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
 import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
+import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.exception.OrderCannotPayException;
 import com.commerce.pagopa.global.exception.PaymentCancelException;
@@ -47,14 +49,18 @@ class PaymentServiceTest {
     @Mock
     private PaymentGateway paymentGateway;
 
+    @Mock
+    private ProductRepository productRepository;
+
     private PaymentService paymentService;
     private long paymentIdSequence;
 
     @BeforeEach
     void setUp() {
         paymentIdSequence = 1L;
+        OrderStockRestoreService orderStockRestoreService = new OrderStockRestoreService(productRepository);
         PaymentTransactionService paymentTransactionService =
-                new PaymentTransactionService(orderRepository, paymentRepository);
+                new PaymentTransactionService(orderRepository, paymentRepository, orderStockRestoreService);
         paymentService = new PaymentService(
                 paymentRepository,
                 orderRepository,

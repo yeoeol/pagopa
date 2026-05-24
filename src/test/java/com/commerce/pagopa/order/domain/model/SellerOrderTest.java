@@ -118,7 +118,7 @@ class SellerOrderTest {
     }
 
     @Test
-    void cancelByBuyer_restoresStockOnReady() {
+    void cancelByBuyer_doesNotRestoreStockDirectly() {
         SellerOrder sellerOrder = newReadySellerOrder();
         Product product = sellerOrder.getOrderProducts().getFirst().getProduct();
         int stockBefore = product.getStock();
@@ -126,7 +126,7 @@ class SellerOrderTest {
 
         sellerOrder.cancelByBuyer();
 
-        assertThat(product.getStock()).isEqualTo(stockBefore);
+        assertThat(product.getStock()).isEqualTo(stockBefore - 1);
     }
 
     @Test
