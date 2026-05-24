@@ -39,6 +39,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +58,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - 1건만 성공, 나머지는 BusinessException 으로 차단되어야 한다.
  * - 결제 상태는 CANCELLED, 주문 상태도 CANCELLED 로 수렴.
  * - 차감했던 재고는 정확히 1회만 복원되어야 한다.
+ *
+ * 시나리오 B: 서로 다른 N개 주문이 동일 상품을 포함할 때 동시 취소
+ * - 각 주문은 별도 결제 → 취소 락(결제 단위)으로 직렬화되지 않는 경합
+ * - 차감분이 정확히 N개 모두 복원되어 finalStock == 초기 재고
  */
 @Slf4j
 @SpringBootTest
@@ -168,5 +173,87 @@ class OrderCancelConcurrencyTest {
         assertThat(finalPayment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
         assertThat(finalOrder.getStatus()).isEqualTo(OrderStatus.CANCELLED);
         assertThat(finalStock).isEqualTo(10);
+    }
+
+    @ParameterizedTest(name = "N={0}")
+    @ValueSource(ints = {50, 200, 1000})
+    void 서로_다른_N개_주문의_동일_상품_동시_취소시_재고가_정확히_복원(int N) throws Exception {
+        // given: 동일 상품(stock=N)을 1개씩 담은 결제완료 주문 N건 (서로 다른 주문 = 서로 다른 결제)
+        CategoryTree tree = CategoryFixture.aTree();
+        categoryRepository.save(tree.root());
+
+        User seller = userRepository.save(UserFixture.aSeller("cross-order-seller-" + N));
+        User buyer = userRepository.save(UserFixture.aBuyer("cross-order-buyer-" + N));
+        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, N));
+
+        List<Long> orderIds = new ArrayList<>(N);
+        for (int i = 0; i < N; i++) {
+            OrderResponseDto created = orderService.order(buyer.getId(),
+                    new OrderCreateRequestDto(
+                            PaymentMethod.CARD,
+                            new DeliveryRequestDto("test", "01012345678", "01010", "집주소", "101동", "메모"),
+                            List.of(new OrderProductRequestDto(product.getId(), 1))
+                    ));
+            Long orderId = created.orderId();
+            orderIds.add(orderId);
+
+            // 주문 → READY 전이 + PAID Payment 저장 (취소 가능 상태 만들기)
+            new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                Order order = orderRepository.findByIdOrThrow(orderId);
+                order.pay();
+                paymentRepository.save(PaymentFixture.aPaidPayment(order));
+            });
+        }
+
+        // N건 주문 생성으로 재고는 0
+        assertThat(productRepository.findByIdOrThrow(product.getId()).getStock()).isZero();
+
+        // when: N건의 서로 다른 주문을 동시에 취소
+        ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+        CyclicBarrier barrier = new CyclicBarrier(N);
+        CountDownLatch done = new CountDownLatch(N);
+
+        AtomicInteger success = new AtomicInteger();
+        AtomicInteger businessFail = new AtomicInteger();
+        AtomicInteger other = new AtomicInteger();
+        Map<String, Integer> errorCounts = new ConcurrentHashMap<>();
+
+        OrderCancelRequestDto request = new OrderCancelRequestDto("동시성 테스트");
+
+        long startNanos = System.nanoTime();
+        for (Long orderId : orderIds) {
+            pool.submit(() -> {
+                try {
+                    barrier.await();
+                    orderService.cancelOrder(orderId, request);
+                    success.incrementAndGet();
+                } catch (BusinessException e) {
+                    businessFail.incrementAndGet();
+                    errorCounts.merge(e.getErrorCode().name(), 1, Integer::sum);
+                } catch (Exception e) {
+                    other.incrementAndGet();
+                    errorCounts.merge(e.getClass().getSimpleName(), 1, Integer::sum);
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+        boolean finished = done.await(120, TimeUnit.SECONDS);
+        long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
+        pool.shutdown();
+
+        // then
+        int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
+
+        log.info("[cross-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} cancelApiCalls={} finalStock={}",
+                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(),
+                paymentGatewayStub.cancelCallCount(), finalStock);
+        errorCounts.forEach((k, v) -> log.warn("  [error] {} x{}", k, v));
+
+        assertThat(success.get()).isEqualTo(N);
+        assertThat(other.get()).isZero();
+        assertThat(paymentGatewayStub.cancelCallCount()).isEqualTo(N);
+        // 현재 로직: 인메모리 read-modify-write 복원의 lost update로 N보다 작아져 실패
+        assertThat(finalStock).isEqualTo(N);
     }
 }
