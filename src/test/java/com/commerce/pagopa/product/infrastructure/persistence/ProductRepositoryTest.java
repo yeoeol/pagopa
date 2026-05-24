@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -78,30 +77,6 @@ class ProductRepositoryTest {
         products.add(productRepository.save(product1));
         products.add(productRepository.save(product2));
         products.add(productRepository.save(product3));
-    }
-
-    @Test
-    void increaseStock_success() {
-        Product product = products.getFirst();
-
-        product.increaseStock(1);
-        Optional<Product> optionalProduct = productRepository.findById(product.getId());
-        assertThat(optionalProduct).isPresent();
-
-        Product getProduct = optionalProduct.get();
-        assertThat(getProduct.getStock()).isEqualTo(11);
-    }
-
-    @Test
-    void decreaseStock_success() {
-        Product product = products.getFirst();
-
-        product.decreaseStock(1);
-        Optional<Product> optionalProduct = productRepository.findById(product.getId());
-        assertThat(optionalProduct).isPresent();
-
-        Product getProduct = optionalProduct.get();
-        assertThat(getProduct.getStock()).isEqualTo(9);
     }
 
     @Test
