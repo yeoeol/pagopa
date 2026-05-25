@@ -6,6 +6,6 @@ public enum PaymentStatus {
     PAID,              // 결제 완료 (승인됨)
     FAILED,            // 결제 실패
     CANCELLING,        // 취소 진행 중 — 외부 PG 호출 직전 단일 스레드만 점유하는 중간 상태
-    PARTIAL_CANCELLED, // 부분 취소 (일부 SellerOrder만 취소되어 Toss 부분 환불됨, 추가 부분/전체 취소 가능)
+    PARTIAL_CANCELLED, // 부분 취소 (일부 SellerOrder만 취소되어 PG 부분 환불됨, 추가 부분/전체 취소 가능)
     CANCELLED          // 결제 전체 취소
 }

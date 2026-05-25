@@ -132,7 +132,7 @@ public class OrderService {
         orderTransactionService.markCancelSellerOrderSuccess(command.orderId(), command.sellerOrderId());
     }
 
-    // 스케줄러 전용: Toss 미승인(paymentKey 없는) 미결제 주문 자동 취소
+    // 스케줄러 전용: 미승인(paymentKey 없는) 미결제 주문 자동 취소
     @Transactional
     public void cancelUnpaidOrder(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
