@@ -10,4 +10,7 @@ public interface ScrapJpaRepository extends JpaRepository<Scrap, Long>, ScrapRep
 
     @Override
     List<Scrap> findAllByUserId(Long userId);
+
+    @Override
+    long countByUserId(Long userId);
 }
