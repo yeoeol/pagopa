@@ -11,7 +11,6 @@ import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.product.domain.model.Product;
@@ -29,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -150,9 +150,17 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
-        OrderStatus status = orderSearch == null ? null : orderSearch.status();
-        return orderRepository.findAllByUserIdAndStatus(userId, status, pageable)
-                .map(OrderResponseDto::from);
+        OrderSearch search = orderSearch == null ? new OrderSearch(null, null) : orderSearch;
+        LocalDateTime now = LocalDateTime.now();
+
+        Page<Order> pageOrder = orderRepository.findAllByPeriod(
+                userId,
+                search.status(),
+                search.start(now),
+                search.end(now),
+                pageable
+        );
+        return pageOrder.map(OrderResponseDto::from);
     }
 
     /**
