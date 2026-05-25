@@ -39,9 +39,9 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     public Page<Order> findAllByPeriod(Long userId, OrderStatus status, LocalDateTime start, LocalDateTime end, Pageable pageable) {
         List<Order> orders = queryFactory
                 .selectFrom(order).distinct()
-                .where(userIdEq(userId)
-                        .and(periodGoeAndLt(start, end))
-                        .and(statusEq(status)))
+                .where(userIdEq(userId),
+                        periodGoeAndLt(start, end),
+                        statusEq(status))
                 .orderBy(order.createdAt.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -50,9 +50,9 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         Long total = queryFactory
                 .select(order.count())
                 .from(order)
-                .where(userIdEq(userId)
-                        .and(periodGoeAndLt(start, end))
-                        .and(statusEq(status)))
+                .where(userIdEq(userId),
+                        periodGoeAndLt(start, end),
+                        statusEq(status))
                 .fetchOne();
 
         return new PageImpl<>(orders, pageable, total == null ? 0L : total);
