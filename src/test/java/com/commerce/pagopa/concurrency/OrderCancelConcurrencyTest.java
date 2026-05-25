@@ -253,7 +253,7 @@ class OrderCancelConcurrencyTest {
         assertThat(success.get()).isEqualTo(N);
         assertThat(other.get()).isZero();
         assertThat(paymentGatewayStub.cancelCallCount()).isEqualTo(N);
-        // 현재 로직: 인메모리 read-modify-write 복원의 lost update로 N보다 작아져 실패
+        // 회귀 방지: 동일 상품 동시 취소에서도 재고는 정확히 초기값(N)으로 복원되어야 한다
         assertThat(finalStock).isEqualTo(N);
     }
 }
