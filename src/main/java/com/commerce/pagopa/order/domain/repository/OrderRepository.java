@@ -18,7 +18,9 @@ public interface OrderRepository {
 
     Page<Order> findAll(Pageable pageable);
 
-    Page<Order> findAllByUserIdAndStatus(Long userId, OrderStatus status, Pageable pageable);
+    Page<Order> findAllByPeriod(
+            Long userId, OrderStatus status, LocalDateTime start, LocalDateTime end, Pageable pageable
+    );
 
     Optional<Order> findByOrderNumber(String orderNumber);
 

@@ -54,4 +54,9 @@ public class ScrapService {
                 .map(ScrapResponseDto::from)
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public long countByUser(Long userId) {
+        return scrapRepository.countByUserId(userId);
+    }
 }

@@ -63,7 +63,7 @@ public class OrderController {
         );
     }
 
-    @Operation(summary = "주문 목록 조회", description = "검색 조건에 대해 주문 목록을 조회합니다.")
+    @Operation(summary = "주문 목록 조회", description = "본인 주문 목록을 조회합니다. year 미지정 시 최근 6개월, year 지정 시 해당 연도. status로 추가 필터링 가능합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails,
