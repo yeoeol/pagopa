@@ -32,7 +32,7 @@ public class PaymentService {
     private final PaymentTransactionService paymentTransactionService;
 
     /**
-     * 주문 생성 직후, 결제 데이터를 준비하고 클라이언트(프론트엔드)가 토스 창을 띄울 수 있도록 DTO 반환
+     * 주문 생성 직후, 결제 데이터를 준비하고 클라이언트(프론트엔드)가 결제 창을 띄울 수 있도록 DTO 반환
      */
     @Transactional
     public PaymentResponseDto requestPayment(Long orderId) {
@@ -55,7 +55,7 @@ public class PaymentService {
     }
 
     /**
-     * 토스 결제 창에서 승인 후 Redirect로 돌아왔을 때, 토스 서버로 최종 결제 승인 API 호출
+     * 결제 창에서 승인 후 Redirect로 돌아왔을 때, PG로 최종 결제 승인 API 호출
      */
     public void confirmPayment(PaymentApproveRequestDto requestDto) {
         boolean canProceed = paymentTransactionService.prepareConfirm(requestDto);
@@ -67,13 +67,13 @@ public class PaymentService {
         try {
             result = paymentGateway.confirm(requestDto.orderId(), requestDto.amount(), requestDto.paymentKey());
         } catch (Exception e) {
-            log.error("[Payment] 토스 승인 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
+            log.error("[Payment] PG 승인 API 호출 실패 - orderNumber={}", requestDto.orderId(), e);
             paymentTransactionService.markConfirmFailure(requestDto.orderId());
             throw new PaymentConfirmException();
         }
 
         if (!result.success()) {
-            log.error("[Payment] 토스 승인 응답 거절 - orderNumber={}, status={}",
+            log.error("[Payment] PG 승인 응답 거절 - orderNumber={}, status={}",
                     requestDto.orderId(), result.status());
             paymentTransactionService.markConfirmFailure(requestDto.orderId());
             throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_REJECTED);
@@ -84,7 +84,7 @@ public class PaymentService {
     }
 
     /**
-     * 승인된 결제를 paymentKey로 환불 취소 (Toss API 호출 + 누적 환불 금액 갱신)
+     * 승인된 결제를 paymentKey로 환불 취소 (PG API 호출 + 누적 환불 금액 갱신)
      */
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
         PaymentCancelCommand command = paymentTransactionService.prepareCancel(payment, cancelAmount);
@@ -93,14 +93,14 @@ public class PaymentService {
         try {
             result = paymentGateway.cancel(command.paymentKey(), command.cancelAmount(), cancelReason);
         } catch (Exception e) {
-            log.error("[Payment] 토스 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}",
+            log.error("[Payment] PG 결제 취소 API 호출 실패 - paymentKey={}, cancelAmount={}",
                     command.paymentKey(), command.cancelAmount(), e);
             releaseCancelLockSafely(command.paymentId());
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
         }
 
         if (!result.success()) {
-            log.error("[Payment] 토스 결제 취소 응답 거절 - paymentKey={}, status={}",
+            log.error("[Payment] PG 결제 취소 응답 거절 - paymentKey={}, status={}",
                     command.paymentKey(), result.status());
             releaseCancelLockSafely(command.paymentId());
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_REJECTED);
@@ -112,7 +112,7 @@ public class PaymentService {
     }
 
     /**
-     * Toss 미승인 결제를 로컬에서만 취소 (스케줄러용 — paymentKey 없는 READY/IN_PROGRESS 건)
+     * 미승인 결제를 로컬에서만 취소 (스케줄러용 — paymentKey 없는 READY/IN_PROGRESS 건)
      */
     @Transactional
     public void cancelPaymentByOrder(Order order) {

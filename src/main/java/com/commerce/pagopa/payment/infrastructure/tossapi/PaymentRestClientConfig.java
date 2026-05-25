@@ -1,6 +1,5 @@
 package com.commerce.pagopa.payment.infrastructure.tossapi;
 
-import com.commerce.pagopa.payment.application.port.PaymentProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,16 +15,16 @@ import java.util.Base64;
 @EnableConfigurationProperties(TossPaymentProperties.class)
 public class PaymentRestClientConfig {
 
-    private final PaymentProperties paymentProperties;
+    private final TossPaymentProperties tossPaymentProperties;
 
     @Bean
     public RestClient tossRestClient() {
         String encodedAuth = Base64.getEncoder()
                 .encodeToString(
-                        (paymentProperties.getSecretKey() + ":").getBytes(StandardCharsets.UTF_8)
+                        (tossPaymentProperties.getSecretKey() + ":").getBytes(StandardCharsets.UTF_8)
                 );
         return RestClient.builder()
-                .baseUrl(paymentProperties.getBaseUrl())
+                .baseUrl(tossPaymentProperties.getBaseUrl())
                 .defaultHeader("Authorization", "Basic " + encodedAuth)
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .build();
