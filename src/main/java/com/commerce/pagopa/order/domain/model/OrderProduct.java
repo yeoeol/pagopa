@@ -57,8 +57,4 @@ public class OrderProduct {
         return getPrice().multiply(BigDecimal.valueOf(getQuantity()));
     }
 
-    /** 주문 취소 시 차감했던 상품 재고를 다시 복원한다. */
-    public void restoreStock() {
-        product.increaseStock(quantity);
-    }
 }

@@ -3,9 +3,6 @@ package com.commerce.pagopa.product.domain.model;
 import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.exception.ProductOutOfStockException;
-import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 
 import jakarta.persistence.*;
@@ -113,26 +110,5 @@ public class Product extends BaseTimeEntity {
 
     public void hide() {
         this.status = ProductStatus.HIDDEN;
-    }
-
-    public boolean isActiveOrSoldOut() {
-        return ProductStatus.ACTIVE == this.status || ProductStatus.SOLDOUT == this.status;
-    }
-
-    public void increaseStock(int quantity) {
-        if (quantity <= 0) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST_QUANTITY);
-        }
-        this.stock += quantity;
-    }
-
-    public void decreaseStock(int quantity) {
-        if (quantity <= 0) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST_QUANTITY);
-        }
-        if (this.stock < quantity) {
-            throw new ProductOutOfStockException();
-        }
-        this.stock -= quantity;
     }
 }

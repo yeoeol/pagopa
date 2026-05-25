@@ -1,6 +1,7 @@
 package com.commerce.pagopa.payment.application;
 
 import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.application.OrderStockRestoreService;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApproveRequestDto;
 import com.commerce.pagopa.payment.domain.model.Payment;
@@ -17,6 +18,7 @@ class PaymentTransactionService {
 
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final OrderStockRestoreService orderStockRestoreService;
 
     @Transactional
     public boolean prepareConfirm(PaymentApproveRequestDto requestDto) {
@@ -28,7 +30,7 @@ class PaymentTransactionService {
 
         if (!payment.isAmountMatched(requestDto.amount())) {
             payment.fail();
-            order.cancel();
+            orderStockRestoreService.cancelOrderAndRestoreStock(order);
             return false;
         }
         return true;
@@ -49,7 +51,7 @@ class PaymentTransactionService {
         Payment payment = paymentRepository.getByOrderOrThrow(order);
 
         payment.fail();
-        order.cancel();
+        orderStockRestoreService.cancelOrderAndRestoreStock(order);
     }
 
     @Transactional

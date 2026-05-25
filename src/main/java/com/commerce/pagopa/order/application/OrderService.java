@@ -16,7 +16,6 @@ import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.product.infrastructure.persistence.ProductJpaRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.global.exception.*;
@@ -44,6 +43,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final PaymentService paymentService;
     private final OrderTransactionService orderTransactionService;
+    private final OrderStockRestoreService orderStockRestoreService;
 
     // 바로 주문
     @Counted("my.order")
@@ -136,7 +136,8 @@ public class OrderService {
     @Transactional
     public void cancelUnpaidOrder(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
-        order.cancel();
+
+        orderStockRestoreService.cancelOrderAndRestoreStock(order);
 
         paymentService.cancelPaymentByOrder(order);
     }

@@ -66,9 +66,7 @@ class OrderTest {
     }
 
     @Test
-    void cancel_doesNotRestoreStockTwiceForAlreadyCancelledSellerOrder() {
-        // 시나리오: SellerOrder#1은 사전에 부분 취소되어 재고 복원이 이미 1회 일어남.
-        // 그 후 전체 Order.cancel() 호출 시 SellerOrder#1은 건드리지 않고 SellerOrder#2만 취소되어야 함.
+    void cancel_skipsAlreadyCancelledSellerOrder() {
 
         User seller1 = UserFixture.aSeller("seller-1");
         User seller2 = UserFixture.aSeller("seller-2");
@@ -78,27 +76,24 @@ class OrderTest {
         Order order = newOrder();
 
         SellerOrder so1 = SellerOrderFixture.aSellerOrder(seller1, "order-1-1");
-        product1.decreaseStock(1);   // 주문 placement 시 차감
         so1.addOrderProduct(OrderProductFixture.anOrderProduct(product1));
         so1.pay();
         order.addSellerOrder(so1);
 
         SellerOrder so2 = SellerOrderFixture.aSellerOrder(seller2, "order-1-2");
-        product2.decreaseStock(1);
         so2.addOrderProduct(OrderProductFixture.anOrderProduct(product2));
         so2.pay();
         order.addSellerOrder(so2);
 
-        // SellerOrder#1만 사전에 취소 → product1 재고 9 → 10으로 복원
         so1.cancel();
-        assertThat(product1.getStock()).isEqualTo(10);
-        assertThat(product2.getStock()).isEqualTo(9);
+        assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
+        assertThat(so2.getStatus()).isEqualTo(SellerOrderStatus.READY);
 
-        // 전체 주문 취소 — so1은 스킵되고 so2만 취소되어야 함
         order.cancel();
 
-        assertThat(product1.getStock()).isEqualTo(10);  // 중복 복원되지 않음
-        assertThat(product2.getStock()).isEqualTo(10);
+        assertThat(so1.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
+        assertThat(so2.getStatus()).isEqualTo(SellerOrderStatus.CANCELLED);
+        assertThat(product1.getStock()).isEqualTo(10);
     }
 
     @Test

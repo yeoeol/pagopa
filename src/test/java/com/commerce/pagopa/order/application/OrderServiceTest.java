@@ -58,15 +58,17 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
+        OrderStockRestoreService orderStockRestoreService = new OrderStockRestoreService(productRepository);
         OrderTransactionService orderTransactionService =
-                new OrderTransactionService(orderRepository, paymentRepository);
+                new OrderTransactionService(orderRepository, paymentRepository, orderStockRestoreService);
         orderService = new OrderService(
                 orderRepository,
                 userRepository,
                 productRepository,
                 cartRepository,
                 paymentService,
-                orderTransactionService
+                orderTransactionService,
+                orderStockRestoreService
         );
     }
 

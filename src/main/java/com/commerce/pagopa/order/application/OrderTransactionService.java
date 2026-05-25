@@ -19,6 +19,7 @@ class OrderTransactionService {
 
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final OrderStockRestoreService orderStockRestoreService;
 
     @Transactional
     public OrderCancelCommand prepareCancelOrder(Long orderId) {
@@ -55,7 +56,7 @@ class OrderTransactionService {
     public void markCancelOrderSuccess(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
 
-        order.cancel();
+        orderStockRestoreService.cancelOrderAndRestoreStock(order);
     }
 
     @Transactional
@@ -63,7 +64,7 @@ class OrderTransactionService {
         Order order = orderRepository.findByIdOrThrow(orderId);
         SellerOrder sellerOrder = order.findSellerOrder(sellerOrderId);
 
-        sellerOrder.cancelByBuyer();
+        orderStockRestoreService.cancelSellerOrderByBuyerAndRestoreStock(sellerOrder);
     }
 }
 

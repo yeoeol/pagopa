@@ -118,14 +118,14 @@ class SellerOrderTest {
     }
 
     @Test
-    void cancelByBuyer_restoresStockOnReady() {
+    void cancelByBuyer_doesNotRestoreStockDirectly() {
         SellerOrder sellerOrder = newReadySellerOrder();
         Product product = sellerOrder.getOrderProducts().getFirst().getProduct();
         int stockBefore = product.getStock();
-        product.decreaseStock(1); // 주문 placement 시 차감 흉내
 
         sellerOrder.cancelByBuyer();
 
+        // 도메인은 재고 미변경 - 복원은 application(OrderStockRestoreService) 책임
         assertThat(product.getStock()).isEqualTo(stockBefore);
     }
 
