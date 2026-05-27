@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public record ScrapListResponseDto(
-        Map<String, Long> count,
+        Map<String, Integer> count,
         UserResponseDto user,
         List<ScrapCollectionItem> collection
 ) {

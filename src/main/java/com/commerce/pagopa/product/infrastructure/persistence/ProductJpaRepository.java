@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository, ProductRepositoryCustom {
 
@@ -38,4 +39,7 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long>, Prod
             "SET p.stock = p.stock + :quantity " +
             "WHERE p.id = :productId AND :quantity > 0")
     int increaseStock(@Param("productId") Long productId, @Param("quantity") int quantity);
+
+    @Override
+    List<Product> findAllByIdIn(List<Long> productIds);
 }
