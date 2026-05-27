@@ -44,4 +44,6 @@ public interface ProductRepository {
     default Product findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ProductNotFoundException::new);
     }
+
+    List<Product> findAllByIdIn(List<Long> productIds);
 }

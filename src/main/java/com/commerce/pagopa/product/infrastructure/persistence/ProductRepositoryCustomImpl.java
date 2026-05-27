@@ -3,20 +3,20 @@ package com.commerce.pagopa.product.infrastructure.persistence;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
+import static com.commerce.pagopa.category.domain.model.QCategory.category;
 import static com.commerce.pagopa.product.domain.model.QProduct.product;
+import static com.commerce.pagopa.product.domain.model.QProductImage.productImage;
+import static com.commerce.pagopa.user.domain.model.QUser.user;
 import static org.springframework.util.StringUtils.hasText;
 
 @RequiredArgsConstructor
@@ -48,7 +48,10 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     @Override
     public List<Product> searchProducts(@NonNull ProductSearchCondition condition) {
         return queryFactory
-                .selectFrom(product)
+                .selectFrom(product).distinct()
+                .leftJoin(product.seller, user).fetchJoin()
+                .leftJoin(product.category, category).fetchJoin()
+                .leftJoin(product.images, productImage).fetchJoin()
                 .where(nameContains(condition.productName()))
                 .fetch();
     }

@@ -4,6 +4,7 @@ import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.scrap.application.ScrapService;
 import com.commerce.pagopa.scrap.application.dto.request.ScrapAddRequestDto;
+import com.commerce.pagopa.scrap.application.dto.response.ScrapListResponseDto;
 import com.commerce.pagopa.scrap.application.dto.response.ScrapResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "SCRAP API", description = "스크랩 관리 API")
 @RestController
@@ -50,12 +49,11 @@ public class ScrapController {
 
     @Operation(summary = "스크랩 목록 조회", description = "스크랩 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ScrapResponseDto>>> getScraps(
+    public ResponseEntity<ApiResponse<ScrapListResponseDto>> getScraps(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        List<ScrapResponseDto> responses = scrapService.findAllByUser(userDetails.getUserId());
         return ResponseEntity.ok(
-                ApiResponse.ok(responses)
+                ApiResponse.ok(scrapService.findAllByUser(userDetails.getUserId()))
         );
     }
 }
