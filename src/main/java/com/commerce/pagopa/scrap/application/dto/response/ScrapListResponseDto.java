@@ -6,8 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 public record ScrapListResponseDto(
-        Map<String, Integer> count,
+        Map<String, Long> count,
         UserResponseDto user,
         List<ScrapCollectionItem> collection
 ) {
+    public static ScrapListResponseDto of(
+            Map<String, Long> count,
+            UserResponseDto user,
+            List<ScrapCollectionItem> collection
+    ) {
+        return new ScrapListResponseDto(
+                count,
+                user,
+                collection
+        );
+    }
 }

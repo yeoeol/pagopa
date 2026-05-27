@@ -1,8 +1,6 @@
 package com.commerce.pagopa.scrap.application;
 
-import com.commerce.pagopa.product.domain.model.Product;
-import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.scrap.application.dto.response.ProductScrapDto;
+import com.commerce.pagopa.scrap.application.port.ScrapContentProvider;
 import com.commerce.pagopa.scrap.application.dto.response.ScrapCollectionItem;
 import com.commerce.pagopa.scrap.application.dto.response.ScrapListResponseDto;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
@@ -30,8 +28,8 @@ public class ScrapService {
 
     private final ScrapRepository scrapRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
     private final List<ScrapTargetValidator> scrapTargetValidators;
+    private final List<ScrapContentProvider> contentProviders;
 
     @Transactional
     public ScrapResponseDto addScrap(Long userId, ScrapAddRequestDto requestDto) {
@@ -62,27 +60,28 @@ public class ScrapService {
         User user = userRepository.findByIdOrThrow(userId);
         List<Scrap> scraps = scrapRepository.findAllByUserId(userId);
 
-        Map<EntityType, List<Long>> targetIdsByType = scraps.stream()
-                .collect(groupingBy(
-                        Scrap::getTargetType,
-                        mapping(Scrap::getTargetId, toList())
-                ));
+        Map<EntityType, List<Scrap>> scrapsByType = scraps.stream()
+                .collect(groupingBy(Scrap::getTargetType));
 
-        Map<String, Integer> count = new HashMap<>();
-        List<ScrapCollectionItem> collectionItems = new ArrayList<>();
+        List<ScrapCollectionItem> collectionItems = scrapsByType.entrySet().stream()
+                .flatMap(entry -> {
+                    EntityType type = entry.getKey();
+                    List<Scrap> typeScraps = entry.getValue();
 
-        for (EntityType entityType : EntityType.values()) {
-            List<Long> ids = targetIdsByType.getOrDefault(entityType, Collections.emptyList());
-            if (entityType.equals(EntityType.PRODUCT)) {
-                List<Product> productScraps = productRepository.findAllByIdIn(ids);
-                count.put(entityType.getDescription(), productScraps.size());
-                for (Product productScrap : productScraps) {
-                    collectionItems.add(ProductScrapDto.from(productScrap.getId(), productScrap));
-                }
-            }
-        }
+                    return contentProviders.stream()
+                            .filter(provider -> provider.supports(type))
+                            .findFirst()
+                            .map(provider -> provider.fetchItems(typeScraps))
+                            .orElse(Collections.emptyList())
+                            .stream();
+                })
+                .sorted(Comparator.comparing(ScrapCollectionItem::collectionId).reversed())
+                .toList();
 
-        return new ScrapListResponseDto(
+        Map<String, Long> count = scraps.stream()
+                .collect(groupingBy(s -> s.getTargetType().getDescription(), counting()));
+
+        return ScrapListResponseDto.of(
                 count,
                 UserResponseDto.from(user),
                 collectionItems
