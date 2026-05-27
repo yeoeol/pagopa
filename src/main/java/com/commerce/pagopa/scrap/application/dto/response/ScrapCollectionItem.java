@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     property = "type"
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = ProductScrapDto.class, name = "PRODUCT"),
+    @JsonSubTypes.Type(value = ProductScrapDto.class, name = "Product"),
     // @JsonSubTypes.Type(value = BrandScrapDto.class, name = "BRAND")
 })
 public interface ScrapCollectionItem {
