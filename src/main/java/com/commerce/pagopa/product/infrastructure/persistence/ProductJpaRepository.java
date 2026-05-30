@@ -42,6 +42,8 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long>, Prod
             SELECT p
             FROM Product p
                 JOIN FETCH p.category c
+                LEFT JOIN FETCH c.parent pc
+                LEFT JOIN FETCH pc.parent gpc
                 JOIN FETCH p.seller s
                 LEFT JOIN FETCH p.images pi
             WHERE p.id = :productId
