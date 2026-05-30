@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,7 +69,7 @@ public class OrderController {
     public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ParameterObject @ModelAttribute OrderSearch orderSearch,
-            @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable
+            @ParameterObject @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(orderService.findAll(userDetails.getUserId(), orderSearch, pageable))

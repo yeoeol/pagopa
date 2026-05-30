@@ -102,7 +102,6 @@ public class CartController {
 
     @Operation(summary = "장바구니 비우기", description = "장바구니 품목들을 전체 삭제합니다.")
     @DeleteMapping
-    @PreAuthorize("@cartOwnerValidator.isOwner(#cartId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> deleteAllCart(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
