@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository, ProductRepositoryCustom {
 
@@ -35,4 +36,15 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long>, Prod
 
     @Override
     List<Product> findAllByIdIn(List<Long> productIds);
+
+    @Override
+    @Query("""
+            SELECT p
+            FROM Product p
+                JOIN FETCH p.category c
+                JOIN FETCH p.seller s
+                LEFT JOIN FETCH p.images pi
+            WHERE p.id = :productId
+            """)
+    Optional<Product> findByIdWithCategoryParentsAndSellerAndProductImages(@Param("productId") Long productId);
 }

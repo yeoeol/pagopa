@@ -31,7 +31,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDto find(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdWithCategoryParentsAndSellerAndProductImages(productId)
                 .orElseThrow(ProductNotFoundException::new);
         return ProductResponseDto.from(product);
     }
