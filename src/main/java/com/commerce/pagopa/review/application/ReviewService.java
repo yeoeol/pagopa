@@ -70,7 +70,7 @@ public class ReviewService {
             throw new ProductNotFoundException();
         }
 
-        return reviewRepository.findAllByProductId(productId).stream()
+        return reviewRepository.findAllByProductIdWithUserAndReviewImages(productId).stream()
                 .map(ProductReviewResponseDto::from)
                 .toList();
     }

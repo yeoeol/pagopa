@@ -16,7 +16,7 @@ public interface ReviewRepository {
 
     void deleteById(Long id);
 
-    List<Review> findAllByProductId(Long productId);
+    List<Review> findAllByProductIdWithUserAndReviewImages(Long productId);
 
     default Review findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ReviewNotFoundException::new);
