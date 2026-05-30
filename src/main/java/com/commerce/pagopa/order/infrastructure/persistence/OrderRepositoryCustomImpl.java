@@ -15,8 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.commerce.pagopa.order.domain.model.QOrder.order;
 import static com.commerce.pagopa.order.domain.model.QSellerOrder.sellerOrder;
@@ -76,10 +78,10 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     private OrderSpecifier<?>[] orderSpecifiers(Pageable pageable) {
-        List<? extends OrderSpecifier<?>> orders = pageable.getSort().stream()
+        List<OrderSpecifier<?>> orders = pageable.getSort().stream()
                 .map(this::orderSpecifier)
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         if (orders.isEmpty()) {
             return new OrderSpecifier<?>[]{QOrder.order.id.desc()};

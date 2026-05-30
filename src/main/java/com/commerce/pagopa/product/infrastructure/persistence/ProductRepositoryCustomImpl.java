@@ -14,9 +14,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.commerce.pagopa.category.domain.model.QCategory.category;
 import static com.commerce.pagopa.product.domain.model.QProduct.product;
@@ -114,10 +116,10 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     private OrderSpecifier<?>[] orderSpecifiers(Pageable pageable) {
-        List<? extends OrderSpecifier<?>> orders = pageable.getSort().stream()
+        List<OrderSpecifier<?>> orders = pageable.getSort().stream()
                 .map(this::orderSpecifier)
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         if (orders.isEmpty()) {
             return new OrderSpecifier<?>[]{product.id.desc()};
