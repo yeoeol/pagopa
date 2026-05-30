@@ -20,13 +20,6 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long>, Prod
     Page<Product> findAllBySellerId(Long userId, Pageable pageable);
 
     @Override
-    Page<Product> findAllByCategoryIdAndStatusIn(
-            Long categoryId,
-            Collection<ProductStatus> statuses,
-            Pageable pageable
-    );
-
-    @Override
     @Modifying
     @Query("UPDATE Product p " +
             "SET p.stock = p.stock - :quantity " +

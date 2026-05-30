@@ -29,7 +29,7 @@ public interface ProductRepository {
 
     Page<Product> findAllBySellerId(Long userId, Pageable pageable);
 
-    Page<Product> findAllByCategoryIdAndStatusIn(
+    Page<Product> findAllByCategoryOrAncestorCategoryIdAndStatusIn(
             Long categoryId,
             Collection<ProductStatus> statuses,
             Pageable pageable

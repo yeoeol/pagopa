@@ -4,6 +4,7 @@ import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.support.fixture.CategoryFixture;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -37,6 +40,8 @@ class ProductRepositoryTest {
     @Autowired
     UserRepository userRepository;
 
+    private Category rootCategory;
+    private Category middleCategory;
     private Category category;
     private User user;
     private List<Product> products = new ArrayList<>();
@@ -45,7 +50,9 @@ class ProductRepositoryTest {
     void setUp() {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
+        rootCategory = tree.root();
         category = tree.leaf();
+        middleCategory = category.getParent();
 
         user = userRepository.save(UserFixture.aSeller("product-repo-test"));
 
@@ -90,5 +97,61 @@ class ProductRepositoryTest {
     void searchProducts_List() {
         List<Product> results = productRepository.searchProducts(new ProductSearchCondition("roduc"));
         assertThat(results).hasSize(products.size());
+    }
+
+    @Test
+    void findAllByCategoryOrAncestorCategoryIdAndStatusIn_rootCategory() {
+        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
+                rootCategory.getId(),
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(results.getContent())
+                .extracting(Product::getId)
+                .containsExactlyInAnyOrderElementsOf(productIds());
+    }
+
+    @Test
+    void findAllByCategoryOrAncestorCategoryIdAndStatusIn_middleCategory() {
+        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
+                middleCategory.getId(),
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(results.getContent())
+                .extracting(Product::getId)
+                .containsExactlyInAnyOrderElementsOf(productIds());
+    }
+
+    @Test
+    void findAllByCategoryOrAncestorCategoryIdAndStatusIn_leafCategory() {
+        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
+                category.getId(),
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(results.getContent())
+                .extracting(Product::getId)
+                .containsExactlyInAnyOrderElementsOf(productIds());
+    }
+
+    @Test
+    void findAllByCategoryOrAncestorCategoryIdAndStatusIn_notFoundCategory_returnsEmptyPage() {
+        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
+                -1L,
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(results).isEmpty();
+    }
+
+    private List<Long> productIds() {
+        return products.stream()
+                .map(Product::getId)
+                .toList();
     }
 }
