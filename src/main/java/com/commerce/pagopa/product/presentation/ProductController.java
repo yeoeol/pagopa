@@ -81,7 +81,7 @@ public class ProductController {
         );
     }
 
-    @Operation(summary = "카테고리별 상품 목록 조회", description = "특정 카테고리에 속한 상품 목록을 조회합니다.")
+    @Operation(summary = "카테고리별 상품 목록 조회", description = "카테고리ID를 전달받고, 해당 카테고리 또는 하위 카테고리에 속한 모든 상품을 조회합니다.")
     @GetMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getProductsByCategory(
             @PathVariable("categoryId") Long categoryId,
