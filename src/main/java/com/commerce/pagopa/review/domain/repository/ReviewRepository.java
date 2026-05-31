@@ -1,6 +1,5 @@
 package com.commerce.pagopa.review.domain.repository;
 
-import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.global.exception.ReviewNotFoundException;
 import com.commerce.pagopa.review.domain.model.Review;
 
@@ -17,7 +16,7 @@ public interface ReviewRepository {
 
     void deleteById(Long id);
 
-    List<Review> findAllByProduct(Product product);
+    List<Review> findAllByProductIdWithUserAndReviewImages(Long productId);
 
     default Review findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ReviewNotFoundException::new);

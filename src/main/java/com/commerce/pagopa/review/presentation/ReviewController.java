@@ -5,6 +5,7 @@ import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.review.application.ReviewService;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
+import com.commerce.pagopa.review.application.dto.response.ProductReviewResponseDto;
 import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,7 +69,7 @@ public class ReviewController {
 
     @Operation(summary = "상품별 리뷰 목록 조회", description = "특정 상품에 대한 리뷰 목록을 조회합니다.")
     @GetMapping("/products/{id}")
-    public ResponseEntity<ApiResponse<List<ReviewResponseDto>>> getAllByProduct(
+    public ResponseEntity<ApiResponse<List<ProductReviewResponseDto>>> getAllByProduct(
             @PathVariable("id") Long productId
     ) {
         return ResponseEntity.ok(
