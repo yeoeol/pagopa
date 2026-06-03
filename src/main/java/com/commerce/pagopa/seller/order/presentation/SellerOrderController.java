@@ -1,7 +1,7 @@
 package com.commerce.pagopa.seller.order.presentation;
 
 import com.commerce.pagopa.seller.order.application.SellerOrderService;
-import com.commerce.pagopa.seller.order.application.dto.request.OrderStatusChangeRequestDto;
+import com.commerce.pagopa.seller.order.application.dto.request.SellerOrderStatusChangeRequestDto;
 import com.commerce.pagopa.seller.order.application.dto.response.SellerOrderResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,7 +53,7 @@ public class SellerOrderController {
     public ResponseEntity<ApiResponse<Void>> changeStatus(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @PathVariable("sellerOrderId") Long sellerOrderId,
-            @Valid @RequestBody OrderStatusChangeRequestDto requestDto
+            @Valid @RequestBody SellerOrderStatusChangeRequestDto requestDto
     ) {
         sellerOrderService.changeStatus(sellerOrderId, userId, requestDto);
         return ResponseEntity.ok(ApiResponse.ok());
