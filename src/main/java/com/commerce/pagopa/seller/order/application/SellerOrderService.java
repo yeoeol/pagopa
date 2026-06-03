@@ -1,10 +1,9 @@
 package com.commerce.pagopa.seller.order.application;
 
+import com.commerce.pagopa.order.application.OrderStockRestoreService;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.order.domain.repository.SellerOrderRepository;
-import com.commerce.pagopa.order.application.OrderStockRestoreService;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.seller.order.application.dto.request.OrderStatusChangeRequestDto;
+import com.commerce.pagopa.seller.order.application.dto.request.SellerOrderStatusChangeRequestDto;
 import com.commerce.pagopa.seller.order.application.dto.response.SellerOrderResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,13 +31,13 @@ public class SellerOrderService {
     }
 
     @Transactional
-    public void changeStatus(Long sellerOrderId, Long sellerId, OrderStatusChangeRequestDto requestDto) {
+    public void changeStatus(Long sellerOrderId, Long sellerId, SellerOrderStatusChangeRequestDto requestDto) {
         SellerOrder sellerOrder = sellerOrderRepository.getByIdAndSellerIdOrThrow(sellerOrderId, sellerId);
-        if (requestDto.status() == OrderStatus.CANCELLED) {
-            orderStockRestoreService.cancelSellerOrderAndRestoreStock(sellerOrder);
-            return;
-        }
 
-        sellerOrder.changeStatus(requestDto.status());
+        switch (requestDto.status()) {
+            case DELIVERING -> sellerOrder.deliver();
+            case COMPLETED -> sellerOrder.complete();
+            case CANCELLED -> orderStockRestoreService.cancelSellerOrderAndRestoreStock(sellerOrder);
+        }
     }
 }
