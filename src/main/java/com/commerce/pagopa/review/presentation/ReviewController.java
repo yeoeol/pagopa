@@ -32,7 +32,6 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 등록", description = "주문 물품에 대한 리뷰를 등록합니다.")
     @PostMapping
-    @PreAuthorize("@orderProductOwnerValidator.isOwner(#requestDto.orderProductId(), principal.userId)")
     public ResponseEntity<ApiResponse<ReviewResponseDto>> review(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ReviewCreateRequestDto requestDto

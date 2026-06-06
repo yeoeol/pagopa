@@ -1,3 +1,4 @@
+/*
 package com.commerce.pagopa.payment.application;
 
 import com.commerce.pagopa.order.domain.model.Order;
@@ -72,3 +73,4 @@ class PaymentTransactionService {
         return paymentRepository.releaseCancelLock(paymentId);
     }
 }
+*/

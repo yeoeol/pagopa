@@ -56,6 +56,7 @@ public enum ErrorCode {
     ORDER_CANNOT_PAY(HttpStatus.BAD_REQUEST, "ORDER_004", "결제를 진행할 수 없는 주문 상태입니다."),
     ORDER_CANNOT_DELIVER(HttpStatus.BAD_REQUEST, "ORDER_005", "배송을 진행할 수 없는 주문 상태입니다."),
     ORDER_CANNOT_COMPLETE(HttpStatus.BAD_REQUEST, "ORDER_006", "배송 완료를 진행할 수 없는 주문 상태입니다."),
+    ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "ORDER_007", "이미 취소된 주문입니다."),
 
     // ORDER PRODUCT
     ORDER_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_PRODUCT_001", "존재하지 않는 주문 상품입니다."),

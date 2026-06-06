@@ -35,7 +35,7 @@ public class Review extends BaseTimeEntity {
     private User user;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_product_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private OrderProduct orderProduct;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
