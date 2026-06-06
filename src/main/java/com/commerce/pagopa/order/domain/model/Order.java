@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +41,11 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @Column(nullable = false)
+    private LocalDateTime orderedAt;
+
+    private LocalDateTime cancelledAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -54,13 +60,15 @@ public class Order extends BaseTimeEntity {
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(String orderNumber, User user, Delivery delivery) {
+    private Order(String orderNumber, User user, Delivery delivery, LocalDateTime orderedAt, LocalDateTime cancelledAt) {
         this.orderNumber = orderNumber;
         this.user = user;
         this.delivery = delivery;
         this.totalAmount = BigDecimal.ZERO;
         this.orderName = "";
         this.status = OrderStatus.ORDERED;
+        this.orderedAt = orderedAt;
+        this.cancelledAt = cancelledAt;
     }
 
     public static Order init(User user, Delivery delivery) {
@@ -68,6 +76,8 @@ public class Order extends BaseTimeEntity {
                 .orderNumber(generateOrderNumber())
                 .user(user)
                 .delivery(delivery)
+                .orderedAt(LocalDateTime.now())
+                .cancelledAt(null)
                 .build();
     }
 
@@ -77,6 +87,10 @@ public class Order extends BaseTimeEntity {
 
     public void addTotalPrice(BigDecimal totalPrice) {
         this.totalAmount = this.totalAmount.add(totalPrice);
+    }
+
+    public void setCancelledAt(LocalDateTime now) {
+        this.cancelledAt = now;
     }
 
     private static String generateOrderNumber() {

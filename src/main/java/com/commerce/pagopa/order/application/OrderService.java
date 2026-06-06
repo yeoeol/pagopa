@@ -186,6 +186,8 @@ public class OrderService {
 
         // 4단계: 주문 상태를 CANCELLED로 변경 및 저장
         order.changeStatus(OrderStatus.CANCELLED);
+        order.setCancelledAt(LocalDateTime.now());
+
         return OrderResponseDto.from(order);
     }
 
