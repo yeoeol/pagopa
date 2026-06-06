@@ -5,6 +5,7 @@ import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.OrderCannotCancelException;
 import com.commerce.pagopa.global.exception.OrderCannotPayException;
 import com.commerce.pagopa.global.exception.SellerOrderNotFoundException;
 import jakarta.persistence.*;
@@ -231,6 +232,10 @@ public class Order extends BaseTimeEntity {
         List<SellerOrder> activeSellerOrders = sellerOrders.stream()
                 .filter(so -> !so.isCancelled())
                 .toList();
+
+        if (activeSellerOrders.isEmpty()) {
+            throw new OrderCannotCancelException();
+        }
 
         validateCancelable(activeSellerOrders);
         activeSellerOrders.forEach(SellerOrder::cancel);

@@ -12,7 +12,6 @@ import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
-import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.user.domain.model.User;
@@ -41,8 +40,6 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
-    private final PaymentService paymentService;
-    private final OrderTransactionService orderTransactionService;
     private final OrderStockRestoreService orderStockRestoreService;
 
     // 바로 주문
@@ -114,22 +111,23 @@ public class OrderService {
     }
 
     @Counted("my.order")
+    @Transactional
     public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
-        OrderCancelCommand command = orderTransactionService.prepareCancelOrder(orderId);
+        Order order = orderRepository.findByIdOrThrow(orderId);
 
-        paymentService.cancelPayment(command.payment(), command.cancelAmount(), requestDto.cancelReason());
-        orderTransactionService.markCancelOrderSuccess(command.orderId());
+        orderStockRestoreService.cancelOrderAndRestoreStock(order);
     }
 
     /**
      * 단일 SellerOrder 부분 취소
      */
     @Counted("my.order")
+    @Transactional
     public void cancelSellerOrder(Long orderId, Long sellerOrderId, OrderCancelRequestDto requestDto) {
-        SellerOrderCancelCommand command = orderTransactionService.prepareCancelSellerOrder(orderId, sellerOrderId);
+        Order order = orderRepository.findByIdOrThrow(orderId);
+        SellerOrder sellerOrder = order.findSellerOrder(sellerOrderId);
 
-        paymentService.cancelPayment(command.payment(), command.cancelAmount(), requestDto.cancelReason());
-        orderTransactionService.markCancelSellerOrderSuccess(command.orderId(), command.sellerOrderId());
+        orderStockRestoreService.cancelSellerOrderByBuyerAndRestoreStock(sellerOrder);
     }
 
     // 스케줄러 전용: 미승인(paymentKey 없는) 미결제 주문 자동 취소
@@ -138,8 +136,6 @@ public class OrderService {
         Order order = orderRepository.findByIdOrThrow(orderId);
 
         orderStockRestoreService.cancelOrderAndRestoreStock(order);
-
-        paymentService.cancelPaymentByOrder(order);
     }
 
     @Transactional(readOnly = true)

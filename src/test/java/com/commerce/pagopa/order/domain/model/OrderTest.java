@@ -151,6 +151,22 @@ class OrderTest {
         assertThat(order.calculateActiveAmount()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
+    @Test
+    void cancel_throwsWhenEverySellerOrderIsAlreadyCancelled() {
+        Order order = newOrder();
+        SellerOrder so1 = newReadySellerOrder("seller-1", "order-1-1");
+        SellerOrder so2 = newReadySellerOrder("seller-2", "order-1-2");
+        order.addSellerOrder(so1);
+        order.addSellerOrder(so2);
+        so1.cancelByBuyer();
+        so2.cancelByBuyer();
+
+        assertThatThrownBy(order::cancel)
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.ORDER_CANNOT_CANCEL);
+    }
+
     private Order newOrder() {
         return OrderFixture.anOrder("order-1", UserFixture.aBuyer("buyer"));
     }

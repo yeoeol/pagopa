@@ -76,7 +76,7 @@ public class OrderController {
         );
     }
 
-    @Operation(summary = "주문 전체 취소", description = "잔여 금액을 환불하고 주문/결제를 최종 CANCELLED 상태로 종결합니다. **(이전 부분 취소 누적분은 이미 환불되었으므로 마지막 활성 금액만 전달)")
+    @Operation(summary = "주문 전체 취소", description = "취소 가능한 주문 출고 단위를 CANCELLED 상태로 변경하고 차감된 재고를 복구합니다.")
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> cancelOrder(
