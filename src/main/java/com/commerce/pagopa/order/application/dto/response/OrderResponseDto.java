@@ -1,6 +1,7 @@
 package com.commerce.pagopa.order.application.dto.response;
 
 import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ public record OrderResponseDto(
         String orderNumber,
         String orderName,
         BigDecimal totalAmount,
-        String status,
+        OrderStatus status,
         UserResponseDto user,
         DeliveryResponseDto delivery,
         List<OrderProductResponseDto> orderProducts
@@ -22,7 +23,7 @@ public record OrderResponseDto(
                 order.getOrderNumber(),
                 order.getOrderName(),
                 order.getTotalAmount(),
-                order.getStatus().getDescription(),
+                order.getStatus(),
                 UserResponseDto.from(order.getUser()),
                 DeliveryResponseDto.from(order.getDelivery()),
                 order.getOrderProducts().stream()

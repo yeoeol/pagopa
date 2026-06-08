@@ -175,7 +175,7 @@ public class OrderService {
         if (order.getStatus() != OrderStatus.ORDERED
                 && order.getStatus() != OrderStatus.PAID
         ) {
-            throw new BusinessException(ErrorCode.ORDER_ALREADY_CANCELLED);
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
 
         // 3단계: 주문 항목 수량만큼 재고 복구

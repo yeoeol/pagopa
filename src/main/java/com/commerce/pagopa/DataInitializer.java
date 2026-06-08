@@ -5,10 +5,12 @@ import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.category.infrastructure.persistence.CategoryJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Profile("!prod")
 public class DataInitializer implements CommandLineRunner {
 
     private final CategoryJpaRepository categoryJpaRepository;
