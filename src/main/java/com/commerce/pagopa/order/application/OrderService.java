@@ -97,7 +97,7 @@ public class OrderService {
                     op.quantity(),
                     product.getPrice()
             );
-            orderProduct.addOrder(order);
+            order.addOrderProduct(orderProduct);
         }
 
         // 4단계: 재고 차감

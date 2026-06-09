@@ -89,6 +89,12 @@ public class Order extends BaseTimeEntity {
         this.totalAmount = this.totalAmount.add(totalPrice);
     }
 
+    public void addOrderProduct(OrderProduct orderProduct) {
+        this.orderProducts.add(orderProduct);
+        orderProduct.assignOrder(this);
+        addTotalPrice(orderProduct.getTotalPrice());
+    }
+
     public void setCancelledAt(LocalDateTime now) {
         this.cancelledAt = now;
     }

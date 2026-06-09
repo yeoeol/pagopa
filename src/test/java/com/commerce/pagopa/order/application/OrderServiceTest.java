@@ -9,7 +9,6 @@ import com.commerce.pagopa.order.domain.model.Address;
 import com.commerce.pagopa.order.domain.model.Delivery;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
-import com.commerce.pagopa.order.domain.model.SellerOrder;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;

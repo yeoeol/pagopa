@@ -6,7 +6,7 @@ import com.commerce.pagopa.order.application.OrderService;
 import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto.OrderProductRequestDto;
+import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
@@ -74,7 +74,6 @@ class OrderCancelConcurrencyTest {
 
         OrderResponseDto created = orderService.order(buyer.getId(),
                 new OrderCreateRequestDto(
-                        PaymentMethod.CARD,
                         new DeliveryRequestDto("test", "01012345678", "01010", "address", "101", "memo"),
                         List.of(new OrderProductRequestDto(product.getId(), 1))
                 ));
@@ -98,7 +97,7 @@ class OrderCancelConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.cancelOrder(orderId, request);
+                    orderService.cancelOrder(orderId);
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
