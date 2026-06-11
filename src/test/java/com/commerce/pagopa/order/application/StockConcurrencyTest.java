@@ -5,7 +5,6 @@ import com.commerce.pagopa.global.exception.ProductOutOfStockException;
 import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
-import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.support.fixture.CategoryFixture;
@@ -180,7 +179,7 @@ class StockConcurrencyTest {
 
         boolean finished = done.await(120, TimeUnit.SECONDS);
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
-        pool.shutdown();
+        pool.close();
 
         log.info("[no-contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}",
                 N, finished, elapsedMs, success.get(), soldOut.get(), other.get());
