@@ -1,10 +1,10 @@
-package com.commerce.pagopa.concurrency;
+package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.global.exception.ProductOutOfStockException;
-import com.commerce.pagopa.order.application.OrderService;
 import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
+import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
 import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
@@ -66,7 +66,7 @@ class StockConcurrencyTest {
         User seller = userRepository.save(UserFixture.aSeller("contention-" + N));
         Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller));
 
-        ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+        ExecutorService pool = Executors.newFixedThreadPool(N);
 
         CyclicBarrier barrier = new CyclicBarrier(N);
         CountDownLatch done   = new CountDownLatch(N);
@@ -81,7 +81,20 @@ class StockConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.order(seller.getId(), new OrderCreateRequestDto(PaymentMethod.CARD, new DeliveryRequestDto("test", "01012345678", "01010", "집주소", "101동", "메모"), List.of(new OrderCreateRequestDto.OrderProductRequestDto(product.getId(), 1))));
+                    orderService.order(
+                            seller.getId(),
+                            new OrderCreateRequestDto(
+                                    new DeliveryRequestDto(
+                                            "test",
+                                            "01012345678",
+                                            "01010",
+                                            "집주소",
+                                            "101동",
+                                            "메모"
+                                    ),
+                                    List.of(new OrderProductRequestDto(product.getId(), 1))
+                            )
+                    );
                     success.incrementAndGet();
                 } catch (ProductOutOfStockException e) {
                     soldOut.incrementAndGet();
@@ -96,7 +109,7 @@ class StockConcurrencyTest {
 
         boolean finished = done.await(120, TimeUnit.SECONDS);
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
-        pool.shutdown();
+        pool.close();
 
         int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
         log.info("[contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}, finalStock={}",
@@ -123,7 +136,7 @@ class StockConcurrencyTest {
             products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 1)));
         }
 
-        ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+        ExecutorService pool = Executors.newFixedThreadPool(N);
 
         CyclicBarrier barrier = new CyclicBarrier(N);
         CountDownLatch done   = new CountDownLatch(N);
@@ -139,7 +152,20 @@ class StockConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.order(seller.getId(), new OrderCreateRequestDto(PaymentMethod.CARD, new DeliveryRequestDto("test", "01012345678", "01010", "집주소", "101동", "메모"), List.of(new OrderCreateRequestDto.OrderProductRequestDto(productId, 1))));
+                    orderService.order(
+                            seller.getId(),
+                            new OrderCreateRequestDto(
+                                    new DeliveryRequestDto(
+                                            "test",
+                                            "01012345678",
+                                            "01010",
+                                            "집주소",
+                                            "101동",
+                                            "메모"
+                                    ),
+                                    List.of(new OrderProductRequestDto(productId, 1))
+                            )
+                    );
                     success.incrementAndGet();
                 } catch (ProductOutOfStockException e) {
                     soldOut.incrementAndGet();

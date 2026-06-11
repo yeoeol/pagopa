@@ -11,10 +11,10 @@ public final class OrderProductFixture {
     }
 
     public static OrderProduct anOrderProduct(Product product) {
-        return OrderProduct.create(1, product.getPrice(), product);
+        return anOrderProduct(product, 1, product.getPrice());
     }
 
     public static OrderProduct anOrderProduct(Product product, int quantity, BigDecimal price) {
-        return OrderProduct.create(quantity, price, product);
+        return OrderProduct.create(product.getId(), product.getName(), quantity, price);
     }
 }

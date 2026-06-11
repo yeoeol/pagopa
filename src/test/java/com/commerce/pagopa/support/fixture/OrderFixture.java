@@ -12,10 +12,6 @@ public final class OrderFixture {
     }
 
     public static Order anOrder(User buyer) {
-        return anOrder("ORD-" + UUID.randomUUID(), buyer);
-    }
-
-    public static Order anOrder(String orderNumber, User buyer) {
-        return Order.init(orderNumber, PaymentMethod.CARD, buyer, DeliveryFixture.aDelivery());
+        return Order.init(buyer, DeliveryFixture.aDelivery());
     }
 }

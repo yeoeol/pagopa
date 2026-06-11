@@ -1,8 +1,7 @@
-package com.commerce.pagopa.concurrency;
+package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.order.application.OrderService;
 import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
@@ -144,10 +143,17 @@ class OrderCancelConcurrencyTest {
         for (int i = 0; i < N; i++) {
             OrderResponseDto created = orderService.order(buyer.getId(),
                     new OrderCreateRequestDto(
-                            PaymentMethod.CARD,
-                            new DeliveryRequestDto("test", "01012345678", "01010", "address", "101", "memo"),
+                            new DeliveryRequestDto(
+                                    "test",
+                                    "01012345678",
+                                    "01010",
+                                    "address",
+                                    "101",
+                                    "memo"
+                            ),
                             List.of(new OrderProductRequestDto(product.getId(), 1))
-                    ));
+                    )
+            );
             orderIds.add(created.orderId());
             payOrder(created.orderId());
         }
@@ -170,7 +176,7 @@ class OrderCancelConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.cancelOrder(orderId, request);
+                    orderService.cancelOrder(orderId);
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
@@ -204,7 +210,6 @@ class OrderCancelConcurrencyTest {
     private void payOrder(Long orderId) {
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
             Order order = orderRepository.findByIdOrThrow(orderId);
-            order.pay();
         });
     }
 }
