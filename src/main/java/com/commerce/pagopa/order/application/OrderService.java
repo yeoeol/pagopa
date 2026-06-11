@@ -56,16 +56,31 @@ public class OrderService {
         Map<Long, Integer> totalQuantityByProductId = new HashMap<>();
 
         for (OrderProductRequestDto orderProduct : requestDto.products()) {
-            totalQuantityByProductId.merge(orderProduct.productId(), orderProduct.quantity(), Integer::sum);
+            totalQuantityByProductId.merge(
+                    orderProduct.productId(),
+                    orderProduct.quantity(),
+                    Integer::sum
+            );
         }
+
+        // 데드락 방지
+        List<Long> productIds = totalQuantityByProductId.keySet()
+                .stream()
+                .sorted()
+                .toList();
 
         // 2단계: 모든 상품 검증 (존재 여부 / 판매 여부 / 재고 부족 여부)
         Map<Long, Product> productMap = new HashMap<>();
-        for (Map.Entry<Long, Integer> entry : totalQuantityByProductId.entrySet()) {
-            Long productId = entry.getKey();
-            int totalQuantity = entry.getValue();
 
-            Product product = productRepository.findByIdOrThrow(productId);
+        for (Long productId : productIds) {
+            Product product = productRepository.findByIdForUpdateOrThrow(productId);
+            productMap.put(productId, product);
+        }
+
+        for (Long productId : productIds) {
+            Product product = productMap.get(productId);
+            int totalQuantity = totalQuantityByProductId.get(productId);
+
             if (!product.isActive()) {
                 throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
             }
@@ -77,8 +92,6 @@ public class OrderService {
                                 .formatted(productId, product.getStock(), totalQuantity)
                 );
             }
-
-            productMap.put(productId, product);     // 검증을 통과한 메뉴들 보관
         }
 
         // 3단계: OrderProduct 목록 생성 및 총액 계산
@@ -101,9 +114,9 @@ public class OrderService {
         }
 
         // 4단계: 재고 차감
-        for (Map.Entry<Long, Integer> entry : totalQuantityByProductId.entrySet()) {
-            Product product = productMap.get(entry.getKey());
-            int orderedQuantity = entry.getValue();
+        for (Long productId : productIds) {
+            Product product = productMap.get(productId);
+            int orderedQuantity = totalQuantityByProductId.get(productId);
 
             product.changeStock(product.getStock() - orderedQuantity);
         }
