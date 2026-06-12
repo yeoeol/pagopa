@@ -5,7 +5,6 @@ import com.commerce.pagopa.order.application.dto.response.DeliveryResponseDto;
 import com.commerce.pagopa.order.application.dto.response.OrderProductResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.util.List;
