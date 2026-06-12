@@ -1,10 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
 import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.user.domain.model.User;
-
-import java.util.UUID;
 
 public final class OrderFixture {
 
