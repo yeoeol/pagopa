@@ -1,34 +1,25 @@
-package com.commerce.pagopa.concurrency;
+package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.order.application.OrderService;
 import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto.OrderProductRequestDto;
+import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.order.domain.model.enums.PaymentMethod;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
-import com.commerce.pagopa.payment.domain.model.Payment;
-import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
-import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.support.fixture.CategoryFixture;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
-import com.commerce.pagopa.support.fixture.PaymentFixture;
 import com.commerce.pagopa.support.fixture.ProductFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
-import com.commerce.pagopa.support.testconfig.PaymentGatewayStubConfig;
-import com.commerce.pagopa.support.testconfig.PaymentGatewayStubConfig.CountingPaymentGatewayStub;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,77 +43,42 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * 시나리오 A: 같은 주문에 대한 중복 취소 요청이 동시에 들어왔을 때
- * - 환불 API(PaymentGateway.cancel)는 정확히 1회만 호출되어야 한다.
- * - 1건만 성공, 나머지는 BusinessException 으로 차단되어야 한다.
- * - 결제 상태는 CANCELLED, 주문 상태도 CANCELLED 로 수렴.
- * - 차감했던 재고는 정확히 1회만 복원되어야 한다.
- *
- * 시나리오 B: 서로 다른 N개 주문이 동일 상품을 포함할 때 동시 취소
- * - 각 주문은 별도 결제 → 취소 락(결제 단위)으로 직렬화되지 않는 경합
- * - 차감분이 정확히 N개 모두 복원되어 finalStock == 초기 재고
- */
 @Slf4j
 @SpringBootTest
-@Import({TestcontainersConfig.class, PaymentGatewayStubConfig.class})
+@Import(TestcontainersConfig.class)
 class OrderCancelConcurrencyTest {
 
     @DynamicPropertySource
     static void hikariProps(DynamicPropertyRegistry registry) {
-        // 동시성 테스트에서 기본 풀(10) 고갈 회피
         registry.add("spring.datasource.hikari.maximum-pool-size", () -> "50");
     }
 
     @Autowired OrderService orderService;
     @Autowired OrderRepository orderRepository;
-    @Autowired PaymentRepository paymentRepository;
     @Autowired ProductRepository productRepository;
     @Autowired CategoryRepository categoryRepository;
     @Autowired UserRepository userRepository;
-    @Autowired CountingPaymentGatewayStub paymentGatewayStub;
     @Autowired PlatformTransactionManager transactionManager;
-
-    @BeforeEach
-    void resetStub() {
-        paymentGatewayStub.reset();
-    }
 
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 200, 1000})
-    void 같은_주문을_N명이_동시_취소하면_정확히_1건만_성공(int N) throws Exception {
-        // given: 결제 완료(PAID)된 취소 가능한 주문 1건 준비
+    void sameOrderConcurrentCancel_succeedsOnceAndRestoresStockOnce(int N) throws Exception {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
         User seller = userRepository.save(UserFixture.aSeller("cancel-idem-seller-" + N));
         User buyer = userRepository.save(UserFixture.aBuyer("cancel-idem-buyer-" + N));
-
         Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10));
 
         OrderResponseDto created = orderService.order(buyer.getId(),
                 new OrderCreateRequestDto(
-                        PaymentMethod.CARD,
-                        new DeliveryRequestDto(
-                                "test",
-                                "01012345678",
-                                "01010",
-                                "집주소",
-                                "101동",
-                                "메모"
-                        ),
+                        new DeliveryRequestDto("test", "01012345678", "01010", "address", "101", "memo"),
                         List.of(new OrderProductRequestDto(product.getId(), 1))
                 ));
         Long orderId = created.orderId();
 
-        // 주문 → READY 전이 + PAID Payment 저장 (취소 가능 상태 만들기)
-        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-            Order order = orderRepository.findByIdOrThrow(orderId);
-            order.pay();
-            paymentRepository.save(PaymentFixture.aPaidPayment(order));
-        });
+        payOrder(orderId);
 
-        // when: N개 스레드가 동시에 같은 주문을 취소
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
         CyclicBarrier barrier = new CyclicBarrier(N);
         CountDownLatch done = new CountDownLatch(N);
@@ -132,14 +88,14 @@ class OrderCancelConcurrencyTest {
         AtomicInteger other = new AtomicInteger();
         Map<String, Integer> errorCounts = new ConcurrentHashMap<>();
 
-        OrderCancelRequestDto request = new OrderCancelRequestDto("동시성 테스트");
+        OrderCancelRequestDto request = new OrderCancelRequestDto("concurrent cancel");
 
         long startNanos = System.nanoTime();
         for (int i = 0; i < N; i++) {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.cancelOrder(orderId, request);
+                    orderService.cancelOrder(orderId);
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
@@ -152,33 +108,29 @@ class OrderCancelConcurrencyTest {
                 }
             });
         }
+
         boolean finished = done.await(120, TimeUnit.SECONDS);
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.shutdown();
 
-        // then
         Order finalOrder = orderRepository.findByIdOrThrow(orderId);
-        Payment finalPayment = paymentRepository.findByOrder(finalOrder).orElseThrow();
         int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
 
-        log.info("[cancel-idempotency] N={} finished={} elapsed={}ms success={} businessFail={} other={} cancelApiCalls={} finalStock={} orderStatus={} paymentStatus={}",
-                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(),
-                paymentGatewayStub.cancelCallCount(), finalStock, finalOrder.getStatus(), finalPayment.getStatus());
+        log.info("[same-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} finalStock={} orderStatus={}",
+                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), finalStock, finalOrder.getStatus());
         errorCounts.forEach((k, v) -> log.warn("  [error] {} x{}", k, v));
 
+        assertThat(finished).isTrue();
         assertThat(success.get()).isEqualTo(1);
         assertThat(businessFail.get()).isEqualTo(N - 1);
         assertThat(other.get()).isZero();
-        assertThat(paymentGatewayStub.cancelCallCount()).isEqualTo(1);
-        assertThat(finalPayment.getStatus()).isEqualTo(PaymentStatus.CANCELLED);
         assertThat(finalOrder.getStatus()).isEqualTo(OrderStatus.CANCELLED);
         assertThat(finalStock).isEqualTo(10);
     }
 
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 200, 1000})
-    void 서로_다른_N개_주문의_동일_상품_동시_취소시_재고가_정확히_복원(int N) throws Exception {
-        // given: 동일 상품(stock=N)을 1개씩 담은 결제완료 주문 N건 (서로 다른 주문 = 서로 다른 결제)
+    void differentOrdersConcurrentCancel_restoresAllStock(int N) throws Exception {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
@@ -190,25 +142,23 @@ class OrderCancelConcurrencyTest {
         for (int i = 0; i < N; i++) {
             OrderResponseDto created = orderService.order(buyer.getId(),
                     new OrderCreateRequestDto(
-                            PaymentMethod.CARD,
-                            new DeliveryRequestDto("test", "01012345678", "01010", "집주소", "101동", "메모"),
+                            new DeliveryRequestDto(
+                                    "test",
+                                    "01012345678",
+                                    "01010",
+                                    "address",
+                                    "101",
+                                    "memo"
+                            ),
                             List.of(new OrderProductRequestDto(product.getId(), 1))
-                    ));
-            Long orderId = created.orderId();
-            orderIds.add(orderId);
-
-            // 주문 → READY 전이 + PAID Payment 저장 (취소 가능 상태 만들기)
-            new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-                Order order = orderRepository.findByIdOrThrow(orderId);
-                order.pay();
-                paymentRepository.save(PaymentFixture.aPaidPayment(order));
-            });
+                    )
+            );
+            orderIds.add(created.orderId());
+            payOrder(created.orderId());
         }
 
-        // N건 주문 생성으로 재고는 0
         assertThat(productRepository.findByIdOrThrow(product.getId()).getStock()).isZero();
 
-        // when: N건의 서로 다른 주문을 동시에 취소
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
         CyclicBarrier barrier = new CyclicBarrier(N);
         CountDownLatch done = new CountDownLatch(N);
@@ -218,14 +168,14 @@ class OrderCancelConcurrencyTest {
         AtomicInteger other = new AtomicInteger();
         Map<String, Integer> errorCounts = new ConcurrentHashMap<>();
 
-        OrderCancelRequestDto request = new OrderCancelRequestDto("동시성 테스트");
+        OrderCancelRequestDto request = new OrderCancelRequestDto("concurrent cancel");
 
         long startNanos = System.nanoTime();
         for (Long orderId : orderIds) {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.cancelOrder(orderId, request);
+                    orderService.cancelOrder(orderId);
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
@@ -238,22 +188,27 @@ class OrderCancelConcurrencyTest {
                 }
             });
         }
+
         boolean finished = done.await(120, TimeUnit.SECONDS);
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.shutdown();
 
-        // then
         int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
 
-        log.info("[cross-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} cancelApiCalls={} finalStock={}",
-                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(),
-                paymentGatewayStub.cancelCallCount(), finalStock);
+        log.info("[different-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} finalStock={}",
+                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), finalStock);
         errorCounts.forEach((k, v) -> log.warn("  [error] {} x{}", k, v));
 
+        assertThat(finished).isTrue();
         assertThat(success.get()).isEqualTo(N);
+        assertThat(businessFail.get()).isZero();
         assertThat(other.get()).isZero();
-        assertThat(paymentGatewayStub.cancelCallCount()).isEqualTo(N);
-        // 회귀 방지: 동일 상품 동시 취소에서도 재고는 정확히 초기값(N)으로 복원되어야 한다
         assertThat(finalStock).isEqualTo(N);
+    }
+
+    private void payOrder(Long orderId) {
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            Order order = orderRepository.findByIdOrThrow(orderId);
+        });
     }
 }

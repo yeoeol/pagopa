@@ -3,7 +3,6 @@ package com.commerce.pagopa.order.infrastructure.persistence;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.QOrder;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.order.domain.model.enums.SellerOrderStatus;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,26 +20,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.commerce.pagopa.order.domain.model.QOrder.order;
-import static com.commerce.pagopa.order.domain.model.QSellerOrder.sellerOrder;
-import static com.commerce.pagopa.product.domain.model.QProduct.product;
 
 @RequiredArgsConstructor
 public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    @Override
-    public List<Order> findUnpaidCreatedBefore(LocalDateTime timeoutTime, int limit) {
-        return queryFactory
-                .selectFrom(order).distinct()
-                .join(order.sellerOrders, sellerOrder)
-                .where(sellerOrder.status.eq(SellerOrderStatus.PENDING_PAYMENT)
-                        .and(order.createdAt.loe(timeoutTime))
-                )
-                .orderBy(order.createdAt.asc())
-                .limit(limit)
-                .fetch();
-    }
 
     @Override
     public Page<Order> findAllByPeriod(Long userId, OrderStatus status, LocalDateTime start, LocalDateTime end, Pageable pageable) {

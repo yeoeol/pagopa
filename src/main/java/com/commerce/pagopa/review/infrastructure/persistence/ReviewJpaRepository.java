@@ -18,7 +18,7 @@ public interface ReviewJpaRepository extends JpaRepository<Review, Long>, Review
                 JOIN r.orderProduct op
                 JOIN FETCH r.user u
                 LEFT JOIN FETCH r.images ri
-            WHERE op.product.id = :productId
+            WHERE op.productId = :productId
             """)
     List<Review> findAllByProductIdWithUserAndReviewImages(@Param("productId") Long productId);
 }

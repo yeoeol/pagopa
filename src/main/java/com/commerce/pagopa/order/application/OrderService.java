@@ -2,17 +2,16 @@ package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cart.domain.repository.CartRepository;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
-import com.commerce.pagopa.order.application.dto.request.OrderCancelRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto.OrderProductRequestDto;
+import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderSearch;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
-import com.commerce.pagopa.order.domain.model.SellerOrder;
+import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
-import com.commerce.pagopa.payment.application.PaymentService;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.user.domain.model.User;
@@ -29,9 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,105 +38,170 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
-    private final PaymentService paymentService;
-    private final OrderTransactionService orderTransactionService;
-    private final OrderStockRestoreService orderStockRestoreService;
 
-    // 바로 주문
+    /**
+     * 바로 주문을 생성합니다.
+     *
+     * [처리 순서]
+     * 1단계. 동일 상품 수량 합산 (같은 productId가 여러 번 오면 수량을 합칩니다.)
+     * 2단계. 모든 상품 검증 (존재 여부 / 판매 여부 / 재고 부족 여부)
+     * 3단계. 검증 통과 후 OrderProduct 목록 생성 및 총액 계산
+     * 4단계. 재고 차감
+     * 5단계. 주문 저장 및 응답 반환
+     */
     @Counted("my.order")
     @Transactional
     public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
+        // 1단계: 동일 상품 수량 합산
+        Map<Long, Integer> totalQuantityByProductId = new HashMap<>();
+
+        for (OrderProductRequestDto orderProduct : requestDto.products()) {
+            totalQuantityByProductId.merge(
+                    orderProduct.productId(),
+                    orderProduct.quantity(),
+                    Integer::sum
+            );
+        }
+
+        // 데드락 방지
+        List<Long> productIds = totalQuantityByProductId.keySet()
+                .stream()
+                .sorted()
+                .toList();
+
+        // 2단계: 모든 상품 검증 (존재 여부 / 판매 여부 / 재고 부족 여부)
+        Map<Long, Product> productMap = new HashMap<>();
+
+        for (Long productId : productIds) {
+            Product product = productRepository.findByIdForUpdateOrThrow(productId);
+            productMap.put(productId, product);
+        }
+
+        for (Long productId : productIds) {
+            Product product = productMap.get(productId);
+            int totalQuantity = totalQuantityByProductId.get(productId);
+
+            if (!product.isActive()) {
+                throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
+            }
+
+            if (product.getStock() < totalQuantity) {
+                throw new BusinessException(
+                        ErrorCode.PRODUCT_OUT_OF_STOCK,
+                        "재고가 부족합니다. productId=%d, 현재 재고=%d, 요청 수량=%d"
+                                .formatted(productId, product.getStock(), totalQuantity)
+                );
+            }
+        }
+
+        // 3단계: OrderProduct 목록 생성 및 총액 계산
         User user = userRepository.findByIdOrThrow(userId);
         Order order = Order.init(
-                generateOrderNumber(),
-                requestDto.paymentMethod(),
                 user,
                 requestDto.delivery().toDelivery()
         );
 
-        // 데드락 회피: 모든 트랜잭션이 productId 오름차순으로 행 락 획득
-        List<OrderProductRequestDto> sorted = requestDto.products().stream()
-                .sorted(Comparator.comparing(OrderProductRequestDto::productId))
-                .toList();
-        for (OrderProductRequestDto req : sorted) {
-            if (!productRepository.existsById(req.productId())) {
-                throw new ProductNotFoundException();
-            }
+        for (OrderProductRequestDto op : requestDto.products()) {
+            Product product = productMap.get(op.productId());
 
-            int updated = productRepository.decreaseStock(req.productId(), req.quantity());
-            if (updated == 0) {
-                throw new ProductOutOfStockException();
-            }
-
-            Product product = productRepository.findByIdOrThrow(req.productId());
-            addProductToOrder(order, product, req.quantity());
+            OrderProduct orderProduct = OrderProduct.create(
+                    product.getId(),
+                    product.getName(),
+                    op.quantity(),
+                    product.getPrice()
+            );
+            order.addOrderProduct(orderProduct);
         }
-        order.refresh();
 
+        // 4단계: 재고 차감
+        for (Long productId : productIds) {
+            Product product = productMap.get(productId);
+            int orderedQuantity = totalQuantityByProductId.get(productId);
+
+            product.changeStock(product.getStock() - orderedQuantity);
+        }
+
+        // 5단계: 주문 저장 및 응답 반환
         return OrderResponseDto.from(orderRepository.save(order));
     }
 
-    // 장바구니 목록 주문
+    /**
+     * 장바구니 목록 주문을 생성합니다.
+     *
+     * [처리 순서]
+     * 1단계. 장바구니 목록 조회
+     * 2단계. order() 메서드에 보내기 위한 재료 만들기 (List<OrderProductRequestDto>, OrderCreateRequestDto)
+     * 3단계. order() 호출
+     * 4단계. 장바구니 목록 삭제
+     * 5단계. 응답 반환
+     */
     @Counted("my.order")
     @Transactional
     public OrderResponseDto orderFromCart(Long userId, CartOrderRequestDto requestDto) {
+        // 1단계: 장바구니 목록 조회
         List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
         if (carts.isEmpty()) {
             throw new CartNotFoundException();
         }
 
-        User user = userRepository.findByIdOrThrow(userId);
-        Order order = Order.init(
-                generateOrderNumber(),
-                requestDto.paymentMethod(),
-                user,
-                requestDto.delivery().toDelivery()
-        );
-        // 데드락 회피: productId 오름차순 정렬 후 행 락 획득
-        carts.stream()
-                .sorted(Comparator.comparing(cart -> cart.getProduct().getId()))
-                .forEach(cart -> {
-                    int updated = productRepository.decreaseStock(cart.getProduct().getId(), cart.getQuantity());
-                    if (updated == 0) {
-                        throw new ProductOutOfStockException();
-                    }
-                    addProductToOrder(order, cart.getProduct(), cart.getQuantity());
-                });
-        order.refresh();
+        // 2단계: order() 메서드에 보내기 위한 재료 만들기
+        List<OrderProductRequestDto> orderProductRequestDtos = new ArrayList<>();
+        for (Cart cart : carts) {
+            OrderProductRequestDto dto = new OrderProductRequestDto(
+                    cart.getProduct().getId(),
+                    cart.getQuantity()
+            );
+            orderProductRequestDtos.add(dto);
+        }
 
-        // 주문 완료 후 장바구니 항목 삭제
+        OrderCreateRequestDto orderCreateRequestDto = new OrderCreateRequestDto(
+                requestDto.delivery(),
+                orderProductRequestDtos
+        );
+
+        // 3단계: order() 호출
+        OrderResponseDto response = order(userId, orderCreateRequestDto);
+
+        // 4단계: 장바구니 목록 삭제
         cartRepository.deleteAllByIdIn(carts.stream().map(Cart::getId).toList());
 
-        return OrderResponseDto.from(orderRepository.save(order));
-    }
-
-    @Counted("my.order")
-    public void cancelOrder(Long orderId, OrderCancelRequestDto requestDto) {
-        OrderCancelCommand command = orderTransactionService.prepareCancelOrder(orderId);
-
-        paymentService.cancelPayment(command.payment(), command.cancelAmount(), requestDto.cancelReason());
-        orderTransactionService.markCancelOrderSuccess(command.orderId());
+        // 5단계: 응답 반환
+        return response;
     }
 
     /**
-     * 단일 SellerOrder 부분 취소
+     * 주문 취소 로직
+     *
+     * [처리 순서]
+     * 1단계. 주문 존재 여부 확인
+     * 2단계. 취소 가능한 상태인지 확인
+     * 3단계. 주문 항목 수량만큼 재고 복구
+     * 4단계. 주문 상태를 CANCELLED로 변경 및 저장
      */
     @Counted("my.order")
-    public void cancelSellerOrder(Long orderId, Long sellerOrderId, OrderCancelRequestDto requestDto) {
-        SellerOrderCancelCommand command = orderTransactionService.prepareCancelSellerOrder(orderId, sellerOrderId);
-
-        paymentService.cancelPayment(command.payment(), command.cancelAmount(), requestDto.cancelReason());
-        orderTransactionService.markCancelSellerOrderSuccess(command.orderId(), command.sellerOrderId());
-    }
-
-    // 스케줄러 전용: 미승인(paymentKey 없는) 미결제 주문 자동 취소
     @Transactional
-    public void cancelUnpaidOrder(Long orderId) {
+    public OrderResponseDto cancelOrder(Long orderId) {
+        // 1단계: 주문 존재 여부 확인
         Order order = orderRepository.findByIdOrThrow(orderId);
 
-        orderStockRestoreService.cancelOrderAndRestoreStock(order);
+        // 2단계: 취소 가능한 상태인지 확인
+        if (order.getStatus() != OrderStatus.ORDERED
+                && order.getStatus() != OrderStatus.PAID
+        ) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
 
-        paymentService.cancelPaymentByOrder(order);
+        // 3단계: 주문 항목 수량만큼 재고 복구
+        for (OrderProduct op : order.getOrderProducts()) {
+            Product product = productRepository.findByIdOrThrow(op.getProductId());
+            product.changeStock(product.getStock() + op.getQuantity());
+        }
+
+        // 4단계: 주문 상태를 CANCELLED로 변경 및 저장
+        order.changeStatus(OrderStatus.CANCELLED);
+        order.setCancelledAt(LocalDateTime.now());
+
+        return OrderResponseDto.from(order);
     }
 
     @Transactional(readOnly = true)
@@ -161,18 +223,5 @@ public class OrderService {
                 pageable
         );
         return pageOrder.map(OrderResponseDto::from);
-    }
-
-    /**
-     * 한 상품을 Order의 적절한 SellerOrder에 추가
-     * 재고 차감은 ProductRepository.decreaseStock(id, qty) 단일 atomic UPDATE로 별도 처리
-     */
-    private void addProductToOrder(Order order, Product product, int quantity) {
-        SellerOrder sellerOrder = order.findOrCreateSellerOrderFor(product.getSeller());
-        sellerOrder.addOrderProduct(OrderProduct.create(quantity, product.getPrice(), product));
-    }
-
-    private static String generateOrderNumber() {
-        return UUID.randomUUID().toString().replace("-", "");
     }
 }

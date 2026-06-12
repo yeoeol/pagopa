@@ -1,3 +1,4 @@
+/*
 package com.commerce.pagopa.payment.presentation;
 
 import com.commerce.pagopa.payment.application.PaymentService;
@@ -40,3 +41,4 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 }
+*/

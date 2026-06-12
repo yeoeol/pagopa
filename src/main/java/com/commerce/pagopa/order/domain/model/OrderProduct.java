@@ -1,6 +1,5 @@
 package com.commerce.pagopa.order.domain.model;
 
-import com.commerce.pagopa.product.domain.model.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +17,11 @@ public class OrderProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_product_id")
-    private Long id;
+    private Long orderProductId;
+
+    private Long productId;
+
+    private String productName;
 
     private int quantity;
 
@@ -26,35 +29,32 @@ public class OrderProduct {
     private BigDecimal price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_order_id")
-    private SellerOrder sellerOrder;
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private OrderProduct(int quantity, BigDecimal price, SellerOrder sellerOrder, Product product) {
+    private OrderProduct(Long productId, String productName, int quantity, BigDecimal price) {
+        this.productId = productId;
+        this.productName = productName;
         this.quantity = quantity;
         this.price = price;
-        this.sellerOrder = sellerOrder;
-        this.product = product;
     }
 
-    public static OrderProduct create(int quantity, BigDecimal price, Product product) {
+    public static OrderProduct create(Long productId, String productName, int quantity, BigDecimal price) {
         return OrderProduct.builder()
+                .productId(productId)
+                .productName(productName)
                 .quantity(quantity)
                 .price(price)
-                .product(product)
                 .build();
-    }
-
-    void assignSellerOrder(SellerOrder sellerOrder) {
-        this.sellerOrder = sellerOrder;
     }
 
     public BigDecimal getTotalPrice() {
         return getPrice().multiply(BigDecimal.valueOf(getQuantity()));
     }
 
+    public void assignOrder(Order order) {
+        this.order = order;
+    }
 }

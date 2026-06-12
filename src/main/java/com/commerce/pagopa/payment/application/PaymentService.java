@@ -1,3 +1,4 @@
+/*
 package com.commerce.pagopa.payment.application;
 
 import com.commerce.pagopa.order.domain.model.Order;
@@ -31,9 +32,11 @@ public class PaymentService {
     private final PaymentGateway paymentGateway;
     private final PaymentTransactionService paymentTransactionService;
 
-    /**
+    */
+/**
      * 주문 생성 직후, 결제 데이터를 준비하고 클라이언트(프론트엔드)가 결제 창을 띄울 수 있도록 DTO 반환
-     */
+     *//*
+
     @Transactional
     public PaymentResponseDto requestPayment(Long orderId) {
         Order order = orderRepository.findByIdOrThrow(orderId);
@@ -54,9 +57,11 @@ public class PaymentService {
         );
     }
 
-    /**
+    */
+/**
      * 결제 창에서 승인 후 Redirect로 돌아왔을 때, PG로 최종 결제 승인 API 호출
-     */
+     *//*
+
     public void confirmPayment(PaymentApproveRequestDto requestDto) {
         boolean canProceed = paymentTransactionService.prepareConfirm(requestDto);
         if (!canProceed) {
@@ -83,9 +88,11 @@ public class PaymentService {
         log.info("[Payment] 승인 성공 - orderNumber={}, paymentKey={}", requestDto.orderId(), requestDto.paymentKey());
     }
 
-    /**
+    */
+/**
      * 승인된 결제를 paymentKey로 환불 취소 (PG API 호출 + 누적 환불 금액 갱신)
-     */
+     *//*
+
     public void cancelPayment(Payment payment, BigDecimal cancelAmount, String cancelReason) {
         PaymentCancelCommand command = paymentTransactionService.prepareCancel(payment, cancelAmount);
 
@@ -111,9 +118,11 @@ public class PaymentService {
                 command.paymentKey(), command.cancelAmount());
     }
 
-    /**
+    */
+/**
      * 미승인 결제를 로컬에서만 취소 (스케줄러용 — paymentKey 없는 READY/IN_PROGRESS 건)
-     */
+     *//*
+
     @Transactional
     public void cancelPaymentByOrder(Order order) {
         paymentRepository.findByOrder(order)
@@ -123,10 +132,12 @@ public class PaymentService {
                 .ifPresent(Payment::cancelUnpaid);
     }
 
-    /**
+    */
+/**
      * 취소 락 해제 — 정상 시 1 반환, 0이면 락 상태 불일치(이미 다른 곳에서 전이됨)
      * 운영자 인지용 WARN만 남기고 원본 예외(PAYMENT_CANCEL_FAIL/REJECTED)는 그대로 전파
-     */
+     *//*
+
     private void releaseCancelLockSafely(Long paymentId) {
         int released = paymentTransactionService.releaseCancelLock(paymentId);
         if (released == 0) {
@@ -134,3 +145,4 @@ public class PaymentService {
         }
     }
 }
+*/

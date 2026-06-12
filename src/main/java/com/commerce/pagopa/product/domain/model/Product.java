@@ -111,4 +111,12 @@ public class Product extends BaseTimeEntity {
     public void hide() {
         this.status = ProductStatus.HIDDEN;
     }
+
+    public boolean isActive() {
+        return this.status == ProductStatus.ACTIVE;
+    }
+
+    public void changeStock(int stock) {
+        this.stock = stock;
+    }
 }

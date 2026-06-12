@@ -24,8 +24,6 @@ public interface OrderRepository {
 
     Optional<Order> findByOrderNumber(String orderNumber);
 
-    List<Order> findUnpaidCreatedBefore(LocalDateTime timeoutTime, int limit);
-
     default Order findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(OrderNotFoundException::new);
     }

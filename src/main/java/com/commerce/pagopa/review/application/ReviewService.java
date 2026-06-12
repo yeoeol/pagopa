@@ -1,8 +1,11 @@
 package com.commerce.pagopa.review.application;
 
 import com.commerce.pagopa.global.exception.ProductNotFoundException;
+import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.repository.OrderProductRepository;
+import com.commerce.pagopa.order.domain.repository.OrderRepository;
+import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
@@ -27,13 +30,13 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
-    private final OrderProductRepository orderProductRepository;
     private final ProductRepository productRepository;
+    private final OrderProductRepository orderProductRepository;
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
         User user = userRepository.findByIdOrThrow(userId);
-        OrderProduct orderProduct = orderProductRepository.getByIdOrThrow(requestDto.orderProductId());
+        OrderProduct orderProduct = orderProductRepository.findByIdOrThrow(requestDto.orderProductId());
 
         Review review = Review.create(requestDto.rating(), requestDto.content(), user, orderProduct);
 

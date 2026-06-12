@@ -39,13 +39,15 @@ public interface ProductRepository {
 
     List<Product> searchProducts(@NonNull ProductSearchCondition condition);
 
-    int decreaseStock(Long productId, int quantity);
+    List<Product> findAllByIdIn(List<Long> productIds);
 
-    int increaseStock(Long productId, int quantity);
+    Optional<Product> findByIdForUpdate(Long id);
+
+    default Product findByIdForUpdateOrThrow(Long id) {
+        return findByIdForUpdate(id).orElseThrow(ProductNotFoundException::new);
+    }
 
     default Product findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(ProductNotFoundException::new);
     }
-
-    List<Product> findAllByIdIn(List<Long> productIds);
 }
