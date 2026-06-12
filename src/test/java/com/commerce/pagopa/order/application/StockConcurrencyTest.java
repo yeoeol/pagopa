@@ -170,8 +170,10 @@ class StockConcurrencyTest {
                             )
                     );
                     success.incrementAndGet();
-                } catch (ProductOutOfStockException e) {
-                    soldOut.incrementAndGet();
+                } catch (BusinessException e) {
+                    if (e.getErrorCode().equals(ErrorCode.PRODUCT_OUT_OF_STOCK)) {
+                        soldOut.incrementAndGet();
+                    }
                 } catch (Exception e) {
                     other.incrementAndGet();
                     errorCounts.merge(e.getClass().getSimpleName(), 1, Integer::sum);
