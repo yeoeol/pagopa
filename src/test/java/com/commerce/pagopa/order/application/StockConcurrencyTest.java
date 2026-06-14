@@ -44,7 +44,7 @@ class StockConcurrencyTest {
     @DynamicPropertySource
     static void hikariProps(DynamicPropertyRegistry registry) {
         // 대용량 동시성 테스트 한정: HikariCP 기본 풀(10) 으론 N=10000 풀 고갈 발생
-        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "300");
+        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "50");
     }
 
     @Autowired
