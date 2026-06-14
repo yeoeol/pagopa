@@ -1,6 +1,8 @@
 package com.commerce.pagopa.order.domain.model;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
@@ -81,14 +83,14 @@ public class Order extends BaseTimeEntity {
                 .build();
     }
 
-    public void addTotalPrice(BigDecimal totalPrice) {
-        this.totalAmount = this.totalAmount.add(totalPrice);
-    }
-
     public void addOrderProduct(OrderProduct orderProduct) {
         this.orderProducts.add(orderProduct);
         orderProduct.assignOrder(this);
         addTotalPrice(orderProduct.getTotalPrice());
+    }
+
+    private void addTotalPrice(BigDecimal totalPrice) {
+        this.totalAmount = this.totalAmount.add(totalPrice);
     }
 
     private static String generateOrderNumber() {
@@ -96,14 +98,15 @@ public class Order extends BaseTimeEntity {
     }
 
     // == 주문 취소 로직 ==
-    public boolean isCancellable() {
-        return this.status == OrderStatus.ORDERED;
+    public void cancel() {
+        validateCancelOrder();
+        this.status = OrderStatus.CANCELLED;
+        this.cancelledAt = LocalDateTime.now();
     }
 
-    public void cancel() {
-        if (isCancellable()) {
-            this.status = OrderStatus.CANCELLED;
-            this.cancelledAt = LocalDateTime.now();
+    private void validateCancelOrder() {
+        if (this.status != OrderStatus.ORDERED) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
     }
 }
