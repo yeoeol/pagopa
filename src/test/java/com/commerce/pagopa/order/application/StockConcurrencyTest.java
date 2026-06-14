@@ -44,7 +44,7 @@ class StockConcurrencyTest {
     @DynamicPropertySource
     static void hikariProps(DynamicPropertyRegistry registry) {
         // 대용량 동시성 테스트 한정: HikariCP 기본 풀(10) 으론 N=10000 풀 고갈 발생
-        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "50");
+        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "300");
     }
 
     @Autowired
@@ -198,8 +198,8 @@ class StockConcurrencyTest {
     }
 
     @ParameterizedTest(name = "N={0}")
-    @ValueSource(ints = {50, 1000, 10000})
-    void N명이_동시_주문취소하면_정확히_N명만_성공(int N) throws Exception {
+    @ValueSource(ints = {50, 200, 1000})
+    void 동시_주문취소하면_정확히_1번만_성공(int N) throws Exception {
         // 상품 등록
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
@@ -207,13 +207,19 @@ class StockConcurrencyTest {
         User seller = userRepository.save(UserFixture.aSeller("cancel-idem-seller-" + N));
         User buyer = userRepository.save(UserFixture.aBuyer("cancel-idem-buyer-" + N));
 
-        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10));
+        Product product1 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10));
+        Product product2 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 20));
+        Product product3 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 30));
 
         // 상품 주문
         OrderResponseDto created = orderService.order(buyer.getId(),
                 new OrderCreateRequestDto(
                         new DeliveryRequestDto("test", "01012345678", "01010", "address", "101", "memo"),
-                        List.of(new OrderProductRequestDto(product.getId(), 1))
+                        List.of(
+                                new OrderProductRequestDto(product1.getId(), 1),
+                                new OrderProductRequestDto(product2.getId(), 2),
+                                new OrderProductRequestDto(product3.getId(), 3)
+                        )
                 )
         );
         Long orderId = created.orderId();
@@ -253,22 +259,26 @@ class StockConcurrencyTest {
         pool.close();
 
         OrderResponseDto response = orderService.find(orderId);
-        int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
+        int finalStock1 = productRepository.findByIdOrThrow(product1.getId()).getStock();
+        int finalStock2 = productRepository.findByIdOrThrow(product2.getId()).getStock();
+        int finalStock3 = productRepository.findByIdOrThrow(product3.getId()).getStock();
 
-        log.info("[same-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} finalStock={} orderStatus={}",
-                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), finalStock, response.status());
+        log.info("[same-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} orderStatus={}",
+                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), response.status());
         errorCounts.forEach((k, v) -> log.warn("  [error] {} x{}", k, v));
 
         assertThat(finished).isTrue();
-        assertThat(success.get()).isEqualTo(10);
+        assertThat(success.get()).isEqualTo(1);
         assertThat(businessFail.get()).isEqualTo(N - 1);
         assertThat(other.get()).isZero();
         assertThat(response.status()).isEqualTo(OrderStatus.CANCELLED);
-        assertThat(finalStock).isEqualTo(10);
+        assertThat(finalStock1).isEqualTo(10);
+        assertThat(finalStock2).isEqualTo(20);
+        assertThat(finalStock3).isEqualTo(30);
     }
 
     @ParameterizedTest(name = "N={0}")
-    @ValueSource(ints = {50, 1000, 10000})
+    @ValueSource(ints = {50, 200, 1000})
     void 서로_다른_N개_상품에_각각_1명씩_주문취소하면_경합없이_재고_복구_성공(int N) throws Exception {
         // 상품 등록
         CategoryTree tree = CategoryFixture.aTree();

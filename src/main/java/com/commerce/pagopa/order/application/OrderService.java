@@ -187,16 +187,31 @@ public class OrderService {
     @Transactional
     public OrderResponseDto cancelOrder(Long orderId) {
         // 1단계: 주문 존재 여부 확인
-        Order order = orderRepository.findByIdOrThrow(orderId);
+        Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
 
         // 2단계: 취소 가능한 상태인지 확인
         if (!order.isCancellable()) {
             throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
 
+
+        // 데드락 방지
+        List<Long> productIds = order.getOrderProducts().stream()
+                .map(OrderProduct::getProductId)
+                .distinct()
+                .sorted()
+                .toList();
+
+        Map<Long, Product> productMap = new HashMap<>();
+
+        for (Long productId : productIds) {
+            Product product = productRepository.findByIdForUpdateOrThrow(productId);
+            productMap.put(productId, product);
+        }
+
         // 3단계: 주문 항목 수량만큼 재고 복구
         for (OrderProduct op : order.getOrderProducts()) {
-            Product product = productRepository.findByIdOrThrow(op.getProductId());
+            Product product = productMap.get(op.getProductId());
             product.restoreStock(op.getQuantity());
         }
 
