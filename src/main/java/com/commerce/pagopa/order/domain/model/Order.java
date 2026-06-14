@@ -4,16 +4,17 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
