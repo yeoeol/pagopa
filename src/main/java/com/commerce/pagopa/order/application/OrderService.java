@@ -2,6 +2,8 @@ package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cart.domain.repository.CartRepository;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.exception.CartNotFoundException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
@@ -10,17 +12,11 @@ import com.commerce.pagopa.order.application.dto.request.OrderSearch;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
-import com.commerce.pagopa.global.exception.*;
-
-import io.micrometer.core.annotation.Counted;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +24,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import lombok.RequiredArgsConstructor;
+
+import io.micrometer.core.annotation.Counted;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +75,7 @@ public class OrderService {
         // 2단계: 모든 상품 검증 (존재 여부 / 판매 여부 / 재고 부족 여부)
         Map<Long, Product> productMap = new HashMap<>();
 
+        // 존재 여부 검증 및 row 락 걸기
         for (Long productId : productIds) {
             Product product = productRepository.findByIdForUpdateOrThrow(productId);
             productMap.put(productId, product);
@@ -81,10 +85,12 @@ public class OrderService {
             Product product = productMap.get(productId);
             int totalQuantity = totalQuantityByProductId.get(productId);
 
+            // 상품 판매 여부 검증
             if (!product.isActive()) {
                 throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
             }
 
+            // 상품 재고 부족 여부 검증
             if (product.getStock() < totalQuantity) {
                 throw new BusinessException(
                         ErrorCode.PRODUCT_OUT_OF_STOCK,
@@ -117,8 +123,7 @@ public class OrderService {
         for (Long productId : productIds) {
             Product product = productMap.get(productId);
             int orderedQuantity = totalQuantityByProductId.get(productId);
-
-            product.changeStock(product.getStock() - orderedQuantity);
+            product.decreaseStock(orderedQuantity);
         }
 
         // 5단계: 주문 저장 및 응답 반환
@@ -185,21 +190,18 @@ public class OrderService {
         Order order = orderRepository.findByIdOrThrow(orderId);
 
         // 2단계: 취소 가능한 상태인지 확인
-        if (order.getStatus() != OrderStatus.ORDERED
-                && order.getStatus() != OrderStatus.PAID
-        ) {
+        if (!order.isCancellable()) {
             throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
 
         // 3단계: 주문 항목 수량만큼 재고 복구
         for (OrderProduct op : order.getOrderProducts()) {
             Product product = productRepository.findByIdOrThrow(op.getProductId());
-            product.changeStock(product.getStock() + op.getQuantity());
+            product.restoreStock(op.getQuantity());
         }
 
         // 4단계: 주문 상태를 CANCELLED로 변경 및 저장
-        order.changeStatus(OrderStatus.CANCELLED);
-        order.setCancelledAt(LocalDateTime.now());
+        order.cancel();
 
         return OrderResponseDto.from(order);
     }
