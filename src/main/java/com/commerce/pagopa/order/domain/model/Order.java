@@ -1,19 +1,22 @@
 package com.commerce.pagopa.order.domain.model;
 
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -50,7 +53,6 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 한 Order의 모든 SellerOrder는 동일 배송지로 발송된다.
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "delivery_id", nullable = false)
     private Delivery delivery;
@@ -81,25 +83,33 @@ public class Order extends BaseTimeEntity {
                 .build();
     }
 
-    public void changeStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public void addTotalPrice(BigDecimal totalPrice) {
-        this.totalAmount = this.totalAmount.add(totalPrice);
-    }
-
     public void addOrderProduct(OrderProduct orderProduct) {
         this.orderProducts.add(orderProduct);
         orderProduct.assignOrder(this);
         addTotalPrice(orderProduct.getTotalPrice());
     }
 
-    public void setCancelledAt(LocalDateTime now) {
-        this.cancelledAt = now;
+    private void addTotalPrice(BigDecimal totalPrice) {
+        this.totalAmount = this.totalAmount.add(totalPrice);
     }
 
     private static String generateOrderNumber() {
         return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    // == 주문 취소 로직 ==
+    public void cancel() {
+        validateCancelOrder();
+        this.status = OrderStatus.CANCELLED;
+        this.cancelledAt = LocalDateTime.now();
+    }
+
+    private void validateCancelOrder() {
+        if (this.status == OrderStatus.CANCELLED) {
+            throw new BusinessException(ErrorCode.ORDER_ALREADY_CANCELLED);
+        }
+        if (this.status != OrderStatus.ORDERED) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
     }
 }

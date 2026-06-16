@@ -1,13 +1,13 @@
 package com.commerce.pagopa.order.domain.repository;
 
+import com.commerce.pagopa.global.exception.OrderNotFoundException;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.global.exception.OrderNotFoundException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository {
@@ -24,11 +24,13 @@ public interface OrderRepository {
 
     Optional<Order> findByOrderNumber(String orderNumber);
 
+    Optional<Order> findByIdForUpdate(Long id);
+
     default Order findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(OrderNotFoundException::new);
     }
 
-    default Order getByOrderNumberOrThrow(String orderNumber) {
-        return findByOrderNumber(orderNumber).orElseThrow(OrderNotFoundException::new);
+    default Order findByIdForUpdateOrThrow(Long id) {
+        return findByIdForUpdate(id).orElseThrow(OrderNotFoundException::new);
     }
 }

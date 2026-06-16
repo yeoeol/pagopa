@@ -1,20 +1,21 @@
 package com.commerce.pagopa.product.domain.model;
 
 import com.commerce.pagopa.category.domain.model.Category;
-import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
-
+import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -112,11 +113,37 @@ public class Product extends BaseTimeEntity {
         this.status = ProductStatus.HIDDEN;
     }
 
-    public boolean isActive() {
-        return this.status == ProductStatus.ACTIVE;
+    public void decreaseStock(int quantity) {
+        validateOnSale();
+        validatePositiveQuantity(quantity);
+        validateEnoughStock(quantity);
+        this.stock -= quantity;
     }
 
-    public void changeStock(int stock) {
-        this.stock = stock;
+    public void restoreStock(int quantity) {
+        validatePositiveQuantity(quantity);
+        this.stock += quantity;
+    }
+
+    private void validatePositiveQuantity(int quantity) {
+        if (quantity <= 0) {
+            throw new BusinessException(ErrorCode.INVALID_QUANTITY);
+        }
+    }
+
+    private void validateOnSale() {
+        if (this.status != ProductStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+    }
+
+    private void validateEnoughStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new BusinessException(
+                    ErrorCode.PRODUCT_OUT_OF_STOCK,
+                    "재고가 부족합니다. productId=%d, 현재 재고=%d, 요청 수량=%d"
+                            .formatted(this.id, this.stock, quantity)
+            );
+        }
     }
 }
