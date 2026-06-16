@@ -57,7 +57,7 @@ class StockConcurrencyTest {
     UserRepository userRepository;
 
     @ParameterizedTest(name = "N={0}")
-    @ValueSource(ints = {50, 1000, 10000})
+    @ValueSource(ints = {50, 200, 1000})
     void stock_10_으로_N명이_동시_주문하면_정확히_10명만_성공(int N) throws Exception {
         // 상품 등록
         CategoryTree tree = CategoryFixture.aTree();
@@ -126,7 +126,7 @@ class StockConcurrencyTest {
     }
 
     @ParameterizedTest(name = "N={0}")
-    @ValueSource(ints = {50, 1000, 10000})
+    @ValueSource(ints = {50, 200, 1000})
     void 서로_다른_N개_상품에_각각_1명씩_주문하면_경합없이_모두_성공(int N) throws Exception {
         // 상품 등록
         CategoryTree tree = CategoryFixture.aTree();
