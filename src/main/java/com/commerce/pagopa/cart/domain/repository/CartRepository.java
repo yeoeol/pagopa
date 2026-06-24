@@ -1,15 +1,17 @@
 package com.commerce.pagopa.cart.domain.repository;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.global.exception.CartNotFoundException;
 
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import static com.commerce.pagopa.global.response.ErrorCode.CART_NOT_FOUND;
 
 public interface CartRepository {
     Cart save(Cart cart);
@@ -33,7 +35,7 @@ public interface CartRepository {
     List<Cart> findAllByIdInAndUserId(@Param("cartIds") List<Long> cartIds, @Param("userId") Long userId);
 
     default Cart findByIdWithFetchOrThrow(Long id) {
-        return findByIdWithFetch(id).orElseThrow(CartNotFoundException::new);
+        return findByIdWithFetch(id).orElseThrow(() -> new BusinessException(CART_NOT_FOUND));
     }
 
 }

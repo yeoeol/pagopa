@@ -2,7 +2,7 @@ package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cart.domain.repository.CartRepository;
-import com.commerce.pagopa.global.exception.CartNotFoundException;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
@@ -30,6 +30,8 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 import io.micrometer.core.annotation.Counted;
+
+import static com.commerce.pagopa.global.response.ErrorCode.CART_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -110,7 +112,7 @@ public class OrderService {
         // 장바구니 목록 조회
         List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
         if (carts.isEmpty()) {
-            throw new CartNotFoundException();
+            throw new BusinessException(CART_NOT_FOUND);
         }
 
         // order() 메서드에 보내기 위한 재료 만들기
