@@ -1,16 +1,17 @@
 package com.commerce.pagopa.cart.domain.model;
 
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.CartQuantityException;
-
 import jakarta.persistence.*;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static com.commerce.pagopa.global.response.ErrorCode.INVALID_CART_QUANTITY;
 
 @Entity
 @Getter
@@ -50,14 +51,14 @@ public class Cart extends BaseTimeEntity {
 
     public void addQuantity(int amount) {
         if (amount <= 0) {
-            throw new CartQuantityException();
+            throw new BusinessException(INVALID_CART_QUANTITY);
         }
         this.quantity += amount;
     }
 
     public void reduceQuantity() {
         if (this.quantity <= 0) {
-            throw new CartQuantityException();
+            throw new BusinessException(INVALID_CART_QUANTITY);
         }
         this.quantity -= 1;
     }

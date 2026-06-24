@@ -1,11 +1,13 @@
 package com.commerce.pagopa.global.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
@@ -30,7 +32,7 @@ public class ApiResponse<T> {
     }
 
     @Getter
-    @AllArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     static class ApiError {
 
         private final String code;

@@ -3,8 +3,7 @@ package com.commerce.pagopa.global.exception.handler;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.response.ErrorCode;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -20,6 +19,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -30,7 +32,10 @@ public class GlobalExceptionHandler {
     // 커스텀 예외 (BusinessException 하위 전체 처리)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
-        log.warn("[BusinessException] code={}, message={}", e.getErrorCode().getCode(), e.getMessage());
+        log.warn("[BusinessException] code={}, internalMessage={}",
+                e.getErrorCode().getCode(),
+                e.getMessage()
+        );
 
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
