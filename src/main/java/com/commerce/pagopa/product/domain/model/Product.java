@@ -141,7 +141,7 @@ public class Product extends BaseTimeEntity {
         if (this.stock < quantity) {
             throw new BusinessException(
                     ErrorCode.PRODUCT_OUT_OF_STOCK,
-                    "재고가 부족합니다. productId=%d, 현재 재고=%d, 요청 수량=%d"
+                    "productId=%d, 현재 재고=%d, 요청 수량=%d"
                             .formatted(this.id, this.stock, quantity)
             );
         }

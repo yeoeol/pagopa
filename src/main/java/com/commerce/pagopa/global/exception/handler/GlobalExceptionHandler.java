@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     // 커스텀 예외 (BusinessException 하위 전체 처리)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
-        log.warn("[BusinessException] code={}, message={}",
+        log.warn("[BusinessException] code={}, internalMessage={}",
                 e.getErrorCode().getCode(),
                 e.getMessage()
         );
