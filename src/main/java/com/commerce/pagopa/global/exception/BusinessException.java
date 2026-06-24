@@ -1,6 +1,7 @@
 package com.commerce.pagopa.global.exception;
 
 import com.commerce.pagopa.global.response.ErrorCode;
+
 import lombok.Getter;
 
 @Getter
@@ -13,8 +14,8 @@ public class BusinessException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
-    public BusinessException(ErrorCode errorCode, String message) {
-        super(message);
+    public BusinessException(ErrorCode errorCode, String internalMessage) {
+        super(internalMessage);
         this.errorCode = errorCode;
     }
 }

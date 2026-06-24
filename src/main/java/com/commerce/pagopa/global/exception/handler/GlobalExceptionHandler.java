@@ -32,12 +32,15 @@ public class GlobalExceptionHandler {
     // 커스텀 예외 (BusinessException 하위 전체 처리)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
-        log.warn("[BusinessException] code={}, message={}", e.getErrorCode().getCode(), e.getMessage());
+        log.warn("[BusinessException] code={}, message={}",
+                e.getErrorCode().getCode(),
+                e.getMessage()
+        );
 
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
-                .body(ApiResponse.error(errorCode, e.getMessage()));
+                .body(ApiResponse.error(errorCode));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
