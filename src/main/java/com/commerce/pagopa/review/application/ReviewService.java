@@ -1,14 +1,9 @@
 package com.commerce.pagopa.review.application;
 
-import com.commerce.pagopa.global.exception.ProductNotFoundException;
-import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.repository.OrderProductRepository;
-import com.commerce.pagopa.order.domain.repository.OrderRepository;
-import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
 import com.commerce.pagopa.review.application.dto.response.ProductReviewResponseDto;
@@ -16,13 +11,17 @@ import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
 import com.commerce.pagopa.review.domain.model.Review;
 import com.commerce.pagopa.review.domain.model.ReviewImage;
 import com.commerce.pagopa.review.domain.repository.ReviewRepository;
-
-import lombok.RequiredArgsConstructor;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
+
+import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -70,7 +69,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public List<ProductReviewResponseDto> findAllByProduct(Long productId) {
         if (!productRepository.existsById(productId)) {
-            throw new ProductNotFoundException();
+            throw new BusinessException(PRODUCT_NOT_FOUND);
         }
 
         return reviewRepository.findAllByProductIdWithUserAndReviewImages(productId).stream()

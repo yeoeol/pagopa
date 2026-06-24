@@ -1,6 +1,6 @@
 package com.commerce.pagopa.order.domain.repository;
 
-import com.commerce.pagopa.global.exception.OrderNotFoundException;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 
@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static com.commerce.pagopa.global.response.ErrorCode.ORDER_NOT_FOUND;
 
 public interface OrderRepository {
 
@@ -27,10 +29,10 @@ public interface OrderRepository {
     Optional<Order> findByIdForUpdate(Long id);
 
     default Order findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(OrderNotFoundException::new);
+        return findById(id).orElseThrow(() -> new BusinessException(ORDER_NOT_FOUND));
     }
 
     default Order findByIdForUpdateOrThrow(Long id) {
-        return findByIdForUpdate(id).orElseThrow(OrderNotFoundException::new);
+        return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(ORDER_NOT_FOUND));
     }
 }

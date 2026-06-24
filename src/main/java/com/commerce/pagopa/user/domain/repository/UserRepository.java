@@ -1,6 +1,6 @@
 package com.commerce.pagopa.user.domain.repository;
 
-import com.commerce.pagopa.global.exception.UserNotFoundException;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 
@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static com.commerce.pagopa.global.response.ErrorCode.USER_NOT_FOUND;
 
 public interface UserRepository {
 
@@ -23,6 +25,6 @@ public interface UserRepository {
     void bulkUnbanBefore(LocalDateTime now);
 
     default User findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(UserNotFoundException::new);
+        return findById(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 }

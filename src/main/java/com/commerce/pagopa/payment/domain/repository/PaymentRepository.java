@@ -1,10 +1,12 @@
 package com.commerce.pagopa.payment.domain.repository;
 
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.payment.domain.model.Payment;
-import com.commerce.pagopa.global.exception.PaymentNotFoundException;
 
 import java.util.Optional;
+
+import static com.commerce.pagopa.global.response.ErrorCode.PAYMENT_NOT_FOUND;
 
 public interface PaymentRepository {
 
@@ -28,14 +30,14 @@ public interface PaymentRepository {
     int releaseCancelLock(Long paymentId);
 
     default Payment getByOrderOrThrow(Order order) {
-        return findByOrder(order).orElseThrow(PaymentNotFoundException::new);
+        return findByOrder(order).orElseThrow(() -> new BusinessException(PAYMENT_NOT_FOUND));
     }
 
     default Payment getByIdOrThrow(Long paymentId) {
-        return findById(paymentId).orElseThrow(PaymentNotFoundException::new);
+        return findById(paymentId).orElseThrow(() -> new BusinessException(PAYMENT_NOT_FOUND));
     }
 
     default Payment getByOrderIdAndPaymentKeyOrThrow(Long orderId, String paymentKey) {
-        return findByOrder_IdAndPaymentKey(orderId, paymentKey).orElseThrow(PaymentNotFoundException::new);
+        return findByOrder_IdAndPaymentKey(orderId, paymentKey).orElseThrow(() -> new BusinessException(PAYMENT_NOT_FOUND));
     }
 }

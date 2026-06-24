@@ -1,10 +1,9 @@
 package com.commerce.pagopa.product.domain.repository;
 
-import com.commerce.pagopa.global.exception.ProductNotFoundException;
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
-import lombok.NonNull;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +11,10 @@ import org.springframework.data.domain.Pageable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import lombok.NonNull;
+
+import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 
 public interface ProductRepository {
 
@@ -44,10 +47,10 @@ public interface ProductRepository {
     Optional<Product> findByIdForUpdate(Long id);
 
     default Product findByIdForUpdateOrThrow(Long id) {
-        return findByIdForUpdate(id).orElseThrow(ProductNotFoundException::new);
+        return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 
     default Product findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(ProductNotFoundException::new);
+        return findById(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 }
