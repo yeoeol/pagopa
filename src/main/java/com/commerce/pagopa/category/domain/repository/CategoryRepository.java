@@ -1,10 +1,12 @@
 package com.commerce.pagopa.category.domain.repository;
 
 import com.commerce.pagopa.category.domain.model.Category;
-import com.commerce.pagopa.global.exception.CategoryNotFoundException;
+import com.commerce.pagopa.global.exception.BusinessException;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.commerce.pagopa.global.response.ErrorCode.CATEGORY_NOT_FOUND;
 
 public interface CategoryRepository {
 
@@ -17,6 +19,6 @@ public interface CategoryRepository {
     List<Category> findRootCategories();
 
     default Category findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(CategoryNotFoundException::new);
+        return findById(id).orElseThrow(() -> new BusinessException(CATEGORY_NOT_FOUND));
     }
 }
