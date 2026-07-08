@@ -5,7 +5,7 @@ import com.commerce.pagopa.auth.jwt.JwtAuthenticationFilter;
 import com.commerce.pagopa.auth.oauth.handler.OAuth2LoginFailureHandler;
 import com.commerce.pagopa.auth.oauth.handler.OAuth2LoginSuccessHandler;
 import com.commerce.pagopa.auth.oauth.service.CustomOAuth2UserService;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +23,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -55,6 +57,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+
+                        .requestMatchers("/api/v1/local-test/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
