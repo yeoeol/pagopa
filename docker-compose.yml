@@ -84,11 +84,11 @@ services:
       BASE_URL: http://host.docker.internal:8080
       K6_PROMETHEUS_RW_SERVER_URL: http://prometheus:9090/api/v1/write
       K6_PROMETHEUS_RW_TREND_STATS: "p(95),p(99),avg,max"
-    command: run -o experimental-prometheus-rw /scripts/test.js
+    command: run -o experimental-prometheus-rw /scripts/user-flow.js
     depends_on:
       - prometheus
     profiles:
-      - loadtest
+      - load-test
     networks:
       - monitoring
 
