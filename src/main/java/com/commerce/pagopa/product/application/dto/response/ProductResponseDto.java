@@ -1,6 +1,6 @@
 package com.commerce.pagopa.product.application.dto.response;
 
-import com.commerce.pagopa.category.application.dto.response.CategoryResponseDto;
+import com.commerce.pagopa.category.application.dto.response.CategoryChildrenResponseDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
@@ -15,7 +15,7 @@ public record ProductResponseDto(
         BigDecimal discountPrice,
         int stock,
         String status,
-        CategoryResponseDto category,
+        CategoryChildrenResponseDto category,
         UserResponseDto seller,
         List<ProductImageResponseDto> productImages
 ) {
@@ -28,7 +28,7 @@ public record ProductResponseDto(
                 product.getDiscountPrice(),
                 product.getStock(),
                 product.getStatus().getDescription(),
-                CategoryResponseDto.from(product.getCategory()),
+                CategoryChildrenResponseDto.from(product.getCategory()),
                 UserResponseDto.from(product.getSeller()),
                 product.getImages().stream()
                         .map(ProductImageResponseDto::from)
