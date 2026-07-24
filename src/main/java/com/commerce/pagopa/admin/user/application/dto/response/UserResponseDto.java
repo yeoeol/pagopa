@@ -4,7 +4,7 @@ import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record UserResponseDto(
         Long userId,
@@ -15,8 +15,8 @@ public record UserResponseDto(
         String providerId,
         String role,
         UserStatus userStatus,
-        LocalDateTime withdrawnAt,  // 탈퇴 일시
-        LocalDateTime banEndDate    // 정지 종료일
+        Instant withdrawnAt,  // 탈퇴 일시
+        Instant banEndDate    // 정지 종료일
 ) {
     public static UserResponseDto from(User user) {
         return new UserResponseDto(
@@ -29,7 +29,7 @@ public record UserResponseDto(
                 user.getRoleName(),
                 user.getUserStatus(),
                 user.getWithdrawnAt(),
-                user.getBanDate()
+                user.getBannedUntil()
         );
     }
 }

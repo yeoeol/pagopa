@@ -5,7 +5,7 @@ import com.commerce.pagopa.user.domain.model.User;
 public record UserResponseDto(
         Long userId,
         String email,
-        String nickname,
+        String name,
         String profileImage,
         String role
 ) {

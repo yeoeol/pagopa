@@ -68,8 +68,8 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private UserStatus userStatus;
 
-    @Column(name = "ban_date", nullable = true)
-    private Instant banDate;   // 정지일
+    @Column(name = "banned_until", nullable = true)
+    private Instant bannedUntil;   // 정지 종료일
 
     @Column(name = "withdrawn_at", nullable = true)
     private Instant withdrawnAt;  // 탈퇴 일시
@@ -112,13 +112,13 @@ public class User extends BaseTimeEntity {
     public void ban(long banSeconds) {
         validateActiveUserStatus();
         this.userStatus = UserStatus.BANNED;
-        this.banDate = getBanEndDate(banSeconds);
+        this.bannedUntil = getBanEndDate(banSeconds);
     }
 
     public void unban() {
         validateBannedUserStatus();
         this.userStatus = UserStatus.ACTIVE;
-        this.banDate = null;
+        this.bannedUntil = null;
     }
 
     public void withdraw() {
