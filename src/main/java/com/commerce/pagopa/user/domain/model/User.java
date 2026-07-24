@@ -6,42 +6,59 @@ import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
-
 import jakarta.persistence.*;
+
+import java.time.Instant;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "users")
+@Table(
+        name = "user",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_user_email",
+                        columnNames = "email"
+                ),
+                @UniqueConstraint(
+                        name = "uq_user_provider_provider_id",
+                        columnNames = {"provider", "provider_id"}
+                )
+        }
+)
 public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 255)
-    private String email;
-
-    @Column(nullable = false, unique = true, length = 255)
-    private String nickname;
-
-    @Column(length = 512)
-    private String profileImage;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "provider", length = 50, nullable = false)
     private Provider provider;
 
-    @Column(nullable = false)
+    @Column(name = "provider_id", length = 255, nullable = false)
     private String providerId;
+
+    @Column(name = "name", length = 50, nullable = false)
+    private String name;
+
+    @Column(name = "email", length = 100, nullable = false)
+    private String email;
+
+    @Column(name = "address", length = 255, nullable = true)
+    private String address;
+
+    @Column(name = "phone_number", length = 20, nullable = true)
+    private String phoneNumber;
+
+    @Column(length = 512, nullable = false)
+    private String profileImage;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -51,59 +68,63 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private UserStatus userStatus;
 
-    private LocalDateTime withdrawnAt;  // 탈퇴 일시
-    private LocalDateTime banEndDate;   // 정지 종료일
+    @Column(name = "ban_date", nullable = true)
+    private Instant banDate;   // 정지일
+
+    @Column(name = "withdrawn_at", nullable = true)
+    private Instant withdrawnAt;  // 탈퇴 일시
 
     @Builder
     public User(
-            String email, String nickname, String profileImage,
-            Provider provider, String providerId, Role role, UserStatus userStatus
+            Provider provider, String providerId,
+            String name, String email, String profileImage,
+            Role role, UserStatus userStatus
     ) {
-        this.email = email;
-        this.nickname = nickname;
-        this.profileImage = profileImage;
         this.provider = provider;
         this.providerId = providerId;
+        this.name = name;
+        this.email = email;
+        this.profileImage = profileImage;
         this.role = role;
         this.userStatus = userStatus;
     }
 
     public static User create(
-            String email, String nickname, String profileImage,
+            String email, String name, String profileImage,
             Provider provider, String providerId, Role role
     ) {
         return User.builder()
-                .email(email)
-                .nickname(nickname)
-                .profileImage(profileImage)
                 .provider(provider)
                 .providerId(providerId)
+                .name(name)
+                .email(email)
+                .profileImage(profileImage)
                 .role(role)
                 .userStatus(UserStatus.ACTIVE)
                 .build();
     }
 
-    public void updateProfile(String nickname, String profileImage) {
-        if (nickname != null && !nickname.isBlank()) this.nickname = nickname;
+    public void updateProfile(String name, String profileImage) {
+        if (name != null && !name.isBlank()) this.name = name;
         if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;
     }
 
     public void ban(long banSeconds) {
         validateActiveUserStatus();
         this.userStatus = UserStatus.BANNED;
-        this.banEndDate = getBanEndDate(banSeconds);
+        this.banDate = getBanEndDate(banSeconds);
     }
 
     public void unban() {
         validateBannedUserStatus();
         this.userStatus = UserStatus.ACTIVE;
-        this.banEndDate = null;
+        this.banDate = null;
     }
 
     public void withdraw() {
         validateActiveUserStatus();
         this.userStatus = UserStatus.WITHDRAWN;
-        this.withdrawnAt = LocalDateTime.now();
+        this.withdrawnAt = Instant.now();
     }
 
     public void updateSellerRole() {
@@ -127,7 +148,7 @@ public class User extends BaseTimeEntity {
         }
     }
 
-    private static LocalDateTime getBanEndDate(long banSeconds) {
-        return LocalDateTime.now().plusSeconds(banSeconds);
+    private static Instant getBanEndDate(long banSeconds) {
+        return Instant.now().plusSeconds(banSeconds);
     }
 }

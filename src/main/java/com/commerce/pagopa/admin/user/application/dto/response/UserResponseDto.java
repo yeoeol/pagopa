@@ -22,14 +22,14 @@ public record UserResponseDto(
         return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
-                user.getNickname(),
+                user.getName(),
                 user.getProfileImage(),
                 user.getProvider(),
                 user.getProviderId(),
                 user.getRoleName(),
                 user.getUserStatus(),
                 user.getWithdrawnAt(),
-                user.getBanEndDate()
+                user.getBanDate()
         );
     }
 }

@@ -22,8 +22,8 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
     @Query(value =
             "UPDATE User u " +
             "SET u.userStatus = 'ACTIVE', " +
-                "u.banEndDate = NULL " +
-            "WHERE u.banEndDate < :now " +
+                "u.banDate = NULL " +
+            "WHERE u.banDate < :now " +
                 "AND u.userStatus = 'BANNED'")
     void bulkUnbanBefore(@Param("now") LocalDateTime now);
 }
