@@ -81,6 +81,7 @@ public class Payment extends BaseTimeEntity {
         return Payment.builder()
                 .paymentMethod(paymentMethod)
                 .amount(order.getTotalAmount())
+                .status(PaymentStatus.READY)
                 .order(order)
                 .build();
     }

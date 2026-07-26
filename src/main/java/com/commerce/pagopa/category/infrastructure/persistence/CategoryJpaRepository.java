@@ -34,7 +34,7 @@ public interface CategoryJpaRepository extends JpaRepository<Category, Long>, Ca
 			JOIN descendants d ON c.parent_id = d.category_id
 		)
 		SELECT d.category_id, d.parent_id, d.name,
-		       d.created_at, d.updated_at,
+		       d.created_at, d.updated_at
 		FROM descendants d
 		ORDER BY d.depth, d.category_id
 	""", nativeQuery = true)
