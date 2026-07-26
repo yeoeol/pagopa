@@ -1,6 +1,6 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.order.domain.model.Address;
+import com.commerce.pagopa.delivery.domain.model.Address;
 
 public final class AddressFixture {
 

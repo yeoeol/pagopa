@@ -1,4 +1,4 @@
-package com.commerce.pagopa.order.application.dto.request;
+package com.commerce.pagopa.delivery.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

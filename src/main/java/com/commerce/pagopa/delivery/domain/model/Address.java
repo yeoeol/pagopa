@@ -1,6 +1,7 @@
-package com.commerce.pagopa.order.domain.model;
+package com.commerce.pagopa.delivery.domain.model;
 
 import jakarta.persistence.Embeddable;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

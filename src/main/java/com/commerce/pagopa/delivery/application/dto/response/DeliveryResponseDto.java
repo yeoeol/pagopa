@@ -1,7 +1,7 @@
-package com.commerce.pagopa.order.application.dto.response;
+package com.commerce.pagopa.delivery.application.dto.response;
 
-import com.commerce.pagopa.order.domain.model.Address;
-import com.commerce.pagopa.order.domain.model.Delivery;
+import com.commerce.pagopa.delivery.domain.model.Address;
+import com.commerce.pagopa.delivery.domain.model.Delivery;
 
 public record DeliveryResponseDto(
         Long deliveryId,
@@ -21,7 +21,7 @@ public record DeliveryResponseDto(
                 address != null ? address.getZipcode() : null,
                 address != null ? address.getAddress() : null,
                 address != null ? address.getDetailAddress() : null,
-                delivery.getDeliveryRequestMemo()
+                delivery.getRequestMemo()
         );
     }
 }

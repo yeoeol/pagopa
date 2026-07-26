@@ -1,9 +1,9 @@
 package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
+import com.commerce.pagopa.delivery.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
