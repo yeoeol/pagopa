@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<User, Long>, UserRepository {
@@ -22,8 +22,9 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
     @Query(value =
             "UPDATE User u " +
             "SET u.userStatus = 'ACTIVE', " +
-                "u.banEndDate = NULL " +
-            "WHERE u.banEndDate < :now " +
+                "u.bannedUntil = NULL " +
+            "WHERE u.withdrawnAt IS NULL " +
+                "AND u.bannedUntil >= :now " +
                 "AND u.userStatus = 'BANNED'")
-    void bulkUnbanBefore(@Param("now") LocalDateTime now);
+    void bulkUnban(@Param("now") Instant now);
 }

@@ -6,11 +6,11 @@ import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class UserService {
             imageService.delete(user.getProfileImage());
         }
 
-        user.updateProfile(requestDto.nickname(), requestDto.profileImage());
+        user.updateProfile(requestDto.name(), requestDto.profileImage());
         return UserResponseDto.from(user);
     }
 }

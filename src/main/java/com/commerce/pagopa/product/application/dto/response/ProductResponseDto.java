@@ -1,21 +1,17 @@
 package com.commerce.pagopa.product.application.dto.response;
 
-import com.commerce.pagopa.category.application.dto.response.CategoryResponseDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public record ProductResponseDto(
         Long productId,
         String productName,
         String description,
-        BigDecimal price,
-        BigDecimal discountPrice,
-        int stock,
+        Integer price,
+        int stockQuantity,
         String status,
-        CategoryResponseDto category,
         UserResponseDto seller,
         List<ProductImageResponseDto> productImages
 ) {
@@ -25,10 +21,8 @@ public record ProductResponseDto(
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
-                product.getDiscountPrice(),
-                product.getStock(),
+                product.getStockQuantity(),
                 product.getStatus().getDescription(),
-                CategoryResponseDto.from(product.getCategory()),
                 UserResponseDto.from(product.getSeller()),
                 product.getImages().stream()
                         .map(ProductImageResponseDto::from)

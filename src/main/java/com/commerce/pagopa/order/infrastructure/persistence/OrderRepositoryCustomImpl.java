@@ -7,17 +7,18 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
 
 import static com.commerce.pagopa.order.domain.model.QOrder.order;
 
@@ -27,7 +28,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Order> findAllByPeriod(Long userId, OrderStatus status, LocalDateTime start, LocalDateTime end, Pageable pageable) {
+    public Page<Order> findAllByPeriod(Long userId, OrderStatus status, Instant start, Instant end, Pageable pageable) {
         List<Order> orders = queryFactory
                 .selectFrom(order).distinct()
                 .where(userIdEq(userId),
@@ -53,7 +54,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return userId == null ? null : order.user.id.eq(userId);
     }
 
-    private BooleanExpression periodGoeAndLt(LocalDateTime start, LocalDateTime end) {
+    private BooleanExpression periodGoeAndLt(Instant start, Instant end) {
         return (start == null || end == null) ? null : order.createdAt.goe(start).and(order.createdAt.lt(end));
     }
 

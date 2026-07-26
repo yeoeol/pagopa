@@ -1,7 +1,7 @@
 package com.commerce.pagopa.global.seeder;
 
-import lombok.RequiredArgsConstructor;
 import net.datafaker.Faker;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 
 @Profile("local")
 @Order(3)
@@ -75,11 +77,11 @@ class ProductSeeder implements Seeder {
                 discountVal = BigDecimal.valueOf(rounded);
             }
 
-            // 재고 - 5% 품절(stock=0), 나머지 1~500
+            // 재고 - 5% 품절(stockQuantity=0), 나머지 1~500
             boolean soldOut = i % 20 == 0;
             int stock = soldOut ? 0 : faker.number().numberBetween(1, 500);
 
-            // 상태 - stock=0이면 SOLDOUT 고정, 그 외 ACTIVE/INACTIVE/HIDDEN 분배
+            // 상태 - stockQuantity=0이면 SOLDOUT 고정, 그 외 ACTIVE/INACTIVE/HIDDEN 분배
             String status;
             if (soldOut) {
                 status = "SOLDOUT";

@@ -5,12 +5,12 @@ import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderSearch;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.order.domain.model.OrderProduct;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
+import com.commerce.pagopa.orderitem.application.dto.request.OrderItemRequestDto;
+import com.commerce.pagopa.orderitem.domain.model.OrderItem;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.user.domain.model.User;
@@ -21,7 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +51,7 @@ public class OrderService {
         // 동일 상품 수량 합산
         Map<Long, Integer> totalQuantityByProductId = new HashMap<>();
 
-        for (OrderProductRequestDto orderProduct : requestDto.products()) {
+        for (OrderItemRequestDto orderProduct : requestDto.products()) {
             totalQuantityByProductId.merge(
                     orderProduct.productId(),
                     orderProduct.quantity(),
@@ -76,21 +76,19 @@ public class OrderService {
 
         // OrderProduct 목록 생성 및 총액 계산
         User user = userRepository.findByIdOrThrow(userId);
-        Order order = Order.init(
-                user,
-                requestDto.delivery().toDelivery()
-        );
+        Order order = Order.init(user);
 
-        for (OrderProductRequestDto op : requestDto.products()) {
+        for (OrderItemRequestDto op : requestDto.products()) {
             Product product = productMap.get(op.productId());
 
-            OrderProduct orderProduct = OrderProduct.create(
-                    product.getId(),
+            OrderItem orderItem = OrderItem.create(
                     product.getName(),
+                    product.getPrice(),
                     op.quantity(),
-                    product.getPrice()
+                    order,
+                    product
             );
-            order.addOrderProduct(orderProduct);
+            order.addOrderItem(orderItem);
         }
 
         // 재고 차감
@@ -116,18 +114,17 @@ public class OrderService {
         }
 
         // order() 메서드에 보내기 위한 재료 만들기
-        List<OrderProductRequestDto> orderProductRequestDtos = new ArrayList<>();
+        List<OrderItemRequestDto> orderItemRequestDtos = new ArrayList<>();
         for (Cart cart : carts) {
-            OrderProductRequestDto dto = new OrderProductRequestDto(
+            OrderItemRequestDto dto = new OrderItemRequestDto(
                     cart.getProduct().getId(),
                     cart.getQuantity()
             );
-            orderProductRequestDtos.add(dto);
+            orderItemRequestDtos.add(dto);
         }
 
         OrderCreateRequestDto orderCreateRequestDto = new OrderCreateRequestDto(
-                requestDto.delivery(),
-                orderProductRequestDtos
+                requestDto.delivery(), orderItemRequestDtos
         );
 
         OrderResponseDto response = order(userId, orderCreateRequestDto);
@@ -149,8 +146,8 @@ public class OrderService {
         order.cancel();
 
         // 데드락 방지
-        List<Long> productIds = order.getOrderProducts().stream()
-                .map(OrderProduct::getProductId)
+        List<Long> productIds = order.getOrderItems().stream()
+                .map(orderItem -> orderItem.getProduct().getId())
                 .distinct()
                 .sorted()
                 .toList();
@@ -163,9 +160,9 @@ public class OrderService {
         }
 
         // 주문 항목 수량만큼 재고 복구
-        for (OrderProduct op : order.getOrderProducts()) {
-            Product product = productMap.get(op.getProductId());
-            product.restoreStock(op.getQuantity());
+        for (OrderItem op : order.getOrderItems()) {
+            Product product = productMap.get(op.getProduct().getId());
+            product.restoreStock(op.getOrderQuantity());
         }
 
         return OrderResponseDto.from(order);
@@ -180,7 +177,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
         OrderSearch search = orderSearch == null ? new OrderSearch(null, null) : orderSearch;
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         Page<Order> pageOrder = orderRepository.findAllByPeriod(
                 userId,

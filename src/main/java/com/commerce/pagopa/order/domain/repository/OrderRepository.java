@@ -7,7 +7,7 @@ import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import static com.commerce.pagopa.global.response.ErrorCode.ORDER_NOT_FOUND;
@@ -21,7 +21,7 @@ public interface OrderRepository {
     Page<Order> findAll(Pageable pageable);
 
     Page<Order> findAllByPeriod(
-            Long userId, OrderStatus status, LocalDateTime start, LocalDateTime end, Pageable pageable
+            Long userId, OrderStatus status, Instant start, Instant end, Pageable pageable
     );
 
     Optional<Order> findByOrderNumber(String orderNumber);

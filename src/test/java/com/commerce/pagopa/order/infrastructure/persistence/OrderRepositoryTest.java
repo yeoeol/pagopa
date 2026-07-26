@@ -10,6 +10,7 @@ import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,8 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TestcontainersConfig.class)
 class OrderRepositoryTest {
 
-    private static final LocalDateTime START = LocalDateTime.of(2024, 1, 1, 0, 0);
-    private static final LocalDateTime END = LocalDateTime.of(2025, 1, 1, 0, 0);
+    private static final Instant START = Instant.parse("2024-01-01T00:00:00.00Z");
+    private static final Instant END = Instant.parse("2025-01-01T00:00:00.00Z");
 
     @Autowired
     OrderRepository orderRepository;
@@ -49,9 +51,9 @@ class OrderRepositoryTest {
     void findAllByPeriod_includesStartBoundaryAndExcludesEndBoundary() {
         // given: 경계 규칙 [start, end) 검증용 데이터
         Order atStart = persistOrder(user, START, OrderStatus.ORDERED);                                  // 포함 (>= start)
-        Order inMiddle = persistOrder(user, LocalDateTime.of(2024, 6, 15, 10, 0), OrderStatus.ORDERED);  // 포함
-        Order lastInstant = persistOrder(user, LocalDateTime.of(2024, 12, 31, 23, 59, 59), OrderStatus.ORDERED); // 포함
-        persistOrder(user, LocalDateTime.of(2023, 12, 31, 23, 59, 59), OrderStatus.ORDERED);             // 제외 (< start)
+        Order inMiddle = persistOrder(user, Instant.parse("2024-06-15T15:10:00.00Z"), OrderStatus.ORDERED);  // 포함
+        Order lastInstant = persistOrder(user, Instant.parse("2024-12-31T23:59:59.00Z"), OrderStatus.ORDERED); // 포함
+        persistOrder(user, Instant.parse("2023-12-31T23:59:59.00Z"), OrderStatus.ORDERED);             // 제외 (< start)
         persistOrder(user, END, OrderStatus.ORDERED);                                                    // 제외 (== end)
         flushAndClear();
 
@@ -122,7 +124,7 @@ class OrderRepositoryTest {
         assertThat(firstPage.getTotalPages()).isEqualTo(2);
     }
 
-    private Order persistOrder(User buyer, LocalDateTime createdAt, OrderStatus status) {
+    private Order persistOrder(User buyer, Instant createdAt, OrderStatus status) {
         Order order = orderRepository.save(OrderFixture.anOrder(buyer));
         // createdAt은 @CreatedDate라 영속 시 now로 채워지므로 bulk update로 backdate, status도 함께 보정
         em.createQuery("update Order o set o.createdAt = :createdAt, o.status = :status where o.id = :id")

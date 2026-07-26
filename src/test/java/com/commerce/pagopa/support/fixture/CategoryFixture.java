@@ -14,8 +14,8 @@ public final class CategoryFixture {
     // root → mid → leaf 3-level tree
     public static CategoryTree aTree() {
         Category root = Category.createRoot("root");
-        Category mid = root.createChild("mid");
-        Category leaf = mid.createChild("leaf");
+        Category mid = root.addChild("mid");
+        Category leaf = mid.addChild("leaf");
         return new CategoryTree(root, leaf);
     }
 

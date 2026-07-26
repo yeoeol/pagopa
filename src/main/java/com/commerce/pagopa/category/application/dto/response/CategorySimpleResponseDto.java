@@ -4,14 +4,14 @@ import com.commerce.pagopa.category.domain.model.Category;
 
 public record CategorySimpleResponseDto(
         Long categoryId,
-        String name,
-        int depth
+        Long parentId,
+        String name
 ) {
     public static CategorySimpleResponseDto from(Category category) {
         return new CategorySimpleResponseDto(
                 category.getId(),
-                category.getName(),
-                category.getDepth()
+                category.getParent().getId(),
+                category.getName()
         );
     }
 }

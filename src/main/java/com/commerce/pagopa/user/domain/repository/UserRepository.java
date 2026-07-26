@@ -7,7 +7,7 @@ import com.commerce.pagopa.user.domain.model.enums.Provider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import static com.commerce.pagopa.global.response.ErrorCode.USER_NOT_FOUND;
@@ -22,7 +22,7 @@ public interface UserRepository {
 
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 
-    void bulkUnbanBefore(LocalDateTime now);
+    void bulkUnban(Instant now);
 
     default User findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));

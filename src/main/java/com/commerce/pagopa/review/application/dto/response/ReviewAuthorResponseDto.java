@@ -10,7 +10,7 @@ public record ReviewAuthorResponseDto(
     public static ReviewAuthorResponseDto from(User user) {
         return new ReviewAuthorResponseDto(
                 user.getId(),
-                user.getNickname(),
+                user.getName(),
                 user.getProfileImage()
         );
     }
