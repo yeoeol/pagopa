@@ -3,19 +3,19 @@ package com.commerce.pagopa.seller.product.application;
 import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
 import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.seller.product.application.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.ProductImage;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.seller.product.application.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -43,17 +43,11 @@ public class SellerProductService {
 
         Category category = categoryRepository.findByIdOrThrow(requestDto.categoryId());
 
-        // 소분류에만 상품 등록이 가능
-        if (!category.isLeaf()) {
-            throw new BusinessException(ErrorCode.INVALID_CATEGORY_LEVEL);
-        }
-
         Product product = Product.create(
                 requestDto.name(),
                 requestDto.description(),
                 requestDto.price(),
-                requestDto.price(),
-                requestDto.stock(),
+                requestDto.stockQuantity(),
                 category,
                 seller
         );

@@ -5,11 +5,10 @@ import jakarta.validation.constraints.Pattern;
 
 public record DeliveryRequestDto(
         @NotBlank(message = "{validation.notBlank}")
-        String recipientName,
+        String trackingNo,
 
         @NotBlank(message = "{validation.notBlank}")
-        @Pattern(regexp = "^[0-9]{9,15}$")
-        String recipientPhone,
+        String requestMemo,
 
         @NotBlank(message = "{validation.notBlank}")
         @Pattern(regexp = "^[0-9]{5,6}$")

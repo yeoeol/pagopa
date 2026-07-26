@@ -5,23 +5,23 @@ import com.commerce.pagopa.delivery.domain.model.Delivery;
 
 public record DeliveryResponseDto(
         Long deliveryId,
-        String recipientName,
-        String recipientPhone,
+        String status,
+        String trackingNo,
+        String requestMemo,
         String zipcode,
         String address,
-        String detailAddress,
-        String deliveryRequestMemo
+        String detailAddress
 ) {
     public static DeliveryResponseDto from(Delivery delivery) {
         Address address = delivery.getAddress();
         return new DeliveryResponseDto(
                 delivery.getId(),
-                delivery.getRecipientName(),
-                delivery.getRecipientPhone(),
+                delivery.getStatus().name(),
+                delivery.getTrackingNo(),
+                delivery.getRequestMemo(),
                 address != null ? address.getZipcode() : null,
                 address != null ? address.getAddress() : null,
-                address != null ? address.getDetailAddress() : null,
-                delivery.getRequestMemo()
+                address != null ? address.getDetailAddress() : null
         );
     }
 }

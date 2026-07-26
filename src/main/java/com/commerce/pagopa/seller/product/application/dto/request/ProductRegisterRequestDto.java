@@ -2,7 +2,6 @@ package com.commerce.pagopa.seller.product.application.dto.request;
 
 import jakarta.validation.constraints.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public record ProductRegisterRequestDto(
@@ -14,11 +13,11 @@ public record ProductRegisterRequestDto(
 
         @NotNull(message = "{validation.notNull}")
         @DecimalMin(value = "0.0", inclusive = false, message = "{validation.min}")
-        BigDecimal price,
+        Integer price,
 
         @NotNull(message = "{validation.notNull}")
         @Min(value = 0, message = "{validation.min}")
-        Integer stock,
+        Integer stockQuantity,
 
         @NotNull(message = "{validation.notNull}")
         Long categoryId,

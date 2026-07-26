@@ -91,7 +91,7 @@ public class Product extends BaseTimeEntity {
             String name,
             String description,
             Integer price,
-            int stockQuantity,
+            Integer stockQuantity,
             Category category,
             User seller
     ) {

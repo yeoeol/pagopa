@@ -53,7 +53,7 @@ public class Review extends BaseTimeEntity {
                 .rating(rating)
                 .content(content)
                 .user(user)
-                .orderProduct(orderItem)
+                .orderItem(orderItem)
                 .build();
     }
 
