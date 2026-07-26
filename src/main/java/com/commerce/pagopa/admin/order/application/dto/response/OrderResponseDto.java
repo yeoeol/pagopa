@@ -2,9 +2,9 @@ package com.commerce.pagopa.admin.order.application.dto.response;
 
 import com.commerce.pagopa.admin.user.application.dto.response.UserResponseDto;
 import com.commerce.pagopa.order.application.dto.response.DeliveryResponseDto;
-import com.commerce.pagopa.order.application.dto.response.OrderProductResponseDto;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
+import com.commerce.pagopa.orderitem.application.dto.response.OrderItemResponseDto;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,7 +17,7 @@ public record OrderResponseDto(
         OrderStatus status,
         UserResponseDto user,
         DeliveryResponseDto delivery,
-        List<OrderProductResponseDto> orderProducts
+        List<OrderItemResponseDto> orderProducts
 ) {
     public static OrderResponseDto from(Order order) {
         return new OrderResponseDto(
@@ -28,8 +28,8 @@ public record OrderResponseDto(
                 order.getStatus(),
                 UserResponseDto.from(order.getUser()),
                 DeliveryResponseDto.from(order.getDelivery()),
-                order.getOrderProducts().stream()
-                        .map(OrderProductResponseDto::from)
+                order.getOrderItems().stream()
+                        .map(OrderItemResponseDto::from)
                         .toList()
         );
     }

@@ -1,5 +1,6 @@
 package com.commerce.pagopa.order.application.dto.request;
 
+import com.commerce.pagopa.orderitem.application.dto.request.OrderItemRequestDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,6 @@ public record OrderCreateRequestDto(
         DeliveryRequestDto delivery,
 
         @NotEmpty(message = "{validation.notEmpty}")
-        List<@Valid OrderProductRequestDto> products
+        List<@Valid OrderItemRequestDto> products
 ) {
 }

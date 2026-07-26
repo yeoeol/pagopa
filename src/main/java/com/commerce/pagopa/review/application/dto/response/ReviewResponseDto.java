@@ -1,8 +1,8 @@
 package com.commerce.pagopa.review.application.dto.response;
 
-import com.commerce.pagopa.order.application.dto.response.OrderProductResponseDto;
-import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
+import com.commerce.pagopa.orderitem.application.dto.response.OrderItemResponseDto;
 import com.commerce.pagopa.review.domain.model.Review;
+import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public record ReviewResponseDto(
         int rating,
         String content,
         UserResponseDto user,
-        OrderProductResponseDto orderProduct,
+        OrderItemResponseDto orderProduct,
         List<ReviewImageResponseDto> images
 ) {
     public static ReviewResponseDto from(Review review) {
@@ -20,7 +20,7 @@ public record ReviewResponseDto(
                 review.getRating(),
                 review.getContent(),
                 UserResponseDto.from(review.getUser()),
-                OrderProductResponseDto.from(review.getOrderProduct()),
+                OrderItemResponseDto.from(review.getOrderItem()),
                 review.getImages().stream()
                         .map(ReviewImageResponseDto::from)
                         .toList()

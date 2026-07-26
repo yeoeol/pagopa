@@ -1,18 +1,17 @@
 package com.commerce.pagopa.review.domain.model;
 
-import com.commerce.pagopa.order.domain.model.OrderProduct;
-import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
-
+import com.commerce.pagopa.orderitem.domain.model.OrderItem;
+import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -36,25 +35,25 @@ public class Review extends BaseTimeEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_product_id", nullable = false)
-    private OrderProduct orderProduct;
+    private OrderItem orderItem;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Review(int rating, String content, User user, OrderProduct orderProduct) {
+    private Review(int rating, String content, User user, OrderItem orderItem) {
         this.rating = rating;
         this.content = content;
         this.user = user;
-        this.orderProduct = orderProduct;
+        this.orderItem = orderItem;
     }
 
-    public static Review create(int rating, String content, User user, OrderProduct orderProduct) {
+    public static Review create(int rating, String content, User user, OrderItem orderItem) {
         return Review.builder()
                 .rating(rating)
                 .content(content)
                 .user(user)
-                .orderProduct(orderProduct)
+                .orderProduct(orderItem)
                 .build();
     }
 

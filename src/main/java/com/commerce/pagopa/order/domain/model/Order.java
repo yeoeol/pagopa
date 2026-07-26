@@ -4,6 +4,7 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
+import com.commerce.pagopa.orderitem.domain.model.OrderItem;
 import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
 
@@ -63,7 +64,7 @@ public class Order extends BaseTimeEntity {
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<OrderProduct> orderProducts = new ArrayList<>();
+    private final List<OrderItem> orderItems = new ArrayList<>();
 
 
     @Builder(access = AccessLevel.PRIVATE)
@@ -91,10 +92,10 @@ public class Order extends BaseTimeEntity {
                 .build();
     }
 
-    public void addOrderProduct(OrderProduct orderProduct) {
-        this.orderProducts.add(orderProduct);
-        orderProduct.assignOrder(this);
-        addTotalPrice(orderProduct.getTotalPrice());
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+        orderItem.assignOrder(this);
+        addTotalPrice(orderItem.getTotalPrice());
     }
 
     private void addTotalPrice(Integer totalPrice) {

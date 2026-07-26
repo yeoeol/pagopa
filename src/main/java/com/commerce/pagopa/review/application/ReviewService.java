@@ -1,8 +1,8 @@
 package com.commerce.pagopa.review.application;
 
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.order.domain.model.OrderProduct;
-import com.commerce.pagopa.order.domain.repository.OrderProductRepository;
+import com.commerce.pagopa.orderitem.domain.model.OrderItem;
+import com.commerce.pagopa.orderitem.domain.repository.OrderItemRepository;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
@@ -30,14 +30,14 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final OrderProductRepository orderProductRepository;
+    private final OrderItemRepository orderItemRepository;
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
         User user = userRepository.findByIdOrThrow(userId);
-        OrderProduct orderProduct = orderProductRepository.findByIdOrThrow(requestDto.orderProductId());
+        OrderItem orderItem = orderItemRepository.findByIdOrThrow(requestDto.orderProductId());
 
-        Review review = Review.create(requestDto.rating(), requestDto.content(), user, orderProduct);
+        Review review = Review.create(requestDto.rating(), requestDto.content(), user, orderItem);
 
         for (int i = 0; i < requestDto.imageUrls().size(); i++) {
             ReviewImage reviewImage = ReviewImage.create(requestDto.imageUrls().get(i), i + 1);

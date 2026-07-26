@@ -5,9 +5,9 @@ import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.request.OrderProductRequestDto;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
+import com.commerce.pagopa.orderitem.application.dto.request.OrderItemRequestDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import com.commerce.pagopa.support.fixture.CategoryFixture;
@@ -93,7 +93,7 @@ class StockConcurrencyTest {
                                             "101동",
                                             "메모"
                                     ),
-                                    List.of(new OrderProductRequestDto(product.getId(), 1))
+                                    List.of(new OrderItemRequestDto(product.getId(), 1))
                             )
                     );
                     success.incrementAndGet();
@@ -167,7 +167,7 @@ class StockConcurrencyTest {
                                             "101동",
                                             "메모"
                                     ),
-                                    List.of(new OrderProductRequestDto(productId, 1))
+                                    List.of(new OrderItemRequestDto(productId, 1))
                             )
                     );
                     success.incrementAndGet();
@@ -216,9 +216,9 @@ class StockConcurrencyTest {
                 new OrderCreateRequestDto(
                         new DeliveryRequestDto("test", "01012345678", "01010", "address", "101", "memo"),
                         List.of(
-                                new OrderProductRequestDto(product1.getId(), 1),
-                                new OrderProductRequestDto(product2.getId(), 2),
-                                new OrderProductRequestDto(product3.getId(), 3)
+                                new OrderItemRequestDto(product1.getId(), 1),
+                                new OrderItemRequestDto(product2.getId(), 2),
+                                new OrderItemRequestDto(product3.getId(), 3)
                         )
                 )
         );
@@ -301,7 +301,7 @@ class StockConcurrencyTest {
                                     "101",
                                     "memo"
                             ),
-                            List.of(new OrderProductRequestDto(product.getId(), 1))
+                            List.of(new OrderItemRequestDto(product.getId(), 1))
                     )
             );
             orderIds.add(created.orderId());

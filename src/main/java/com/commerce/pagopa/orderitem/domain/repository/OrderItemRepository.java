@@ -1,17 +1,17 @@
-package com.commerce.pagopa.order.domain.repository;
+package com.commerce.pagopa.orderitem.domain.repository;
 
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.order.domain.model.OrderProduct;
+import com.commerce.pagopa.orderitem.domain.model.OrderItem;
 
 import java.util.Optional;
 
 import static com.commerce.pagopa.global.response.ErrorCode.ORDER_PRODUCT_NOT_FOUND;
 
-public interface OrderProductRepository {
+public interface OrderItemRepository {
 
-    Optional<OrderProduct> findById(Long id);
+    Optional<OrderItem> findById(Long id);
 
-    default OrderProduct findByIdOrThrow(Long id) {
+    default OrderItem findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(() -> new BusinessException(ORDER_PRODUCT_NOT_FOUND));
     }
 }
