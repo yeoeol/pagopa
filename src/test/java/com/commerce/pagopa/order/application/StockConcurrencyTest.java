@@ -114,7 +114,7 @@ class StockConcurrencyTest {
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.close();
 
-        int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
+        int finalStock = productRepository.findByIdOrThrow(product.getId()).getStockQuantity();
         log.info("[contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}, finalStock={}",
                 N, finished, elapsedMs, success.get(), soldOut.get(), other.get(), finalStock);
         errorCounts.forEach((k, v) -> log.warn("  [other] {} x{}", k, v));
@@ -134,7 +134,7 @@ class StockConcurrencyTest {
 
         User seller = userRepository.save(UserFixture.aSeller("no-contention-" + N));
 
-        // N개 상품 미리 생성, 각 stock=1 → 동시 주문 시 row 경합 0
+        // N개 상품 미리 생성, 각 stockQuantity=1 → 동시 주문 시 row 경합 0
         List<Product> products = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
             products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10)));
@@ -259,9 +259,9 @@ class StockConcurrencyTest {
         pool.close();
 
         OrderResponseDto response = orderService.find(orderId);
-        int finalStock1 = productRepository.findByIdOrThrow(product1.getId()).getStock();
-        int finalStock2 = productRepository.findByIdOrThrow(product2.getId()).getStock();
-        int finalStock3 = productRepository.findByIdOrThrow(product3.getId()).getStock();
+        int finalStock1 = productRepository.findByIdOrThrow(product1.getId()).getStockQuantity();
+        int finalStock2 = productRepository.findByIdOrThrow(product2.getId()).getStockQuantity();
+        int finalStock3 = productRepository.findByIdOrThrow(product3.getId()).getStockQuantity();
 
         log.info("[same-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} orderStatus={}",
                 N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), response.status());
@@ -308,7 +308,7 @@ class StockConcurrencyTest {
         }
 
         // 주문 성공 검증
-        assertThat(productRepository.findByIdOrThrow(product.getId()).getStock()).isZero();
+        assertThat(productRepository.findByIdOrThrow(product.getId()).getStockQuantity()).isZero();
 
         // 스레드 풀 생성
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -344,7 +344,7 @@ class StockConcurrencyTest {
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.close();
 
-        int finalStock = productRepository.findByIdOrThrow(product.getId()).getStock();
+        int finalStock = productRepository.findByIdOrThrow(product.getId()).getStockQuantity();
 
         log.info("[different-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} finalStock={}",
                 N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), finalStock);

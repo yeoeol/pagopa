@@ -8,7 +8,6 @@ import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,39 +19,49 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "products")
+@Table(
+        name = "product",
+        indexes = {
+                @Index(name = "idx_product_name", columnList = "name")
+        }
+)
 public class Product extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
+    @Column(name = "product_id", nullable = false)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", length = 255, nullable = true)
     private String description;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    @Column(name = "price", nullable = false)
+    private Integer price;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal discountPrice;
-
-    @Column(nullable = false)
-    private int stock;
+    @Column(name = "stock_quantity", nullable = false)
+    private int stockQuantity = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ProductStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(
+            name = "category_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_product_category")
+    )
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_product_seller")
+    )
     private User seller;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -61,31 +70,36 @@ public class Product extends BaseTimeEntity {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Product(
-            String name, String description, BigDecimal price,
-            BigDecimal discountPrice, int stock,
-            ProductStatus status, Category category, User seller
+            String name,
+            String description,
+            Integer price,
+            int stockQuantity,
+            ProductStatus status,
+            Category category,
+            User seller
     ) {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.discountPrice = discountPrice;
-        this.stock = stock;
+        this.stockQuantity = stockQuantity;
         this.status = status;
         this.category = category;
         this.seller = seller;
     }
 
     public static Product create(
-            String name, String description, BigDecimal price,
-            BigDecimal discountPrice, int stock,
-            Category category, User seller
+            String name,
+            String description,
+            Integer price,
+            int stockQuantity,
+            Category category,
+            User seller
     ) {
         return Product.builder()
                 .name(name)
                 .description(description)
                 .price(price)
-                .discountPrice(discountPrice)
-                .stock(stock)
+                .stockQuantity(stockQuantity)
                 .status(ProductStatus.ACTIVE)
                 .category(category)
                 .seller(seller)
@@ -117,12 +131,12 @@ public class Product extends BaseTimeEntity {
         validateOnSale();
         validatePositiveQuantity(quantity);
         validateEnoughStock(quantity);
-        this.stock -= quantity;
+        this.stockQuantity -= quantity;
     }
 
     public void restoreStock(int quantity) {
         validatePositiveQuantity(quantity);
-        this.stock += quantity;
+        this.stockQuantity += quantity;
     }
 
     private void validatePositiveQuantity(int quantity) {
@@ -138,11 +152,11 @@ public class Product extends BaseTimeEntity {
     }
 
     private void validateEnoughStock(int quantity) {
-        if (this.stock < quantity) {
+        if (this.stockQuantity < quantity) {
             throw new BusinessException(
                     ErrorCode.PRODUCT_OUT_OF_STOCK,
                     "productId=%d, 현재 재고=%d, 요청 수량=%d"
-                            .formatted(this.id, this.stock, quantity)
+                            .formatted(this.id, this.stockQuantity, quantity)
             );
         }
     }

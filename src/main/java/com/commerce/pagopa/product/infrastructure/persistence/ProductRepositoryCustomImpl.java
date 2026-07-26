@@ -7,8 +7,7 @@ import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +18,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import static com.commerce.pagopa.category.domain.model.QCategory.category;
 import static com.commerce.pagopa.product.domain.model.QProduct.product;
@@ -133,8 +135,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
             case "id" -> order.isAscending() ? product.id.asc() : product.id.desc();
             case "name" -> order.isAscending() ? product.name.asc() : product.name.desc();
             case "price" -> order.isAscending() ? product.price.asc() : product.price.desc();
-            case "discountPrice" -> order.isAscending() ? product.discountPrice.asc() : product.discountPrice.desc();
-            case "stock" -> order.isAscending() ? product.stock.asc() : product.stock.desc();
+            case "stockQuantity" -> order.isAscending() ? product.stockQuantity.asc() : product.stockQuantity.desc();
             case "status" -> order.isAscending() ? product.status.asc() : product.status.desc();
             case "createdAt" -> order.isAscending() ? product.createdAt.asc() : product.createdAt.desc();
             case "updatedAt" -> order.isAscending() ? product.updatedAt.asc() : product.updatedAt.desc();

@@ -28,7 +28,7 @@ public record ProductScrapDto(
                 product.getDescription(),
                 product.getPrice(),
                 product.getDiscountPrice(),
-                product.getStock(),
+                product.getStockQuantity(),
                 product.getStatus().getDescription(),
                 product.getCategory().getId(),
                 product.getSeller().getId(),
