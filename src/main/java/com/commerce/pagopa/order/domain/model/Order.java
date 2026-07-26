@@ -7,8 +7,7 @@ import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,14 +20,20 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "orders", indexes = {
-        @Index(name = "idx_orders_user_status", columnList = "user_id,status")
-})
+@Table(
+        name = "orders",
+        indexes = {
+                @Index(
+                        name = "idx_orders_status_ordered_at",
+                        columnList = "status, ordered_at"
+                )
+        }
+)
 public class Order extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
+    @Column(name = "order_id", nullable = false)
     private Long id;
 
     @Column(unique = true)
@@ -37,48 +42,51 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false)
     private String orderName;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal totalAmount;
+    @Column(nullable = false)
+    private Integer totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private OrderStatus status;
 
-    @Column(nullable = false)
-    private LocalDateTime orderedAt;
+    @Column(name = "ordered_at", nullable = false)
+    private Instant orderedAt;
 
-    private LocalDateTime cancelledAt;
+    private Instant cancelledAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_orders_user")
+    )
     private User user;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "delivery_id", nullable = false)
-    private Delivery delivery;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<OrderProduct> orderProducts = new ArrayList<>();
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(String orderNumber, User user, Delivery delivery, LocalDateTime orderedAt, LocalDateTime cancelledAt) {
+    private Order(
+            String orderNumber,
+            User user,
+            Instant orderedAt,
+            Instant cancelledAt
+    ) {
         this.orderNumber = orderNumber;
         this.user = user;
-        this.delivery = delivery;
-        this.totalAmount = BigDecimal.ZERO;
+        this.totalAmount = 0;
         this.orderName = "";
         this.status = OrderStatus.ORDERED;
         this.orderedAt = orderedAt;
         this.cancelledAt = cancelledAt;
     }
 
-    public static Order init(User user, Delivery delivery) {
+    public static Order init(User user) {
         return Order.builder()
                 .orderNumber(generateOrderNumber())
                 .user(user)
-                .delivery(delivery)
-                .orderedAt(LocalDateTime.now())
+                .orderedAt(Instant.now())
                 .cancelledAt(null)
                 .build();
     }
@@ -89,8 +97,8 @@ public class Order extends BaseTimeEntity {
         addTotalPrice(orderProduct.getTotalPrice());
     }
 
-    private void addTotalPrice(BigDecimal totalPrice) {
-        this.totalAmount = this.totalAmount.add(totalPrice);
+    private void addTotalPrice(Integer totalPrice) {
+        this.totalAmount += totalPrice;
     }
 
     private static String generateOrderNumber() {
@@ -101,7 +109,7 @@ public class Order extends BaseTimeEntity {
     public void cancel() {
         validateCancelOrder();
         this.status = OrderStatus.CANCELLED;
-        this.cancelledAt = LocalDateTime.now();
+        this.cancelledAt = Instant.now();
     }
 
     private void validateCancelOrder() {

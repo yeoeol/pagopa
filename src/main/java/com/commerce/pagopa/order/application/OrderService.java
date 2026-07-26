@@ -21,7 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,10 +76,7 @@ public class OrderService {
 
         // OrderProduct 목록 생성 및 총액 계산
         User user = userRepository.findByIdOrThrow(userId);
-        Order order = Order.init(
-                user,
-                requestDto.delivery().toDelivery()
-        );
+        Order order = Order.init(user);
 
         for (OrderProductRequestDto op : requestDto.products()) {
             Product product = productMap.get(op.productId());
@@ -180,7 +177,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
         OrderSearch search = orderSearch == null ? new OrderSearch(null, null) : orderSearch;
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         Page<Order> pageOrder = orderRepository.findAllByPeriod(
                 userId,

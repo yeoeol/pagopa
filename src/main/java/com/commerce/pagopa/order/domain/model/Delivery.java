@@ -2,6 +2,7 @@ package com.commerce.pagopa.order.domain.model;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
