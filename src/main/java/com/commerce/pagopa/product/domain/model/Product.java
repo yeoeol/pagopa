@@ -5,7 +5,7 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
-import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.seller.domain.model.Seller;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -22,7 +22,10 @@ import lombok.NoArgsConstructor;
 @Table(
         name = "product",
         indexes = {
-                @Index(name = "idx_product_name", columnList = "name")
+                @Index(
+                        name = "idx_product_name",
+                        columnList = "name"
+                )
         }
 )
 public class Product extends BaseTimeEntity {
@@ -42,7 +45,7 @@ public class Product extends BaseTimeEntity {
     private Integer price;
 
     @Column(name = "stock_quantity", nullable = false)
-    private int stockQuantity = 0;
+    private Integer stockQuantity = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -58,11 +61,11 @@ public class Product extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "user_id",
+            name = "seller_id",
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_product_seller")
     )
-    private User seller;
+    private Seller seller;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
@@ -73,10 +76,10 @@ public class Product extends BaseTimeEntity {
             String name,
             String description,
             Integer price,
-            int stockQuantity,
+            Integer stockQuantity,
             ProductStatus status,
             Category category,
-            User seller
+            Seller seller
     ) {
         this.name = name;
         this.description = description;
@@ -93,7 +96,7 @@ public class Product extends BaseTimeEntity {
             Integer price,
             Integer stockQuantity,
             Category category,
-            User seller
+            Seller seller
     ) {
         return Product.builder()
                 .name(name)

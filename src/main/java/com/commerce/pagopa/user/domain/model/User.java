@@ -1,5 +1,6 @@
 package com.commerce.pagopa.user.domain.model;
 
+import com.commerce.pagopa.delivery.domain.model.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
@@ -51,8 +52,8 @@ public class User extends BaseTimeEntity {
     @Column(name = "email", length = 100, nullable = false)
     private String email;
 
-    @Column(name = "address", length = 255, nullable = true)
-    private String address;
+    @Embedded
+    private Address address;
 
     @Column(name = "phone_number", length = 20, nullable = true)
     private String phoneNumber;
