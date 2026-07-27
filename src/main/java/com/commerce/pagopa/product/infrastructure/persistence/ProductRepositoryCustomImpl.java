@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import static com.commerce.pagopa.category.domain.model.QCategory.category;
 import static com.commerce.pagopa.product.domain.model.QProduct.product;
 import static com.commerce.pagopa.product.domain.model.QProductImage.productImage;
-import static com.commerce.pagopa.user.domain.model.QUser.user;
+import static com.commerce.pagopa.seller.domain.model.QSeller.seller;
 import static org.springframework.util.StringUtils.hasText;
 
 @RequiredArgsConstructor
@@ -96,7 +96,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     public List<Product> searchProducts(@NonNull ProductSearchCondition condition) {
         return queryFactory
                 .selectFrom(product).distinct()
-                .leftJoin(product.seller, user).fetchJoin()
+                .leftJoin(product.seller, seller).fetchJoin()
                 .leftJoin(product.category, category).fetchJoin()
                 .leftJoin(product.images, productImage).fetchJoin()
                 .where(nameContains(condition.productName()))

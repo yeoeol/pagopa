@@ -1,19 +1,19 @@
-package com.commerce.pagopa.product.presentation.security;
+package com.commerce.pagopa.seller.presentation.security;
 
-import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-
-import lombok.RequiredArgsConstructor;
+import com.commerce.pagopa.seller.domain.model.Seller;
 
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component("productOwnerValidator")
+import lombok.RequiredArgsConstructor;
+
+@Component("sellerProductOwnerValidator")
 @RequiredArgsConstructor
-public class ProductOwnerValidator extends OwnerValidator<Product, Long> {
+public class SellerProductOwnerValidator extends OwnerValidator<Product, Long> {
 
     private final ProductRepository productRepository;
 
@@ -25,7 +25,7 @@ public class ProductOwnerValidator extends OwnerValidator<Product, Long> {
     @Override
     protected Long extractOwnerId(Product product) {
         return Optional.ofNullable(product.getSeller())
-                .map(User::getId)
+                .map(Seller::getId)
                 .orElse(null);
     }
 }

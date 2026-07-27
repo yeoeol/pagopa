@@ -21,10 +21,10 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
     @Modifying(clearAutomatically = true)
     @Query(value =
             "UPDATE User u " +
-            "SET u.userStatus = 'ACTIVE', " +
-                "u.bannedUntil = NULL " +
+            "SET u.status = 'ACTIVE', " +
+                "u.suspendedUntil = NULL " +
             "WHERE u.withdrawnAt IS NULL " +
-                "AND u.bannedUntil >= :now " +
-                "AND u.userStatus = 'BANNED'")
+                "AND u.suspendedUntil >= :now " +
+                "AND u.status = 'BANNED'")
     void bulkUnban(@Param("now") Instant now);
 }

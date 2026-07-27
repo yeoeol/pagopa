@@ -1,4 +1,4 @@
-package com.commerce.pagopa.seller.product.application;
+package com.commerce.pagopa.seller.application;
 
 import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
@@ -6,9 +6,9 @@ import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.ProductImage;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.seller.product.application.dto.request.ProductRegisterRequestDto;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
+import com.commerce.pagopa.seller.application.dto.product.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.seller.domain.model.Seller;
+import com.commerce.pagopa.seller.domain.repository.SellerRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,7 @@ public class SellerProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
 
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> findAll(Long userId, Pageable pageable) {
@@ -39,7 +39,7 @@ public class SellerProductService {
 
     @Transactional
     public ProductResponseDto register(Long sellerId, ProductRegisterRequestDto requestDto) {
-        User seller = userRepository.findByIdOrThrow(sellerId);
+        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
 
         Category category = categoryRepository.findByIdOrThrow(requestDto.categoryId());
 

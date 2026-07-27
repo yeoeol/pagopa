@@ -1,17 +1,16 @@
 package com.commerce.pagopa.auth.oauth.service;
 
+import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
 import com.commerce.pagopa.auth.oauth.userinfo.OAuth2UserInfo;
 import com.commerce.pagopa.auth.oauth.userinfo.OAuth2UserInfoFactory;
 import com.commerce.pagopa.auth.service.AuthService;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
-import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -22,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +60,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (!user.getUserStatus().equals(UserStatus.ACTIVE)) {
+            if (!user.getStatus().equals(UserStatus.ACTIVE)) {
                 OAuth2Error error = new OAuth2Error(
                         ErrorCode.USER_NOT_ACTIVE.name(),
                         ErrorCode.USER_NOT_ACTIVE.getMessage(),
