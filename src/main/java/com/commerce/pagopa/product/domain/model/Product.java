@@ -67,7 +67,7 @@ public class Product extends BaseTimeEntity {
     )
     private Seller seller;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product")
     @OrderBy("displayOrder ASC")
     private final List<ProductImage> images = new ArrayList<>();
 

@@ -33,7 +33,7 @@ public class Seller extends BaseTimeEntity {
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "status", nullable = false)
+	@Column(name = "status", length = 20, nullable = false)
 	private SellerStatus status;
 
 	@Enumerated(EnumType.STRING)
