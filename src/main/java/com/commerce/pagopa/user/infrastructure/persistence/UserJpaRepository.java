@@ -24,7 +24,7 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
             "SET u.status = 'ACTIVE', " +
                 "u.suspendedUntil = NULL " +
             "WHERE u.withdrawnAt IS NULL " +
-                "AND u.suspendedUntil >= :now " +
-                "AND u.status = 'BANNED'")
+                "AND u.suspendedUntil <= :now " +
+                "AND u.status = 'SUSPENDED'")
     void bulkUnban(@Param("now") Instant now);
 }

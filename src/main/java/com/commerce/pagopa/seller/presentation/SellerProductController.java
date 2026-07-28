@@ -33,11 +33,11 @@ public class SellerProductController {
     @Operation(summary = "판매자 상품 목록 조회", description = "판매자 본인 상품 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getSellerProducts(
-            @AuthenticationPrincipal(expression = "userId") Long sellerId,
+            @AuthenticationPrincipal(expression = "userId") Long userId,
             @ParameterObject @PageableDefault(size = 10, page = 0, sort = "createdAt") Pageable pageable
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(sellerProductService.findAll(sellerId, pageable))
+                ApiResponse.ok(sellerProductService.findAll(userId, pageable))
         );
     }
 
@@ -55,13 +55,13 @@ public class SellerProductController {
     @Operation(summary = "판매자 상품 등록", description = "판매자 상품을 등록합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponseDto>> register(
-            @AuthenticationPrincipal(expression = "userId") Long sellerId,
+            @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody ProductRegisterRequestDto requestDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(
-                        sellerProductService.register(sellerId, requestDto))
+                        sellerProductService.register(userId, requestDto))
                 );
     }
 }

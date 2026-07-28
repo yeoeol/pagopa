@@ -3,7 +3,7 @@ package com.commerce.pagopa.seller.presentation.security;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.seller.domain.model.Seller;
+import com.commerce.pagopa.user.domain.model.User;
 
 import org.springframework.stereotype.Component;
 
@@ -24,8 +24,8 @@ public class SellerProductOwnerValidator extends OwnerValidator<Product, Long> {
 
     @Override
     protected Long extractOwnerId(Product product) {
-        return Optional.ofNullable(product.getSeller())
-                .map(Seller::getId)
+        return Optional.ofNullable(product.getSeller().getUser())
+                .map(User::getId)
                 .orElse(null);
     }
 }

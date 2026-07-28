@@ -45,7 +45,7 @@ public class Product extends BaseTimeEntity {
     private Integer price;
 
     @Column(name = "stock_quantity", nullable = false)
-    private Integer stockQuantity = 0;
+    private int stockQuantity = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

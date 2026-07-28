@@ -11,7 +11,13 @@ public interface SellerRepository {
 
 	Optional<Seller> findById(Long id);
 
+	Optional<Seller> findByUserId(Long userId);
+
 	default Seller findByIdOrThrow(Long id) {
 		return findById(id).orElseThrow(() -> new BusinessException(SELLER_NOT_FOUND));
+	}
+
+	default Seller findByUserIdOrThrow(Long userId) {
+		return findByUserId(userId).orElseThrow(() -> new BusinessException(SELLER_NOT_FOUND));
 	}
 }
