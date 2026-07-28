@@ -1,5 +1,6 @@
 package com.commerce.pagopa.user.domain.model;
 
+import com.commerce.pagopa.delivery.domain.model.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
@@ -51,8 +52,8 @@ public class User extends BaseTimeEntity {
     @Column(name = "email", length = 100, nullable = false)
     private String email;
 
-    @Column(name = "address", length = 255, nullable = true)
-    private String address;
+    @Embedded
+    private Address address;
 
     @Column(name = "phone_number", length = 20, nullable = true)
     private String phoneNumber;
@@ -66,19 +67,23 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus userStatus;
+    private UserStatus status;
 
-    @Column(name = "banned_until", nullable = true)
-    private Instant bannedUntil;   // 정지 종료일
+    @Column(name = "suspended_until", nullable = true)
+    private Instant suspendedUntil;   // 정지 종료일
 
     @Column(name = "withdrawn_at", nullable = true)
     private Instant withdrawnAt;  // 탈퇴 일시
 
     @Builder
     public User(
-            Provider provider, String providerId,
-            String name, String email, String profileImage,
-            Role role, UserStatus userStatus
+            Provider provider,
+            String providerId,
+            String name,
+            String email,
+            String profileImage,
+            Role role,
+            UserStatus status
     ) {
         this.provider = provider;
         this.providerId = providerId;
@@ -86,7 +91,7 @@ public class User extends BaseTimeEntity {
         this.email = email;
         this.profileImage = profileImage;
         this.role = role;
-        this.userStatus = userStatus;
+        this.status = status;
     }
 
     public static User create(
@@ -100,7 +105,7 @@ public class User extends BaseTimeEntity {
                 .email(email)
                 .profileImage(profileImage)
                 .role(role)
-                .userStatus(UserStatus.ACTIVE)
+                .status(UserStatus.ACTIVE)
                 .build();
     }
 
@@ -109,27 +114,10 @@ public class User extends BaseTimeEntity {
         if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;
     }
 
-    public void ban(long banSeconds) {
-        validateActiveUserStatus();
-        this.userStatus = UserStatus.BANNED;
-        this.bannedUntil = getBanEndDate(banSeconds);
-    }
-
-    public void unban() {
-        validateBannedUserStatus();
-        this.userStatus = UserStatus.ACTIVE;
-        this.bannedUntil = null;
-    }
-
     public void withdraw() {
         validateActiveUserStatus();
-        this.userStatus = UserStatus.WITHDRAWN;
+        this.status = UserStatus.WITHDRAWN;
         this.withdrawnAt = Instant.now();
-    }
-
-    public void updateSellerRole() {
-        validateActiveUserStatus();
-        this.role = Role.ROLE_SELLER;
     }
 
     public String getRoleName() {
@@ -137,18 +125,8 @@ public class User extends BaseTimeEntity {
     }
 
     private void validateActiveUserStatus() {
-        if (this.userStatus != UserStatus.ACTIVE) {
+        if (this.status != UserStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
         }
-    }
-
-    private void validateBannedUserStatus() {
-        if (this.userStatus != UserStatus.BANNED) {
-            throw new BusinessException(ErrorCode.USER_NOT_BANNED);
-        }
-    }
-
-    private static Instant getBanEndDate(long banSeconds) {
-        return Instant.now().plusSeconds(banSeconds);
     }
 }

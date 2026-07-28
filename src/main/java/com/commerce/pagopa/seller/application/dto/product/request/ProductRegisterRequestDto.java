@@ -1,4 +1,4 @@
-package com.commerce.pagopa.seller.product.application.dto.request;
+package com.commerce.pagopa.seller.application.dto.product.request;
 
 import jakarta.validation.constraints.*;
 
@@ -8,11 +8,10 @@ public record ProductRegisterRequestDto(
         @NotBlank(message = "{validation.notBlank}")
         String name,
 
-        @NotBlank(message = "{validation.notBlank}")
         String description,
 
         @NotNull(message = "{validation.notNull}")
-        @DecimalMin(value = "0.0", inclusive = false, message = "{validation.min}")
+        @PositiveOrZero(message = "{validation.min}")
         Integer price,
 
         @NotNull(message = "{validation.notNull}")

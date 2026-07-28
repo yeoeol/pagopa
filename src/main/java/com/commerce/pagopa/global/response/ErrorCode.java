@@ -98,6 +98,9 @@ public enum ErrorCode {
     PAYMENT_CANCEL_REJECTED(HttpStatus.BAD_REQUEST, "PAYMENT_013", "결제 취소가 거절되었습니다."),
     PAYMENT_CANCEL_IN_PROGRESS(HttpStatus.CONFLICT, "PAYMENT_014", "이미 결제 취소가 진행 중입니다."),
 
+    // SELLER
+    SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "SELLER_001", "존재하지 않는 판매자입니다."),
+
     ;
     private final HttpStatus httpStatus;
     private final String code;

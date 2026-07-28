@@ -1,13 +1,11 @@
-package com.commerce.pagopa.seller.product.presentation;
+package com.commerce.pagopa.seller.presentation;
 
-import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.seller.product.application.SellerProductService;
-import com.commerce.pagopa.seller.product.application.dto.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.global.response.ApiResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
+import com.commerce.pagopa.seller.application.SellerProductService;
+import com.commerce.pagopa.seller.application.dto.product.request.ProductRegisterRequestDto;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import lombok.RequiredArgsConstructor;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "SELLER PRODUCT API", description = "판매자 - 상품 관리 API")
 @RestController
@@ -40,7 +43,7 @@ public class SellerProductController {
 
     @Operation(summary = "판매자 상품 상세 조회", description = "판매자 본인의 특정 상품을 조회합니다.")
     @GetMapping("/{id}")
-    @PreAuthorize("@productOwnerValidator.isOwner(#productId, principal.userId)")
+    @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
     public ResponseEntity<ApiResponse<ProductResponseDto>> getSellerProduct(
             @PathVariable("id") Long productId
     ) {

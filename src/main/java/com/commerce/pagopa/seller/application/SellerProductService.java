@@ -1,4 +1,4 @@
-package com.commerce.pagopa.seller.product.application;
+package com.commerce.pagopa.seller.application;
 
 import com.commerce.pagopa.category.domain.model.Category;
 import com.commerce.pagopa.category.domain.repository.CategoryRepository;
@@ -6,7 +6,9 @@ import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.ProductImage;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.seller.product.application.dto.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.seller.application.dto.product.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.seller.domain.model.Seller;
+import com.commerce.pagopa.seller.domain.repository.SellerRepository;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
@@ -21,13 +23,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SellerProductService {
 
+    private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
 
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> findAll(Long userId, Pageable pageable) {
-        Page<Product> pageProduct = productRepository.findAllBySellerId(userId, pageable);
+        User user = userRepository.findByIdOrThrow(userId);
+        Seller seller = sellerRepository.findByUserIdOrThrow(user.getId());
+
+        Page<Product> pageProduct = productRepository.findAllBySellerId(seller.getId(), pageable);
         return pageProduct.map(ProductResponseDto::from);
     }
 
@@ -38,8 +44,9 @@ public class SellerProductService {
     }
 
     @Transactional
-    public ProductResponseDto register(Long sellerId, ProductRegisterRequestDto requestDto) {
-        User seller = userRepository.findByIdOrThrow(sellerId);
+    public ProductResponseDto register(Long userId, ProductRegisterRequestDto requestDto) {
+        User user = userRepository.findByIdOrThrow(userId);
+        Seller seller = sellerRepository.findByUserIdOrThrow(user.getId());
 
         Category category = categoryRepository.findByIdOrThrow(requestDto.categoryId());
 
