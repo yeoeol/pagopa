@@ -11,7 +11,7 @@ public record ReviewAuthorResponseDto(
         return new ReviewAuthorResponseDto(
                 user.getId(),
                 user.getName(),
-                user.getProfileImage()
+                user.getProfileImageUrl()
         );
     }
 }

@@ -41,7 +41,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> findAllByCategory(Long categoryId, Pageable pageable) {
         Page<Product> productPage = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
-                categoryId, List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT), pageable
+                categoryId, List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT), pageable
         );
         return productPage.map(ProductResponseDto::from);
     }

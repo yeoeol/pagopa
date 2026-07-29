@@ -20,7 +20,7 @@ public record SellerResponseDto(
 				SellerStatusResponseDto.from(seller.getStatus()),
 				seller.getVerificationStatus(),
 				seller.getActivatedAt(),
-				seller.getSuspendedAt(),
+				seller.getSuspendedUntil(),
 				UserResponseDto.from(seller.getUser())
 		);
 	}

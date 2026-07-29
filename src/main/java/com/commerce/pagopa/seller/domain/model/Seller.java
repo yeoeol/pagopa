@@ -43,8 +43,8 @@ public class Seller extends BaseTimeEntity {
 	@Column(name = "activated_at", nullable = true)
 	private Instant activatedAt;
 
-	@Column(name = "suspended_at", nullable = true)
-	private Instant suspendedAt;
+	@Column(name = "suspended_until", nullable = true)
+	private Instant suspendedUntil;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -58,14 +58,10 @@ public class Seller extends BaseTimeEntity {
 	private Seller(
 			SellerStatus status,
 			VerificationStatus verificationStatus,
-			Instant activatedAt,
-			Instant suspendedAt,
 			User user
 	) {
 		this.status = status;
 		this.verificationStatus = verificationStatus;
-		this.activatedAt = activatedAt;
-		this.suspendedAt = suspendedAt;
 		this.user = user;
 	}
 

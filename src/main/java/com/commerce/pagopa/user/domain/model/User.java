@@ -58,15 +58,15 @@ public class User extends BaseTimeEntity {
     @Column(name = "phone_number", length = 20, nullable = true)
     private String phoneNumber;
 
-    @Column(length = 512, nullable = false)
-    private String profileImage;
+    @Column(name = "profile_image_url", length = 512, nullable = false)
+    private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "role", length = 20, nullable = false)
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", length = 20, nullable = false)
     private UserStatus status;
 
     @Column(name = "suspended_until", nullable = true)
@@ -81,7 +81,7 @@ public class User extends BaseTimeEntity {
             String providerId,
             String name,
             String email,
-            String profileImage,
+            String profileImageUrl,
             Role role,
             UserStatus status
     ) {
@@ -89,13 +89,13 @@ public class User extends BaseTimeEntity {
         this.providerId = providerId;
         this.name = name;
         this.email = email;
-        this.profileImage = profileImage;
+        this.profileImageUrl = profileImageUrl;
         this.role = role;
         this.status = status;
     }
 
     public static User create(
-            String email, String name, String profileImage,
+            String email, String name, String profileImageUrl,
             Provider provider, String providerId, Role role
     ) {
         return User.builder()
@@ -103,7 +103,7 @@ public class User extends BaseTimeEntity {
                 .providerId(providerId)
                 .name(name)
                 .email(email)
-                .profileImage(profileImage)
+                .profileImageUrl(profileImageUrl)
                 .role(role)
                 .status(UserStatus.ACTIVE)
                 .build();
@@ -111,7 +111,7 @@ public class User extends BaseTimeEntity {
 
     public void updateProfile(String name, String profileImage) {
         if (name != null && !name.isBlank()) this.name = name;
-        if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;
+        if (profileImage != null && !profileImage.isBlank()) this.profileImageUrl = profileImage;
     }
 
     public void withdraw() {

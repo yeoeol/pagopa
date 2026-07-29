@@ -271,7 +271,7 @@ class StockConcurrencyTest {
         assertThat(success.get()).isEqualTo(1);
         assertThat(businessFail.get()).isEqualTo(N - 1);
         assertThat(other.get()).isZero();
-        assertThat(response.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(response.status()).isEqualTo(OrderStatus.CANCELED);
         assertThat(finalStock1).isEqualTo(10);
         assertThat(finalStock2).isEqualTo(20);
         assertThat(finalStock3).isEqualTo(30);

@@ -11,7 +11,6 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -37,23 +36,15 @@ public class Order extends BaseTimeEntity {
     @Column(name = "order_id", nullable = false)
     private Long id;
 
-    @Column(unique = true)
-    private String orderNumber;
-
-    @Column(nullable = false)
-    private String orderName;
-
-    @Column(nullable = false)
-    private Integer totalAmount;
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", length = 20, nullable = false)
     private OrderStatus status;
 
     @Column(name = "ordered_at", nullable = false)
     private Instant orderedAt;
 
-    private Instant cancelledAt;
+    @Column(name = "canceled_at", nullable = true)
+    private Instant canceledAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -63,61 +54,45 @@ public class Order extends BaseTimeEntity {
     )
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order")
     private final List<OrderItem> orderItems = new ArrayList<>();
-
 
     @Builder(access = AccessLevel.PRIVATE)
     private Order(
-            String orderNumber,
-            User user,
+            OrderStatus status,
             Instant orderedAt,
-            Instant cancelledAt
+            User user
     ) {
-        this.orderNumber = orderNumber;
-        this.user = user;
-        this.totalAmount = 0;
-        this.orderName = "";
-        this.status = OrderStatus.ORDERED;
+        this.status = status;
         this.orderedAt = orderedAt;
-        this.cancelledAt = cancelledAt;
+        this.user = user;
     }
 
     public static Order init(User user) {
         return Order.builder()
-                .orderNumber(generateOrderNumber())
-                .user(user)
+                .status(OrderStatus.PENDING_PAYMENT)
                 .orderedAt(Instant.now())
-                .cancelledAt(null)
+                .user(user)
                 .build();
     }
 
     public void addOrderItem(OrderItem orderItem) {
         this.orderItems.add(orderItem);
         orderItem.assignOrder(this);
-        addTotalPrice(orderItem.getTotalPrice());
-    }
-
-    private void addTotalPrice(Integer totalPrice) {
-        this.totalAmount += totalPrice;
-    }
-
-    private static String generateOrderNumber() {
-        return UUID.randomUUID().toString().replace("-", "");
     }
 
     // == 주문 취소 로직 ==
     public void cancel() {
         validateCancelOrder();
-        this.status = OrderStatus.CANCELLED;
-        this.cancelledAt = Instant.now();
+        this.status = OrderStatus.CANCELED;
+        this.canceledAt = Instant.now();
     }
 
     private void validateCancelOrder() {
-        if (this.status == OrderStatus.CANCELLED) {
+        if (this.status == OrderStatus.CANCELED) {
             throw new BusinessException(ErrorCode.ORDER_ALREADY_CANCELLED);
         }
-        if (this.status != OrderStatus.ORDERED) {
+        if (this.status != OrderStatus.CONFIRMED) {
             throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
     }
