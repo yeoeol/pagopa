@@ -14,9 +14,6 @@ import java.util.Optional;
 public interface OrderJpaRepository extends JpaRepository<Order, Long>, OrderRepository, OrderRepositoryCustom {
 
     @Override
-    Optional<Order> findByOrderNumber(String orderNumber);
-
-    @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT o FROM Order o WHERE o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("id") Long id);

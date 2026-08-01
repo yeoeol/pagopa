@@ -24,8 +24,6 @@ public interface OrderRepository {
             Long userId, OrderStatus status, Instant start, Instant end, Pageable pageable
     );
 
-    Optional<Order> findByOrderNumber(String orderNumber);
-
     Optional<Order> findByIdForUpdate(Long id);
 
     default Order findByIdOrThrow(Long id) {

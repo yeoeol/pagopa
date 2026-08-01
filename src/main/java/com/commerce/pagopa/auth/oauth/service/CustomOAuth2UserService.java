@@ -7,7 +7,6 @@ import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
@@ -20,7 +19,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 
@@ -73,12 +71,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         return userRepository.save(
                 User.create(
-                        userInfo.getEmail(),
-                        "user_" + UUID.randomUUID().toString().substring(0, 8),
-                        azureBaseUrl + "/default.png",
                         provider,
                         userInfo.getProviderId(),
-                        Role.ROLE_USER
+                        userInfo.getName(),
+                        userInfo.getEmail(),
+                        azureBaseUrl + "/default.png"
                 )
         );
     }

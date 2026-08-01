@@ -4,11 +4,12 @@ import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,12 +37,11 @@ public class LocalTestAuthService {
 
 	private User createUser(String providerId) {
 		return User.create(
-				providerId + "@pagopa.local",
-				providerId,
-				null,
 				Provider.LOCAL_TEST,
 				providerId,
-				Role.ROLE_USER
+				"user_" + UUID.randomUUID().toString().substring(0, 8),
+				providerId + "@pagopa.local",
+				"default.png"
 		);
 	}
 }
