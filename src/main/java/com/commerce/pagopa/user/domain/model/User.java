@@ -75,12 +75,14 @@ public class User extends BaseTimeEntity {
     @Column(name = "withdrawn_at", nullable = true)
     private Instant withdrawnAt;  // 탈퇴 일시
 
-    @Builder
-    public User(
+    @Builder(access = AccessLevel.PRIVATE)
+    private User(
             Provider provider,
             String providerId,
             String name,
             String email,
+            Address address,
+            String phoneNumber,
             String profileImageUrl,
             Role role,
             UserStatus status
@@ -89,14 +91,19 @@ public class User extends BaseTimeEntity {
         this.providerId = providerId;
         this.name = name;
         this.email = email;
+        this.address = address;
+        this.phoneNumber = phoneNumber;
         this.profileImageUrl = profileImageUrl;
         this.role = role;
         this.status = status;
     }
 
     public static User create(
-            String email, String name, String profileImageUrl,
-            Provider provider, String providerId, Role role
+            Provider provider,
+            String providerId,
+            String name,
+            String email,
+            String profileImageUrl
     ) {
         return User.builder()
                 .provider(provider)
@@ -104,7 +111,7 @@ public class User extends BaseTimeEntity {
                 .name(name)
                 .email(email)
                 .profileImageUrl(profileImageUrl)
-                .role(role)
+                .role(Role.ROLE_USER)
                 .status(UserStatus.ACTIVE)
                 .build();
     }

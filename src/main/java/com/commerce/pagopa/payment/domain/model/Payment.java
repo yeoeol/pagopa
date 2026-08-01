@@ -66,15 +66,11 @@ public class Payment extends BaseTimeEntity {
             String paymentMethod,
             Integer amount,
             PaymentStatus status,
-            Instant paidAt,
-            String paymentKey,
             Order order
     ) {
         this.paymentMethod = paymentMethod;
         this.amount = amount;
         this.status = status;
-        this.paidAt = paidAt;
-        this.paymentKey = paymentKey;
         this.order = order;
     }
 
@@ -87,8 +83,9 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
-    public void pay() {
-        this.status = PaymentStatus.PAID;
+    public void pay(String paymentKey) {
         this.paidAt = Instant.now();
+        this.status = PaymentStatus.PAID;
+        this.paymentKey = paymentKey;
     }
 }

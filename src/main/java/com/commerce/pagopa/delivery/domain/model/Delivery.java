@@ -60,16 +60,19 @@ public class Delivery extends BaseTimeEntity {
 
     public static Delivery create(
             Address address,
-            String trackingNo,
             String requestMemo,
             Order order
     ) {
         return Delivery.builder()
                 .address(address)
                 .status(DeliveryStatus.PREPARING)
-                .trackingNo(trackingNo)
                 .requestMemo(requestMemo)
                 .order(order)
                 .build();
+    }
+
+    public void ship(String trackingNo) {
+        this.status = DeliveryStatus.SHIPPED;
+        this.trackingNo = trackingNo;
     }
 }
