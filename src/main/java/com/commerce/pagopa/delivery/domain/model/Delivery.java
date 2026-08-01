@@ -1,6 +1,7 @@
 package com.commerce.pagopa.delivery.domain.model;
 
 import com.commerce.pagopa.delivery.domain.model.enums.DeliveryStatus;
+import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.order.domain.model.Order;
 import jakarta.persistence.*;

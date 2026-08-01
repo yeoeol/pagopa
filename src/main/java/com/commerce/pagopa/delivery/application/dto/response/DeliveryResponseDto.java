@@ -1,7 +1,7 @@
 package com.commerce.pagopa.delivery.application.dto.response;
 
-import com.commerce.pagopa.delivery.domain.model.Address;
 import com.commerce.pagopa.delivery.domain.model.Delivery;
+import com.commerce.pagopa.global.entity.Address;
 
 public record DeliveryResponseDto(
         Long deliveryId,

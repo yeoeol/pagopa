@@ -1,6 +1,6 @@
 package com.commerce.pagopa.user.domain.model;
 
-import com.commerce.pagopa.delivery.domain.model.Address;
+import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
