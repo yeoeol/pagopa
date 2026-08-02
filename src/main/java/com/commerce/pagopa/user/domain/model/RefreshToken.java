@@ -10,7 +10,19 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "refresh_tokens")
+@Table(
+        name = "refresh_token",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uq_refresh_token_user_id",
+                    columnNames = {"user_id"}
+            ),
+            @UniqueConstraint(
+                    name = "uq_refresh_token_token",
+                    columnNames = {"token"}
+            )
+        }
+)
 public class RefreshToken {
 
     @Id
@@ -18,21 +30,26 @@ public class RefreshToken {
     @Column(name = "refresh_token_id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private Long userId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_refresh_token_user")
+    )
+    private User user;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "token", length = 255, nullable = false)
     private String token;
 
     @Builder
-    public RefreshToken(Long userId, String token) {
-        this.userId = userId;
+    public RefreshToken(User user, String token) {
+        this.user = user;
         this.token = token;
     }
 
-    public static RefreshToken create(Long userId, String token) {
+    public static RefreshToken create(User user, String token) {
         return RefreshToken.builder()
-                .userId(userId)
+                .user(user)
                 .token(token)
                 .build();
     }

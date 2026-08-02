@@ -2,15 +2,17 @@ package com.commerce.pagopa.auth.service;
 
 import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.user.domain.model.RefreshToken;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.RefreshTokenRepository;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +39,7 @@ public class AuthService {
                 throw new BusinessException(ErrorCode.INVALID_TOKEN);
             }
 
-            Long userId = token.getUserId();
+            Long userId = token.getUser().getId();
             User user = userRepository.findByIdOrThrow(userId);
 
             return issueAccessTokenAndRefreshToken(userId, user.getEmail(), user.getRoleName());
@@ -53,13 +55,16 @@ public class AuthService {
         );
         String refreshToken = jwtTokenProvider.generateRefreshToken(userId);
 
+        User user = userRepository.findByIdOrThrow(userId);
         refreshTokenRepository.findByUserId(userId)
                 .ifPresentOrElse(
                         rt -> rt.updateToken(refreshToken),
-                        () -> refreshTokenRepository.save(RefreshToken.create(
-                                userId,
-                                refreshToken
-                        ))
+                        () -> refreshTokenRepository.save(
+                                RefreshToken.create(
+                                    user,
+                                    refreshToken
+                                )
+                        )
                 );
 
         return TokenResponseDto.of(userId, accessToken, refreshToken);

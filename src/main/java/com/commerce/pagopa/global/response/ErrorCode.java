@@ -59,8 +59,8 @@ public enum ErrorCode {
     ORDER_CANNOT_COMPLETE(HttpStatus.BAD_REQUEST, "ORDER_006", "배송 완료를 진행할 수 없는 주문 상태입니다."),
     ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "ORDER_007", "이미 취소된 주문입니다."),
 
-    // ORDER PRODUCT
-    ORDER_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_PRODUCT_001", "존재하지 않는 주문 상품입니다."),
+    // ORDER ITEM
+    ORDER_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_PRODUCT_001", "존재하지 않는 주문 상품입니다."),
 
     // SELLER ORDER (판매자별 출고 단위)
     SELLER_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "SELLER_ORDER_001", "존재하지 않는 판매자 주문입니다."),
