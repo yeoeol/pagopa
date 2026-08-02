@@ -2,6 +2,10 @@ package com.commerce.pagopa.order.application;
 
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cart.domain.repository.CartRepository;
+import com.commerce.pagopa.delivery.application.dto.request.DeliveryRequestDto;
+import com.commerce.pagopa.delivery.domain.model.Delivery;
+import com.commerce.pagopa.delivery.domain.repository.DeliveryRepository;
+import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
@@ -38,6 +42,7 @@ import static com.commerce.pagopa.global.response.ErrorCode.CART_NOT_FOUND;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final DeliveryRepository deliveryRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
@@ -51,10 +56,10 @@ public class OrderService {
         // 동일 상품 수량 합산
         Map<Long, Integer> totalQuantityByProductId = new HashMap<>();
 
-        for (OrderItemRequestDto orderProduct : requestDto.products()) {
+        for (OrderItemRequestDto orderItem : requestDto.products()) {
             totalQuantityByProductId.merge(
-                    orderProduct.productId(),
-                    orderProduct.quantity(),
+                    orderItem.productId(),
+                    orderItem.quantity(),
                     Integer::sum
             );
         }
@@ -98,7 +103,22 @@ public class OrderService {
             product.decreaseStock(orderedQuantity);
         }
 
-        return OrderResponseDto.from(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+
+        // 배송 정보 생성
+        DeliveryRequestDto deliveryRequestDto = requestDto.delivery();
+        Delivery delivery = Delivery.create(
+                Address.create(
+                        deliveryRequestDto.zipcode(),
+                        deliveryRequestDto.address(),
+                        deliveryRequestDto.detailAddress()
+                ),
+                deliveryRequestDto.requestMemo(),
+                savedOrder
+        );
+        deliveryRepository.save(delivery);
+
+        return OrderResponseDto.from(savedOrder);
     }
 
     /**

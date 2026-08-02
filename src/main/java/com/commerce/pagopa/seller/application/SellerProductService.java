@@ -61,7 +61,12 @@ public class SellerProductService {
 
         for (int i = 0; i < requestDto.imageUrls().size(); i++) {
             boolean isThumbnail = (i == 0);
-            ProductImage productImage = ProductImage.create(requestDto.imageUrls().get(i), i + 1, isThumbnail);
+            ProductImage productImage = ProductImage.create(
+                    requestDto.imageUrls().get(i),
+                    i + 1,
+                    isThumbnail,
+                    product
+            );
             product.addImage(productImage);
         }
 

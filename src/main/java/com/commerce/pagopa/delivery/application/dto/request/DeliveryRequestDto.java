@@ -5,9 +5,6 @@ import jakarta.validation.constraints.Pattern;
 
 public record DeliveryRequestDto(
         @NotBlank(message = "{validation.notBlank}")
-        String trackingNo,
-
-        @NotBlank(message = "{validation.notBlank}")
         String requestMemo,
 
         @NotBlank(message = "{validation.notBlank}")
@@ -18,8 +15,6 @@ public record DeliveryRequestDto(
         String address,
 
         @NotBlank(message = "{validation.notBlank}")
-        String detailAddress,
-
-        String deliveryRequestMemo
+        String detailAddress
 ) {
 }
