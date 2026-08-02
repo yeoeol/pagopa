@@ -18,6 +18,8 @@ public interface UserRepository {
 
     Optional<User> findById(Long id);
 
+    Optional<User> findByIdForUpdate(Long id);
+
     Page<User> findAll(Pageable pageable);
 
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
@@ -26,5 +28,9 @@ public interface UserRepository {
 
     default User findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+    }
+
+    default User findByIdForUpdateOrThrow(Long id) {
+        return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 }

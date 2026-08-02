@@ -55,7 +55,7 @@ public class AuthService {
         );
         String refreshToken = jwtTokenProvider.generateRefreshToken(userId);
 
-        User user = userRepository.findByIdOrThrow(userId);
+        User user = userRepository.findByIdForUpdateOrThrow(userId);
         refreshTokenRepository.findByUserId(userId)
                 .ifPresentOrElse(
                         rt -> rt.updateToken(refreshToken),
