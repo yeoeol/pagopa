@@ -55,7 +55,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     private BooleanExpression periodGoeAndLt(Instant start, Instant end) {
-        return (start == null || end == null) ? null : order.createdAt.goe(start).and(order.createdAt.lt(end));
+        return (start == null || end == null) ? null : order.orderedAt.goe(start).and(order.orderedAt.lt(end));
     }
 
     private BooleanExpression statusEq(OrderStatus status) {
