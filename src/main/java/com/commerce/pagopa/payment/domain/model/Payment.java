@@ -37,9 +37,6 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "amount", nullable = false)
     private Integer amount; // 결제 금액
 
-    @Column(nullable = false)
-    private Integer canceledAmount; // 누적 환불 금액 (부분 취소 합산)
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private PaymentStatus status; // 결제 상태
