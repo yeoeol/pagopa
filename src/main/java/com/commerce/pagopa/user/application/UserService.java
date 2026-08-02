@@ -31,7 +31,7 @@ public class UserService {
 
         // 기존 이미지 삭제
         if (StringUtils.hasText(requestDto.profileImage())) {
-            imageService.delete(user.getProfileImage());
+            imageService.delete(user.getProfileImageUrl());
         }
 
         user.updateProfile(requestDto.name(), requestDto.profileImage());

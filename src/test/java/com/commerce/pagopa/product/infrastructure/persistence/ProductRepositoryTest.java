@@ -13,6 +13,7 @@ import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +104,7 @@ class ProductRepositoryTest {
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_rootCategory() {
         Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
                 rootCategory.getId(),
-                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT),
                 PageRequest.of(0, 10)
         );
 
@@ -116,7 +117,7 @@ class ProductRepositoryTest {
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_middleCategory() {
         Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
                 middleCategory.getId(),
-                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT),
                 PageRequest.of(0, 10)
         );
 
@@ -129,7 +130,7 @@ class ProductRepositoryTest {
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_leafCategory() {
         Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
                 category.getId(),
-                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT),
                 PageRequest.of(0, 10)
         );
 
@@ -142,7 +143,7 @@ class ProductRepositoryTest {
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_notFoundCategory_returnsEmptyPage() {
         Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
                 -1L,
-                List.of(ProductStatus.ACTIVE, ProductStatus.SOLDOUT),
+                List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT),
                 PageRequest.of(0, 10)
         );
 

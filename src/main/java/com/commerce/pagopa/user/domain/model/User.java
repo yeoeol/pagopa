@@ -1,6 +1,6 @@
 package com.commerce.pagopa.user.domain.model;
 
-import com.commerce.pagopa.delivery.domain.model.Address;
+import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
@@ -58,15 +58,15 @@ public class User extends BaseTimeEntity {
     @Column(name = "phone_number", length = 20, nullable = true)
     private String phoneNumber;
 
-    @Column(length = 512, nullable = false)
-    private String profileImage;
+    @Column(name = "profile_image_url", length = 512, nullable = false)
+    private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "role", length = 20, nullable = false)
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", length = 20, nullable = false)
     private UserStatus status;
 
     @Column(name = "suspended_until", nullable = true)
@@ -75,13 +75,15 @@ public class User extends BaseTimeEntity {
     @Column(name = "withdrawn_at", nullable = true)
     private Instant withdrawnAt;  // 탈퇴 일시
 
-    @Builder
-    public User(
+    @Builder(access = AccessLevel.PRIVATE)
+    private User(
             Provider provider,
             String providerId,
             String name,
             String email,
-            String profileImage,
+            Address address,
+            String phoneNumber,
+            String profileImageUrl,
             Role role,
             UserStatus status
     ) {
@@ -89,29 +91,34 @@ public class User extends BaseTimeEntity {
         this.providerId = providerId;
         this.name = name;
         this.email = email;
-        this.profileImage = profileImage;
+        this.address = address;
+        this.phoneNumber = phoneNumber;
+        this.profileImageUrl = profileImageUrl;
         this.role = role;
         this.status = status;
     }
 
     public static User create(
-            String email, String name, String profileImage,
-            Provider provider, String providerId, Role role
+            Provider provider,
+            String providerId,
+            String name,
+            String email,
+            String profileImageUrl
     ) {
         return User.builder()
                 .provider(provider)
                 .providerId(providerId)
                 .name(name)
                 .email(email)
-                .profileImage(profileImage)
-                .role(role)
+                .profileImageUrl(profileImageUrl)
+                .role(Role.ROLE_USER)
                 .status(UserStatus.ACTIVE)
                 .build();
     }
 
     public void updateProfile(String name, String profileImage) {
         if (name != null && !name.isBlank()) this.name = name;
-        if (profileImage != null && !profileImage.isBlank()) this.profileImage = profileImage;
+        if (profileImage != null && !profileImage.isBlank()) this.profileImageUrl = profileImage;
     }
 
     public void withdraw() {

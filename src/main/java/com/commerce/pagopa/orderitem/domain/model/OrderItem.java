@@ -63,8 +63,8 @@ public class OrderItem extends BaseTimeEntity {
             Product product
     ) {
         this.productName = productName;
-        this.orderQuantity = orderQuantity;
         this.orderPrice = orderPrice;
+        this.orderQuantity = orderQuantity;
         this.order = order;
         this.product = product;
     }

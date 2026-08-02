@@ -4,7 +4,7 @@ import com.commerce.pagopa.orderitem.domain.model.OrderItem;
 import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 
 public record OrderItemResponseDto(
-        Long orderProductId,
+        Long orderItemId,
         String productName,
         Integer orderPrice,
         Integer orderQuantity,

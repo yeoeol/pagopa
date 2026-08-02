@@ -1,6 +1,7 @@
 package com.commerce.pagopa.delivery.domain.model;
 
 import com.commerce.pagopa.delivery.domain.model.enums.DeliveryStatus;
+import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.order.domain.model.Order;
 import jakarta.persistence.*;
@@ -22,7 +23,7 @@ public class Delivery extends BaseTimeEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", length = 20, nullable = false)
     private DeliveryStatus status;
 
     @Column(name = "tracking_no", length = 50, nullable = true)
@@ -44,26 +45,34 @@ public class Delivery extends BaseTimeEntity {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Delivery(
-            Address address,
-            String trackingNo,
             DeliveryStatus status,
+            String trackingNo,
+            Address address,
             String requestMemo,
             Order order
     ) {
-        this.address = address;
-        this.trackingNo = trackingNo;
         this.status = status;
+        this.trackingNo = trackingNo;
+        this.address = address;
         this.requestMemo = requestMemo;
         this.order = order;
     }
 
-    public static Delivery create(Address address, String trackingNo, String requestMemo, Order order) {
+    public static Delivery create(
+            Address address,
+            String requestMemo,
+            Order order
+    ) {
         return Delivery.builder()
                 .address(address)
-                .status(DeliveryStatus.READY)
-                .trackingNo(trackingNo)
+                .status(DeliveryStatus.PREPARING)
                 .requestMemo(requestMemo)
                 .order(order)
                 .build();
+    }
+
+    public void ship(String trackingNo) {
+        this.status = DeliveryStatus.SHIPPED;
+        this.trackingNo = trackingNo;
     }
 }

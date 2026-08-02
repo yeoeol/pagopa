@@ -32,7 +32,7 @@ public class Category extends BaseTimeEntity {
     )
     private Category parent;
 
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)
     private final List<Category> children = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)

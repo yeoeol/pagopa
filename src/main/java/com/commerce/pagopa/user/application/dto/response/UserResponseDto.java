@@ -1,21 +1,32 @@
 package com.commerce.pagopa.user.application.dto.response;
 
+import com.commerce.pagopa.global.response.StatusResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.user.domain.model.enums.UserStatus;
+
+import java.time.Instant;
 
 public record UserResponseDto(
         Long userId,
-        String email,
+        Provider provider,
         String name,
-        String profileImage,
-        String role
+        String email,
+        String profileImageUrl,
+        StatusResponseDto<UserStatus> status,
+        Instant suspendedUntil,
+        Instant withdrawnAt
 ) {
     public static UserResponseDto from(User user) {
         return new UserResponseDto(
                 user.getId(),
-                user.getEmail(),
+                user.getProvider(),
                 user.getName(),
-                user.getProfileImage(),
-                user.getRoleName()
+                user.getEmail(),
+                user.getProfileImageUrl(),
+                StatusResponseDto.from(user.getStatus()),
+                user.getSuspendedUntil(),
+                user.getWithdrawnAt()
         );
     }
 }

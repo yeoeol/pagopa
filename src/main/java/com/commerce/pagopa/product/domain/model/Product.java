@@ -48,7 +48,7 @@ public class Product extends BaseTimeEntity {
     private int stockQuantity = 0;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "status", length = 20, nullable = false)
     private ProductStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -67,7 +67,7 @@ public class Product extends BaseTimeEntity {
     )
     private Seller seller;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
     @OrderBy("displayOrder ASC")
     private final List<ProductImage> images = new ArrayList<>();
 
@@ -123,7 +123,7 @@ public class Product extends BaseTimeEntity {
     }
 
     public void markAsSoldOut() {
-        this.status = ProductStatus.SOLDOUT;
+        this.status = ProductStatus.SOLD_OUT;
     }
 
     public void hide() {

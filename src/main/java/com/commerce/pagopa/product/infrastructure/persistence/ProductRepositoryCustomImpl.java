@@ -38,7 +38,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         List<Product> products = queryFactory
                 .selectFrom(product)
                 .where(statusEq(ProductStatus.ACTIVE)
-                        .or(statusEq(ProductStatus.SOLDOUT)))
+                        .or(statusEq(ProductStatus.SOLD_OUT)))
                 .orderBy(product.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -48,7 +48,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .select(product.count())
                 .from(product)
                 .where(statusEq(ProductStatus.ACTIVE)
-                        .or(statusEq(ProductStatus.SOLDOUT)))
+                        .or(statusEq(ProductStatus.SOLD_OUT)))
                 .fetchOne();
 
         return new PageImpl<>(products, pageable, total == null ? 0L : total);

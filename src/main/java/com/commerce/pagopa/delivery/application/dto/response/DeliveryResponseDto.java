@@ -1,27 +1,24 @@
 package com.commerce.pagopa.delivery.application.dto.response;
 
-import com.commerce.pagopa.delivery.domain.model.Address;
 import com.commerce.pagopa.delivery.domain.model.Delivery;
+import com.commerce.pagopa.delivery.domain.model.enums.DeliveryStatus;
+import com.commerce.pagopa.global.entity.Address;
+import com.commerce.pagopa.global.response.StatusResponseDto;
 
 public record DeliveryResponseDto(
         Long deliveryId,
-        String status,
+        StatusResponseDto<DeliveryStatus> status,
         String trackingNo,
         String requestMemo,
-        String zipcode,
-        String address,
-        String detailAddress
+        Address address
 ) {
     public static DeliveryResponseDto from(Delivery delivery) {
-        Address address = delivery.getAddress();
-        return new DeliveryResponseDto(
+		return new DeliveryResponseDto(
                 delivery.getId(),
-                delivery.getStatus().name(),
+                StatusResponseDto.from(delivery.getStatus()),
                 delivery.getTrackingNo(),
                 delivery.getRequestMemo(),
-                address != null ? address.getZipcode() : null,
-                address != null ? address.getAddress() : null,
-                address != null ? address.getDetailAddress() : null
+                delivery.getAddress()
         );
     }
 }

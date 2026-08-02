@@ -50,11 +50,11 @@ class OrderRepositoryTest {
     @Test
     void findAllByPeriod_includesStartBoundaryAndExcludesEndBoundary() {
         // given: 경계 규칙 [start, end) 검증용 데이터
-        Order atStart = persistOrder(user, START, OrderStatus.ORDERED);                                  // 포함 (>= start)
-        Order inMiddle = persistOrder(user, Instant.parse("2024-06-15T15:10:00.00Z"), OrderStatus.ORDERED);  // 포함
-        Order lastInstant = persistOrder(user, Instant.parse("2024-12-31T23:59:59.00Z"), OrderStatus.ORDERED); // 포함
-        persistOrder(user, Instant.parse("2023-12-31T23:59:59.00Z"), OrderStatus.ORDERED);             // 제외 (< start)
-        persistOrder(user, END, OrderStatus.ORDERED);                                                    // 제외 (== end)
+        Order atStart = persistOrder(user, START, OrderStatus.CONFIRMED);                                  // 포함 (>= start)
+        Order inMiddle = persistOrder(user, Instant.parse("2024-06-15T15:10:00.00Z"), OrderStatus.CONFIRMED);  // 포함
+        Order lastInstant = persistOrder(user, Instant.parse("2024-12-31T23:59:59.00Z"), OrderStatus.CONFIRMED); // 포함
+        persistOrder(user, Instant.parse("2023-12-31T23:59:59.00Z"), OrderStatus.CONFIRMED);             // 제외 (< start)
+        persistOrder(user, END, OrderStatus.CONFIRMED);                                                    // 제외 (== end)
         flushAndClear();
 
         // when
@@ -71,8 +71,8 @@ class OrderRepositoryTest {
     void findAllByPeriod_excludesOtherUsersOrders() {
         // given
         User other = userRepository.save(UserFixture.aBuyer("other-user"));
-        Order mine = persistOrder(user, LocalDateTime.of(2024, 5, 1, 0, 0), OrderStatus.ORDERED);
-        persistOrder(other, LocalDateTime.of(2024, 5, 1, 0, 0), OrderStatus.ORDERED);
+        Order mine = persistOrder(user, LocalDateTime.of(2024, 5, 1, 0, 0), OrderStatus.CONFIRMED);
+        persistOrder(other, LocalDateTime.of(2024, 5, 1, 0, 0), OrderStatus.CONFIRMED);
         flushAndClear();
 
         // when
@@ -87,12 +87,12 @@ class OrderRepositoryTest {
     @Test
     void findAllByPeriod_filtersByStatusWhenProvided() {
         // given
-        Order ordered = persistOrder(user, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.ORDERED);
-        Order cancelled = persistOrder(user, LocalDateTime.of(2024, 4, 1, 0, 0), OrderStatus.CANCELLED);
+        Order ordered = persistOrder(user, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.CONFIRMED);
+        Order cancelled = persistOrder(user, LocalDateTime.of(2024, 4, 1, 0, 0), OrderStatus.CANCELED);
         flushAndClear();
 
         // when: status 지정 시 해당 상태만, null이면 전체
-        Page<Order> onlyCancelled = orderRepository.findAllByPeriod(user.getId(), OrderStatus.CANCELLED, START, END, PageRequest.of(0, 10));
+        Page<Order> onlyCancelled = orderRepository.findAllByPeriod(user.getId(), OrderStatus.CANCELED, START, END, PageRequest.of(0, 10));
         Page<Order> all = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
 
         // then
@@ -107,12 +107,12 @@ class OrderRepositoryTest {
     @Test
     void findAllByPeriod_totalCountReflectsFilterNotAllRows() {
         // given: 대상 3건 + 잡음 2건(타 유저 / 기간 밖) → count가 필터를 반영하는지(페이징 정확성)
-        persistOrder(user, LocalDateTime.of(2024, 2, 1, 0, 0), OrderStatus.ORDERED);
-        persistOrder(user, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.ORDERED);
-        persistOrder(user, LocalDateTime.of(2024, 4, 1, 0, 0), OrderStatus.ORDERED);
+        persistOrder(user, LocalDateTime.of(2024, 2, 1, 0, 0), OrderStatus.CONFIRMED);
+        persistOrder(user, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.CONFIRMED);
+        persistOrder(user, LocalDateTime.of(2024, 4, 1, 0, 0), OrderStatus.CONFIRMED);
         User other = userRepository.save(UserFixture.aBuyer("noise-user"));
-        persistOrder(other, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.ORDERED); // 타 유저
-        persistOrder(user, LocalDateTime.of(2023, 3, 1, 0, 0), OrderStatus.ORDERED);  // 기간 밖
+        persistOrder(other, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.CONFIRMED); // 타 유저
+        persistOrder(user, LocalDateTime.of(2023, 3, 1, 0, 0), OrderStatus.CONFIRMED);  // 기간 밖
         flushAndClear();
 
         // when: 페이지 크기 2

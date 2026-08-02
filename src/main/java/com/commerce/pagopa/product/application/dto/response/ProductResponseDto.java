@@ -1,6 +1,9 @@
 package com.commerce.pagopa.product.application.dto.response;
 
+import com.commerce.pagopa.category.application.dto.response.CategorySimpleResponseDto;
+import com.commerce.pagopa.global.response.StatusResponseDto;
 import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 import com.commerce.pagopa.seller.application.dto.seller.response.SellerResponseDto;
 
 import java.util.List;
@@ -11,7 +14,8 @@ public record ProductResponseDto(
         String description,
         Integer price,
         int stockQuantity,
-        String status,
+        StatusResponseDto<ProductStatus> status,
+        CategorySimpleResponseDto category,
         SellerResponseDto seller,
         List<ProductImageResponseDto> productImages
 ) {
@@ -22,7 +26,8 @@ public record ProductResponseDto(
                 product.getDescription(),
                 product.getPrice(),
                 product.getStockQuantity(),
-                product.getStatus().getDescription(),
+                StatusResponseDto.from(product.getStatus()),
+                CategorySimpleResponseDto.from(product.getCategory()),
                 SellerResponseDto.from(product.getSeller()),
                 product.getImages().stream()
                         .map(ProductImageResponseDto::from)
