@@ -54,7 +54,7 @@ public class Order extends BaseTimeEntity {
     )
     private User user;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
     private final List<OrderItem> orderItems = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
