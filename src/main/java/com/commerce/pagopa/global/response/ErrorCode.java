@@ -50,6 +50,9 @@ public enum ErrorCode {
     CART_ITEM_NOT_MINE(HttpStatus.FORBIDDEN, "CART_002", "본인의 장바구니 항목이 아닙니다."),
     INVALID_CART_QUANTITY(HttpStatus.BAD_REQUEST, "CART_003", "유효하지 않은 상품 수량입니다."),
 
+    // CART ITEM
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "CART_ITEM_001", "존재하지 않는 장바구니 항목입니다."),
+
     // ORDER
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_001", "존재하지 않는 주문입니다."),
     ORDER_NOT_MINE(HttpStatus.FORBIDDEN, "ORDER_002", "본인의 주문이 아닙니다."),
