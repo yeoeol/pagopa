@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "CART-ITEM API", description = "장바구니 품목 개별 관리 API")
+@Tag(name = "CART-ITEM API", description = "장바구니 항목 개별 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/cart-items")
@@ -26,7 +26,7 @@ public class CartItemController {
 	private final CartItemService cartItemService;
 
 	@Operation(
-			summary = "장바구니 추가",
+			summary = "장바구니 항목 추가",
 			description = "장바구니에 상품을 추가합니다. 이미 담긴 상품이면 요청 수량만큼 누적됩니다."
 	)
 	@PostMapping
@@ -44,8 +44,8 @@ public class CartItemController {
 	}
 
 	@Operation(
-			summary = "장바구니 품목 수량 증가",
-			description = "장바구니 품목의 수량을 1 증가시킵니다."
+			summary = "장바구니 항목 수량 증가",
+			description = "장바구니 항목의 수량을 1 증가시킵니다."
 	)
 	@PostMapping("/{cartItemId}/increment")
 	@PreAuthorize("@cartItemOwnerValidator.isOwner(#cartItemId, principal.userId)")
@@ -59,8 +59,8 @@ public class CartItemController {
 	}
 
 	@Operation(
-			summary = "장바구니 품목 수량 감소",
-			description = "장바구니 품목의 수량을 1 감소시킵니다. 수량이 0이 되면 해당 품목이 삭제되고 null을 반환합니다."
+			summary = "장바구니 항목 수량 감소",
+			description = "장바구니 항목의 수량을 1 감소시킵니다. 수량이 0이 되면 해당 항목이 삭제되고 null을 반환합니다."
 	)
 	@PostMapping("/{cartItemId}/decrement")
 	@PreAuthorize("@cartItemOwnerValidator.isOwner(#cartItemId, principal.userId)")
@@ -78,7 +78,7 @@ public class CartItemController {
 		);
 	}
 
-	@Operation(summary = "장바구니 품목 삭제", description = "장바구니에서 특정 품목을 삭제합니다.")
+	@Operation(summary = "장바구니 항목 삭제", description = "장바구니에서 특정 항목을 삭제합니다.")
 	@DeleteMapping("/{cartItemId}")
 	@PreAuthorize("@cartItemOwnerValidator.isOwner(#cartItemId, principal.userId)")
 	public ResponseEntity<ApiResponse<Void>> deleteCart(

@@ -34,14 +34,12 @@ public class CartController {
         );
     }
 
-    @Operation(summary = "장바구니 비우기", description = "장바구니 품목들을 전체 삭제합니다.")
+    @Operation(summary = "장바구니 비우기", description = "장바구니 항목들을 전체 삭제합니다.")
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> deleteAllCart(
             @AuthenticationPrincipal(expression = "userId") Long userId
     ) {
         cartService.deleteAll(userId);
-        return ResponseEntity.ok(
-                ApiResponse.ok()
-        );
+        return ResponseEntity.ok(ApiResponse.ok());
     }
 }

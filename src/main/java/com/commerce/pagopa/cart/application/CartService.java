@@ -20,7 +20,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CartResponseDto findUserCart(Long userId) {
         Optional<Cart> optionalCart = cartRepository.findByUserIdWithItems(userId);
 

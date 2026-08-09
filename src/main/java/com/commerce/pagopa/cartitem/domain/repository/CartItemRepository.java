@@ -6,6 +6,7 @@ import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.product.domain.model.Product;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CartItemRepository {
@@ -15,7 +16,14 @@ public interface CartItemRepository {
 
 	Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
 
+	List<CartItem> findAllByIdInAndUserId(
+			List<Long> cartItemIds,
+			Long userId
+	);
+
 	void deleteById(Long cartItemId);
+
+	void deleteAllByIdIn(List<Long> cartItemIds);
 
 	default CartItem findByIdOrThrow(Long cartItemId) {
 		return findById(cartItemId).orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));

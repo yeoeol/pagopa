@@ -1,13 +1,13 @@
 package com.commerce.pagopa.order.application;
 
-import com.commerce.pagopa.cart.domain.model.Cart;
-import com.commerce.pagopa.cart.domain.repository.CartRepository;
+import com.commerce.pagopa.cartitem.domain.model.CartItem;
+import com.commerce.pagopa.cartitem.domain.repository.CartItemRepository;
 import com.commerce.pagopa.delivery.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.delivery.domain.model.Delivery;
 import com.commerce.pagopa.delivery.domain.repository.DeliveryRepository;
 import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.order.application.dto.request.CartOrderRequestDto;
+import com.commerce.pagopa.order.application.dto.request.CartItemOrderRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.order.application.dto.request.OrderSearch;
 import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 
 import io.micrometer.core.annotation.Counted;
 
-import static com.commerce.pagopa.global.response.ErrorCode.CART_NOT_FOUND;
+import static com.commerce.pagopa.global.response.ErrorCode.CART_ITEM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +45,7 @@ public class OrderService {
     private final DeliveryRepository deliveryRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
     /**
      * 바로 주문을 생성합니다.
@@ -79,7 +79,7 @@ public class OrderService {
             productMap.put(productId, product);
         }
 
-        // OrderProduct 목록 생성 및 총액 계산
+        // OrderItem 목록 생성 및 총액 계산
         User user = userRepository.findByIdOrThrow(userId);
         Order order = Order.init(user);
 
@@ -126,32 +126,24 @@ public class OrderService {
      */
     @Counted("my.order")
     @Transactional
-    public OrderResponseDto orderFromCart(Long userId, CartOrderRequestDto requestDto) {
-        // 장바구니 목록 조회
-        List<Cart> carts = cartRepository.findAllByIdInAndUserId(requestDto.cartIds(), userId);
-        if (carts.isEmpty()) {
-            throw new BusinessException(CART_NOT_FOUND);
-        }
-
-        // order() 메서드에 보내기 위한 재료 만들기
-        List<OrderItemRequestDto> orderItemRequestDtos = new ArrayList<>();
-        for (Cart cart : carts) {
-            OrderItemRequestDto dto = new OrderItemRequestDto(
-                    cart.getProduct().getId(),
-                    cart.getQuantity()
-            );
-            orderItemRequestDtos.add(dto);
-        }
-
-        OrderCreateRequestDto orderCreateRequestDto = new OrderCreateRequestDto(
-                requestDto.delivery(), orderItemRequestDtos
+    public OrderResponseDto orderFromCart(Long userId, CartItemOrderRequestDto requestDto) {
+        // 선택된 장바구니 항목 조회
+        List<CartItem> cartItems = cartItemRepository.findAllByIdInAndUserId(
+                requestDto.cartItemIds(),
+                userId
         );
-
+        OrderCreateRequestDto orderCreateRequestDto = getOrderCreateRequestDto(
+                requestDto,
+                cartItems
+        );
         OrderResponseDto response = order(userId, orderCreateRequestDto);
 
         // 장바구니 목록 삭제
-        cartRepository.deleteAllByIdIn(carts.stream().map(Cart::getId).toList());
-
+        cartItemRepository.deleteAllByIdIn(
+                cartItems.stream()
+                        .map(CartItem::getId)
+                        .toList()
+        );
         return response;
     }
 
@@ -207,5 +199,29 @@ public class OrderService {
                 pageable
         );
         return pageOrder.map(OrderResponseDto::from);
+    }
+
+    private OrderCreateRequestDto getOrderCreateRequestDto(
+            CartItemOrderRequestDto requestDto,
+            List<CartItem> cartItems
+    ) {
+        if (cartItems.isEmpty()) {
+            throw new BusinessException(CART_ITEM_NOT_FOUND);
+        }
+
+        // order() 메서드에 보내기 위한 재료 만들기
+        List<OrderItemRequestDto> orderItemRequestDtos = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            OrderItemRequestDto dto = new OrderItemRequestDto(
+                    cartItem.getProduct().getId(),
+                    cartItem.getCartQuantity()
+            );
+            orderItemRequestDtos.add(dto);
+        }
+
+        return new OrderCreateRequestDto(
+                requestDto.delivery(),
+                orderItemRequestDtos
+        );
     }
 }
