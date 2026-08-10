@@ -6,6 +6,7 @@ import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.user.domain.model.RefreshToken;
 import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 import com.commerce.pagopa.user.domain.repository.RefreshTokenRepository;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
@@ -29,23 +30,29 @@ public class AuthService {
 
     @Transactional
     public TokenResponseDto reissueToken(String refreshToken) {
-        ErrorCode tokenValidationErrorCode = jwtTokenProvider.getTokenValidationErrorCode(refreshToken);
-        if (tokenValidationErrorCode == null) {
-            RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
-
-            // 기존에 저장되어 있던 토큰과 파라미터로 넘어온 토큰이 일치하는지 검증
-            if (!token.getToken().equals(refreshToken)) {
-                throw new BusinessException(ErrorCode.INVALID_TOKEN);
-            }
-
-            Long userId = token.getUser().getId();
-            User user = userRepository.findByIdOrThrow(userId);
-
-            return issueAccessTokenAndRefreshToken(userId, user.getEmail(), user.getRoleName());
+        ErrorCode errorCode = jwtTokenProvider.getTokenValidationErrorCode(refreshToken);
+        if (errorCode != null) {
+            throw new BusinessException(errorCode);
         }
 
-        throw new BusinessException(tokenValidationErrorCode);
+        RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
+
+        // 기존에 저장되어 있던 토큰과 파라미터로 넘어온 토큰이 일치하는지 검증
+        if (!token.getToken().equals(refreshToken)) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        User user = token.getUser();
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
+        }
+
+        return issueAccessTokenAndRefreshToken(
+                user.getId(),
+                user.getEmail(),
+                user.getRoleName()
+        );
     }
 
     @Transactional
