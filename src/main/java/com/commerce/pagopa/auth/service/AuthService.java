@@ -43,7 +43,8 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
-        User user = token.getUser();
+        Long userId = token.getUser().getId();
+        User user = userRepository.findByIdForUpdateOrThrow(userId);
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
         }

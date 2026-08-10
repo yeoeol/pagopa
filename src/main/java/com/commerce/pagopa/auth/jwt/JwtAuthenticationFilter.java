@@ -60,12 +60,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (BusinessException e) {
+                    tokenValidationErrorCode = ErrorCode.USER_NOT_ACTIVE;
+
                     SecurityContextHolder.clearContext();
-                    request.setAttribute(ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE, tokenValidationErrorCode);
+                    request.setAttribute(
+                            ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE,
+                            tokenValidationErrorCode
+                    );
                 }
             } else {
                 SecurityContextHolder.clearContext();
-                request.setAttribute(ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE, tokenValidationErrorCode);
+                request.setAttribute(
+                        ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE,
+                        tokenValidationErrorCode
+                );
             }
         }
 
