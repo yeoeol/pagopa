@@ -10,7 +10,7 @@ public record CategorySimpleResponseDto(
     public static CategorySimpleResponseDto from(Category category) {
         return new CategorySimpleResponseDto(
                 category.getId(),
-                category.getParent().getId(),
+                category.getParent() == null ? null : category.getParent().getId(),
                 category.getName()
         );
     }

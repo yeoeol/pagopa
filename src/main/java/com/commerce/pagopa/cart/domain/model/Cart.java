@@ -1,65 +1,65 @@
 package com.commerce.pagopa.cart.domain.model;
 
+import com.commerce.pagopa.cartitem.domain.model.CartItem;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.user.domain.model.User;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static com.commerce.pagopa.global.response.ErrorCode.INVALID_CART_QUANTITY;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "carts")
+@Table(
+        name = "cart",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_cart_user_id",
+                        columnNames = {"user_id"}
+                )
+        }
+)
 public class Cart extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_id")
+    @Column(name = "cart_id", nullable = false)
     private Long id;
 
-    private int quantity;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_cart_user")
+    )
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private final List<CartItem> cartItems = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Cart(int quantity, User user, Product product) {
-        this.quantity = quantity;
+    private Cart(User user) {
         this.user = user;
-        this.product = product;
     }
 
-    public static Cart create(int quantity, User user, Product product) {
+    public static Cart create(User user) {
         return Cart.builder()
-                .quantity(quantity)
                 .user(user)
-                .product(product)
                 .build();
     }
 
-    public void addQuantity(int amount) {
-        if (amount <= 0) {
-            throw new BusinessException(INVALID_CART_QUANTITY);
-        }
-        this.quantity += amount;
+    public void addItem(CartItem cartItem) {
+        this.cartItems.add(cartItem);
+        cartItem.assignCart(this);
     }
 
-    public void reduceQuantity() {
-        if (this.quantity <= 0) {
-            throw new BusinessException(INVALID_CART_QUANTITY);
-        }
-        this.quantity -= 1;
+    public void removeAllItems() {
+        this.cartItems.clear();
     }
 }

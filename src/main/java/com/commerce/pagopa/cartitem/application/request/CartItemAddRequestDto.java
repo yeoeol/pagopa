@@ -1,9 +1,9 @@
-package com.commerce.pagopa.cart.application.dto.request;
+package com.commerce.pagopa.cartitem.application.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record CartAddRequestDto(
+public record CartItemAddRequestDto(
         @NotNull(message = "{validation.notNull}")
         Long productId,
 
