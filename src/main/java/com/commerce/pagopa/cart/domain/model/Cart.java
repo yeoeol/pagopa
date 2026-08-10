@@ -16,7 +16,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "cart")
+@Table(
+        name = "cart",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_cart_user_id",
+                        columnNames = {"user_id"}
+                )
+        }
+)
 public class Cart extends BaseTimeEntity {
 
     @Id

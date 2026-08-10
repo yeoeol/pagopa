@@ -26,10 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -128,10 +126,12 @@ public class OrderService {
     @Transactional
     public OrderResponseDto orderFromCart(Long userId, CartItemOrderRequestDto requestDto) {
         // 선택된 장바구니 항목 조회
-        List<CartItem> cartItems = cartItemRepository.findAllByIdInAndUserId(
+        List<CartItem> cartItems = cartItemRepository.findAllByIdInAndUserIdForUpdate(
                 requestDto.cartItemIds(),
                 userId
         );
+        validateRequestedCartItems(requestDto.cartItemIds(), cartItems);
+
         OrderCreateRequestDto orderCreateRequestDto = getOrderCreateRequestDto(
                 requestDto,
                 cartItems
@@ -223,5 +223,18 @@ public class OrderService {
                 requestDto.delivery(),
                 orderItemRequestDtos
         );
+    }
+
+    private void validateRequestedCartItems(
+            List<Long> requestedItemIds,
+            List<CartItem> cartItems
+    ) {
+        Set<Long> requestedIds = new HashSet<>(requestedItemIds);
+        Set<Long> foundIds = cartItems.stream()
+                .map(CartItem::getId)
+                .collect(Collectors.toSet());
+        if (!requestedIds.equals(foundIds)) {
+            throw new BusinessException(CART_ITEM_NOT_FOUND);
+        }
     }
 }

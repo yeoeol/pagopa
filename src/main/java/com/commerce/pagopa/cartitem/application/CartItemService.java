@@ -1,7 +1,7 @@
 package com.commerce.pagopa.cartitem.application;
 
+import com.commerce.pagopa.cart.application.CartService;
 import com.commerce.pagopa.cart.domain.model.Cart;
-import com.commerce.pagopa.cart.domain.repository.CartRepository;
 import com.commerce.pagopa.cartitem.application.request.CartItemAddRequestDto;
 import com.commerce.pagopa.cartitem.application.reseponse.CartItemResponseDto;
 import com.commerce.pagopa.cartitem.domain.model.CartItem;
@@ -18,13 +18,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CartItemService {
 
-    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final CartService cartService;
 
     @Transactional
-    public CartItemResponseDto addCart(Long userId, CartItemAddRequestDto requestDto) {
-        Cart cart = cartRepository.findByUserIdOrThrow(userId);
+    public CartItemResponseDto addCartItem(Long userId, CartItemAddRequestDto requestDto) {
+        Cart cart = cartService.getOrCreate(userId);
 
         Product product = productRepository.findByIdOrThrow(requestDto.productId());
 
@@ -42,14 +42,14 @@ public class CartItemService {
 
     @Transactional
     public CartItemResponseDto incrementQuantity(Long cartItemId) {
-        CartItem cartItem = cartItemRepository.findByIdOrThrow(cartItemId);
+        CartItem cartItem = cartItemRepository.findByIdForUpdateOrThrow(cartItemId);
         cartItem.addQuantity(1);
         return CartItemResponseDto.from(cartItem);
     }
 
     @Transactional
     public CartItemResponseDto decrementQuantity(Long cartItemId) {
-        CartItem cartItem = cartItemRepository.findByIdOrThrow(cartItemId);
+        CartItem cartItem = cartItemRepository.findByIdForUpdateOrThrow(cartItemId);
         cartItem.reduceQuantity(1);
 
         if (cartItem.getCartQuantity() == 0) {

@@ -3,7 +3,9 @@ package com.commerce.pagopa.cart.application.dto.response;
 import com.commerce.pagopa.cart.domain.model.Cart;
 import com.commerce.pagopa.cartitem.application.reseponse.CartItemResponseDto;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
+import com.commerce.pagopa.user.domain.model.User;
 
+import java.util.Collections;
 import java.util.List;
 
 public record CartResponseDto(
@@ -18,6 +20,14 @@ public record CartResponseDto(
 				cart.getCartItems().stream()
 						.map(CartItemResponseDto::from)
 						.toList()
+		);
+	}
+
+	public static CartResponseDto empty(User user) {
+		return new CartResponseDto(
+				null,
+				UserResponseDto.from(user),
+				Collections.emptyList()
 		);
 	}
 }

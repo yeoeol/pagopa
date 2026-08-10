@@ -34,7 +34,7 @@ public class CartItemController {
 			@AuthenticationPrincipal(expression = "userId") Long userId,
 			@Valid @RequestBody CartItemAddRequestDto requestDto
 	) {
-		CartItemResponseDto response = cartItemService.addCart(
+		CartItemResponseDto response = cartItemService.addCartItem(
 				userId,
 				requestDto
 		);
@@ -71,7 +71,7 @@ public class CartItemController {
 		if (response == null) {
 			return ResponseEntity
 					.status(HttpStatus.NO_CONTENT)
-					.body(ApiResponse.ok(null));
+					.build();
 		}
 		return ResponseEntity.ok(
 				ApiResponse.ok(response) // 수량이 0이 되어 삭제된 경우 response는 null

@@ -21,4 +21,8 @@ public interface CartRepository {
     default Cart findByUserIdOrThrow(Long userId) {
         return findByUserId(userId).orElseThrow(() -> new BusinessException(CART_NOT_FOUND));
     }
+
+    default Cart findByUserIdWithItemsOrThrow(Long userId) {
+        return findByUserIdWithItems(userId).orElseThrow(() -> new BusinessException(CART_NOT_FOUND));
+    }
 }

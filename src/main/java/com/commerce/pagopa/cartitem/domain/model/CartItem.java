@@ -80,7 +80,7 @@ public class CartItem extends BaseTimeEntity {
 	}
 
 	public void reduceQuantity(Integer quantity) {
-		if (this.cartQuantity >= 1) {
+		if (this.cartQuantity >= quantity) {
 			this.cartQuantity -= quantity;
 		}
 	}
