@@ -155,7 +155,7 @@ public class OrderService {
     public OrderResponseDto cancelOrder(Long orderId) {
         // 주문 존재 여부 확인
         Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
-        order.cancel();
+        order.cancel(Instant.now());
 
         // 데드락 방지
         List<Long> productIds = order.getOrderItems().stream()

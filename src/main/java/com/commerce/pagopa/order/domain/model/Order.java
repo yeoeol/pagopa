@@ -82,18 +82,12 @@ public class Order extends BaseTimeEntity {
     }
 
     // == 주문 취소 로직 ==
-    public void cancel() {
-        validateCancelOrder();
-        this.status = OrderStatus.CANCELED;
-        this.canceledAt = Instant.now();
-    }
+    public void cancel(Instant canceledAt) {
+        if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
 
-    private void validateCancelOrder() {
-        if (this.status == OrderStatus.CANCELED) {
-            throw new BusinessException(ErrorCode.ORDER_ALREADY_CANCELLED);
-        }
-        if (this.status != OrderStatus.CONFIRMED) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
-        }
+        this.status = OrderStatus.CANCELED;
+        this.canceledAt = canceledAt;
     }
 }
