@@ -1,12 +1,12 @@
 package com.commerce.pagopa.auth.service;
 
+import com.commerce.pagopa.auth.jwt.AuthenticatedUser;
 import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.user.domain.model.RefreshToken;
 import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 import com.commerce.pagopa.user.domain.repository.RefreshTokenRepository;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
@@ -22,6 +22,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtAuthenticationService jwtAuthenticationService;
 
     @Transactional
     public void logout(Long userId) {
@@ -45,14 +46,12 @@ public class AuthService {
 
         Long userId = token.getUser().getId();
         User user = userRepository.findByIdForUpdateOrThrow(userId);
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
-        }
+        AuthenticatedUser authenticatedUser = jwtAuthenticationService.loadActiveUser(user.getId());
 
         return issueAccessTokenAndRefreshToken(
-                user.getId(),
-                user.getEmail(),
-                user.getRoleName()
+                authenticatedUser.userId(),
+                authenticatedUser.email(),
+                authenticatedUser.role().name()
         );
     }
 
