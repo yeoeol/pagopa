@@ -3,6 +3,7 @@ package com.commerce.pagopa.seller.presentation;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.seller.application.SellerProductService;
+import com.commerce.pagopa.seller.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.seller.application.dto.product.request.ProductRegisterRequestDto;
 import jakarta.validation.Valid;
 
@@ -24,7 +25,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "SELLER PRODUCT API", description = "판매자 - 상품 관리 API")
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('SELLER')")
 @RequestMapping("/api/v1/seller/products")
 public class SellerProductController {
 
@@ -63,5 +63,16 @@ public class SellerProductController {
                 .body(ApiResponse.ok(
                         sellerProductService.register(userId, requestDto))
                 );
+    }
+
+    @Operation(summary = "판매자 상품 재고 추가", description = "특정 판매자 상품의 재고를 추가합니다.")
+    @PatchMapping("/{productId}/stock")
+    public ResponseEntity<ApiResponse<ProductResponseDto>> addStock(
+            @PathVariable("productId") Long productId,
+            @Valid @RequestBody ProductAddStockRequestDto requestDto
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(sellerProductService.addStock(productId, requestDto))
+        );
     }
 }

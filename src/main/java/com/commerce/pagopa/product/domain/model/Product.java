@@ -114,27 +114,19 @@ public class Product extends BaseTimeEntity {
         image.assignProduct(this);
     }
 
-    public void activate() {
-        this.status = ProductStatus.ACTIVE;
-    }
-
-    public void inactivate() {
-        this.status = ProductStatus.INACTIVE;
-    }
-
-    public void markAsSoldOut() {
-        this.status = ProductStatus.SOLD_OUT;
-    }
-
-    public void hide() {
-        this.status = ProductStatus.HIDDEN;
+    public void increaseStock(int quantity) {
+        this.stockQuantity += quantity;
+        if (this.status == ProductStatus.SOLD_OUT && this.stockQuantity > 0) {
+            this.status = ProductStatus.ACTIVE;
+        }
     }
 
     public void decreaseStock(int quantity) {
-        validateOnSale();
-        validatePositiveQuantity(quantity);
         validateEnoughStock(quantity);
         this.stockQuantity -= quantity;
+        if (this.stockQuantity <= 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
     }
 
     public void restoreStock(int quantity) {
