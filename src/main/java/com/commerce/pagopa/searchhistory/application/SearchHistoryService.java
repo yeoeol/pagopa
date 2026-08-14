@@ -1,16 +1,18 @@
 package com.commerce.pagopa.searchhistory.application;
 
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 import com.commerce.pagopa.searchhistory.application.dto.response.SearchHistoryResponseDto;
 import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
 import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;
-import lombok.RequiredArgsConstructor;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -30,23 +32,19 @@ public class SearchHistoryService {
             User user = userRepository.findById(userId).orElse(null);
             if (user != null) {
                 Optional<SearchHistory> existingHistory = searchHistoryRepository.findByUserIdAndKeyword(userId, keyword);
-                if (existingHistory.isPresent()) {
-                    existingHistory.get().updateLastSearchedAt(); // 이미 존재하면 갱신만 수행
-                } else {
-                    SearchHistory history = SearchHistory.createForUser(user, keyword);
-                    searchHistoryRepository.save(history);
-                }
+                existingHistory.ifPresentOrElse(
+						SearchHistory::updateLastSearchedAt,
+                        () -> searchHistoryRepository.save(SearchHistory.createForUser(user, keyword))
+                );
             }
         }
         // 비로그인 사용자 (세션 기반)
         else if (sessionId != null && !sessionId.isBlank()) {
             Optional<SearchHistory> existingHistory = searchHistoryRepository.findBySessionIdAndKeyword(sessionId, keyword);
-            if (existingHistory.isPresent()) {
-                existingHistory.get().updateLastSearchedAt(); // 이미 존재하면 갱신만 수행
-            } else {
-                SearchHistory history = SearchHistory.createForGuest(sessionId, keyword);
-                searchHistoryRepository.save(history);
-            }
+            existingHistory.ifPresentOrElse(
+                    SearchHistory::updateLastSearchedAt,
+                    () -> searchHistoryRepository.save(SearchHistory.createForGuest(sessionId, keyword))
+            );
         }
     }
 
