@@ -9,8 +9,6 @@ import com.commerce.pagopa.user.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,13 +20,12 @@ public class CartService {
 
     @Transactional
     public CartResponseDto findUserCart(Long userId) {
-        Optional<Cart> optionalCart = cartRepository.findByUserIdWithItems(userId);
-        if (optionalCart.isPresent()) {
-            return CartResponseDto.from(optionalCart.get());
-        }
-
-        User user = userRepository.findByIdOrThrow(userId);
-        return CartResponseDto.empty(user);
+		return cartRepository.findByUserIdWithItems(userId)
+                .map(CartResponseDto::from)
+                .orElseGet(() -> {
+                    User user = userRepository.findByIdOrThrow(userId);
+                    return CartResponseDto.empty(user);
+                });
     }
 
     @Transactional
@@ -41,10 +38,8 @@ public class CartService {
     public Cart getOrCreate(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
 
-        Optional<Cart> optionalCart = cartRepository.findByUserId(userId);
-		return optionalCart.orElseGet(
-                () -> cartRepository.save(Cart.create(user))
-        );
+		return cartRepository.findByUserId(userId)
+                .orElseGet(() -> cartRepository.save(Cart.create(user)));
 
 	}
 }

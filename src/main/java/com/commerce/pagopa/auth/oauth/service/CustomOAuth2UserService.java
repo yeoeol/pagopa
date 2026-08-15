@@ -17,8 +17,6 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -51,30 +49,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User saveOrUpdate(OAuth2UserInfo userInfo, Provider provider) {
-        Optional<User> optionalUser = userRepository
-                .findByProviderAndProviderId(provider, userInfo.getProviderId());
-
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (!user.getStatus().equals(UserStatus.ACTIVE)) {
-                OAuth2Error error = new OAuth2Error(
-                        ErrorCode.USER_NOT_ACTIVE.name(),
-                        ErrorCode.USER_NOT_ACTIVE.getMessage(),
-                        null
-                );
-                throw new OAuth2AuthenticationException(error, error.toString());
-            }
-            return user;
-        }
-
-        return userRepository.save(
-                User.create(
-                        provider,
-                        userInfo.getProviderId(),
-                        userInfo.getName(),
-                        userInfo.getEmail(),
-                        azureBaseUrl + "/default.png"
-                )
-        );
+		return userRepository
+				.findByProviderAndProviderId(provider, userInfo.getProviderId())
+                .map(user -> {
+                    if (user.getStatus() != UserStatus.ACTIVE) {
+                        OAuth2Error error = new OAuth2Error(
+                                ErrorCode.USER_NOT_ACTIVE.name(),
+                                ErrorCode.USER_NOT_ACTIVE.getMessage(),
+                                null
+                        );
+                        throw new OAuth2AuthenticationException(error, error.toString());
+                    }
+                    return user;
+                }).orElseGet(() -> userRepository.save(
+						User.create(
+								provider,
+								userInfo.getProviderId(),
+								userInfo.getName(),
+								userInfo.getEmail(),
+								azureBaseUrl + "/default.png"
+						)
+				));
     }
 }

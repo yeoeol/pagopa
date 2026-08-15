@@ -6,6 +6,7 @@ import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.ProductImage;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.seller.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.seller.application.dto.product.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.seller.domain.model.Seller;
 import com.commerce.pagopa.seller.domain.repository.SellerRepository;
@@ -71,5 +72,12 @@ public class SellerProductService {
         }
 
         return ProductResponseDto.from(productRepository.save(product));
+    }
+
+    @Transactional
+    public ProductResponseDto addStock(Long productId, ProductAddStockRequestDto requestDto) {
+        Product product = productRepository.findByIdOrThrow(productId);
+        product.increaseStock(requestDto.quantity());
+        return ProductResponseDto.from(product);
     }
 }
