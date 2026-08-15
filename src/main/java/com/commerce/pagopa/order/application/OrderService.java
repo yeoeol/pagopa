@@ -174,7 +174,7 @@ public class OrderService {
         // 주문 항목 수량만큼 재고 복구
         for (OrderItem op : order.getOrderItems()) {
             Product product = productMap.get(op.getProduct().getId());
-            product.restoreStock(op.getOrderQuantity());
+            product.increaseStock(op.getOrderQuantity());
         }
 
         return OrderResponseDto.from(order);

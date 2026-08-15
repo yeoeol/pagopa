@@ -42,10 +42,10 @@ public class SellerProductController {
     }
 
     @Operation(summary = "판매자 상품 상세 조회", description = "판매자 본인의 특정 상품을 조회합니다.")
-    @GetMapping("/{id}")
+    @GetMapping("/{productId}")
     @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
     public ResponseEntity<ApiResponse<ProductResponseDto>> getSellerProduct(
-            @PathVariable("id") Long productId
+            @PathVariable("productId") Long productId
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(sellerProductService.find(productId))
@@ -67,6 +67,7 @@ public class SellerProductController {
 
     @Operation(summary = "판매자 상품 재고 추가", description = "특정 판매자 상품의 재고를 추가합니다.")
     @PatchMapping("/{productId}/stock")
+    @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
     public ResponseEntity<ApiResponse<ProductResponseDto>> addStock(
             @PathVariable("productId") Long productId,
             @Valid @RequestBody ProductAddStockRequestDto requestDto

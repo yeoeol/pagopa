@@ -129,23 +129,6 @@ public class Product extends BaseTimeEntity {
         }
     }
 
-    public void restoreStock(int quantity) {
-        validatePositiveQuantity(quantity);
-        this.stockQuantity += quantity;
-    }
-
-    private void validatePositiveQuantity(int quantity) {
-        if (quantity <= 0) {
-            throw new BusinessException(ErrorCode.INVALID_QUANTITY);
-        }
-    }
-
-    private void validateOnSale() {
-        if (this.status != ProductStatus.ACTIVE) {
-            throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
-        }
-    }
-
     private void validateEnoughStock(int quantity) {
         if (this.stockQuantity < quantity) {
             throw new BusinessException(
