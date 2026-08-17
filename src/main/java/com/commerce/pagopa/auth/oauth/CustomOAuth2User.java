@@ -35,6 +35,7 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getUserRoles().stream()
                 .map(UserRole::getRole)
+                .filter(Role::isEnabled)
                 .map(Role::getCode)
                 .map(RoleCode::name)
                 .map(SimpleGrantedAuthority::new)
@@ -67,6 +68,7 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
     public Set<String> getRoles() {
         return user.getUserRoles().stream()
                 .map(UserRole::getRole)
+                .filter(Role::isEnabled)
                 .map(Role::getCode)
                 .map(RoleCode::name)
                 .collect(Collectors.toUnmodifiableSet());

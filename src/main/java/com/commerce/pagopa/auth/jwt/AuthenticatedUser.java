@@ -19,6 +19,7 @@ public record AuthenticatedUser(
 				user.getEmail(),
 				user.getUserRoles().stream()
 						.map(UserRole::getRole)
+						.filter(Role::isEnabled)
 						.map(Role::getCode)
 						.collect(Collectors.toUnmodifiableSet())
 		);

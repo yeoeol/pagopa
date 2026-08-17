@@ -105,10 +105,10 @@ public enum ErrorCode {
     SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "SELLER_001", "존재하지 않는 판매자입니다."),
 
     // ROLE
-    ROLE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROLE_001", "이미 존재하는 역할(권한)입니다."),
+    ROLE_ALREADY_EXISTS(HttpStatus.CONFLICT, "ROLE_001", "이미 존재하는 역할(권한)입니다."),
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_002", "존재하지 않는 역할(권한)입니다."),
-    ROLE_ALREADY_DISABLED(HttpStatus.NOT_FOUND, "ROLE_003", "이미 비활성화된 역할(권한)입니다."),
-    ROLE_ALREADY_ENABLED(HttpStatus.NOT_FOUND, "ROLE_004", "이미 활성화된 역할(권한)입니다."),
+    ROLE_ALREADY_DISABLED(HttpStatus.CONFLICT, "ROLE_003", "이미 비활성화된 역할(권한)입니다."),
+    ROLE_ALREADY_ENABLED(HttpStatus.CONFLICT, "ROLE_004", "이미 활성화된 역할(권한)입니다."),
     ;
     private final HttpStatus httpStatus;
     private final String code;
