@@ -1,7 +1,10 @@
 package com.commerce.pagopa.role.application;
 
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.role.application.response.RoleResponseDto;
 import com.commerce.pagopa.role.domain.model.Role;
+import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.role.domain.repository.RoleRepository;
 
 import org.springframework.stereotype.Service;
@@ -46,5 +49,11 @@ public class RoleService {
 	public void inactive(Long roleId) {
 		Role role = roleRepository.findByIdOrThrow(roleId);
 		role.inactive();
+	}
+
+	@Transactional(readOnly = true)
+	public Role findUserRole() {
+		return roleRepository.findByCode(RoleCode.ROLE_USER)
+				.orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
 	}
 }

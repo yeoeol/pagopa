@@ -126,6 +126,11 @@ public class User extends BaseTimeEntity {
         this.withdrawnAt = Instant.now();
     }
 
+    public void addUserRole(UserRole userRole) {
+        this.userRoles.add(userRole);
+        userRole.assignUser(this);
+    }
+
     private void validateActiveUserStatus() {
         if (this.status != UserStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);

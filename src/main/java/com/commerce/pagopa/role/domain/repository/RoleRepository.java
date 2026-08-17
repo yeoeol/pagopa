@@ -3,6 +3,7 @@ package com.commerce.pagopa.role.domain.repository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.role.domain.model.Role;
+import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,6 @@ public interface RoleRepository {
 				() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND)
 		);
 	}
+
+	Optional<Role> findByCode(RoleCode code);
 }

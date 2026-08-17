@@ -4,10 +4,11 @@ import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
 import com.commerce.pagopa.auth.oauth.userinfo.OAuth2UserInfo;
 import com.commerce.pagopa.auth.oauth.userinfo.OAuth2UserInfoFactory;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.user.application.UserService;
+import com.commerce.pagopa.user.application.dto.request.UserCreateRequestDto;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -23,9 +24,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final UserRepository userRepository;
+	private final UserService userService;
 
-    @Value("${app.azure.base-url}")
+	@Value("${app.azure.base-url}")
     private String azureBaseUrl;
 
     @Override
@@ -49,20 +50,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User saveOrUpdate(OAuth2UserInfo userInfo, Provider provider) {
-		return userRepository
-				.findByProviderAndProviderId(provider, userInfo.getProviderId())
-                .map(user -> {
-                    if (user.getStatus() != UserStatus.ACTIVE) {
-                        OAuth2Error error = new OAuth2Error(
-                                ErrorCode.USER_NOT_ACTIVE.name(),
-                                ErrorCode.USER_NOT_ACTIVE.getMessage(),
-                                null
-                        );
-                        throw new OAuth2AuthenticationException(error, error.toString());
-                    }
-                    return user;
-                }).orElseGet(() -> userRepository.save(
-						User.create(
+		return userService.findByProviderAndProviderIdWithActive(provider, userInfo.getProviderId())
+				.map(user -> {
+					if (user.getStatus() != UserStatus.ACTIVE) {
+						OAuth2Error error = new OAuth2Error(
+								ErrorCode.USER_NOT_ACTIVE.name(),
+								ErrorCode.USER_NOT_ACTIVE.getMessage(),
+								null
+						);
+						throw new OAuth2AuthenticationException(error, error.toString());
+					}
+					return user;
+				}).orElseGet(() -> userService.register(
+						new UserCreateRequestDto(
 								provider,
 								userInfo.getProviderId(),
 								userInfo.getName(),
