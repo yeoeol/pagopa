@@ -42,9 +42,18 @@ public class RoleController {
 		);
 	}
 
+	@Operation(summary = "역할(권한) 활성화", description = "역할(권한)을 활성화합니다.")
+	@PatchMapping("/{roleId}/active")
+	public ResponseEntity<ApiResponse<Void>> active(
+			@PathVariable("roleId") Long roleId
+	) {
+		roleService.active(roleId);
+		return ResponseEntity.ok(ApiResponse.ok());
+	}
+
 	@Operation(summary = "역할(권한) 비활성화", description = "역할(권한)을 비활성화합니다.")
-	@PatchMapping("/{roleId}")
-	public ResponseEntity<ApiResponse<Void>> delete(
+	@PatchMapping("/{roleId}/inactive")
+	public ResponseEntity<ApiResponse<Void>> inactive(
 			@PathVariable("roleId") Long roleId
 	) {
 		roleService.inactive(roleId);

@@ -37,6 +37,12 @@ public class RoleService {
 	}
 
 	@Transactional
+	public void active(Long roleId) {
+		Role role = roleRepository.findByIdOrThrow(roleId);
+		role.active();
+	}
+
+	@Transactional
 	public void inactive(Long roleId) {
 		Role role = roleRepository.findByIdOrThrow(roleId);
 		role.inactive();

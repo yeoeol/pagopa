@@ -63,6 +63,13 @@ public class Role extends BaseTimeEntity {
 				.build();
 	}
 
+	public void active() {
+		if (this.enabled) {
+			throw new BusinessException(ErrorCode.ROLE_ALREADY_ENABLED);
+		}
+		this.enabled = true;
+	}
+
 	public void inactive() {
 		if (!this.enabled) {
 			throw new BusinessException(ErrorCode.ROLE_ALREADY_DISABLED);
