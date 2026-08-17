@@ -1,6 +1,8 @@
 package com.commerce.pagopa.role.domain.model;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 
 import jakarta.persistence.*;
@@ -52,13 +54,19 @@ public class Role extends BaseTimeEntity {
 
 	public static Role create(
 			RoleCode code,
-			String description,
-			boolean enabled
+			String description
 	) {
 		return Role.builder()
 				.code(code)
 				.description(description)
-				.enabled(enabled)
+				.enabled(true)
 				.build();
+	}
+
+	public void inactive() {
+		if (!this.enabled) {
+			throw new BusinessException(ErrorCode.ROLE_ALREADY_DISABLED);
+		}
+		this.enabled = false;
 	}
 }
