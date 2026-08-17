@@ -91,6 +91,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/refresh").permitAll()
                         .requestMatchers("/api/v1/auth/**").authenticated()
 
+                        .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
 

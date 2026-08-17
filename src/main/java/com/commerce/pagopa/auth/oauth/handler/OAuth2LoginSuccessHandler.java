@@ -3,22 +3,22 @@ package com.commerce.pagopa.auth.oauth.handler;
 import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.JwtTokenType;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
-import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.auth.oauth.CustomOAuth2User;
+import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.global.cookie.JwtCookieFactory;
-
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         TokenResponseDto tokenResponseDto = authService.issueAccessTokenAndRefreshToken(
                 oAuth2User.getUserId(),
                 oAuth2User.getEmail(),
-                oAuth2User.getRole()
+                oAuth2User.getRoles()
         );
 
         Cookie accessTokenCookie = jwtCookieFactory.createJwtCookie(

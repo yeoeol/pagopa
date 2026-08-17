@@ -1,14 +1,21 @@
 package com.commerce.pagopa.user.application;
 
 import com.commerce.pagopa.image.application.ImageService;
+import com.commerce.pagopa.role.application.RoleService;
+import com.commerce.pagopa.role.domain.model.Role;
+import com.commerce.pagopa.user.application.dto.request.UserCreateRequestDto;
 import com.commerce.pagopa.user.application.dto.request.UserUpdateRequestDto;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
+import com.commerce.pagopa.userrole.domain.model.UserRole;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +25,24 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ImageService imageService;
+    private final RoleService roleService;
+
+    @Transactional
+    public User register(UserCreateRequestDto requestDto) {
+        User user = User.create(
+                requestDto.provider(),
+                requestDto.providerId(),
+                requestDto.name(),
+                requestDto.email(),
+                requestDto.profileImageUrl()
+        );
+        Role role = roleService.findUserRole();
+
+        UserRole userRole = UserRole.create(user, role);
+        user.addUserRole(userRole);
+
+        return userRepository.save(user);
+    }
 
     @Transactional(readOnly = true)
     public UserResponseDto find(Long userId) {
@@ -36,5 +61,13 @@ public class UserService {
 
         user.updateProfile(requestDto.name(), requestDto.profileImage());
         return UserResponseDto.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findByProviderAndProviderIdWithActive(
+            Provider provider,
+            String providerId
+    ) {
+        return userRepository.findByProviderAndProviderId(provider, providerId);
     }
 }

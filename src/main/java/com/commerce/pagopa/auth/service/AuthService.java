@@ -5,6 +5,7 @@ import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.user.domain.model.RefreshToken;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.RefreshTokenRepository;
@@ -12,6 +13,9 @@ import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -51,14 +55,16 @@ public class AuthService {
         return issueAccessTokenAndRefreshToken(
                 authenticatedUser.userId(),
                 authenticatedUser.email(),
-                authenticatedUser.role().name()
+                authenticatedUser.roleCodes().stream()
+                        .map(RoleCode::name)
+                        .collect(Collectors.toUnmodifiableSet())
         );
     }
 
     @Transactional
-    public TokenResponseDto issueAccessTokenAndRefreshToken(Long userId, String email, String role) {
+    public TokenResponseDto issueAccessTokenAndRefreshToken(Long userId, String email, Set<String> roles) {
         String accessToken = jwtTokenProvider.generateAccessToken(
-                userId, email, role
+                userId, email, roles
         );
         String refreshToken = jwtTokenProvider.generateRefreshToken(userId);
 
