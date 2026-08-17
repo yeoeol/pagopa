@@ -5,11 +5,14 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.model.enums.Role;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
+import com.commerce.pagopa.userrole.domain.model.UserRole;
+
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -61,9 +64,8 @@ public class User extends BaseTimeEntity {
     @Column(name = "profile_image_url", length = 512, nullable = false)
     private String profileImageUrl;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 20, nullable = false)
-    private Role role;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private final Set<UserRole> userRoles = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
@@ -84,7 +86,6 @@ public class User extends BaseTimeEntity {
             Address address,
             String phoneNumber,
             String profileImageUrl,
-            Role role,
             UserStatus status
     ) {
         this.provider = provider;
@@ -94,7 +95,6 @@ public class User extends BaseTimeEntity {
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.profileImageUrl = profileImageUrl;
-        this.role = role;
         this.status = status;
     }
 
@@ -111,7 +111,6 @@ public class User extends BaseTimeEntity {
                 .name(name)
                 .email(email)
                 .profileImageUrl(profileImageUrl)
-                .role(Role.ROLE_USER)
                 .status(UserStatus.ACTIVE)
                 .build();
     }
@@ -125,10 +124,6 @@ public class User extends BaseTimeEntity {
         validateActiveUserStatus();
         this.status = UserStatus.WITHDRAWN;
         this.withdrawnAt = Instant.now();
-    }
-
-    public String getRoleName() {
-        return role.name();
     }
 
     private void validateActiveUserStatus() {

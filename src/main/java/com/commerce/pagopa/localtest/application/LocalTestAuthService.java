@@ -2,14 +2,18 @@ package com.commerce.pagopa.localtest.application;
 
 import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.auth.service.AuthService;
+import com.commerce.pagopa.role.domain.model.Role;
+import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
+import com.commerce.pagopa.userrole.domain.model.UserRole;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +35,11 @@ public class LocalTestAuthService {
 		return authService.issueAccessTokenAndRefreshToken(
 				user.getId(),
 				user.getEmail(),
-				user.getRoleName()
+				user.getUserRoles().stream()
+						.map(UserRole::getRole)
+						.map(Role::getCode)
+						.map(RoleCode::name)
+						.collect(Collectors.toUnmodifiableSet())
 		);
 	}
 

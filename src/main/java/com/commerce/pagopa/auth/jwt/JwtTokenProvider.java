@@ -1,20 +1,25 @@
 package com.commerce.pagopa.auth.jwt;
 
+import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 
 @Slf4j
 @Component
@@ -34,12 +39,12 @@ public class JwtTokenProvider {
         this.refreshTokenExpiry = refreshTokenExpiry;
     }
 
-    public String generateAccessToken(Long userId, String email, String role) {
+    public String generateAccessToken(Long userId, String email, Collection<String> roles) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("email", email)
-                .claim("role", role)
+                .claim("roles", List.copyOf(roles))
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessTokenExpiry))
                 .signWith(secretKey)
@@ -72,12 +77,17 @@ public class JwtTokenProvider {
         return (String) parseClaims(token).get("email");
     }
 
-    public String getRole(String token) {
-        return (String) parseClaims(token).get("role");
-    }
+    public Set<String> getRoles(String token) {
+        Object rolesClaim = parseClaims(token).get("roles");
+        if (!(rolesClaim instanceof Collection<?> roles)
+                || roles.stream().anyMatch(role -> !(role instanceof String))
+        ) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
 
-    public boolean validateToken(String token) {
-        return getTokenValidationErrorCode(token) == null;
+        return roles.stream()
+                .map(String.class::cast)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public ErrorCode getTokenValidationErrorCode(String token) {
