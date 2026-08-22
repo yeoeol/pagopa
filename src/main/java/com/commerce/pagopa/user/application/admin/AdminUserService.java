@@ -1,7 +1,6 @@
 package com.commerce.pagopa.user.application.admin;
 
 import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSearchRequestDto;
-import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSuspendRequestDto;
 import com.commerce.pagopa.user.application.admin.dto.response.AdminUserDetailResponseDto;
 import com.commerce.pagopa.user.application.admin.dto.response.AdminUserPageResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
@@ -13,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,19 +54,19 @@ public class AdminUserService {
     @Transactional
     public void activate(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
-        user.activate();
+        user.activate(Instant.now());
     }
 
     @Transactional
-    public void suspend(Long userId, AdminUserSuspendRequestDto requestDto) {
+    public void suspend(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
-        user.suspend(requestDto.suspendedUntil());
+        user.suspend(Instant.now());
     }
 
     @Transactional
     public void ban(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
-        user.ban();
+        user.ban(Instant.now());
     }
 
     private String normalizeKeyword(String keyword) {

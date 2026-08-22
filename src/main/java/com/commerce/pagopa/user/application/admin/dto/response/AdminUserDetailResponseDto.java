@@ -1,5 +1,6 @@
 package com.commerce.pagopa.user.application.admin.dto.response;
 
+import com.commerce.pagopa.global.response.StatusResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
@@ -13,9 +14,8 @@ public record AdminUserDetailResponseDto(
         String email,
         String phoneNumber,
         String profileImageUrl,
-        UserStatus status,
-        Instant suspendedUntil,
-        Instant withdrawnAt,
+        StatusResponseDto<UserStatus> status,
+        Instant statusChangedAt,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -27,9 +27,8 @@ public record AdminUserDetailResponseDto(
                 user.getEmail(),
                 user.getPhoneNumber(),
                 user.getProfileImageUrl(),
-                user.getStatus(),
-                user.getSuspendedUntil(),
-                user.getWithdrawnAt(),
+                StatusResponseDto.from(user.getStatus()),
+                user.getStatusChangedAt(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );

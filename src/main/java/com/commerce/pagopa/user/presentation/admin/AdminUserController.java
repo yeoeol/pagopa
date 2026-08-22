@@ -2,7 +2,6 @@ package com.commerce.pagopa.user.presentation.admin;
 
 import com.commerce.pagopa.user.application.admin.AdminUserService;
 import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSearchRequestDto;
-import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSuspendRequestDto;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,10 +52,9 @@ public class AdminUserController {
 
     @PatchMapping("/{userId}/status/suspend")
     public String suspend(
-            @PathVariable("userId") Long userId,
-            @Valid @ModelAttribute AdminUserSuspendRequestDto requestDto
+            @PathVariable("userId") Long userId
     ) {
-        adminUserService.suspend(userId, requestDto);
+        adminUserService.suspend(userId);
         return "redirect:/admin/users/" + userId;
     }
 

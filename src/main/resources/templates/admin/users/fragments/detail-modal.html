@@ -38,13 +38,13 @@
             <dd class="col-sm-8"
                 th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</dd>
 
-            <dt class="col-sm-4" th:if="${user.suspendedUntil != null}">정지 종료일</dt>
-            <dd class="col-sm-8" th:if="${user.suspendedUntil != null}"
-                th:text="${#temporals.format(user.suspendedUntil, 'yyyy-MM-dd HH:mm')}">-</dd>
+            <dt class="col-sm-4" th:if="${user.status.status == 'SUSPENDED' && user.statusChangedAt != null}">정지일</dt>
+            <dd class="col-sm-8" th:if="${user.status.status == 'SUSPENDED' && user.statusChangedAt != null}"
+                th:text="${#temporals.format(user.statusChangedAt, 'yyyy-MM-dd HH:mm')}">-</dd>
 
-            <dt class="col-sm-4" th:if="${user.withdrawnAt != null}">탈퇴일</dt>
-            <dd class="col-sm-8" th:if="${user.withdrawnAt != null}"
-                th:text="${#temporals.format(user.withdrawnAt, 'yyyy-MM-dd HH:mm')}">-</dd>
+            <dt class="col-sm-4" th:if="${user.status.status == 'WITHDRAWN' && user.statusChangedAt != null}">탈퇴일</dt>
+            <dd class="col-sm-8" th:if="${user.status.status == 'WITHDRAWN' && user.statusChangedAt != null}"
+                th:text="${#temporals.format(user.statusChangedAt, 'yyyy-MM-dd HH:mm')}">-</dd>
         </dl>
     </div>
     <div class="modal-footer">

@@ -14,8 +14,7 @@ public record UserResponseDto(
         String email,
         String profileImageUrl,
         StatusResponseDto<UserStatus> status,
-        Instant suspendedUntil,
-        Instant withdrawnAt
+        Instant statusChangedAt
 ) {
     public static UserResponseDto from(User user) {
         return new UserResponseDto(
@@ -25,8 +24,7 @@ public record UserResponseDto(
                 user.getEmail(),
                 user.getProfileImageUrl(),
                 StatusResponseDto.from(user.getStatus()),
-                user.getSuspendedUntil(),
-                user.getWithdrawnAt()
+                user.getStatusChangedAt()
         );
     }
 }

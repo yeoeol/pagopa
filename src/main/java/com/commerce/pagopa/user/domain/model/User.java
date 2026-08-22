@@ -71,11 +71,8 @@ public class User extends BaseTimeEntity {
     @Column(name = "status", length = 20, nullable = false)
     private UserStatus status;
 
-    @Column(name = "suspended_until", nullable = true)
-    private Instant suspendedUntil;   // 정지 종료일
-
-    @Column(name = "withdrawn_at", nullable = true)
-    private Instant withdrawnAt;  // 탈퇴 일시
+    @Column(name = "status_changed_at", nullable = false)
+    private Instant statusChangedAt;  // 탈퇴 일시
 
     @Builder(access = AccessLevel.PRIVATE)
     private User(
@@ -86,7 +83,8 @@ public class User extends BaseTimeEntity {
             Address address,
             String phoneNumber,
             String profileImageUrl,
-            UserStatus status
+            UserStatus status,
+            Instant statusChangedAt
     ) {
         this.provider = provider;
         this.providerId = providerId;
@@ -96,6 +94,7 @@ public class User extends BaseTimeEntity {
         this.phoneNumber = phoneNumber;
         this.profileImageUrl = profileImageUrl;
         this.status = status;
+        this.statusChangedAt = statusChangedAt;
     }
 
     public static User create(
@@ -103,7 +102,8 @@ public class User extends BaseTimeEntity {
             String providerId,
             String name,
             String email,
-            String profileImageUrl
+            String profileImageUrl,
+            Instant statusChangedAt
     ) {
         return User.builder()
                 .provider(provider)
@@ -112,6 +112,7 @@ public class User extends BaseTimeEntity {
                 .email(email)
                 .profileImageUrl(profileImageUrl)
                 .status(UserStatus.ACTIVE)
+                .statusChangedAt(statusChangedAt)
                 .build();
     }
 
@@ -125,34 +126,30 @@ public class User extends BaseTimeEntity {
         userRole.assignUser(this);
     }
 
-    public void activate() {
+    public void activate(Instant activatedAt) {
         if (this.status == UserStatus.WITHDRAWN) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         this.status = UserStatus.ACTIVE;
-        this.suspendedUntil = null;
-        this.withdrawnAt = null;
+        this.statusChangedAt = activatedAt;
     }
 
-    public void suspend(Instant suspendedUntil) {
+    public void suspend(Instant suspendedAt) {
         if (this.status == UserStatus.WITHDRAWN
                 || this.status != UserStatus.ACTIVE
-                || this.suspendedUntil != null
         ) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         this.status = UserStatus.SUSPENDED;
-        this.suspendedUntil = suspendedUntil;
-        this.withdrawnAt = null;
+        this.statusChangedAt = suspendedAt;
     }
 
-    public void ban() {
+    public void ban(Instant bannedAt) {
         if (this.status == UserStatus.WITHDRAWN || this.status == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         this.status = UserStatus.BANNED;
-        this.suspendedUntil = null;
-        this.withdrawnAt = null;
+        this.statusChangedAt = bannedAt;
     }
 
     public void withdraw(Instant withdrawnAt) {
@@ -160,7 +157,6 @@ public class User extends BaseTimeEntity {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         this.status = UserStatus.WITHDRAWN;
-        this.withdrawnAt = withdrawnAt;
-        this.suspendedUntil = null;
+        this.statusChangedAt = withdrawnAt;
     }
 }
