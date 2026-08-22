@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section id="user-results" th:fragment="result">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">회원 목록</h3>
+            <div class="ms-auto text-secondary">
+                총 <strong class="text-body" th:text="${#numbers.formatInteger(result.totalElements, 1, 'COMMA')}">0</strong>명
+            </div>
+        </div>
+
+        <div class="table-responsive" th:if="${!result.content.isEmpty()}">
+            <table class="table table-vcenter card-table table-hover admin-user-table">
+                <thead>
+                <tr>
+                    <th>회원</th>
+                    <th>가입 경로</th>
+                    <th>상태</th>
+                    <th>가입일</th>
+                    <th class="w-1"><span class="visually-hidden">작업</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <th:block th:each="rowUser : ${result.content}">
+                        <tr th:replace="~{admin/users/fragments/row :: row(user=${rowUser})}"></tr>
+                    </th:block>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty py-6" th:if="${result.content.isEmpty()}">
+            <div class="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
+                    <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+                </svg>
+            </div>
+            <p class="empty-title">조건에 맞는 회원이 없습니다.</p>
+            <p class="empty-subtitle text-secondary">검색어나 회원 상태를 변경해 보세요.</p>
+        </div>
+
+        <div class="card-footer d-flex align-items-center" th:if="${result.totalElements > 0}">
+            <p class="m-0 text-secondary">
+                <span th:text="${result.page * result.size + 1}">1</span>–<span
+                    th:text="${result.page * result.size + result.content.size()}">20</span> 표시
+            </p>
+            <div class="ms-auto"
+                 th:replace="~{admin/fragments/pagination :: pagination(${result}, ${search})}"></div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

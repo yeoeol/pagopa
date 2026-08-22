@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<tr th:fragment="row(user)" th:id="|user-${user.userId}|">
+    <td>
+        <div class="d-flex align-items-center gap-3">
+            <span class="avatar avatar-sm" th:text="${#strings.substring(user.name, 0, 1)}">A</span>
+            <div>
+                <div class="fw-semibold" th:text="${user.name}">회원 이름</div>
+                <div class="text-secondary small" th:text="${user.email}">user@example.com</div>
+            </div>
+        </div>
+    </td>
+    <td>
+        <span class="badge bg-azure-lt" th:text="${user.provider}">GOOGLE</span>
+    </td>
+    <td>
+        <span class="badge"
+              th:classappend=
+                  "${user.status.name() == 'ACTIVE'
+                      ? 'text-bg-success'
+                      : (user.status.name() == 'SUSPENDED'
+                           ? 'text-bg-warning'
+                           : (user.status.name() == 'BANNED'
+                                ? 'text-bg-danger'
+                                : 'text-bg-secondary'))}"
+              th:text="${user.status.description}">정상</span>
+    </td>
+    <td class="text-secondary">
+        <time th:if="${user.createdAt != null}"
+              th:datetime="${user.createdAt}"
+              th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">2026-08-22 12:00</time>
+        <span th:if="${user.createdAt == null}">-</span>
+    </td>
+    <td>
+        <button class="btn btn-outline-primary btn-sm"
+                type="button"
+                th:attr="hx-get=@{|/admin/users/${user.userId}|}"
+                hx-target="#user-detail-content"
+                hx-swap="innerHTML"
+                data-bs-toggle="modal"
+                data-bs-target="#user-detail-modal">상세</button>
+    </td>
+</tr>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="detail">
+    <div class="modal-header">
+        <div>
+            <div class="text-secondary small">회원 번호 <span th:text="${user.userId}">1</span></div>
+            <h3 class="modal-title" id="user-detail-title" th:text="${user.name}">회원 상세</h3>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+    </div>
+    <div class="modal-body">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <span class="avatar avatar-xl"
+                  th:style="${user.profileImageUrl != null} ? |background-image: url('${user.profileImageUrl}')| : ''"
+                  th:text="${user.profileImageUrl == null ? #strings.substring(user.name, 0, 1) : ''}">A</span>
+            <div>
+                <div class="h3 mb-1" th:text="${user.name}">회원 이름</div>
+                <div class="text-secondary" th:text="${user.email}">user@example.com</div>
+            </div>
+        </div>
+
+        <dl class="row admin-detail-list mb-0">
+            <dt class="col-sm-4">상태</dt>
+            <dd class="col-sm-8"><span class="badge bg-secondary-lt" th:text="${user.status.description}">정상</span></dd>
+
+            <dt class="col-sm-4">가입 경로</dt>
+            <dd class="col-sm-8" th:text="${user.provider}">GOOGLE</dd>
+
+            <dt class="col-sm-4">전화번호</dt>
+            <dd class="col-sm-8" th:text="${user.phoneNumber != null ? user.phoneNumber : '-'}">-</dd>
+
+            <dt class="col-sm-4">가입일</dt>
+            <dd class="col-sm-8"
+                th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">-</dd>
+
+            <dt class="col-sm-4">최근 수정일</dt>
+            <dd class="col-sm-8"
+                th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</dd>
+
+            <dt class="col-sm-4" th:if="${user.suspendedUntil != null}">정지 종료일</dt>
+            <dd class="col-sm-8" th:if="${user.suspendedUntil != null}"
+                th:text="${#temporals.format(user.suspendedUntil, 'yyyy-MM-dd HH:mm')}">-</dd>
+
+            <dt class="col-sm-4" th:if="${user.withdrawnAt != null}">탈퇴일</dt>
+            <dd class="col-sm-8" th:if="${user.withdrawnAt != null}"
+                th:text="${#temporals.format(user.withdrawnAt, 'yyyy-MM-dd HH:mm')}">-</dd>
+        </dl>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+    </div>
+</th:block>
+</body>
+</html>

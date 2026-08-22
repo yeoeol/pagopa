@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko"
+      data-bs-theme="light"
+      xmlns:th="http://www.thymeleaf.org"
+      th:fragment="shell(pageTitle, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <title th:text="|${pageTitle} · Pagopa Admin|">Pagopa Admin</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/admin-assets/favicon.svg}">
+
+    <link rel="stylesheet" th:href="@{/admin-assets/vendor/tabler/1.4.0/tabler.min.css}">
+    <link rel="stylesheet" th:href="@{/admin-assets/css/admin.css}">
+    <script defer th:src="@{/admin-assets/vendor/tabler/1.4.0/tabler.min.js}"></script>
+    <script defer th:src="@{/admin-assets/vendor/htmx/2.0.10/htmx.min.js}"></script>
+    <script defer th:src="@{/admin-assets/js/admin.js}"></script>
+</head>
+<body class="layout-fluid">
+<div class="page">
+    <aside th:replace="~{admin/fragments/sidebar :: sidebar}"></aside>
+
+    <div class="page-wrapper">
+        <header th:replace="~{admin/fragments/topbar :: topbar}"></header>
+        <th:block th:replace="${content}"></th:block>
+        <footer class="footer footer-transparent d-print-none">
+            <div class="container-xl">
+                <div class="text-secondary small">Pagopa 운영 백오피스</div>
+            </div>
+        </footer>
+    </div>
+</div>
+<div id="admin-notice" class="admin-notice" aria-live="polite"></div>
+</body>
+</html>
