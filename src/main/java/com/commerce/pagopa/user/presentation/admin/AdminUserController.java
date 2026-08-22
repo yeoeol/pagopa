@@ -28,7 +28,7 @@ public class AdminUserController {
         model.addAttribute("search", requestDto);
 
         if ("true".equals(htmxRequest)) {
-            return "admin/users/frazgments/result :: result";
+            return "admin/users/fragments/result :: result";
         }
         return "admin/users/list";
     }
