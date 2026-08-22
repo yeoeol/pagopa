@@ -64,7 +64,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> findByProviderAndProviderIdWithActive(
+    public Optional<User> findByProviderAndProviderId(
             Provider provider,
             String providerId
     ) {

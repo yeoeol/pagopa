@@ -3,6 +3,7 @@ package com.commerce.pagopa.user.domain.repository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,8 @@ public interface UserRepository {
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 
     void bulkUnban(Instant now);
+
+    Page<User> searchAdminUsers(String keyword, UserStatus status, Pageable pageable);
 
     default User findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
