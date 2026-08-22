@@ -9,6 +9,7 @@ import com.commerce.pagopa.auth.oauth.service.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -42,6 +43,7 @@ public class SecurityConfig {
     private List<String> allowedOrigins;
 
     @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -97,8 +99,9 @@ public class SecurityConfig {
                 )
 
                 .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(endpoint ->
-                                endpoint.userService(customOAuth2UserService))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                 )
