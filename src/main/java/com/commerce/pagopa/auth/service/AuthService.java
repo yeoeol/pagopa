@@ -14,6 +14,7 @@ import com.commerce.pagopa.user.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -89,6 +90,6 @@ public class AuthService {
 
         refreshTokenRepository.deleteByUserId(userId);
 
-        user.withdraw();
+        user.withdraw(Instant.now());
     }
 }

@@ -120,20 +120,47 @@ public class User extends BaseTimeEntity {
         if (profileImage != null && !profileImage.isBlank()) this.profileImageUrl = profileImage;
     }
 
-    public void withdraw() {
-        validateActiveUserStatus();
-        this.status = UserStatus.WITHDRAWN;
-        this.withdrawnAt = Instant.now();
-    }
-
     public void addUserRole(UserRole userRole) {
         this.userRoles.add(userRole);
         userRole.assignUser(this);
     }
 
-    private void validateActiveUserStatus() {
-        if (this.status != UserStatus.ACTIVE) {
-            throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
+    public void activate() {
+        if (this.status == UserStatus.WITHDRAWN) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
+        this.status = UserStatus.ACTIVE;
+        this.suspendedUntil = null;
+        this.withdrawnAt = null;
+    }
+
+    public void suspend(Instant suspendedUntil) {
+        if (this.status == UserStatus.WITHDRAWN
+                || this.status != UserStatus.ACTIVE
+                || this.suspendedUntil != null
+        ) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        this.status = UserStatus.SUSPENDED;
+        this.suspendedUntil = suspendedUntil;
+        this.withdrawnAt = null;
+    }
+
+    public void ban() {
+        if (this.status == UserStatus.WITHDRAWN || this.status == UserStatus.BANNED) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        this.status = UserStatus.BANNED;
+        this.suspendedUntil = null;
+        this.withdrawnAt = null;
+    }
+
+    public void withdraw(Instant withdrawnAt) {
+        if (this.status == UserStatus.WITHDRAWN) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        this.status = UserStatus.WITHDRAWN;
+        this.withdrawnAt = withdrawnAt;
+        this.suspendedUntil = null;
     }
 }

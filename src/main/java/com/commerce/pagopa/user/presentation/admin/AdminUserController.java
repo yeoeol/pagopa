@@ -2,6 +2,7 @@ package com.commerce.pagopa.user.presentation.admin;
 
 import com.commerce.pagopa.user.application.admin.AdminUserService;
 import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSearchRequestDto;
+import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSuspendRequestDto;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,5 +41,30 @@ public class AdminUserController {
     ) {
         model.addAttribute("user", adminUserService.find(userId));
         return "admin/users/fragments/detail-modal :: detail";
+    }
+
+    @PatchMapping("/{userId}/status/activate")
+    public String activate(
+            @PathVariable("userId") Long userId
+    ) {
+        adminUserService.activate(userId);
+        return "redirect:/admin/users/" + userId;
+    }
+
+    @PatchMapping("/{userId}/status/suspend")
+    public String suspend(
+            @PathVariable("userId") Long userId,
+            @Valid @ModelAttribute AdminUserSuspendRequestDto requestDto
+    ) {
+        adminUserService.suspend(userId, requestDto);
+        return "redirect:/admin/users/" + userId;
+    }
+
+    @PatchMapping("/{userId}/status/ban")
+    public String ban(
+            @PathVariable("userId") Long userId
+    ) {
+        adminUserService.ban(userId);
+        return "redirect:/admin/users/" + userId;
     }
 }

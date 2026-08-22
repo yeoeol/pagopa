@@ -1,6 +1,7 @@
 package com.commerce.pagopa.user.application.admin;
 
 import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSearchRequestDto;
+import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSuspendRequestDto;
 import com.commerce.pagopa.user.application.admin.dto.response.AdminUserDetailResponseDto;
 import com.commerce.pagopa.user.application.admin.dto.response.AdminUserPageResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
@@ -17,13 +18,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AdminUserService {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
 
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public AdminUserPageResponseDto search(AdminUserSearchRequestDto requestDto) {
         int page = requestDto.page() == null ? 0 : requestDto.page();
         int size = requestDto.size() == null ? DEFAULT_PAGE_SIZE : requestDto.size();
@@ -43,9 +44,28 @@ public class AdminUserService {
         return AdminUserPageResponseDto.from(users);
     }
 
+    @Transactional(readOnly = true)
     public AdminUserDetailResponseDto find(Long userId) {
         User user = userRepository.findByIdOrThrow(userId);
         return AdminUserDetailResponseDto.from(user);
+    }
+
+    @Transactional
+    public void activate(Long userId) {
+        User user = userRepository.findByIdForUpdateOrThrow(userId);
+        user.activate();
+    }
+
+    @Transactional
+    public void suspend(Long userId, AdminUserSuspendRequestDto requestDto) {
+        User user = userRepository.findByIdForUpdateOrThrow(userId);
+        user.suspend(requestDto.suspendedUntil());
+    }
+
+    @Transactional
+    public void ban(Long userId) {
+        User user = userRepository.findByIdForUpdateOrThrow(userId);
+        user.ban();
     }
 
     private String normalizeKeyword(String keyword) {
