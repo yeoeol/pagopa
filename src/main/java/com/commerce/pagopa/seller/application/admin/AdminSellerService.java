@@ -6,11 +6,17 @@ import com.commerce.pagopa.role.domain.model.Role;
 import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.role.domain.repository.RoleRepository;
 import com.commerce.pagopa.seller.application.admin.dto.request.AdminSellerRejectRequestDto;
+import com.commerce.pagopa.seller.application.admin.dto.response.AdminSellerPageResponseDto;
 import com.commerce.pagopa.seller.application.admin.dto.response.AdminSellerRejectResponseDto;
 import com.commerce.pagopa.seller.domain.model.Seller;
+import com.commerce.pagopa.seller.domain.model.enums.SellerStatus;
 import com.commerce.pagopa.seller.domain.repository.SellerRepository;
 import com.commerce.pagopa.userrole.domain.model.UserRole;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +30,20 @@ public class AdminSellerService {
 
 	private final SellerRepository sellerRepository;
 	private final RoleRepository roleRepository;
+
+	@Transactional(readOnly = true)
+	public AdminSellerPageResponseDto getPendingSellers(Pageable pageable) {
+		Pageable pageRequest = PageRequest.of(
+				pageable.getPageNumber(),
+				pageable.getPageSize(),
+				Sort.by(Sort.Direction.DESC, "createdAt")
+						.and(Sort.by(Sort.Direction.DESC, "id"))
+		);
+		Page<Seller> sellers = sellerRepository
+				.findPendingRequests(SellerStatus.PENDING, pageRequest);
+
+		return AdminSellerPageResponseDto.from(sellers);
+	}
 
 	@Transactional
 	public void approve(Long sellerId) {
