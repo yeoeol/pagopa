@@ -1,4 +1,4 @@
-package com.commerce.pagopa.user.application.dto.response;
+package com.commerce.pagopa.user.application.admin.dto.response;
 
 import com.commerce.pagopa.global.response.StatusResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
@@ -6,25 +6,37 @@ import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 
 import java.time.Instant;
+import java.util.List;
 
-public record UserResponseDto(
+public record AdminUserDetailResponseDto(
         Long userId,
         Provider provider,
         String name,
         String email,
+        String phoneNumber,
         String profileImageUrl,
         StatusResponseDto<UserStatus> status,
-        Instant statusChangedAt
+        List<AdminUserRoleResponseDto> roles,
+        Instant statusChangedAt,
+        Instant createdAt,
+        Instant updatedAt
 ) {
-    public static UserResponseDto from(User user) {
-        return new UserResponseDto(
+    public static AdminUserDetailResponseDto from(
+            User user,
+            List<AdminUserRoleResponseDto> roles
+    ) {
+        return new AdminUserDetailResponseDto(
                 user.getId(),
                 user.getProvider(),
                 user.getName(),
                 user.getEmail(),
+                user.getPhoneNumber(),
                 user.getProfileImageUrl(),
                 StatusResponseDto.from(user.getStatus()),
-                user.getStatusChangedAt()
+                List.copyOf(roles),
+                user.getStatusChangedAt(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
     }
 }

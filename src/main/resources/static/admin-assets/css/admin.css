@@ -1,0 +1,100 @@
+:root {
+    --admin-brand: #206bc4;
+}
+
+.admin-brand-mark {
+    align-items: center;
+    background: var(--admin-brand);
+    border-radius: .5rem;
+    color: #fff;
+    display: inline-flex;
+    font-size: 1rem;
+    font-weight: 700;
+    height: 2rem;
+    justify-content: center;
+    margin-right: .625rem;
+    width: 2rem;
+}
+
+.admin-brand-mark-lg {
+    font-size: 1.5rem;
+    height: 3.5rem;
+    margin-right: 0;
+    width: 3.5rem;
+}
+
+.admin-user-table {
+    min-width: 760px;
+}
+
+.admin-user-table tbody tr {
+    transition: background-color .15s ease, opacity .15s ease;
+}
+
+.admin-user-table tbody tr.htmx-swapping {
+    opacity: 0;
+}
+
+.admin-detail-list dt,
+.admin-detail-list dd {
+    border-bottom: 1px solid var(--tblr-border-color);
+    margin-bottom: 0;
+    padding-bottom: .75rem;
+    padding-top: .75rem;
+}
+
+.admin-notice {
+    bottom: 1.5rem;
+    max-width: min(24rem, calc(100vw - 2rem));
+    position: fixed;
+    right: 1.5rem;
+    z-index: 1090;
+}
+
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    display: inline-block;
+}
+
+.role-badge {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.role-badge:focus-visible {
+    outline: 2px solid var(--tblr-primary);
+    outline-offset: 2px;
+}
+
+.role-description-popover {
+    max-width: min(420px, calc(100vw - 2rem));
+}
+
+.role-description-popover .popover-header {
+    font-weight: 600;
+}
+
+.role-description-popover .popover-body {
+    max-height: 280px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+#user-results.htmx-swapping {
+    opacity: .55;
+    transition: opacity .15s ease;
+}
+
+@media (max-width: 767.98px) {
+    .admin-notice {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+    }
+}

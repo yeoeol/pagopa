@@ -2,8 +2,11 @@ package com.commerce.pagopa.user.infrastructure.persistence;
 
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -38,12 +41,32 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
 
     @Override
     @Modifying(clearAutomatically = true)
-    @Query(value =
-            "UPDATE User u " +
-            "SET u.status = 'ACTIVE', " +
-                "u.suspendedUntil = NULL " +
-            "WHERE u.withdrawnAt IS NULL " +
-                "AND u.suspendedUntil <= :now " +
-                "AND u.status = 'SUSPENDED'")
-    void bulkUnban(@Param("now") Instant now);
+    @Query("""
+            UPDATE User u
+            SET u.status = :activeStatus,
+                u.statusChangedAt = :now
+            WHERE u.status = :suspendedStatus
+              AND u.statusChangedAt <= :threshold
+            """)
+    int bulkUnSuspend(
+            @Param("activeStatus") UserStatus activeStatus,
+            @Param("suspendedStatus") UserStatus suspendedStatus,
+            @Param("now") Instant now,
+            @Param("threshold") Instant threshold
+    );
+
+    @Override
+    @Query("""
+            SELECT u
+            FROM User u
+            WHERE (:keyword IS NULL
+                OR LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND (:status IS NULL OR u.status = :status)
+            """)
+    Page<User> searchAdminUsers(
+            @Param("keyword") String keyword,
+            @Param("status") UserStatus status,
+            Pageable pageable
+    );
 }

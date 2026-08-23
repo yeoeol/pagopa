@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,8 @@ public class UserService {
                 requestDto.providerId(),
                 requestDto.name(),
                 requestDto.email(),
-                requestDto.profileImageUrl()
+                requestDto.profileImageUrl(),
+                Instant.now()
         );
         Role role = roleService.findUserRole();
 
@@ -64,7 +66,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> findByProviderAndProviderIdWithActive(
+    public Optional<User> findByProviderAndProviderId(
             Provider provider,
             String providerId
     ) {

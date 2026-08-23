@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/shell :: shell('회원 관리', ~{::main})}">
+<body>
+<main>
+    <div class="page-header d-print-none">
+        <div class="container-xl">
+            <div class="row g-2 align-items-center">
+                <div class="col">
+                    <div class="page-pretitle">USER OPERATIONS</div>
+                    <h2 class="page-title">회원 관리</h2>
+                    <div class="text-secondary mt-1">회원 상태를 확인하고 상세 정보를 조회합니다.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <form method="get"
+                          th:action="@{/admin/users}"
+                          th:attr="hx-get=@{/admin/users}"
+                          hx-target="#user-results"
+                          hx-push-url="true"
+                          hx-indicator="#search-indicator">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-12 col-lg-6">
+                                <label class="form-label" for="keyword">회원 검색</label>
+                                <input id="keyword" class="form-control" type="search" name="keyword"
+                                       th:value="${search.keyword}"
+                                       placeholder="이름 또는 이메일을 입력하세요">
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <label class="form-label" for="status">회원 상태</label>
+                                <select id="status" class="form-select" name="status">
+                                    <option value="">전체 상태</option>
+                                    <option value="ACTIVE"
+                                            th:selected="${search.status != null and search.status.name() == 'ACTIVE'}">정상</option>
+                                    <option value="SUSPENDED"
+                                            th:selected="${search.status != null and search.status.name() == 'SUSPENDED'}">임시정지</option>
+                                    <option value="BANNED"
+                                            th:selected="${search.status != null and search.status.name() == 'BANNED'}">영구정지</option>
+                                    <option value="WITHDRAWN"
+                                            th:selected="${search.status != null and search.status.name() == 'WITHDRAWN'}">영구탈퇴</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-primary flex-fill" type="submit">
+                                        <span id="search-indicator" class="spinner-border spinner-border-sm htmx-indicator" aria-hidden="true"></span>
+                                        검색
+                                    </button>
+                                    <a class="btn btn-outline-secondary"
+                                       th:href="@{/admin/users}"
+                                       th:attr="hx-get=@{/admin/users}"
+                                       hx-target="#user-results"
+                                       hx-push-url="true">초기화</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <section id="user-results"
+                     aria-live="polite"
+                     th:replace="~{admin/users/fragments/result :: result}"></section>
+        </div>
+    </div>
+
+    <div class="modal modal-blur fade" id="user-detail-modal" tabindex="-1"
+         aria-labelledby="user-detail-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content" id="user-detail-content">
+                <div class="modal-body py-5 text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="text-secondary mt-3">회원 정보를 불러오는 중입니다.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

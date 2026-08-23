@@ -18,6 +18,8 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 	private final UserService userService;
+
+	private static final String ADMIN_SUFFIX = "-admin";
 
 	@Value("${app.azure.base-url}")
     private String azureBaseUrl;
@@ -34,23 +38,57 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        String userNameAttributeName = userRequest.getClientRegistration()
-                .getProviderDetails()
-                .getUserInfoEndpoint()
-                .getUserNameAttributeName();
+        boolean adminLogin = registrationId.endsWith(ADMIN_SUFFIX);
 
-        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.of(registrationId, oAuth2User.getAttributes());
-        User user = saveOrUpdate(userInfo, Provider.valueOf(registrationId.toUpperCase()));
+        String providerRegistrationId = resolveProviderRegistrationId(registrationId);
+
+        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.of(providerRegistrationId, oAuth2User.getAttributes());
+        Provider provider = Provider.valueOf(providerRegistrationId.toUpperCase());
+        User user = adminLogin
+                ? findExistingActiveUser(userInfo, provider)
+                : findOrRegisterActiveUser(userInfo, provider);
 
         return new CustomOAuth2User(
                 user,
                 oAuth2User.getAttributes(),
-                userNameAttributeName
+                userInfo.getProviderId()
         );
     }
 
-    private User saveOrUpdate(OAuth2UserInfo userInfo, Provider provider) {
-		return userService.findByProviderAndProviderIdWithActive(provider, userInfo.getProviderId())
+    private String resolveProviderRegistrationId(String registrationId) {
+        if (registrationId.endsWith(ADMIN_SUFFIX)) {
+            return registrationId.substring(0, registrationId.length() - ADMIN_SUFFIX.length());
+        }
+        return registrationId;
+    }
+
+    private User findExistingActiveUser(OAuth2UserInfo userInfo, Provider provider) {
+        return findActiveUser(userInfo, provider)
+				.orElseThrow(() -> {
+                    OAuth2Error error = new OAuth2Error(
+                            ErrorCode.USER_NOT_FOUND.name(),
+                            ErrorCode.USER_NOT_FOUND.getMessage(),
+                            null
+                    );
+                    return new OAuth2AuthenticationException(error, error.toString());
+                });
+    }
+
+    private User findOrRegisterActiveUser(OAuth2UserInfo userInfo, Provider provider) {
+		return findActiveUser(userInfo, provider)
+				.orElseGet(() -> userService.register(
+						new UserCreateRequestDto(
+								provider,
+								userInfo.getProviderId(),
+								userInfo.getName(),
+								userInfo.getEmail(),
+								azureBaseUrl + "/default.png"
+						)
+				));
+    }
+
+	private Optional<User> findActiveUser(OAuth2UserInfo userInfo, Provider provider) {
+		return userService.findByProviderAndProviderId(provider, userInfo.getProviderId())
 				.map(user -> {
 					if (user.getStatus() != UserStatus.ACTIVE) {
 						OAuth2Error error = new OAuth2Error(
@@ -61,14 +99,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 						throw new OAuth2AuthenticationException(error, error.toString());
 					}
 					return user;
-				}).orElseGet(() -> userService.register(
-						new UserCreateRequestDto(
-								provider,
-								userInfo.getProviderId(),
-								userInfo.getName(),
-								userInfo.getEmail(),
-								azureBaseUrl + "/default.png"
-						)
-				));
-    }
+				});
+	}
 }

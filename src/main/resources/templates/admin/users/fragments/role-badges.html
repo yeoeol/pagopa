@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="roleBadges(roles)"
+     class="d-flex flex-wrap gap-1">
+
+    <button th:each="role : ${roles}"
+            type="button"
+            class="badge border-0 role-badge"
+            th:classappend=
+                    "${!role.enabled
+                    ? 'text-bg-secondary'
+                    : (role.code.name() == 'ROLE_ADMIN'
+                         ? 'text-bg-danger'
+                         : (role.code.name() == 'ROLE_SELLER'
+                              ? 'text-bg-warning'
+                              : 'text-bg-primary'))}"
+            data-role-popover
+            data-bs-toggle="popover"
+            data-bs-trigger="focus"
+            data-bs-placement="top"
+            data-bs-container="body"
+            data-bs-custom-class="role-description-popover"
+            th:attr="
+                data-bs-title=${role.enabled
+                    ? role.code.description
+                    : role.code.description + ' (비활성)'},
+                data-bs-content=${role.description}"
+            th:aria-label="|${role.code.description} 권한 설명 보기|"
+            th:text="${role.enabled
+                ? role.code.description
+                : role.code.description + ' (비활성)'}">
+        회원
+    </button>
+
+    <span class="text-secondary"
+          th:if="${#lists.isEmpty(roles)}">
+        권한 없음
+    </span>
+</div>
+</body>
+</html>

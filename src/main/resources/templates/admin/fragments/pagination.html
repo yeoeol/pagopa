@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="pagination(result, search)"
+     th:if="${result.totalPages > 1}"
+     aria-label="회원 목록 페이지">
+    <ul class="pagination m-0">
+        <li class="page-item" th:classappend="${result.first} ? 'disabled'">
+            <a class="page-link"
+               th:if="${!result.first}"
+               th:href="@{/admin/users(keyword=${search.keyword},status=${search.status},page=${result.page - 1},size=${result.size})}"
+               th:attr="hx-get=@{/admin/users(keyword=${search.keyword},status=${search.status},page=${result.page - 1},size=${result.size})}"
+               hx-target="#user-results" hx-push-url="true" aria-label="이전 페이지">이전</a>
+            <span class="page-link" th:if="${result.first}" aria-disabled="true">이전</span>
+        </li>
+
+        <li class="page-item"
+            th:each="pageNumber : ${#numbers.sequence(result.startPage, result.endPage)}"
+            th:classappend="${pageNumber == result.page} ? 'active'">
+            <a class="page-link"
+               th:href="@{/admin/users(keyword=${search.keyword},status=${search.status},page=${pageNumber},size=${result.size})}"
+               th:attr="hx-get=@{/admin/users(keyword=${search.keyword},status=${search.status},page=${pageNumber},size=${result.size})}"
+               hx-target="#user-results" hx-push-url="true"
+               th:text="${pageNumber + 1}"
+               th:aria-current="${pageNumber == result.page} ? 'page'">1</a>
+        </li>
+
+        <li class="page-item" th:classappend="${result.last} ? 'disabled'">
+            <a class="page-link"
+               th:if="${!result.last}"
+               th:href="@{/admin/users(keyword=${search.keyword},status=${search.status},page=${result.page + 1},size=${result.size})}"
+               th:attr="hx-get=@{/admin/users(keyword=${search.keyword},status=${search.status},page=${result.page + 1},size=${result.size})}"
+               hx-target="#user-results" hx-push-url="true" aria-label="다음 페이지">다음</a>
+            <span class="page-link" th:if="${result.last}" aria-disabled="true">다음</span>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>
