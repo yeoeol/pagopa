@@ -71,6 +71,35 @@
             refreshUserResults();
         });
 
+        document.body.addEventListener("htmx:afterRequest", function (event) {
+            var requestConfig = event.detail.requestConfig;
+
+            var trigger = requestConfig && requestConfig.elt
+                ? requestConfig.elt
+                : event.detail.elt;
+
+            if (!trigger
+                || !trigger.matches
+                || !trigger.matches("[data-seller-action]")) {
+                return;
+            }
+
+            if (!event.detail.successful) {
+                return;
+            }
+
+            if (trigger.hasAttribute("data-dismiss-seller-modal")) {
+                hideSellerRejectModal();
+            }
+
+            showNotice(
+                trigger.dataset.successMessage || "판매자 승급 요청을 처리했습니다.",
+                "success"
+            );
+
+            refreshSellerResults();
+        });
+
         document.body.addEventListener("htmx:responseError", function () {
             showNotice("요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.", "danger");
         });
@@ -91,6 +120,59 @@
                     + '</div>';
             }
         });
+    }
+
+    function configureSellerRejectModal() {
+        var modal = document.getElementById("seller-reject-modal");
+        var form = document.getElementById("seller-reject-form");
+
+        if (!modal || !form) {
+            return;
+        }
+
+        modal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            if (!trigger) {
+                return;
+            }
+
+            var rejectUrl = trigger.dataset.rejectUrl;
+            var sellerId = trigger.dataset.sellerId || "-";
+            var sellerName = trigger.dataset.sellerName || "선택한 회원";
+
+            document.getElementById("seller-reject-id").textContent = sellerId;
+            document.getElementById("seller-reject-name").textContent = sellerName;
+
+            form.setAttribute("action", rejectUrl);
+            form.setAttribute("hx-post", rejectUrl);
+
+            if (window.htmx) {
+                window.htmx.process(form);
+            }
+        });
+
+        modal.addEventListener("hidden.bs.modal", function () {
+            form.reset();
+            form.removeAttribute("action");
+            form.removeAttribute("hx-post");
+        });
+    }
+
+    function hideSellerRejectModal() {
+        var modal = document.getElementById("seller-reject-modal");
+        if (!modal) {
+            return;
+        }
+
+        if (window.tabler && window.tabler.Modal) {
+            window.tabler.Modal.getOrCreateInstance(modal).hide();
+            return;
+        }
+
+        var closeButton = modal.querySelector("[data-bs-dismiss='modal']");
+        if (closeButton) {
+            closeButton.click();
+        }
     }
 
     function showNotice(message, variant) {
@@ -140,10 +222,26 @@
         });
     }
 
+    function refreshSellerResults() {
+        var sellerResults = document.getElementById("seller-results");
+
+        if (!sellerResults || !window.htmx) {
+            return;
+        }
+
+        var listUrl = window.location.pathname + window.location.search;
+
+        window.htmx.ajax("GET", listUrl, {
+            target: "#seller-results",
+            swap: "outerHTML"
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         configureTheme();
         configureHtmx();
         configureModal();
+        configureSellerRejectModal();
         configureRolePopovers(document);
     });
 })();

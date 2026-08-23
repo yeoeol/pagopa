@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="pagination(sellers)"
+     th:if="${sellers.totalPages > 1}"
+     aria-label="판매자 승급 요청 페이지">
+    <ul class="pagination m-0">
+        <li class="page-item" th:classappend="${sellers.first} ? 'disabled'">
+            <a class="page-link"
+               th:if="${!sellers.first}"
+               th:href="@{/admin/sellers/requests(page=${sellers.page - 1},size=${sellers.size})}"
+               th:attr="hx-get=@{/admin/sellers/requests(page=${sellers.page - 1},size=${sellers.size})}"
+               hx-target="#seller-results"
+               hx-swap="outerHTML"
+               hx-push-url="true"
+               aria-label="이전 페이지">이전</a>
+            <span class="page-link" th:if="${sellers.first}" aria-disabled="true">이전</span>
+        </li>
+
+        <li class="page-item"
+            th:each="pageNumber : ${#numbers.sequence(sellers.startPage, sellers.endPage)}"
+            th:classappend="${pageNumber == sellers.page} ? 'active'">
+            <a class="page-link"
+               th:href="@{/admin/sellers/requests(page=${pageNumber},size=${sellers.size})}"
+               th:attr="hx-get=@{/admin/sellers/requests(page=${pageNumber},size=${sellers.size})}"
+               hx-target="#seller-results"
+               hx-swap="outerHTML"
+               hx-push-url="true"
+               th:text="${pageNumber + 1}"
+               th:aria-current="${pageNumber == sellers.page} ? 'page'">1</a>
+        </li>
+
+        <li class="page-item" th:classappend="${sellers.last} ? 'disabled'">
+            <a class="page-link"
+               th:if="${!sellers.last}"
+               th:href="@{/admin/sellers/requests(page=${sellers.page + 1},size=${sellers.size})}"
+               th:attr="hx-get=@{/admin/sellers/requests(page=${sellers.page + 1},size=${sellers.size})}"
+               hx-target="#seller-results"
+               hx-swap="outerHTML"
+               hx-push-url="true"
+               aria-label="다음 페이지">다음</a>
+            <span class="page-link" th:if="${sellers.last}" aria-disabled="true">다음</span>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/shell :: shell('판매자 관리', 'sellers', ~{::main})}">
+<body>
+<main>
+    <div class="page-header d-print-none">
+        <div class="container-xl">
+            <div class="row g-2 align-items-center">
+                <div class="col">
+                    <div class="page-pretitle">SELLER OPERATIONS</div>
+                    <h2 class="page-title">판매자 관리</h2>
+                    <div class="text-secondary mt-1">판매자 승급 요청을 확인하고 승인 또는 거부합니다.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+            <div class="alert alert-info" role="alert">
+                <div class="d-flex">
+                    <div>
+                        <h4 class="alert-title">승급 요청 처리 안내</h4>
+                        <div class="text-secondary">
+                            승인하면 회원에게 판매자 권한이 부여됩니다. 거부할 때는 처리 사유를 입력해 주세요.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section id="seller-results"
+                     aria-live="polite"
+                     th:replace="~{admin/sellers/fragments/result :: result}"></section>
+        </div>
+    </div>
+
+    <div class="modal modal-blur fade" id="seller-reject-modal" tabindex="-1"
+         aria-labelledby="seller-reject-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <form class="modal-content"
+                  id="seller-reject-form"
+                  method="post"
+                  action=""
+                  hx-target="#seller-results"
+                  hx-swap="none"
+                  hx-indicator="#seller-reject-indicator"
+                  hx-disabled-elt="find button[type='submit']"
+                  data-seller-action
+                  data-dismiss-seller-modal
+                  data-success-message="판매자 승급 요청을 거부했습니다.">
+                <input th:if="${_csrf != null}"
+                       type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+                <div class="modal-header">
+                    <div>
+                        <div class="text-secondary small">
+                            판매자 번호 <span id="seller-reject-id">-</span>
+                        </div>
+                        <h3 class="modal-title" id="seller-reject-title">판매자 승급 요청 거부</h3>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="text-secondary">
+                        <strong class="text-body" id="seller-reject-name">선택한 회원</strong>의 승급 요청을 거부합니다.
+                    </p>
+                    <label class="form-label required" for="seller-reject-reason">거부 사유</label>
+                    <textarea class="form-control"
+                              id="seller-reject-reason"
+                              name="reason"
+                              rows="4"
+                              required
+                              placeholder="거부 사유를 입력하세요"></textarea>
+                    <div class="form-hint">입력한 사유는 현재 요청 처리에만 사용되며 별도로 저장되지 않습니다.</div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-danger">
+                        <span id="seller-reject-indicator"
+                              class="spinner-border spinner-border-sm htmx-indicator"
+                              aria-hidden="true"></span>
+                        요청 거부
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+</body>
+</html>

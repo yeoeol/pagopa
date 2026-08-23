@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<tr th:fragment="row(seller, page, size)" th:id="|seller-request-${seller.sellerId}|">
+    <td>
+        <div class="d-flex align-items-center gap-3">
+            <span class="avatar avatar-sm" th:text="${#strings.substring(seller.name, 0, 1)}">A</span>
+            <div>
+                <div class="fw-semibold" th:text="${seller.name}">회원 이름</div>
+                <div class="text-secondary small" th:text="${seller.email}">user@example.com</div>
+                <div class="text-secondary small">회원 번호 <span th:text="${seller.userId}">10</span></div>
+            </div>
+        </div>
+    </td>
+    <td>
+        <span class="font-monospace" th:text="${seller.sellerId}">5</span>
+    </td>
+    <td>
+        <span class="badge text-bg-warning" th:text="${seller.status.description}">대기</span>
+    </td>
+    <td>
+        <span class="badge"
+              th:classappend="${seller.verificationStatus.status.name() == 'VERIFIED'
+                  ? 'text-bg-success'
+                  : 'text-bg-secondary'}"
+              th:text="${seller.verificationStatus.description}">인증되지 않음</span>
+    </td>
+    <td class="text-secondary">
+        <time th:if="${seller.requestedAt != null}"
+              th:datetime="${seller.requestedAt}"
+              th:text="${#temporals.format(seller.requestedAt, 'yyyy-MM-dd HH:mm')}">2026-08-23 17:00</time>
+        <span th:if="${seller.requestedAt == null}">-</span>
+    </td>
+    <td>
+        <div class="d-flex justify-content-end gap-2 text-nowrap">
+            <form method="post"
+                  th:action="@{/admin/sellers/{sellerId}/approve(
+                      sellerId=${seller.sellerId}, page=${page}, size=${size})}"
+                  th:attr="
+                      hx-post=@{/admin/sellers/{sellerId}/approve(
+                          sellerId=${seller.sellerId}, page=${page}, size=${size})},
+                      hx-confirm=|${seller.name} 회원의 판매자 승급을 승인하시겠습니까?|"
+                  hx-swap="none"
+                  hx-disabled-elt="find button"
+                  data-seller-action
+                  data-success-message="판매자 승급 요청을 승인했습니다.">
+                <button type="submit" class="btn btn-success btn-sm">승인</button>
+            </form>
+
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#seller-reject-modal"
+                    th:attr="
+                        data-seller-id=${seller.sellerId},
+                        data-seller-name=${seller.name},
+                        data-reject-url=@{/admin/sellers/{sellerId}/reject(
+                            sellerId=${seller.sellerId}, page=${page}, size=${size})}">
+                거부
+            </button>
+        </div>
+    </td>
+</tr>
+</body>
+</html>
