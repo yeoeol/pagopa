@@ -41,10 +41,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         boolean adminLogin = registrationId.endsWith(ADMIN_SUFFIX);
 
         String providerRegistrationId = resolveProviderRegistrationId(registrationId);
-        String userNameAttributeName = userRequest.getClientRegistration()
-                .getProviderDetails()
-                .getUserInfoEndpoint()
-                .getUserNameAttributeName();
 
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.of(providerRegistrationId, oAuth2User.getAttributes());
         Provider provider = Provider.valueOf(providerRegistrationId.toUpperCase());
@@ -55,7 +51,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return new CustomOAuth2User(
                 user,
                 oAuth2User.getAttributes(),
-                userNameAttributeName
+                userInfo.getProviderId()
         );
     }
 

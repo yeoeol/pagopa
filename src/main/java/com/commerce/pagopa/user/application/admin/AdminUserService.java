@@ -42,6 +42,7 @@ public class AdminUserService {
                 page,
                 size,
                 Sort.by(Sort.Direction.DESC, "createdAt")
+                        .and(Sort.by(Sort.Direction.DESC, "id"))
         );
         Page<User> users = userRepository.searchAdminUsers(
                 keyword,
