@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-<th:block th:fragment="detail">
+<th:block th:fragment="detail"
+          th:with="statusName=${user.status.status.name()}">
     <div class="modal-header">
         <div>
             <div class="text-secondary small">회원 번호 <span th:text="${user.userId}">1</span></div>
@@ -22,8 +23,20 @@
 
         <dl class="row admin-detail-list mb-0">
             <dt class="col-sm-4">상태</dt>
-            <dd class="col-sm-8"><span class="badge bg-secondary-lt" th:text="${user.status.description}">정상</span></dd>
-
+            <dd class="col-sm-8">
+                <span class="badge"
+                      th:classappend=
+                              "${statusName == 'ACTIVE'
+                              ? 'text-bg-success'
+                              : (statusName == 'SUSPENDED'
+                                   ? 'text-bg-warning'
+                                   : (statusName == 'BANNED'
+                                        ? 'text-bg-danger'
+                                        : 'text-bg-secondary'))}"
+                      th:text="${user.status.description}">
+                    정상
+                </span>
+            </dd>
             <dt class="col-sm-4">권한</dt>
             <dd class="col-sm-8">
                 <div th:replace=
@@ -46,17 +59,86 @@
             <dd class="col-sm-8"
                 th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</dd>
 
-            <dt class="col-sm-4" th:if="${user.status.status.name() == 'SUSPENDED' && user.statusChangedAt != null}">정지일</dt>
-            <dd class="col-sm-8" th:if="${user.status.status.name() == 'SUSPENDED' && user.statusChangedAt != null}"
+            <dt class="col-sm-4" th:if="${statusName == 'SUSPENDED' && user.statusChangedAt != null}">정지일</dt>
+            <dd class="col-sm-8" th:if="${statusName == 'SUSPENDED' && user.statusChangedAt != null}"
                 th:text="${#temporals.format(user.statusChangedAt, 'yyyy-MM-dd HH:mm')}">-</dd>
 
-            <dt class="col-sm-4" th:if="${user.status.status.name() == 'WITHDRAWN' && user.statusChangedAt != null}">탈퇴일</dt>
-            <dd class="col-sm-8" th:if="${user.status.status.name() == 'WITHDRAWN' && user.statusChangedAt != null}"
+            <dt class="col-sm-4" th:if="${statusName == 'WITHDRAWN' && user.statusChangedAt != null}">탈퇴일</dt>
+            <dd class="col-sm-8" th:if="${statusName == 'WITHDRAWN' && user.statusChangedAt != null}"
                 th:text="${#temporals.format(user.statusChangedAt, 'yyyy-MM-dd HH:mm')}">-</dd>
         </dl>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+        <!-- 왼쪽: 상태 변경 버튼 -->
+        <div class="d-flex flex-wrap align-items-center gap-2 me-auto">
+            <!-- 임시정지 또는 영구정지 해제 -->
+            <button th:if="${statusName == 'SUSPENDED' or statusName == 'BANNED'}"
+                    type="button"
+                    class="btn btn-success"
+                    th:attr="
+                    hx-post=@{|/admin/users/${user.userId}/status/activate|},
+                    hx-confirm=${statusName == 'SUSPENDED'
+                        ? '이 회원의 임시정지를 해제하시겠습니까?'
+                        : '이 회원의 영구정지를 해제하시겠습니까?'}"
+                    hx-target="#user-detail-content"
+                    hx-swap="innerHTML"
+                    hx-indicator="#status-change-indicator"
+                    hx-disabled-elt="this"
+                    data-user-status-action
+                    data-success-message="회원 상태를 정상으로 변경했습니다."
+                    th:text="${statusName == 'SUSPENDED'
+                    ? '임시정지 해제'
+                    : '영구정지 해제'}">
+                정지 해제
+            </button>
+
+            <!-- 정상 회원 임시정지 -->
+            <button th:if="${statusName == 'ACTIVE'}"
+                    type="button"
+                    class="btn btn-warning"
+                    th:attr="hx-post=@{|/admin/users/${user.userId}/status/suspend|}"
+                    hx-confirm="이 회원을 임시정지 처리하시겠습니까?"
+                    hx-target="#user-detail-content"
+                    hx-swap="innerHTML"
+                    hx-indicator="#status-change-indicator"
+                    hx-disabled-elt="this"
+                    data-user-status-action
+                    data-success-message="회원을 임시정지 처리했습니다.">
+                임시정지
+            </button>
+
+            <!-- 정상 또는 임시정지 회원 영구정지 -->
+            <button th:if="${statusName == 'ACTIVE' or statusName == 'SUSPENDED'}"
+                    type="button"
+                    class="btn btn-danger"
+                    th:attr="hx-post=@{|/admin/users/${user.userId}/status/ban|}"
+                    hx-confirm="이 회원을 영구정지 처리하시겠습니까?"
+                    hx-target="#user-detail-content"
+                    hx-swap="innerHTML"
+                    hx-indicator="#status-change-indicator"
+                    hx-disabled-elt="this"
+                    data-user-status-action
+                    data-success-message="회원을 영구정지 처리했습니다.">
+                영구정지
+            </button>
+
+            <span id="status-change-indicator"
+                  class="spinner-border spinner-border-sm htmx-indicator"
+                  aria-label="상태 변경 중">
+        </span>
+
+            <span th:if="${statusName == 'WITHDRAWN'}"
+                  class="text-secondary small">
+            탈퇴 회원은 상태를 변경할 수 없습니다.
+        </span>
+        </div>
+
+        <!-- 오른쪽: 닫기 버튼 -->
+        <button type="button"
+                class="btn btn-secondary ms-auto"
+                data-bs-dismiss="modal">
+            닫기
+        </button>
     </div>
 </th:block>
 </body>

@@ -42,7 +42,7 @@ public class AdminUserController {
         return "admin/users/fragments/detail-modal :: detail";
     }
 
-    @PatchMapping("/{userId}/status/activate")
+    @PostMapping("/{userId}/status/activate")
     public String activate(
             @PathVariable("userId") Long userId
     ) {
@@ -50,7 +50,7 @@ public class AdminUserController {
         return "redirect:/admin/users/" + userId;
     }
 
-    @PatchMapping("/{userId}/status/suspend")
+    @PostMapping("/{userId}/status/suspend")
     public String suspend(
             @PathVariable("userId") Long userId
     ) {
@@ -58,7 +58,7 @@ public class AdminUserController {
         return "redirect:/admin/users/" + userId;
     }
 
-    @PatchMapping("/{userId}/status/ban")
+    @PostMapping("/{userId}/status/ban")
     public String ban(
             @PathVariable("userId") Long userId
     ) {

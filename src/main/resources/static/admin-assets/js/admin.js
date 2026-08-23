@@ -43,7 +43,32 @@
         });
 
         document.body.addEventListener("htmx:afterSwap", function (event) {
-            configureRolePopovers(event.detail.target);
+            configureRolePopovers(document);
+        });
+
+        document.body.addEventListener("htmx:afterRequest", function (event) {
+            var requestConfig = event.detail.requestConfig;
+
+            var trigger = requestConfig && requestConfig.elt
+                ? requestConfig.elt
+                : event.detail.elt;
+
+            if (!trigger
+                || !trigger.matches
+                || !trigger.matches("[data-user-status-action]")) {
+                return;
+            }
+
+            if (!event.detail.successful) {
+                return;
+            }
+
+            showNotice(
+                trigger.dataset.successMessage || "회원 상태를 변경했습니다.",
+                "success"
+            );
+
+            refreshUserResults();
         });
 
         document.body.addEventListener("htmx:responseError", function () {
@@ -97,6 +122,21 @@
                 placement: "auto",
                 html: false
             });
+        });
+    }
+
+    function refreshUserResults() {
+        var userResults = document.getElementById("user-results");
+
+        if (!userResults || !window.htmx) {
+            return;
+        }
+
+        var listUrl = window.location.pathname + window.location.search;
+
+        window.htmx.ajax("GET", listUrl, {
+            target: "#user-results",
+            swap: "outerHTML"
         });
     }
 
