@@ -3,8 +3,11 @@ package com.commerce.pagopa.user.application.admin;
 import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSearchRequestDto;
 import com.commerce.pagopa.user.application.admin.dto.response.AdminUserDetailResponseDto;
 import com.commerce.pagopa.user.application.admin.dto.response.AdminUserPageResponseDto;
+import com.commerce.pagopa.user.application.admin.dto.response.AdminUserRoleResponseDto;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
+import com.commerce.pagopa.userrole.domain.model.UserRole;
+import com.commerce.pagopa.userrole.domain.repository.UserRoleRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +30,7 @@ public class AdminUserService {
     private static final int DEFAULT_PAGE_SIZE = 20;
 
     private final UserRepository userRepository;
+    private final UserRoleRepository userRoleRepository;
 
     @Transactional(readOnly = true)
     public AdminUserPageResponseDto search(AdminUserSearchRequestDto requestDto) {
@@ -42,13 +49,31 @@ public class AdminUserService {
                 pageable
         );
 
-        return AdminUserPageResponseDto.from(users);
+        List<Long> userIds = users.getContent()
+                .stream()
+                .map(User::getId)
+                .toList();
+
+        Map<Long, List<AdminUserRoleResponseDto>> rolesByUserId =
+                findRolesByUserIds(userIds);
+
+        return AdminUserPageResponseDto.from(
+                users,
+                rolesByUserId
+        );
     }
 
     @Transactional(readOnly = true)
     public AdminUserDetailResponseDto find(Long userId) {
         User user = userRepository.findByIdOrThrow(userId);
-        return AdminUserDetailResponseDto.from(user);
+
+        Map<Long, List<AdminUserRoleResponseDto>> rolesByUserId =
+                findRolesByUserIds(List.of(userId));
+
+        return AdminUserDetailResponseDto.from(
+                user,
+                rolesByUserId.getOrDefault(user.getId(), List.of())
+        );
     }
 
     @Transactional
@@ -67,6 +92,22 @@ public class AdminUserService {
     public void ban(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
         user.ban(Instant.now());
+    }
+
+    private Map<Long, List<AdminUserRoleResponseDto>> findRolesByUserIds(List<Long> userIds) {
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<UserRole> userRoles = userRoleRepository.findAllWithRoleByUserIds(userIds);
+        return userRoles.stream()
+                .collect(Collectors.groupingBy(
+                        userRole -> userRole.getUser().getId(),
+                        Collectors.mapping(
+                                AdminUserRoleResponseDto::from,
+                                Collectors.toList()
+                        )
+                ));
     }
 
     private String normalizeKeyword(String keyword) {

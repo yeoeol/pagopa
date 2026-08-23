@@ -60,6 +60,32 @@
     display: inline-block;
 }
 
+.role-badge {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.role-badge:focus-visible {
+    outline: 2px solid var(--tblr-primary);
+    outline-offset: 2px;
+}
+
+.role-description-popover {
+    max-width: min(420px, calc(100vw - 2rem));
+}
+
+.role-description-popover .popover-header {
+    font-weight: 600;
+}
+
+.role-description-popover .popover-body {
+    max-height: 280px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
 #user-results.htmx-swapping {
     opacity: .55;
     transition: opacity .15s ease;

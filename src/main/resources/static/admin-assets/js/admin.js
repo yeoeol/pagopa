@@ -42,6 +42,10 @@
             }
         });
 
+        document.body.addEventListener("htmx:afterSwap", function (event) {
+            configureRolePopovers(event.detail.target);
+        });
+
         document.body.addEventListener("htmx:responseError", function () {
             showNotice("요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.", "danger");
         });
@@ -78,9 +82,28 @@
         }, 4000);
     }
 
+    function configureRolePopovers(root) {
+        if (!window.tabler || !window.tabler.Popover) {
+            return;
+        }
+
+        var scope = root || document;
+        var roleBadges = scope.querySelectorAll("[data-role-popover]");
+
+        roleBadges.forEach(function (roleBadge) {
+            window.tabler.Popover.getOrCreateInstance(roleBadge, {
+                container: "body",
+                trigger: "focus",
+                placement: "auto",
+                html: false
+            });
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         configureTheme();
         configureHtmx();
         configureModal();
+        configureRolePopovers(document);
     });
 })();

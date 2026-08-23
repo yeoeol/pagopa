@@ -26,6 +26,12 @@
                                 : 'text-bg-secondary'))}"
               th:text="${user.status.description}">정상</span>
     </td>
+    <td>
+        <div th:replace=
+                     "~{admin/users/fragments/role-badges
+                                :: roleBadges(roles=${user.roles})}">
+        </div>
+    </td>
     <td class="text-secondary">
         <time th:if="${user.createdAt != null}"
               th:datetime="${user.createdAt}"

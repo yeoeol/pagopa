@@ -24,6 +24,14 @@
             <dt class="col-sm-4">상태</dt>
             <dd class="col-sm-8"><span class="badge bg-secondary-lt" th:text="${user.status.description}">정상</span></dd>
 
+            <dt class="col-sm-4">권한</dt>
+            <dd class="col-sm-8">
+                <div th:replace=
+                             "~{admin/users/fragments/role-badges
+                                :: roleBadges(roles=${user.roles})}">
+                </div>
+            </dd>
+
             <dt class="col-sm-4">가입 경로</dt>
             <dd class="col-sm-8" th:text="${user.provider}">GOOGLE</dd>
 
