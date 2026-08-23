@@ -12,8 +12,7 @@ public record SellerResponseDto(
 		Long sellerId,
 		StatusResponseDto<SellerStatus> status,
 		StatusResponseDto<VerificationStatus> verificationStatus,
-		Instant activatedAt,
-		Instant suspendedAt,
+		Instant statusChangedAt,
 		UserResponseDto user
 ) {
 	public static SellerResponseDto from(Seller seller) {
@@ -21,8 +20,7 @@ public record SellerResponseDto(
 				seller.getId(),
 				StatusResponseDto.from(seller.getStatus()),
 				StatusResponseDto.from(seller.getVerificationStatus()),
-				seller.getActivatedAt(),
-				seller.getSuspendedUntil(),
+				seller.getStatusChangedAt(),
 				UserResponseDto.from(seller.getUser())
 		);
 	}

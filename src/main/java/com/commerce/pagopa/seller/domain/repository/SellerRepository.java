@@ -9,6 +9,8 @@ import static com.commerce.pagopa.global.response.ErrorCode.SELLER_NOT_FOUND;
 
 public interface SellerRepository {
 
+	Seller save(Seller seller);
+
 	Optional<Seller> findById(Long id);
 
 	Optional<Seller> findByUserId(Long userId);
