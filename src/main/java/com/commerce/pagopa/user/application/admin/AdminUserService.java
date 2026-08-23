@@ -41,7 +41,7 @@ public class AdminUserService {
         Pageable pageable = PageRequest.of(
                 page,
                 size,
-                Sort.by(Sort.Direction.DESC, "createdAt")
+                Sort.by(Sort.Direction.DESC, "statusChangedAt")
                         .and(Sort.by(Sort.Direction.DESC, "id"))
         );
         Page<User> users = userRepository.searchAdminUsers(

@@ -3,7 +3,6 @@ package com.commerce.pagopa.seller.presentation.admin;
 import com.commerce.pagopa.seller.application.admin.AdminSellerService;
 import com.commerce.pagopa.seller.application.admin.dto.request.AdminSellerRejectRequestDto;
 import com.commerce.pagopa.seller.application.admin.dto.response.AdminSellerPageResponseDto;
-import com.commerce.pagopa.seller.application.admin.dto.response.AdminSellerRejectResponseDto;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -23,14 +22,21 @@ public class AdminSellerController {
 	private final AdminSellerService adminSellerService;
 
 	@GetMapping("/requests")
-	public String getPendingSeller(
+	public String getPendingSellers(
 			@PageableDefault(size = 10, page = 0) Pageable pageable,
+			@RequestHeader(value = "HX-Request", required = false) String htmxRequest,
 			Model model
 	) {
-		AdminSellerPageResponseDto pendingSellers = adminSellerService.getPendingSellers(pageable);
+		AdminSellerPageResponseDto pendingSellers =
+				adminSellerService.getPendingSellers(pageable);
 
 		model.addAttribute("sellers", pendingSellers);
-		return "redirect:/admin/users";
+
+		if ("true".equals(htmxRequest)) {
+			return "admin/sellers/fragments/result :: result";
+		}
+
+		return "admin/sellers/requests";
 	}
 
 	@PostMapping("/{sellerId}/approve")
@@ -38,19 +44,15 @@ public class AdminSellerController {
 			@PathVariable("sellerId") Long sellerId
 	) {
 		adminSellerService.approve(sellerId);
-		return "redirect:/admin/users";
+		return "redirect:/admin/sellers/requests";
 	}
 
 	@PostMapping("/{sellerId}/reject")
 	public String reject(
 			@PathVariable("sellerId") Long sellerId,
-			@Valid @ModelAttribute AdminSellerRejectRequestDto requestDto,
-			Model model
+			@Valid @ModelAttribute AdminSellerRejectRequestDto requestDto
 	) {
-		AdminSellerRejectResponseDto responseDto =
-				adminSellerService.reject(sellerId, requestDto);
-
-		model.addAttribute("rejectReason", responseDto.reason());
-		return "redirect:/admin/users";
+		adminSellerService.reject(sellerId, requestDto);
+		return "redirect:/admin/sellers/requests";
 	}
 }

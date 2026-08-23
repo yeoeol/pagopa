@@ -36,7 +36,7 @@ public class AdminSellerService {
 		Pageable pageRequest = PageRequest.of(
 				pageable.getPageNumber(),
 				pageable.getPageSize(),
-				Sort.by(Sort.Direction.DESC, "createdAt")
+				Sort.by(Sort.Direction.DESC, "statusChangedAt")
 						.and(Sort.by(Sort.Direction.DESC, "id"))
 		);
 		Page<Seller> sellers = sellerRepository

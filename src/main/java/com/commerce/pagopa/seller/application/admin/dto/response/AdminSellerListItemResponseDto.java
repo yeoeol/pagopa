@@ -8,19 +8,23 @@ import com.commerce.pagopa.seller.domain.model.enums.VerificationStatus;
 import java.time.Instant;
 
 public record AdminSellerListItemResponseDto(
+        Long sellerId,
         Long userId,
+        String name,
+        String email,
         StatusResponseDto<SellerStatus> status,
         StatusResponseDto<VerificationStatus> verificationStatus,
-        Instant statusChangedAt,
-        Instant createdAt
+        Instant requestedAt
 ) {
     public static AdminSellerListItemResponseDto from(Seller seller) {
         return new AdminSellerListItemResponseDto(
                 seller.getId(),
+                seller.getUser().getId(),
+                seller.getUser().getName(),
+                seller.getUser().getEmail(),
                 StatusResponseDto.from(seller.getStatus()),
                 StatusResponseDto.from(seller.getVerificationStatus()),
-                seller.getStatusChangedAt(),
-                seller.getCreatedAt()
+                seller.getStatusChangedAt()
         );
     }
 }
