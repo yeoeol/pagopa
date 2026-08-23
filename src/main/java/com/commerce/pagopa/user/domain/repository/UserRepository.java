@@ -25,7 +25,12 @@ public interface UserRepository {
 
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 
-    void bulkUnban(Instant now);
+    int bulkUnSuspend(
+            UserStatus activeStatus,
+            UserStatus suspendedStatus,
+            Instant now,
+            Instant threshold
+    );
 
     Page<User> searchAdminUsers(String keyword, UserStatus status, Pageable pageable);
 

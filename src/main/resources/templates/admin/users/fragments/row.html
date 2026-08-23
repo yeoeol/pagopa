@@ -17,11 +17,11 @@
     <td>
         <span class="badge"
               th:classappend=
-                  "${user.status.status == 'ACTIVE'
+                  "${user.status.status.name() == 'ACTIVE'
                       ? 'text-bg-success'
-                      : (user.status.status == 'SUSPENDED'
+                      : (user.status.status.name() == 'SUSPENDED'
                            ? 'text-bg-warning'
-                           : (user.status.status == 'BANNED'
+                           : (user.status.status.name() == 'BANNED'
                                 ? 'text-bg-danger'
                                 : 'text-bg-secondary'))}"
               th:text="${user.status.description}">정상</span>

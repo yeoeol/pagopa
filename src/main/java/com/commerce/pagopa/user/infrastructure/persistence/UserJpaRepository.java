@@ -41,14 +41,19 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
 
     @Override
     @Modifying(clearAutomatically = true)
-    @Query(value =
-            "UPDATE User u " +
-            "SET u.status = 'ACTIVE', " +
-                "u.suspendedUntil = NULL " +
-            "WHERE u. IS NULL " +
-                "AND u.suspendedUntil <= :now " +
-                "AND u.status = 'SUSPENDED'")
-    void bulkUnban(@Param("now") Instant now);
+    @Query("""
+            UPDATE User u
+            SET u.status = :activeStatus,
+                u.statusChangedAt = :now
+            WHERE u.status = :suspendedStatus
+              AND u.statusChangedAt <= :threshold
+            """)
+    int bulkUnSuspend(
+            @Param("activeStatus") UserStatus activeStatus,
+            @Param("suspendedStatus") UserStatus suspendedStatus,
+            @Param("now") Instant now,
+            @Param("threshold") Instant threshold
+    );
 
     @Override
     @Query("""
