@@ -27,15 +27,17 @@ public class SellerUserService {
 
 	@Transactional
 	public void request(Long userId) {
-		User user = userRepository.findByIdOrThrow(userId);
+		User user = userRepository.findByIdForUpdateOrThrow(userId);
 		validateRequestable(user);
+
+		Instant requestedAt = Instant.now();
 
 		Seller seller = sellerRepository.findByUserId(userId)
 				.map(existingSeller -> {
-					existingSeller.requestAgain(Instant.now());
+					existingSeller.requestAgain(requestedAt);
 					return existingSeller;
 				})
-				.orElseGet(() -> Seller.create(user, Instant.now()));
+				.orElseGet(() -> Seller.create(user, requestedAt));
 
 		sellerRepository.save(seller);
 	}

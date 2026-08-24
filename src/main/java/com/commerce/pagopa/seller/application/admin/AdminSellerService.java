@@ -5,9 +5,7 @@ import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.role.domain.model.Role;
 import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.role.domain.repository.RoleRepository;
-import com.commerce.pagopa.seller.application.admin.dto.request.AdminSellerRejectRequestDto;
 import com.commerce.pagopa.seller.application.admin.dto.response.AdminSellerPageResponseDto;
-import com.commerce.pagopa.seller.application.admin.dto.response.AdminSellerRejectResponseDto;
 import com.commerce.pagopa.seller.domain.model.Seller;
 import com.commerce.pagopa.seller.domain.model.enums.SellerStatus;
 import com.commerce.pagopa.seller.domain.repository.SellerRepository;
@@ -59,10 +57,8 @@ public class AdminSellerService {
 	}
 
 	@Transactional
-	public AdminSellerRejectResponseDto reject(Long sellerId, AdminSellerRejectRequestDto requestDto) {
+	public void reject(Long sellerId) {
 		Seller seller = sellerRepository.findByIdOrThrow(sellerId);
 		seller.reject(Instant.now());
-
-		return AdminSellerRejectResponseDto.from(requestDto.reason());
 	}
 }

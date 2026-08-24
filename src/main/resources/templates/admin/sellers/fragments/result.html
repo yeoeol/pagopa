@@ -48,7 +48,7 @@
             <p class="empty-subtitle text-secondary">새 요청이 접수되면 이 목록에 표시됩니다.</p>
         </div>
 
-        <div class="card-footer d-flex align-items-center" th:if="${sellers.totalElements > 0}">
+        <div class="card-footer d-flex align-items-center" th:if="${!sellers.content.isEmpty()}">
             <p class="m-0 text-secondary">
                 <span th:text="${sellers.page * sellers.size + 1}">1</span>–<span
                     th:text="${sellers.page * sellers.size + sellers.content.size()}">10</span> 표시

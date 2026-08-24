@@ -2,11 +2,15 @@ package com.commerce.pagopa.user.presentation.admin;
 
 import com.commerce.pagopa.user.application.admin.AdminUserService;
 import com.commerce.pagopa.user.application.admin.dto.request.AdminUserSearchRequestDto;
+import com.commerce.pagopa.user.application.admin.dto.response.AdminUserPageResponseDto;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -22,10 +26,31 @@ public class AdminUserController {
     public String users(
             @Valid @ModelAttribute AdminUserSearchRequestDto requestDto,
             @RequestHeader(value = "HX-Request", required = false) String htmxRequest,
+            HttpServletResponse response,
             Model model
     ) {
-        model.addAttribute("result", adminUserService.search(requestDto));
+        AdminUserPageResponseDto result = adminUserService.search(requestDto);
+
+        model.addAttribute("result", result);
         model.addAttribute("search", requestDto);
+
+        if (result.totalPages() > 0
+                && result.page() >= result.totalPages()) {
+
+            int lastPage = result.totalPages() - 1;
+            String redirectUrl = createRedirectUrl(
+                    requestDto,
+                    lastPage,
+                    result.size()
+            );
+
+            if ("true".equals(htmxRequest)) {
+                response.setHeader("HX-Redirect", redirectUrl);
+                return "admin/users/fragments/result :: result";
+            }
+
+            return "redirect:" + redirectUrl;
+        }
 
         if ("true".equals(htmxRequest)) {
             return "admin/users/fragments/result :: result";
@@ -64,5 +89,28 @@ public class AdminUserController {
     ) {
         adminUserService.ban(userId);
         return "redirect:/admin/users/" + userId;
+    }
+
+    private String createRedirectUrl(
+            AdminUserSearchRequestDto requestDto,
+            int page,
+            int size
+    ) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromPath("/admin/users")
+                .queryParam("page", page)
+                .queryParam("size", size);
+
+        if (StringUtils.hasText(requestDto.keyword())) {
+            builder.queryParam("keyword", requestDto.keyword().trim());
+        }
+
+        if (requestDto.status() != null) {
+            builder.queryParam("status", requestDto.status().name());
+        }
+
+        return builder.build()
+                .encode()
+                .toUriString();
     }
 }
