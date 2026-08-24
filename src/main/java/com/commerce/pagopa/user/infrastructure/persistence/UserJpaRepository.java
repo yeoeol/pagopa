@@ -1,5 +1,6 @@
 package com.commerce.pagopa.user.infrastructure.persistence;
 
+import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
@@ -63,10 +64,19 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
                 OR LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))
               AND (:status IS NULL OR u.status = :status)
+              AND (:roleCode IS NULL OR EXISTS (
+                    SELECT ur.id
+                    FROM UserRole ur
+                    JOIN ur.role r
+                    WHERE ur.user = u
+                        AND r.code = :roleCode
+                        AND r.enabled = true
+              ))
             """)
     Page<User> searchAdminUsers(
             @Param("keyword") String keyword,
             @Param("status") UserStatus status,
+            @Param("roleCode") RoleCode roleCode,
             Pageable pageable
     );
 }

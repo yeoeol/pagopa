@@ -48,6 +48,7 @@ public class AdminUserService {
         Page<User> users = userRepository.searchAdminUsers(
                 keyword,
                 requestDto.status(),
+                requestDto.roleCode(),
                 pageable
         );
 
