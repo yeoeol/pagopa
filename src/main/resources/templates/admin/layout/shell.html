@@ -2,7 +2,7 @@
 <html lang="ko"
       data-bs-theme="light"
       xmlns:th="http://www.thymeleaf.org"
-      th:fragment="shell(pageTitle, content)">
+      th:fragment="shell(pageTitle, activeMenu, content)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,7 +19,7 @@
 </head>
 <body class="layout-fluid">
 <div class="page">
-    <aside th:replace="~{admin/fragments/sidebar :: sidebar}"></aside>
+    <aside th:replace="~{admin/fragments/sidebar :: sidebar(${activeMenu})}"></aside>
 
     <div class="page-wrapper">
         <header th:replace="~{admin/fragments/topbar :: topbar}"></header>

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SellerStatus implements DescribedStatus {
 	PENDING("대기"),
+	REJECTED("거부"),
 	ACTIVE("정상"),
 	SUSPENDED("임시정지"),
 	BANNED("영구정지"),

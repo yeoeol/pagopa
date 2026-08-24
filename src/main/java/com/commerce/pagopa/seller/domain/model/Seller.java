@@ -1,9 +1,12 @@
 package com.commerce.pagopa.seller.domain.model;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.seller.domain.model.enums.SellerStatus;
 import com.commerce.pagopa.seller.domain.model.enums.VerificationStatus;
 import com.commerce.pagopa.user.domain.model.User;
+
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -40,11 +43,8 @@ public class Seller extends BaseTimeEntity {
 	@Column(name = "verification_status", length = 20, nullable = false)
 	private VerificationStatus verificationStatus;
 
-	@Column(name = "activated_at", nullable = true)
-	private Instant activatedAt;
-
-	@Column(name = "suspended_until", nullable = true)
-	private Instant suspendedUntil;
+	@Column(name = "status_changed_at", nullable = false)
+	private Instant statusChangedAt;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -58,18 +58,50 @@ public class Seller extends BaseTimeEntity {
 	private Seller(
 			SellerStatus status,
 			VerificationStatus verificationStatus,
+			Instant statusChangedAt,
 			User user
 	) {
 		this.status = status;
 		this.verificationStatus = verificationStatus;
+		this.statusChangedAt = statusChangedAt;
 		this.user = user;
 	}
 
-	public static Seller create(User user) {
+	public static Seller create(User user, Instant requestedAt) {
 		return Seller.builder()
 				.status(SellerStatus.PENDING)
 				.verificationStatus(VerificationStatus.UNVERIFIED)
+				.statusChangedAt(requestedAt)
 				.user(user)
 				.build();
+	}
+
+	public void requestAgain(Instant requestedAt) {
+		if (this.status == SellerStatus.PENDING) {
+			return;
+		}
+		if (this.status != SellerStatus.REJECTED) {
+			throw new BusinessException(ErrorCode.SELLER_REQUEST_NOT_ALLOWED);
+		}
+		this.status = SellerStatus.PENDING;
+		this.statusChangedAt = requestedAt;
+	}
+
+	public void activate(Instant activatedAt) {
+		if (this.status != SellerStatus.PENDING) {
+			throw new BusinessException(ErrorCode.SELLER_REQUEST_NOT_ALLOWED);
+		}
+		this.status = SellerStatus.ACTIVE;
+		this.verificationStatus = VerificationStatus.VERIFIED;
+		this.statusChangedAt = activatedAt;
+	}
+
+	public void reject(Instant rejectedAt) {
+		if (this.status != SellerStatus.PENDING) {
+			throw new BusinessException(ErrorCode.SELLER_REQUEST_NOT_ALLOWED);
+		}
+		this.status = SellerStatus.REJECTED;
+		this.verificationStatus = VerificationStatus.UNVERIFIED;
+		this.statusChangedAt = rejectedAt;
 	}
 }

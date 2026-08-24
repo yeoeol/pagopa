@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section id="seller-results" th:fragment="result">
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h3 class="card-title">판매자 승급 요청</h3>
+                <div class="card-subtitle">승인 대기 상태인 요청만 표시합니다.</div>
+            </div>
+            <div class="ms-auto text-secondary">
+                총 <strong class="text-body"
+                          th:text="${#numbers.formatInteger(sellers.totalElements, 1, 'COMMA')}">0</strong>건
+            </div>
+        </div>
+
+        <div class="table-responsive" th:if="${!sellers.content.isEmpty()}">
+            <table class="table table-vcenter card-table table-hover">
+                <thead>
+                <tr>
+                    <th>신청 회원</th>
+                    <th>판매자 번호</th>
+                    <th>요청 상태</th>
+                    <th>인증 상태</th>
+                    <th>신청일</th>
+                    <th class="text-end">작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <th:block th:each="seller : ${sellers.content}">
+                        <tr th:replace="~{admin/sellers/fragments/row
+                            :: row(seller=${seller}, page=${sellers.page}, size=${sellers.size})}"></tr>
+                    </th:block>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty py-6" th:if="${sellers.content.isEmpty()}">
+            <div class="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3l8 -8"/>
+                    <path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9"/>
+                </svg>
+            </div>
+            <p class="empty-title">대기 중인 판매자 승급 요청이 없습니다.</p>
+            <p class="empty-subtitle text-secondary">새 요청이 접수되면 이 목록에 표시됩니다.</p>
+        </div>
+
+        <div class="card-footer d-flex align-items-center" th:if="${!sellers.content.isEmpty()}">
+            <p class="m-0 text-secondary">
+                <span th:text="${sellers.page * sellers.size + 1}">1</span>–<span
+                    th:text="${sellers.page * sellers.size + sellers.content.size()}">10</span> 표시
+            </p>
+            <div class="ms-auto"
+                 th:replace="~{admin/sellers/fragments/pagination :: pagination(${sellers})}"></div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

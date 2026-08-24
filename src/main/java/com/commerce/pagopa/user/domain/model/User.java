@@ -117,8 +117,12 @@ public class User extends BaseTimeEntity {
     }
 
     public void updateProfile(String name, String profileImage) {
-        if (name != null && !name.isBlank()) this.name = name;
-        if (profileImage != null && !profileImage.isBlank()) this.profileImageUrl = profileImage;
+        if (name != null && !name.isBlank()) {
+            this.name = name;
+        }
+        if (profileImage != null && !profileImage.isBlank()) {
+            this.profileImageUrl = profileImage;
+        }
     }
 
     public void addUserRole(UserRole userRole) {

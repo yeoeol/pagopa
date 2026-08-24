@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -41,7 +42,7 @@ public class AdminUserService {
         Pageable pageable = PageRequest.of(
                 page,
                 size,
-                Sort.by(Sort.Direction.DESC, "createdAt")
+                Sort.by(Sort.Direction.DESC, "statusChangedAt")
                         .and(Sort.by(Sort.Direction.DESC, "id"))
         );
         Page<User> users = userRepository.searchAdminUsers(
@@ -112,7 +113,7 @@ public class AdminUserService {
     }
 
     private String normalizeKeyword(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
+        if (!StringUtils.hasText(keyword)) {
             return null;
         }
         return keyword.trim();

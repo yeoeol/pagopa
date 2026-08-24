@@ -3,7 +3,7 @@
 <body>
 <aside class="navbar navbar-vertical navbar-expand-lg"
        data-bs-theme="dark"
-       th:fragment="sidebar">
+       th:fragment="sidebar(activeMenu)">
     <div class="container-fluid">
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse" data-bs-target="#admin-sidebar"
@@ -22,7 +22,9 @@
         <div class="collapse navbar-collapse" id="admin-sidebar">
             <ul class="navbar-nav pt-lg-3">
                 <li class="nav-item">
-                    <a class="nav-link active" th:href="@{/admin/users}">
+                    <a class="nav-link"
+                       th:classappend="${activeMenu == 'users'} ? 'active'"
+                       th:href="@{/admin/users}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block" aria-hidden="true">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                  viewBox="0 0 24 24" stroke="currentColor"
@@ -32,6 +34,26 @@
                             </svg>
                         </span>
                         <span class="nav-link-title">회원 관리</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${activeMenu == 'sellers'} ? 'active'"
+                       th:href="@{/admin/sellers/requests}">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 21l18 0"/>
+                                <path d="M5 21v-14l8 -4v18"/>
+                                <path d="M19 21v-10l-6 -4"/>
+                                <path d="M9 9l0 .01"/>
+                                <path d="M9 12l0 .01"/>
+                                <path d="M9 15l0 .01"/>
+                                <path d="M9 18l0 .01"/>
+                            </svg>
+                        </span>
+                        <span class="nav-link-title">판매자 관리</span>
                     </a>
                 </li>
             </ul>

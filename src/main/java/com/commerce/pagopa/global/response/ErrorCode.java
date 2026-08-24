@@ -103,6 +103,7 @@ public enum ErrorCode {
 
     // SELLER
     SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "SELLER_001", "존재하지 않는 판매자입니다."),
+    SELLER_REQUEST_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "SELLER_002", "허용되지 않는 판매자 요청입니다."),
 
     // ROLE
     ROLE_ALREADY_EXISTS(HttpStatus.CONFLICT, "ROLE_001", "이미 존재하는 역할(권한)입니다."),
