@@ -72,6 +72,7 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
                         AND r.code = :roleCode
                         AND r.enabled = true
               ))
+            ORDER BY u.statusChangedAt DESC, u.id DESC
             """)
     Page<User> searchAdminUsers(
             @Param("keyword") String keyword,
