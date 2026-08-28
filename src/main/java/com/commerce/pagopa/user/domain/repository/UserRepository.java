@@ -1,6 +1,7 @@
 package com.commerce.pagopa.user.domain.repository;
 
 import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
@@ -32,7 +33,12 @@ public interface UserRepository {
             Instant threshold
     );
 
-    Page<User> searchAdminUsers(String keyword, UserStatus status, Pageable pageable);
+    Page<User> searchAdminUsers(
+            String keyword,
+            UserStatus status,
+            RoleCode roleCode,
+            Pageable pageable
+    );
 
     default User findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));

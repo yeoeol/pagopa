@@ -1,5 +1,6 @@
 package com.commerce.pagopa.user.application.admin.dto.request;
 
+import com.commerce.pagopa.role.domain.model.enums.RoleCode;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 
 import jakarta.validation.constraints.Max;
@@ -10,6 +11,8 @@ public record AdminUserSearchRequestDto(
         String keyword,
 
 		UserStatus status,
+
+		RoleCode roleCode,
 
 		@PositiveOrZero(message = "{validation.min}")
 		Integer page,
