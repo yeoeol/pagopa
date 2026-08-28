@@ -109,6 +109,10 @@ public class AdminUserController {
             builder.queryParam("status", requestDto.status().name());
         }
 
+        if (requestDto.roleCode() != null) {
+            builder.queryParam("roleCode", requestDto.roleCode().name());
+        }
+
         return builder.build()
                 .encode()
                 .toUriString();
