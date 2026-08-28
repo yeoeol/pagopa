@@ -1,18 +1,22 @@
 package com.commerce.pagopa.searchhistory.application;
 
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.searchhistory.application.dto.response.SearchHistoryResponseDto;
 import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
 import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;
-import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+
+import static org.springframework.util.StringUtils.hasText;
 
 @Service
 @RequiredArgsConstructor
@@ -23,27 +27,39 @@ public class SearchHistoryService {
 
     @Transactional
     public void saveHistory(Long userId, String sessionId, String keyword) {
-        if (keyword == null || keyword.isBlank()) {
+        Instant now = Instant.now();
+
+        String normalizeKeyword = normalizeKeyword(keyword);
+        if (normalizeKeyword == null) {
             return;
         }
 
-        // 로그인 사용자
+        // 로그인 회원
         if (userId != null) {
-            User user = userRepository.findById(userId).orElse(null);
-            if (user != null) {
-                Optional<SearchHistory> existingHistory = searchHistoryRepository.findByUserIdAndKeyword(userId, keyword);
-                existingHistory.ifPresentOrElse(
-						SearchHistory::updateLastSearchedAt,
-                        () -> searchHistoryRepository.save(SearchHistory.createForUser(user, keyword))
-                );
+            if (!userRepository.existsById(userId)) {
+                throw new BusinessException(ErrorCode.USER_NOT_FOUND);
             }
+
+            Optional<SearchHistory> existingHistory = searchHistoryRepository
+                            .findByUserIdAndKeywordForUpdate(userId, keyword);
+
+            existingHistory.ifPresentOrElse(
+                    sh -> sh.updateLastSearchedAt(now),
+                    () -> searchHistoryRepository.save(
+                            SearchHistory.createForUser(userId, keyword, now)
+                    )
+            );
         }
         // 비로그인 사용자 (세션 기반)
-        else if (sessionId != null && !sessionId.isBlank()) {
-            Optional<SearchHistory> existingHistory = searchHistoryRepository.findBySessionIdAndKeyword(sessionId, keyword);
+        else if (hasText(sessionId)) {
+            Optional<SearchHistory> existingHistory = searchHistoryRepository
+                    .findBySessionIdAndKeywordForUpdate(sessionId, keyword);
+
             existingHistory.ifPresentOrElse(
-                    SearchHistory::updateLastSearchedAt,
-                    () -> searchHistoryRepository.save(SearchHistory.createForGuest(sessionId, keyword))
+                    sh -> sh.updateLastSearchedAt(now),
+                    () -> searchHistoryRepository.save(
+                            SearchHistory.createForGuest(sessionId, keyword, now)
+                    )
             );
         }
     }
@@ -77,5 +93,12 @@ public class SearchHistoryService {
         } else if (sessionId != null && !sessionId.isBlank()) {
             searchHistoryRepository.deleteBySessionId(sessionId);
         }
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (!hasText(keyword)) {
+            return null;
+        }
+        return keyword.trim();
     }
 }

@@ -17,9 +17,9 @@ public interface SearchHistoryRepository {
 
     List<SearchHistory> findBySessionIdOrderByLastSearchedAtDesc(String sessionId);
 
-    Optional<SearchHistory> findByUserIdAndKeyword(Long userId, String keyword);
+    Optional<SearchHistory> findByUserIdAndKeywordForUpdate(Long userId, String keyword);
 
-    Optional<SearchHistory> findBySessionIdAndKeyword(String sessionId, String keyword);
+    Optional<SearchHistory> findBySessionIdAndKeywordForUpdate(String sessionId, String keyword);
 
     void deleteByUserId(Long userId);
 

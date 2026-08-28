@@ -40,6 +40,8 @@ public interface UserRepository {
             Pageable pageable
     );
 
+    boolean existsById(Long userId);
+
     default User findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }

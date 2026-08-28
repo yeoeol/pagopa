@@ -3,9 +3,12 @@ package com.commerce.pagopa.searchhistory.infrastructure.persistence;
 import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
 import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +22,12 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
     List<SearchHistory> findBySessionIdOrderByLastSearchedAtDesc(String sessionId);
 
     @Override
-    Optional<SearchHistory> findByUserIdAndKeyword(Long userId, String keyword);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<SearchHistory> findByUserIdAndKeywordForUpdate(Long userId, String keyword);
 
     @Override
-    Optional<SearchHistory> findBySessionIdAndKeyword(String sessionId, String keyword);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<SearchHistory> findBySessionIdAndKeywordForUpdate(String sessionId, String keyword);
 
     @Override
     @Modifying
