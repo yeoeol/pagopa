@@ -13,15 +13,11 @@ public final class ProductFixture {
         return aProduct("test-product", "test-description", 1, 10, category, seller);
     }
 
-    public static Product aProduct(Category category, Seller seller, int stockQuantity) {
-        return aProduct("test-product", "test-description", 1, stockQuantity, category, seller);
-    }
-
     public static Product aProduct(Category category, Seller seller, Integer price) {
         return aProduct("test-product", "test-description", price, 10, category, seller);
     }
 
-    private static Product aProduct(
+    public static Product aProduct(
             String name,
             String description,
             Integer price,

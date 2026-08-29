@@ -96,4 +96,18 @@ public class Order extends BaseTimeEntity {
                 .mapToInt(OrderItem::getTotalPrice)
                 .sum();
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "createdAt=" + createdAt +
+                ", id=" + id +
+                ", status=" + status +
+                ", orderedAt=" + orderedAt +
+                ", canceledAt=" + canceledAt +
+                ", user=" + user +
+                ", orderItems=" + orderItems +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

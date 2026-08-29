@@ -10,9 +10,12 @@ import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.orderitem.application.dto.request.OrderItemRequestDto;
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.seller.domain.model.Seller;
+import com.commerce.pagopa.seller.domain.repository.SellerRepository;
 import com.commerce.pagopa.support.fixture.CategoryFixture;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
 import com.commerce.pagopa.support.fixture.ProductFixture;
+import com.commerce.pagopa.support.fixture.SellerFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
@@ -55,6 +58,8 @@ class StockConcurrencyTest {
     CategoryRepository categoryRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+	SellerRepository sellerRepository;
 
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 200, 1000})
@@ -63,7 +68,7 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        User seller = userRepository.save(UserFixture.aSeller("contention-" + N));
+        Seller seller = sellerRepository.save(SellerFixture.aSeller(UserFixture.aUser("contention-" + N)));
         Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller));
 
         // 스레드풀 생성
@@ -86,12 +91,10 @@ class StockConcurrencyTest {
                             seller.getId(),
                             new OrderCreateRequestDto(
                                     new DeliveryRequestDto(
-                                            "test",
-                                            "01012345678",
+                                            "메모",
                                             "01010",
                                             "집주소",
-                                            "101동",
-                                            "메모"
+                                            "101동"
                                     ),
                                     List.of(new OrderItemRequestDto(product.getId(), 1))
                             )
@@ -132,7 +135,7 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        User seller = userRepository.save(UserFixture.aSeller("no-contention-" + N));
+        Seller seller = sellerRepository.save(SellerFixture.aSeller(UserFixture.aUser("no-contention-" + N)));
 
         // N개 상품 미리 생성, 각 stockQuantity=1 → 동시 주문 시 row 경합 0
         List<Product> products = new ArrayList<>(N);
@@ -160,12 +163,10 @@ class StockConcurrencyTest {
                             seller.getId(),
                             new OrderCreateRequestDto(
                                     new DeliveryRequestDto(
-                                            "test",
-                                            "01012345678",
+                                            "메모",
                                             "01010",
                                             "집주소",
-                                            "101동",
-                                            "메모"
+                                            "101동"
                                     ),
                                     List.of(new OrderItemRequestDto(productId, 1))
                             )
@@ -204,8 +205,8 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        User seller = userRepository.save(UserFixture.aSeller("cancel-idem-seller-" + N));
-        User buyer = userRepository.save(UserFixture.aBuyer("cancel-idem-buyer-" + N));
+        Seller seller = sellerRepository.save(SellerFixture.aSeller(UserFixture.aUser("cancel-idem-seller-" + N)));
+        User buyer = userRepository.save(UserFixture.aUser("cancel-idem-buyer-" + N));
 
         Product product1 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10));
         Product product2 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 20));
@@ -214,7 +215,12 @@ class StockConcurrencyTest {
         // 상품 주문
         OrderResponseDto created = orderService.order(buyer.getId(),
                 new OrderCreateRequestDto(
-                        new DeliveryRequestDto("test", "01012345678", "01010", "address", "101", "memo"),
+                        new DeliveryRequestDto(
+                                "메모",
+                                "01010",
+                                "집주소",
+                                "101동"
+                        ),
                         List.of(
                                 new OrderItemRequestDto(product1.getId(), 1),
                                 new OrderItemRequestDto(product2.getId(), 2),
@@ -284,8 +290,9 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        User seller = userRepository.save(UserFixture.aSeller("cross-order-seller-" + N));
-        User buyer = userRepository.save(UserFixture.aBuyer("cross-order-buyer-" + N));
+        Seller seller = sellerRepository.save(SellerFixture.aSeller(UserFixture.aUser("cross-order-seller-" + N)));
+        User buyer = userRepository.save(UserFixture.aUser("cross-order-buyer-" + N));
+
         Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, N));
 
         // 상품 주문
@@ -294,12 +301,10 @@ class StockConcurrencyTest {
             OrderResponseDto created = orderService.order(buyer.getId(),
                     new OrderCreateRequestDto(
                             new DeliveryRequestDto(
-                                    "test",
-                                    "01012345678",
+                                    "메모",
                                     "01010",
-                                    "address",
-                                    "101",
-                                    "memo"
+                                    "집주소",
+                                    "101동"
                             ),
                             List.of(new OrderItemRequestDto(product.getId(), 1))
                     )

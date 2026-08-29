@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoleRepository {
+	Role save(Role role);
+
 	List<Role> findAll();
 
 	List<Role> findAllByEnabled(boolean enabled);

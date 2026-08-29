@@ -163,4 +163,23 @@ public class User extends BaseTimeEntity {
         this.status = UserStatus.WITHDRAWN;
         this.statusChangedAt = withdrawnAt;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", provider=" + provider +
+                ", providerId='" + providerId + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", address=" + address +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", profileImageUrl='" + profileImageUrl + '\'' +
+                ", userRoles=" + userRoles +
+                ", status=" + status +
+                ", statusChangedAt=" + statusChangedAt +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

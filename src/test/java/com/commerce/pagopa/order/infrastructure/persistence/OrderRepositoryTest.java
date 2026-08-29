@@ -3,13 +3,15 @@ package com.commerce.pagopa.order.infrastructure.persistence;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.order.domain.repository.OrderRepository;
+import com.commerce.pagopa.role.domain.model.Role;
+import com.commerce.pagopa.role.domain.repository.RoleRepository;
 import com.commerce.pagopa.support.fixture.OrderFixture;
+import com.commerce.pagopa.support.fixture.RoleFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
+import com.commerce.pagopa.support.fixture.UserRoleFixture;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +22,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,6 +41,8 @@ class OrderRepositoryTest {
     OrderRepository orderRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+	RoleRepository roleRepository;
     @PersistenceContext
     EntityManager em;
 
@@ -44,7 +50,17 @@ class OrderRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        user = userRepository.save(UserFixture.aBuyer("order-period-test"));
+        Role userRole = roleRepository.save(RoleFixture.aRoleUser());
+        user = userRepository.save(UserFixture.aUser("order-period-test"));
+        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
+    }
+
+    @Test
+    void test() {
+        Order atStart = persistOrder(user, START, OrderStatus.CONFIRMED);                                  // 포함 (>= start)
+        Order order = orderRepository.findById(atStart.getId())
+                .orElseThrow();
+        System.out.println("order = " + order);
     }
 
     @Test
@@ -58,21 +74,32 @@ class OrderRepositoryTest {
         flushAndClear();
 
         // when
-        Page<Order> result = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
+        Page<Order> result = orderRepository.findAllByPeriod(
+                user.getId(),
+                null,
+                START,
+                END,
+                PageRequest.of(0, 10)
+        );
 
         // then
+        System.out.println("result.size() = " + result.getSize());
         assertThat(result.getContent())
                 .extracting(Order::getId)
-                .containsExactlyInAnyOrder(atStart.getId(), inMiddle.getId(), lastInstant.getId());
+                .containsExactlyInAnyOrder(
+                        atStart.getId(),
+                        inMiddle.getId(),
+                        lastInstant.getId()
+                );
         assertThat(result.getTotalElements()).isEqualTo(3);
     }
 
     @Test
     void findAllByPeriod_excludesOtherUsersOrders() {
         // given
-        User other = userRepository.save(UserFixture.aBuyer("other-user"));
-        Order mine = persistOrder(user, LocalDateTime.of(2024, 5, 1, 0, 0), OrderStatus.CONFIRMED);
-        persistOrder(other, LocalDateTime.of(2024, 5, 1, 0, 0), OrderStatus.CONFIRMED);
+        User other = userRepository.save(UserFixture.aUser("other-user"));
+        Order mine = persistOrder(user, Instant.parse("2024-05-01T00:00:00.00Z"), OrderStatus.CONFIRMED);
+        persistOrder(other, Instant.parse("2024-05-01T00:00:00.00Z"), OrderStatus.CONFIRMED);
         flushAndClear();
 
         // when
@@ -87,8 +114,8 @@ class OrderRepositoryTest {
     @Test
     void findAllByPeriod_filtersByStatusWhenProvided() {
         // given
-        Order ordered = persistOrder(user, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.CONFIRMED);
-        Order cancelled = persistOrder(user, LocalDateTime.of(2024, 4, 1, 0, 0), OrderStatus.CANCELED);
+        Order ordered = persistOrder(user, Instant.parse("2024-03-01T00:00:00.00Z"), OrderStatus.CONFIRMED);
+        Order cancelled = persistOrder(user, Instant.parse("2024-04-01T00:00:00.00Z"), OrderStatus.CANCELED);
         flushAndClear();
 
         // when: status 지정 시 해당 상태만, null이면 전체
@@ -107,12 +134,12 @@ class OrderRepositoryTest {
     @Test
     void findAllByPeriod_totalCountReflectsFilterNotAllRows() {
         // given: 대상 3건 + 잡음 2건(타 유저 / 기간 밖) → count가 필터를 반영하는지(페이징 정확성)
-        persistOrder(user, LocalDateTime.of(2024, 2, 1, 0, 0), OrderStatus.CONFIRMED);
-        persistOrder(user, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.CONFIRMED);
-        persistOrder(user, LocalDateTime.of(2024, 4, 1, 0, 0), OrderStatus.CONFIRMED);
-        User other = userRepository.save(UserFixture.aBuyer("noise-user"));
-        persistOrder(other, LocalDateTime.of(2024, 3, 1, 0, 0), OrderStatus.CONFIRMED); // 타 유저
-        persistOrder(user, LocalDateTime.of(2023, 3, 1, 0, 0), OrderStatus.CONFIRMED);  // 기간 밖
+        persistOrder(user, Instant.parse("2024-02-01T00:00:00.00Z"), OrderStatus.CONFIRMED);
+        persistOrder(user, Instant.parse("2024-03-01T00:00:00.00Z"), OrderStatus.CONFIRMED);
+        persistOrder(user, Instant.parse("2024-04-01T00:00:00.00Z"), OrderStatus.CONFIRMED);
+        User other = userRepository.save(UserFixture.aUser("noise-user"));
+        persistOrder(other, Instant.parse("2024-03-01T00:00:00.00Z"), OrderStatus.CONFIRMED); // 타 유저
+        persistOrder(user, Instant.parse("2023-03-01T00:00:00.00Z"), OrderStatus.CONFIRMED);  // 기간 밖
         flushAndClear();
 
         // when: 페이지 크기 2
@@ -127,7 +154,11 @@ class OrderRepositoryTest {
     private Order persistOrder(User buyer, Instant createdAt, OrderStatus status) {
         Order order = orderRepository.save(OrderFixture.anOrder(buyer));
         // createdAt은 @CreatedDate라 영속 시 now로 채워지므로 bulk update로 backdate, status도 함께 보정
-        em.createQuery("update Order o set o.createdAt = :createdAt, o.status = :status where o.id = :id")
+        em.createQuery("""
+                       update Order o
+                       set o.createdAt = :createdAt, o.status = :status
+                       where o.id = :id
+                       """)
                 .setParameter("createdAt", createdAt)
                 .setParameter("status", status)
                 .setParameter("id", order.getId())
