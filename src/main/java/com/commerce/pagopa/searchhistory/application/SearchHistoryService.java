@@ -83,8 +83,12 @@ public class SearchHistoryService {
     }
 
     @Transactional
-    public void delete(Long searchHistoryId) {
-        searchHistoryRepository.deleteById(searchHistoryId);
+    public void delete(Long searchHistoryId, Long userId, String sessionId) {
+        if (userId != null) {
+            searchHistoryRepository.deleteByIdAndUserId(searchHistoryId, userId);
+        } else if (hasText(sessionId)) {
+            searchHistoryRepository.deleteByIdAndSessionId(searchHistoryId, sessionId);
+        }
     }
 
     @Transactional

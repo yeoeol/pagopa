@@ -11,7 +11,9 @@ public interface SearchHistoryRepository {
 
     Optional<SearchHistory> findById(Long id);
 
-    void deleteById(Long id);
+    void deleteByIdAndUserId(Long searchHistoryId, Long userId);
+
+    void deleteByIdAndSessionId(Long searchHistoryId, String sessionId);
 
     List<SearchHistory> findByUserIdOrderByLastSearchedAtDesc(Long userId);
 

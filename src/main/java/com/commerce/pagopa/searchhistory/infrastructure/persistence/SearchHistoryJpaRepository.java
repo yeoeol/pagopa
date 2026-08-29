@@ -23,16 +23,34 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<SearchHistory> findByUserIdAndKeywordForUpdate(Long userId, String keyword);
+    @Query("""
+            SELECT sh
+            FROM SearchHistory sh
+            WHERE sh.userId = :userId
+                AND sh.keyword = :keyword
+            """)
+    Optional<SearchHistory> findByUserIdAndKeywordForUpdate(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword
+    );
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<SearchHistory> findBySessionIdAndKeywordForUpdate(String sessionId, String keyword);
+    @Query("""
+            SELECT sh
+            FROM SearchHistory sh
+            WHERE sh.sessionId = :sessionId
+                AND sh.keyword = :keyword
+            """)
+    Optional<SearchHistory> findBySessionIdAndKeywordForUpdate(
+            @Param("sessionId") String sessionId,
+            @Param("keyword") String keyword
+    );
 
     @Override
     @Modifying
     @Query("DELETE FROM SearchHistory sh " +
-            "WHERE sh.user.id = :userId")
+            "WHERE sh.userId = :userId")
     void deleteByUserId(@Param("userId") Long userId);
 
     @Override
