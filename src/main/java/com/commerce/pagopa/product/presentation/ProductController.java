@@ -1,20 +1,11 @@
 package com.commerce.pagopa.product.presentation;
 
-import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.cookie.GuestSessionCookieFactory;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.product.application.ProductService;
 import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.searchhistory.application.SearchHistoryService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -25,7 +16,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "PRODUCT API", description = "상품 관리 API")
 @RestController
@@ -60,21 +60,15 @@ public class ProductController {
     @Operation(summary = "상품 검색", description = "검색 조건에 맞는 상품을 조회합니다.")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthenticationPrincipal(expression = "userId") Long userId,
             @ParameterObject @Valid @ModelAttribute ProductSearchCondition productSearchCondition,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
         String keyword = productSearchCondition.productName();
+        String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
 
-        if (keyword != null && !keyword.isBlank()) {
-            if (userDetails != null) {
-                searchHistoryService.saveHistory(userDetails.getUserId(), null, keyword);
-            } else {
-                String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
-                searchHistoryService.saveHistory(null, sessionId, keyword);
-            }
-        }
+        searchHistoryService.saveHistory(userId, sessionId, keyword);
 
         return ResponseEntity.ok(
                 ApiResponse.ok(productService.search(productSearchCondition))

@@ -1,7 +1,7 @@
 package com.commerce.pagopa.searchhistory.presentation;
 
+import com.commerce.pagopa.global.cookie.GuestSessionCookieFactory;
 import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.global.util.CookieUtil;
 import com.commerce.pagopa.searchhistory.application.SearchHistoryService;
 import com.commerce.pagopa.searchhistory.application.dto.response.SearchHistoryResponseDto;
 
@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -25,14 +26,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class SearchHistoryController {
 
     private final SearchHistoryService searchHistoryService;
+    private final GuestSessionCookieFactory guestSessionCookieFactory;
 
     @Operation(summary = "검색 기록 조회", description = "검색 기록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<List<SearchHistoryResponseDto>>> getHistories(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        String sessionId = CookieUtil.getSessionIdFromCookie(request);
+        String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
 
         return ResponseEntity.ok(
                 ApiResponse.ok(searchHistoryService.getHistories(userId, sessionId))
@@ -44,9 +47,10 @@ public class SearchHistoryController {
     public ResponseEntity<ApiResponse<Void>> deleteHistory(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @PathVariable("searchHistoryId") Long searchHistoryId,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        String sessionId = CookieUtil.getSessionIdFromCookie(request);
+        String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
 
         searchHistoryService.delete(searchHistoryId, userId, sessionId);
         return ResponseEntity.ok(ApiResponse.ok());
@@ -56,9 +60,10 @@ public class SearchHistoryController {
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> deleteAllHistories(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        String sessionId = CookieUtil.getSessionIdFromCookie(request);
+        String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
 
         searchHistoryService.deleteAll(userId, sessionId);
         return ResponseEntity.ok(ApiResponse.ok());
