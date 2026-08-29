@@ -2,6 +2,7 @@ package com.commerce.pagopa.searchhistory.domain.repository;
 
 import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,11 +20,19 @@ public interface SearchHistoryRepository {
 
     List<SearchHistory> findBySessionIdOrderByLastSearchedAtDesc(String sessionId);
 
-    Optional<SearchHistory> findByUserIdAndKeywordForUpdate(Long userId, String keyword);
-
-    Optional<SearchHistory> findBySessionIdAndKeywordForUpdate(String sessionId, String keyword);
-
     void deleteByUserId(Long userId);
 
     void deleteBySessionId(String sessionId);
+
+    void upsertByUserId(
+            Long userId,
+            String keyword,
+            Instant lastSearchedAt
+    );
+
+    void upsertBySessionId(
+            String SessionId,
+            String keyword,
+            Instant lastSearchedAt
+    );
 }

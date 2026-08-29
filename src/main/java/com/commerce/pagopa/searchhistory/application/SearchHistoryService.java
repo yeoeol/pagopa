@@ -3,7 +3,6 @@ package com.commerce.pagopa.searchhistory.application;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.searchhistory.application.dto.response.SearchHistoryResponseDto;
-import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
 import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
 
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,26 +38,18 @@ public class SearchHistoryService {
                 throw new BusinessException(ErrorCode.USER_NOT_FOUND);
             }
 
-            Optional<SearchHistory> existingHistory = searchHistoryRepository
-                            .findByUserIdAndKeywordForUpdate(userId, keyword);
-
-            existingHistory.ifPresentOrElse(
-                    sh -> sh.updateLastSearchedAt(now),
-                    () -> searchHistoryRepository.save(
-                            SearchHistory.createForUser(userId, keyword, now)
-                    )
+            searchHistoryRepository.upsertByUserId(
+                    userId,
+                    normalizeKeyword,
+                    now
             );
         }
         // 비로그인 사용자 (세션 기반)
         else if (hasText(sessionId)) {
-            Optional<SearchHistory> existingHistory = searchHistoryRepository
-                    .findBySessionIdAndKeywordForUpdate(sessionId, keyword);
-
-            existingHistory.ifPresentOrElse(
-                    sh -> sh.updateLastSearchedAt(now),
-                    () -> searchHistoryRepository.save(
-                            SearchHistory.createForGuest(sessionId, keyword, now)
-                    )
+            searchHistoryRepository.upsertBySessionId(
+                    sessionId,
+                    normalizeKeyword,
+                    now
             );
         }
     }
