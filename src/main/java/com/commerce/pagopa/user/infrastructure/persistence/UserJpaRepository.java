@@ -22,9 +22,25 @@ import java.util.Optional;
 public interface UserJpaRepository extends JpaRepository<User, Long>, UserRepository {
 
     @Override
+    @Query("""
+            SELECT u
+            FROM User u
+                LEFT JOIN FETCH u.userRoles ur
+                LEFT JOIN FETCH ur.role r
+            WHERE u.id = :userId
+            """)
+    Optional<User> findById(@Param("userId") Long userId);
+
+    @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT u FROM User u WHERE u.id = :id")
-    Optional<User> findByIdForUpdate(@Param("id") Long id);
+    @Query("""
+            SELECT u
+            FROM User u
+                LEFT JOIN FETCH u.userRoles ur
+                LEFT JOIN FETCH ur.role r
+            WHERE u.id = :userId
+            """)
+    Optional<User> findByIdForUpdate(@Param("userId") Long userId);
 
     @Override
     @Query("""
