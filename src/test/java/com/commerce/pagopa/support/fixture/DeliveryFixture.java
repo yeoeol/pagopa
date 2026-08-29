@@ -2,6 +2,8 @@ package com.commerce.pagopa.support.fixture;
 
 import com.commerce.pagopa.delivery.domain.model.Delivery;
 import com.commerce.pagopa.global.entity.Address;
+import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.user.domain.model.User;
 
 public final class DeliveryFixture {
 
@@ -9,10 +11,15 @@ public final class DeliveryFixture {
     }
 
     public static Delivery aDelivery() {
-        return aDelivery(AddressFixture.anAddress());
+        User user = UserFixture.aUser("test");
+
+        return aDelivery(
+                AddressFixture.anAddress(),
+                OrderFixture.anOrder(user)
+        );
     }
 
-    public static Delivery aDelivery(Address address) {
-        return Delivery.create(address, "수령인", "01012345678", null);
+    public static Delivery aDelivery(Address address, Order order) {
+        return Delivery.create(address, "요청사항", order);
     }
 }

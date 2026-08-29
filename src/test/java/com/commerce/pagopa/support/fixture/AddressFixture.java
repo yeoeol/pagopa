@@ -8,6 +8,6 @@ public final class AddressFixture {
     }
 
     public static Address anAddress() {
-        return new Address("12345", "서울시 강남구", "101동 101호");
+        return Address.create("01234", "서울특별시 강남구 테헤란로", "101번지 1");
     }
 }

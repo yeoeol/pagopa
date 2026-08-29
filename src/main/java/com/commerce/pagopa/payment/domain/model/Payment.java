@@ -1,6 +1,8 @@
 package com.commerce.pagopa.payment.domain.model;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
 import jakarta.persistence.*;
@@ -81,6 +83,9 @@ public class Payment extends BaseTimeEntity {
     }
 
     public void pay(String paymentKey) {
+        if (this.status != PaymentStatus.READY) {
+            throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+        }
         this.paidAt = Instant.now();
         this.status = PaymentStatus.PAID;
         this.paymentKey = paymentKey;

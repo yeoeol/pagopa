@@ -90,4 +90,10 @@ public class Order extends BaseTimeEntity {
         this.status = OrderStatus.CANCELED;
         this.canceledAt = canceledAt;
     }
+
+    public Integer getTotalAmount() {
+        return orderItems.stream()
+                .mapToInt(OrderItem::getTotalPrice)
+                .sum();
+    }
 }

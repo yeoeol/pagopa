@@ -9,13 +9,20 @@ public final class PaymentFixture {
     }
 
     public static Payment aReadyPayment(Order order) {
-        return Payment.create(order);
+        return aPayment(order);
     }
 
     public static Payment aPaidPayment(Order order) {
-        Payment payment = Payment.create(order);
-        payment.markInProgress();
-        payment.success("test-payment-key-" + order.getOrderNumber());
+        Payment payment = aPayment(order);
+        payment.pay("test-payment-key-" + order.getOrderedAt().toString());
         return payment;
+    }
+
+    private static Payment aPayment(Order order) {
+        return Payment.create(
+                "CREDIT_CARD",
+                order.getTotalAmount(),
+                order
+        );
     }
 }
