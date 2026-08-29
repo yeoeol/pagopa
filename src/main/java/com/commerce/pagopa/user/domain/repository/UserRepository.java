@@ -18,13 +18,16 @@ public interface UserRepository {
 
     User save(User user);
 
-    Optional<User> findById(Long id);
+    Optional<User> findById(Long userId);
 
-    Optional<User> findByIdForUpdate(Long id);
+    Optional<User> findByIdForUpdate(Long userId);
 
     Page<User> findAll(Pageable pageable);
 
-    Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
+    Optional<User> findByProviderAndProviderId(
+            Provider provider,
+            String providerId
+    );
 
     int bulkUnSuspend(
             UserStatus activeStatus,
@@ -40,11 +43,15 @@ public interface UserRepository {
             Pageable pageable
     );
 
-    default User findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+    boolean existsById(Long userId);
+
+    default User findByIdOrThrow(Long userId) {
+        return findById(userId)
+                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 
-    default User findByIdForUpdateOrThrow(Long id) {
-        return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+    default User findByIdForUpdateOrThrow(Long userId) {
+        return findByIdForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 }
