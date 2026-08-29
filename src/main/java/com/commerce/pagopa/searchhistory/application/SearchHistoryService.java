@@ -67,17 +67,18 @@ public class SearchHistoryService {
     @Transactional(readOnly = true)
     public List<SearchHistoryResponseDto> getHistories(Long userId, String sessionId) {
         if (userId != null) {
-            return searchHistoryRepository.findByUserIdOrderByLastSearchedAtDesc(userId)
+            return searchHistoryRepository
+                    .findByUserIdOrderByLastSearchedAtDesc(userId)
                     .stream()
                     .map(SearchHistoryResponseDto::from)
                     .toList();
-        } else if (sessionId != null && !sessionId.isBlank()) {
-            return searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId)
+        } else if (hasText(sessionId)) {
+            return searchHistoryRepository
+                    .findBySessionIdOrderByLastSearchedAtDesc(sessionId)
                     .stream()
                     .map(SearchHistoryResponseDto::from)
                     .toList();
         }
-
         return List.of();
     }
 
@@ -90,7 +91,7 @@ public class SearchHistoryService {
     public void deleteAll(Long userId, String sessionId) {
         if (userId != null) {
             searchHistoryRepository.deleteByUserId(userId);
-        } else if (sessionId != null && !sessionId.isBlank()) {
+        } else if (hasText(sessionId)) {
             searchHistoryRepository.deleteBySessionId(sessionId);
         }
     }
