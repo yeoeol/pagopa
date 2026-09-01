@@ -70,7 +70,6 @@ public class Category extends BaseTimeEntity {
         return "Category{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", parent=" + parent +
                 ", children=" + children +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
