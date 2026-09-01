@@ -74,7 +74,6 @@ public class UserRole extends BaseTimeEntity {
 		return "UserRole{" +
 				"createdAt=" + createdAt +
 				", id=" + id +
-				", user=" + user +
 				", role=" + role +
 				", updatedAt=" + updatedAt +
 				'}';
