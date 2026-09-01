@@ -6,6 +6,7 @@ import com.commerce.pagopa.product.application.dto.request.ProductSearchConditio
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.role.domain.model.Role;
 import com.commerce.pagopa.role.domain.repository.RoleRepository;
 import com.commerce.pagopa.seller.domain.model.Seller;
 import com.commerce.pagopa.seller.domain.repository.SellerRepository;
@@ -49,12 +50,13 @@ class ProductRepositoryTest {
     private Category middleCategory;
     private Category category;
     private User user;
-    private List<Product> products = new ArrayList<>();
+    private final List<Product> products = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
         roleRepository.save(RoleFixture.aRoleAdmin());
-        roleRepository.save(RoleFixture.aRoleUser());
+        Role sellerRole = roleRepository.save(RoleFixture.aRoleSeller());
+        Role userRole = roleRepository.save(RoleFixture.aRoleUser());
 
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
@@ -62,14 +64,21 @@ class ProductRepositoryTest {
         category = tree.leaf();
         middleCategory = category.getParent();
 
-        user = userRepository.save(UserFixture.aUser("product-repo-test"));
+        user = UserFixture.aUser("product-repo-test");
+        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
+        user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
+        userRepository.save(user);
+
         Seller seller = sellerRepository.save(SellerFixture.aSeller(user));
 
         // 검색 테스트가 productA/B/C name으로 매칭하므로 fixture 디폴트 대신 명시 생성
         Product product1 = ProductFixture.aProduct(
+                "productA",
+                "descA",
+                1000,
+                10,
                 category,
-                seller,
-                1000
+                seller
         );
         Product product2 = ProductFixture.aProduct(
                 "productB",
@@ -94,14 +103,18 @@ class ProductRepositoryTest {
 
     @Test
     void searchProducts_one() {
-        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("A"));
+        List<Product> results = productRepository.searchProducts(
+                new ProductSearchCondition("A")
+        );
         assertThat(results).hasSize(1);
         assertThat(results.getFirst()).isEqualTo(products.getFirst());
     }
 
     @Test
     void searchProducts_List() {
-        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("roduc"));
+        List<Product> results = productRepository.searchProducts(
+                new ProductSearchCondition("roduc")
+        );
         assertThat(results).hasSize(products.size());
     }
 

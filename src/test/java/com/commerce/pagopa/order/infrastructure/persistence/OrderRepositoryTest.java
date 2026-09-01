@@ -51,16 +51,9 @@ class OrderRepositoryTest {
     @BeforeEach
     void setUp() {
         Role userRole = roleRepository.save(RoleFixture.aRoleUser());
-        user = userRepository.save(UserFixture.aUser("order-period-test"));
+        user = UserFixture.aUser("order-period-test");
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
-    }
-
-    @Test
-    void test() {
-        Order atStart = persistOrder(user, START, OrderStatus.CONFIRMED);                                  // 포함 (>= start)
-        Order order = orderRepository.findById(atStart.getId())
-                .orElseThrow();
-        System.out.println("order = " + order);
+        user = userRepository.save(UserFixture.aUser("order-period-test"));
     }
 
     @Test
@@ -151,15 +144,15 @@ class OrderRepositoryTest {
         assertThat(firstPage.getTotalPages()).isEqualTo(2);
     }
 
-    private Order persistOrder(User buyer, Instant createdAt, OrderStatus status) {
+    private Order persistOrder(User buyer, Instant orderedAt, OrderStatus status) {
         Order order = orderRepository.save(OrderFixture.anOrder(buyer));
         // createdAt은 @CreatedDate라 영속 시 now로 채워지므로 bulk update로 backdate, status도 함께 보정
         em.createQuery("""
                        update Order o
-                       set o.createdAt = :createdAt, o.status = :status
+                       set o.orderedAt = :orderedAt, o.status = :status
                        where o.id = :id
                        """)
-                .setParameter("createdAt", createdAt)
+                .setParameter("orderedAt", orderedAt)
                 .setParameter("status", status)
                 .setParameter("id", order.getId())
                 .executeUpdate();
