@@ -64,4 +64,16 @@ public class Category extends BaseTimeEntity {
     public void rename(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", parent=" + parent +
+                ", children=" + children +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

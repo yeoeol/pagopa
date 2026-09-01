@@ -138,4 +138,21 @@ public class Product extends BaseTimeEntity {
             );
         }
     }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "images=" + images +
+                ", id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", stockQuantity=" + stockQuantity +
+                ", status=" + status +
+                ", category=" + category +
+                ", seller=" + seller +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }
