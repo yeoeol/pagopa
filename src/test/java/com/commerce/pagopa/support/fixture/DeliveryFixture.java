@@ -10,9 +10,7 @@ public final class DeliveryFixture {
     private DeliveryFixture() {
     }
 
-    public static Delivery aDelivery() {
-        User user = UserFixture.aUser("test");
-
+    public static Delivery aDelivery(User user) {
         return aDelivery(
                 AddressFixture.anAddress(),
                 OrderFixture.anOrder(user)

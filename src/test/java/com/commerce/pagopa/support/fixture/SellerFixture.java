@@ -11,7 +11,6 @@ public final class SellerFixture {
 	}
 
 	public static Seller aSeller(User user) {
-		user.addUserRole(UserRoleFixture.aUserRole(user, RoleFixture.aRoleSeller()));
 		return Seller.create(
 				user,
 				Instant.now()
