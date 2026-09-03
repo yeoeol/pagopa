@@ -12,14 +12,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "orders",
         indexes = {
@@ -32,17 +30,21 @@ import lombok.NoArgsConstructor;
 public class Order extends BaseTimeEntity {
 
     @Id
+    @ToString.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private OrderStatus status;
 
+    @ToString.Include
     @Column(name = "ordered_at", nullable = false)
     private Instant orderedAt;
 
+    @ToString.Include
     @Column(name = "canceled_at", nullable = true)
     private Instant canceledAt;
 
@@ -83,11 +85,20 @@ public class Order extends BaseTimeEntity {
 
     // == 주문 취소 로직 ==
     public void cancel(Instant canceledAt) {
+        if (this.status != OrderStatus.PENDING_PAYMENT) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
         if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
 
         this.status = OrderStatus.CANCELED;
         this.canceledAt = canceledAt;
+    }
+
+    public Integer getTotalAmount() {
+        return orderItems.stream()
+                .mapToInt(OrderItem::getTotalPrice)
+                .sum();
     }
 }

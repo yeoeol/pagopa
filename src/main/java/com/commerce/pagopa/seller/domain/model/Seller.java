@@ -104,4 +104,17 @@ public class Seller extends BaseTimeEntity {
 		this.verificationStatus = VerificationStatus.UNVERIFIED;
 		this.statusChangedAt = rejectedAt;
 	}
+
+	@Override
+	public String toString() {
+		return "Seller{" +
+				"id=" + id +
+				", status=" + status +
+				", verificationStatus=" + verificationStatus +
+				", statusChangedAt=" + statusChangedAt +
+				", user=" + user +
+				", createdAt=" + createdAt +
+				", updatedAt=" + updatedAt +
+				'}';
+	}
 }

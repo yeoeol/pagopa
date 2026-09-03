@@ -11,14 +11,12 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "product",
         indexes = {
@@ -32,21 +30,27 @@ public class Product extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "product_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
+    @ToString.Include
     @Column(name = "description", length = 255, nullable = true)
     private String description;
 
+    @ToString.Include
     @Column(name = "price", nullable = false)
     private Integer price;
 
+    @ToString.Include
     @Column(name = "stock_quantity", nullable = false)
     private int stockQuantity = 0;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private ProductStatus status;

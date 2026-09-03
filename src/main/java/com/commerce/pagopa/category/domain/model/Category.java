@@ -6,22 +6,22 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "category")
 public class Category extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "category_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
@@ -63,5 +63,16 @@ public class Category extends BaseTimeEntity {
 
     public void rename(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", children=" + children +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

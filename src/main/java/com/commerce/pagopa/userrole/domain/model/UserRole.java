@@ -68,4 +68,14 @@ public class UserRole extends BaseTimeEntity {
 	public void assignUser(User user) {
 		this.user = user;
 	}
+
+	@Override
+	public String toString() {
+		return "UserRole{" +
+				"createdAt=" + createdAt +
+				", id=" + id +
+				", role=" + role +
+				", updatedAt=" + updatedAt +
+				'}';
+	}
 }

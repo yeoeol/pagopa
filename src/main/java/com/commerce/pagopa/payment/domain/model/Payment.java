@@ -1,20 +1,20 @@
 package com.commerce.pagopa.payment.domain.model;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "payment",
         uniqueConstraints = {
@@ -28,25 +28,32 @@ public class Payment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "payment_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Column(name = "payment_method", length = 50, nullable = false)
     private String paymentMethod;
 
+    @ToString.Include
     @Column(name = "amount", nullable = false)
     private Integer amount; // 결제 금액
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private PaymentStatus status; // 결제 상태
 
+    @ToString.Include
     @Column(name = "paid_at", nullable = true)
     private Instant paidAt;
 
+    @ToString.Include
     @Column(name = "canceled_at", nullable = true)
     private Instant canceledAt;
 
+    @ToString.Include
     @Column(unique = true, length = 200)
     private String paymentKey; // 토스 페이먼츠에서 발급하는 고유 키
 
@@ -81,6 +88,9 @@ public class Payment extends BaseTimeEntity {
     }
 
     public void pay(String paymentKey) {
+        if (this.status != PaymentStatus.READY) {
+            throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+        }
         this.paidAt = Instant.now();
         this.status = PaymentStatus.PAID;
         this.paymentKey = paymentKey;

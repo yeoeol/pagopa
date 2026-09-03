@@ -6,10 +6,12 @@ import com.commerce.pagopa.product.application.dto.request.ProductSearchConditio
 import com.commerce.pagopa.product.domain.model.Product;
 import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.support.fixture.CategoryFixture;
+import com.commerce.pagopa.role.domain.model.Role;
+import com.commerce.pagopa.role.domain.repository.RoleRepository;
+import com.commerce.pagopa.seller.domain.model.Seller;
+import com.commerce.pagopa.seller.domain.repository.SellerRepository;
+import com.commerce.pagopa.support.fixture.*;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
-import com.commerce.pagopa.support.fixture.ProductFixture;
-import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.repository.UserRepository;
@@ -23,7 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,47 +41,60 @@ class ProductRepositoryTest {
     CategoryRepository categoryRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+	RoleRepository roleRepository;
+    @Autowired
+    SellerRepository sellerRepository;
 
     private Category rootCategory;
     private Category middleCategory;
     private Category category;
     private User user;
-    private List<Product> products = new ArrayList<>();
+    private final List<Product> products = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
+        roleRepository.save(RoleFixture.aRoleAdmin());
+        Role sellerRole = roleRepository.save(RoleFixture.aRoleSeller());
+        Role userRole = roleRepository.save(RoleFixture.aRoleUser());
+
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
         rootCategory = tree.root();
         category = tree.leaf();
         middleCategory = category.getParent();
 
-        user = userRepository.save(UserFixture.aSeller("product-repo-test"));
+        user = UserFixture.aUser("product-repo-test");
+        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
+        user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
+        userRepository.save(user);
+
+        Seller seller = sellerRepository.save(SellerFixture.aSeller(user));
 
         // 검색 테스트가 productA/B/C name으로 매칭하므로 fixture 디폴트 대신 명시 생성
         Product product1 = ProductFixture.aProduct(
                 "productA",
                 "descA",
-                category,
-                user,
+                1000,
                 10,
-                BigDecimal.valueOf(1000)
+                category,
+                seller
         );
         Product product2 = ProductFixture.aProduct(
                 "productB",
                 "descB",
-                category,
-                user,
+                2000,
                 20,
-                BigDecimal.valueOf(2000)
+                category,
+                seller
         );
         Product product3 = ProductFixture.aProduct(
                 "productC",
                 "descC",
-                category,
-                user,
+                3000,
                 30,
-                BigDecimal.valueOf(3000)
+                category,
+                seller
         );
         products.add(productRepository.save(product1));
         products.add(productRepository.save(product2));
@@ -89,14 +103,18 @@ class ProductRepositoryTest {
 
     @Test
     void searchProducts_one() {
-        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("A"));
+        List<Product> results = productRepository.searchProducts(
+                new ProductSearchCondition("A")
+        );
         assertThat(results).hasSize(1);
         assertThat(results.getFirst()).isEqualTo(products.getFirst());
     }
 
     @Test
     void searchProducts_List() {
-        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("roduc"));
+        List<Product> results = productRepository.searchProducts(
+                new ProductSearchCondition("roduc")
+        );
         assertThat(results).hasSize(products.size());
     }
 

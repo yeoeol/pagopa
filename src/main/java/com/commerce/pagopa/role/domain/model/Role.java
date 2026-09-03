@@ -76,4 +76,16 @@ public class Role extends BaseTimeEntity {
 		}
 		this.enabled = false;
 	}
+
+	@Override
+	public String toString() {
+		return "Role{" +
+				"id=" + id +
+				", code=" + code +
+				", description='" + description + '\'' +
+				", enabled=" + enabled +
+				", createdAt=" + createdAt +
+				", updatedAt=" + updatedAt +
+				'}';
+	}
 }

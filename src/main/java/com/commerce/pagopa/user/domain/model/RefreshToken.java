@@ -2,14 +2,12 @@ package com.commerce.pagopa.user.domain.model;
 
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "refresh_token",
         uniqueConstraints = {
@@ -27,6 +25,7 @@ public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "refresh_token_id")
     private Long id;
 
@@ -38,6 +37,7 @@ public class RefreshToken {
     )
     private User user;
 
+    @ToString.Include
     @Column(name = "token", length = 255, nullable = false)
     private String token;
 

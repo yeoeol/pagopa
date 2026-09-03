@@ -9,6 +9,6 @@ public final class OrderFixture {
     }
 
     public static Order anOrder(User buyer) {
-        return Order.init(buyer, DeliveryFixture.aDelivery());
+        return Order.init(buyer);
     }
 }

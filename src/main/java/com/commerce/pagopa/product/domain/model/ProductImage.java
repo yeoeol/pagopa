@@ -2,14 +2,12 @@ package com.commerce.pagopa.product.domain.model;
 
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "product_image",
         uniqueConstraints = {
@@ -23,15 +21,19 @@ public class ProductImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "product_image_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Column(name = "image_url", length = 512, nullable = false)
     private String imageUrl;
 
+    @ToString.Include
     @Column(name = "display_order", nullable = false)
     private int displayOrder;
 
+    @ToString.Include
     @Column(name = "is_thumbnail", nullable = false)
     private boolean isThumbnail = false;
 
