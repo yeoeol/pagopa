@@ -14,7 +14,7 @@ public final class PaymentFixture {
 
     public static Payment aPaidPayment(Order order) {
         Payment payment = aPayment(order);
-        payment.pay("test-payment-key-" + order.getOrderedAt().toString());
+        payment.pay("test-payment-key-" + order.getId());
         return payment;
     }
 

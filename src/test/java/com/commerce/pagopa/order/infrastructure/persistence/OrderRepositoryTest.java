@@ -53,7 +53,7 @@ class OrderRepositoryTest {
         Role userRole = roleRepository.save(RoleFixture.aRoleUser());
         user = UserFixture.aUser("order-period-test");
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
-        user = userRepository.save(UserFixture.aUser("order-period-test"));
+        user = userRepository.save(user);
     }
 
     @Test

@@ -84,12 +84,15 @@ class StockConcurrencyTest {
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 200, 1000})
     void stock_10_으로_N명이_동시_주문하면_정확히_10명만_성공(int N) throws Exception {
-        user = UserFixture.aUser("order-stock-test-contention-" + N);
+        user = UserFixture.aUser("order-stock-contention-seller-" + N);
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-
         seller = sellerRepository.save(SellerFixture.aSeller(user));
+
+        User buyer = UserFixture.aUser("order-stock-contention-buyer-" + N);
+        buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
+        userRepository.save(buyer);
 
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
@@ -114,7 +117,7 @@ class StockConcurrencyTest {
                 try {
                     barrier.await();
                     orderService.order(
-                            seller.getId(),
+                            buyer.getId(),
                             new OrderCreateRequestDto(
                                     new DeliveryRequestDto(
                                             "메모",
@@ -157,12 +160,15 @@ class StockConcurrencyTest {
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 200, 1000})
     void 서로_다른_N개_상품에_각각_1명씩_주문하면_경합없이_모두_성공(int N) throws Exception {
-        user = UserFixture.aUser("order-stock-test-no-contention-" + N);
+        user = UserFixture.aUser("order-stock-no-contention-seller-" + N);
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-
         seller = sellerRepository.save(SellerFixture.aSeller(user));
+
+        User buyer = UserFixture.aUser("order-stock-no-contention-buyer-" + N);
+        buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
+        userRepository.save(buyer);
 
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
@@ -190,7 +196,7 @@ class StockConcurrencyTest {
                 try {
                     barrier.await();
                     orderService.order(
-                            seller.getId(),
+                            buyer.getId(),
                             new OrderCreateRequestDto(
                                     new DeliveryRequestDto(
                                             "메모",
