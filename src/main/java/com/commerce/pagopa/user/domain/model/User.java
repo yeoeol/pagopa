@@ -4,6 +4,7 @@ import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.role.domain.model.Role;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 import com.commerce.pagopa.userrole.domain.model.UserRole;
@@ -136,6 +137,10 @@ public class User extends BaseTimeEntity {
     public void addUserRole(UserRole userRole) {
         this.userRoles.add(userRole);
         userRole.assignUser(this);
+    }
+
+    public void grantRole(Role role) {
+        userRoles.add(UserRole.create(this, role));
     }
 
     public void activate(Instant activatedAt) {

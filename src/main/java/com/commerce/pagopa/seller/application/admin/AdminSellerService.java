@@ -9,7 +9,8 @@ import com.commerce.pagopa.seller.application.admin.dto.response.AdminSellerPage
 import com.commerce.pagopa.seller.domain.model.Seller;
 import com.commerce.pagopa.seller.domain.model.enums.SellerStatus;
 import com.commerce.pagopa.seller.domain.repository.SellerRepository;
-import com.commerce.pagopa.userrole.domain.model.UserRole;
+import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminSellerService {
 
 	private final SellerRepository sellerRepository;
+	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
 
 	@Transactional(readOnly = true)
@@ -46,14 +48,13 @@ public class AdminSellerService {
 	@Transactional
 	public void approve(Long sellerId) {
 		Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-		seller.activate(Instant.now());
+		User user = userRepository.findByIdOrThrow(seller.getUser().getId());
 
-		Role role = roleRepository.findByCode(RoleCode.ROLE_SELLER)
+		Role sellerRole = roleRepository.findByCode(RoleCode.ROLE_SELLER)
 				.orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
 
-		seller.getUser().addUserRole(UserRole.create(seller.getUser(), role));
-
-		sellerRepository.save(seller);
+		seller.activate(Instant.now());
+		user.grantRole(sellerRole);
 	}
 
 	@Transactional
