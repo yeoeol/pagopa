@@ -11,14 +11,12 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
 		name = "seller",
 		uniqueConstraints = {
@@ -32,17 +30,21 @@ public class Seller extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@ToString.Include
 	@Column(name = "seller_id", nullable = false)
 	private Long id;
 
+	@ToString.Include
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", length = 20, nullable = false)
 	private SellerStatus status;
 
+	@ToString.Include
 	@Enumerated(EnumType.STRING)
 	@Column(name = "verification_status", length = 20, nullable = false)
 	private VerificationStatus verificationStatus;
 
+	@ToString.Include
 	@Column(name = "status_changed_at", nullable = false)
 	private Instant statusChangedAt;
 
@@ -103,18 +105,5 @@ public class Seller extends BaseTimeEntity {
 		this.status = SellerStatus.REJECTED;
 		this.verificationStatus = VerificationStatus.UNVERIFIED;
 		this.statusChangedAt = rejectedAt;
-	}
-
-	@Override
-	public String toString() {
-		return "Seller{" +
-				"id=" + id +
-				", status=" + status +
-				", verificationStatus=" + verificationStatus +
-				", statusChangedAt=" + statusChangedAt +
-				", user=" + user +
-				", createdAt=" + createdAt +
-				", updatedAt=" + updatedAt +
-				'}';
 	}
 }
