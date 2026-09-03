@@ -37,7 +37,14 @@ public class Review extends BaseTimeEntity {
     @JoinColumn(name = "order_product_id", nullable = false)
     private OrderItem orderItem;
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "review",
+            cascade = {
+                    CascadeType.ALL,
+                    CascadeType.REMOVE
+            },
+            orphanRemoval = true
+    )
     private List<ReviewImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)

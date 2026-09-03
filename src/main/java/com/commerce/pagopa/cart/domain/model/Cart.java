@@ -40,7 +40,14 @@ public class Cart extends BaseTimeEntity {
     )
     private User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "cart",
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.REMOVE
+            },
+            orphanRemoval = true
+    )
     private final List<CartItem> cartItems = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
