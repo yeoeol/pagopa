@@ -13,8 +13,8 @@ public final class ProductFixture {
         return aProduct("test-product", "test-description", 1, 10, category, seller);
     }
 
-    public static Product aProduct(Category category, Seller seller, Integer price) {
-        return aProduct("test-product", "test-description", price, 10, category, seller);
+    public static Product aProduct(Category category, Seller seller, Integer stockQuantity) {
+        return aProduct("test-product", "test-description", 1000, stockQuantity, category, seller);
     }
 
     public static Product aProduct(

@@ -83,8 +83,11 @@ public class Order extends BaseTimeEntity {
 
     // == 주문 취소 로직 ==
     public void cancel(Instant canceledAt) {
+        if (this.status != OrderStatus.PENDING_PAYMENT) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
         if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
 
         this.status = OrderStatus.CANCELED;
