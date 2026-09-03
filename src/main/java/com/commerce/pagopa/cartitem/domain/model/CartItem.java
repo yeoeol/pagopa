@@ -5,14 +5,12 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.product.domain.model.Product;
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
 		name = "cart_item",
 		uniqueConstraints = {
@@ -26,6 +24,7 @@ public class CartItem extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@ToString.Include
 	@Column(name = "cart_item_id", nullable = false)
 	private Long id;
 
@@ -45,6 +44,7 @@ public class CartItem extends BaseTimeEntity {
 	)
 	private Product product;
 
+	@ToString.Include
 	@Column(name = "cart_quantity", nullable = false)
 	private Integer cartQuantity = 1;
 

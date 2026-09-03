@@ -6,29 +6,31 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.order.domain.model.Order;
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "delivery")
 public class Delivery extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "delivery_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private DeliveryStatus status;
 
+    @ToString.Include
     @Column(name = "tracking_no", length = 50, nullable = true)
     private String trackingNo;
 
+    @ToString.Include
     @Column(name = "request_memo", length = 100, nullable = true)
     private String requestMemo;
 

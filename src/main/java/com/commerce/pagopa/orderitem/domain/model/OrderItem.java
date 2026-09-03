@@ -5,14 +5,12 @@ import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.product.domain.model.Product;
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "order_item",
         uniqueConstraints = {
@@ -26,15 +24,19 @@ public class OrderItem extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "order_item_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Column(name = "product_name", length = 100, nullable = false)
     private String productName;
 
+    @ToString.Include
     @Column(name = "order_price", nullable = false)
     private Integer orderPrice;
 
+    @ToString.Include
     @Column(name = "order_quantity", nullable = false)
     private Integer orderQuantity;
 

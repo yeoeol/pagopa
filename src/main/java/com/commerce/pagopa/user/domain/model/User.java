@@ -14,14 +14,12 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "user",
         uniqueConstraints = {
@@ -39,38 +37,48 @@ public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(name = "user_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(name = "provider", length = 50, nullable = false)
     private Provider provider;
 
+    @ToString.Include
     @Column(name = "provider_id", length = 255, nullable = false)
     private String providerId;
 
+    @ToString.Include
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
+    @ToString.Include
     @Column(name = "email", length = 100, nullable = false)
     private String email;
 
+    @ToString.Include
     @Embedded
     private Address address;
 
+    @ToString.Include
     @Column(name = "phone_number", length = 20, nullable = true)
     private String phoneNumber;
 
+    @ToString.Include
     @Column(name = "profile_image_url", length = 512, nullable = false)
     private String profileImageUrl;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final Set<UserRole> userRoles = new HashSet<>();
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private UserStatus status;
 
+    @ToString.Include
     @Column(name = "status_changed_at", nullable = false)
     private Instant statusChangedAt;  // 탈퇴 일시
 
@@ -162,24 +170,5 @@ public class User extends BaseTimeEntity {
         }
         this.status = UserStatus.WITHDRAWN;
         this.statusChangedAt = withdrawnAt;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", provider=" + provider +
-                ", providerId='" + providerId + '\'' +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", address=" + address +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", profileImageUrl='" + profileImageUrl + '\'' +
-                ", userRoles=" + userRoles +
-                ", status=" + status +
-                ", statusChangedAt=" + statusChangedAt +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }

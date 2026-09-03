@@ -12,14 +12,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "orders",
         indexes = {
@@ -32,17 +30,21 @@ import lombok.NoArgsConstructor;
 public class Order extends BaseTimeEntity {
 
     @Id
+    @ToString.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id", nullable = false)
     private Long id;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private OrderStatus status;
 
+    @ToString.Include
     @Column(name = "ordered_at", nullable = false)
     private Instant orderedAt;
 
+    @ToString.Include
     @Column(name = "canceled_at", nullable = true)
     private Instant canceledAt;
 
@@ -98,19 +100,5 @@ public class Order extends BaseTimeEntity {
         return orderItems.stream()
                 .mapToInt(OrderItem::getTotalPrice)
                 .sum();
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "createdAt=" + createdAt +
-                ", id=" + id +
-                ", status=" + status +
-                ", orderedAt=" + orderedAt +
-                ", canceledAt=" + canceledAt +
-                ", user=" + user +
-                ", orderItems=" + orderItems +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }
