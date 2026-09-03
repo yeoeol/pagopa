@@ -71,7 +71,7 @@ public class User extends BaseTimeEntity {
     @Column(name = "profile_image_url", length = 512, nullable = false)
     private String profileImageUrl;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
     private final Set<UserRole> userRoles = new HashSet<>();
 
     @ToString.Include
