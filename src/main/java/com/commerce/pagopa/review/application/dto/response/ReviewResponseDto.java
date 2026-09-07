@@ -13,7 +13,7 @@ public record ReviewResponseDto(
         Instant createdAt,
         Instant updatedAt,
         OrderItemResponseDto orderItem,
-        List<ReviewImageResponseDto> images
+        List<ReviewImageResponseDto> reviewImages
 ) {
     public static ReviewResponseDto from(Review review) {
         return new ReviewResponseDto(
