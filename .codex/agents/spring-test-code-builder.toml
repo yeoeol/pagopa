@@ -24,7 +24,8 @@ developer_instructions = """
 
 작업 경계:
 - 승인 상태가 없거나 대상 코드가 바뀌었으면 수정하지 않고 되돌립니다.
-- A 방식에 따라 대상 테스트 파일과 그 내부 helper만 수정합니다.
+- A 방식에 따라 소스 코드 변경은 대상 테스트 파일과 그 내부 helper로 제한합니다.
+- 필수 산출물인 artifacts/03-implementation.md만 추가로 생성·갱신합니다.
 - 운영 코드, build.gradle, 공용 Fixture, 공용 테스트 유틸리티, 다른 테스트 파일을 수정하지 않습니다.
 - assertion을 약화하거나 예외를 삼켜 테스트를 통과시키지 않습니다.
 - git add, git commit, git push를 실행하지 않습니다.

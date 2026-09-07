@@ -34,7 +34,8 @@ description: >
 3. 같은 대상의 일부 단계만 다시 요청했고 입력과 코드가 바뀌지 않았다면 부분 재실행한다.
 4. 대상, 요구사항, 기준 브랜치 또는 관련 코드가 달라졌다면 기존 결과를
    `artifacts/archive/{YYYYMMDD-HHMMSS}/`에 보존하고 새 실행을 시작한다.
-5. 승인 뒤 코드가 달라졌다면 테스트 계획을 stale로 표시하고 다시 승인받는다.
+5. 테스트 목록 승인 후 승인된 테스트 구현 diff를 제외하고 기준 커밋 이후 대상 코드, 빌드 설정
+   또는 사용자 변경이 달라졌다면 테스트 계획을 stale로 표시하고 다시 승인받는다.
 
 ## Phase 0. 현재 상황 확인
 
@@ -73,19 +74,22 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 설계 → 승�
 3. `implement-spring-tests`
 4. `verify-spring-tests`
 
-## Phase 6. Orchestrator 실행
+## Phase 6. 승인 구현
 
 1. 분석 결과에서 테스트 가능한 동작과 위험을 확인한다.
 2. `design-spring-test-cases`로 정상·예외·경계값·회귀 목록을 작성한다.
 3. 승인 게이트 1에서 테스트 목록과 예상 수정 파일을 사용자에게 보여주고 멈춘다.
 4. 명시적 승인 후에만 `implement-spring-tests`로 테스트 코드를 수정한다.
-5. `verify-spring-tests`로 대상 테스트, 관련 테스트와 가능한 범위의 전체 테스트를 검증한다.
-6. 검증 실패가 테스트 구현 문제이면 최대 2회까지 구현→검증을 반복한다. 매 라운드 diff와
+
+## Phase 7. 독립 검증·개선
+
+1. `verify-spring-tests`로 대상 테스트, 관련 테스트와 가능한 범위의 전체 테스트를 검증한다.
+2. 검증 실패가 테스트 구현 문제이면 최대 2회까지 구현→검증을 반복한다. 매 라운드 diff와
    결과를 보존하고 악화되면 직전 best로 돌아간다.
-7. 운영 코드 결함, 환경 차단, 두 번의 수정 후 미통과이면 자동 통과시키지 않고 사용자에게
+3. 운영 코드 결함, 환경 차단, 두 번의 수정 후 미통과이면 자동 통과시키지 않고 사용자에게
    선택지를 보고한다.
-8. `artifacts/final.md`, Git diff와 상태를 보여주고 승인 게이트 2에서 멈춘다.
-9. 사용자가 최종 결과를 직접 확인하고 별도로 승인해야만 커밋할 수 있다.
+4. `artifacts/final.md`, Git diff와 상태를 보여주고 승인 게이트 2에서 멈춘다.
+5. 사용자가 최종 결과를 직접 확인하고 별도로 승인해야만 커밋할 수 있다.
 
 ## 승인 게이트 1: 테스트 계획
 
@@ -95,6 +99,8 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 설계 → 승�
 - 대상:
 - 테스트 목록: `artifacts/02-test-cases.md`
 - 수정 예정 파일:
+- 추가할 새 테스트와 파일 내부 private helper:
+- 기존 테스트 setup·assertion 변경: 없음 또는 승인받을 정확한 항목
 - 별도 승인 없이는 수정하지 않을 파일:
 - 주요 트레이드오프:
 - 승인하면 일어나는 일: 승인된 테스트만 A 방식으로 구현
@@ -121,15 +127,15 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 설계 → 승�
 
 ## 파일 기반 산출물 계약
 
-| 단계 | 파일 | 만드는 역할 | 다음에 읽는 역할 |
+| Phase | 파일 | 만드는 역할 | 다음에 읽는 역할 |
 | --- | --- | --- | --- |
-| 요청 | `artifacts/00-request.md` | Orchestrator | 모든 역할 |
-| 컨텍스트 | `artifacts/01-project-context.md` | Context Analyst | Test Designer, Builder |
-| 테스트 목록 | `artifacts/02-test-cases.md` | Test Designer | 사용자, Builder |
-| 구현 기록 | `artifacts/03-implementation.md` | Builder | Reviewer |
-| 검증 | `artifacts/04-verification.md` | Reviewer | Orchestrator, 사용자 |
-| 최종 설명 | `artifacts/final.md` | Orchestrator | 사용자, 다음 실행 |
-| 개선 기록 | `artifacts/improvement-log.md` | Orchestrator | 다음 하네스 개선 |
+| Phase 0 | `artifacts/00-request.md` | Orchestrator | 모든 역할 |
+| Phase 1 | `artifacts/01-project-context.md` | Context Analyst | Test Designer, Builder |
+| Phase 2 | `artifacts/02-test-cases.md` | Test Designer | 사용자, Builder |
+| Phase 6 | `artifacts/03-implementation.md` | Builder | Reviewer |
+| Phase 7 | `artifacts/04-verification.md` | Reviewer | Orchestrator, 사용자 |
+| Phase 7 | `artifacts/final.md` | Orchestrator | 사용자, 다음 실행 |
+| Phase 7 | `artifacts/improvement-log.md` | Orchestrator | 다음 하네스 개선 |
 
 지정 경로 저장에 실패하면 한 번 재시도하고, 다시 실패하면 차단으로 보고한다. 저장한 척 대화
 요약으로 대체하지 않는다.

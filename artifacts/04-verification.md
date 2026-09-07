@@ -27,7 +27,7 @@
 | ID | 메서드 / 분류 | 핵심 assertion | 3회 반복 결과 |
 | --- | --- | --- | --- |
 | N-01 | `concurrent_different_keywords_are_all_saved` / `normal` | 8개 작업 성공, outcome·예외·완료·종료, 행 8건, keyword 집합 일치 | 3/3 PASS |
-| E-01 | `concurrent_updates_of_existing_history_complete_without_errors` / `exception` | 기존 행 1건, 동시 update 8건 성공, ID 유지, `lastSearchedAt` 증가 | 3/3 PASS |
+| E-01 | `concurrent_updates_of_existing_history_complete_without_errors` / 예외 안전성 (`exception` tag) | 기존 행 1건, 동시 update 8건 성공, 예상 밖 실패 0, ID 유지, `lastSearchedAt` 증가 | 3/3 PASS |
 | B-01 | `concurrent_whitespace_variants_are_deduplicated` / `boundary` | 공백 변형 8개 성공, 단일 행, 정규화 keyword 일치 | 3/3 PASS |
 | R-01 | `concurrent_same_user_keyword_results_in_one_history` / `regression` | 동일 userId/keyword 8개 성공, 단일 행, keyword 일치 | 3/3 PASS |
 | R-02 | `concurrent_same_session_keyword_results_in_one_history` / `regression` | 동일 sessionId/keyword 8개 성공, 단일 행, keyword 일치 | 3/3 PASS |
@@ -39,7 +39,9 @@
 - 매 테스트의 `@BeforeEach`에서 JDBC metadata product name이 `MySQL`인지 직접 검증한다. 3회 15개 테스트가 모두 통과했으므로 metadata assertion도 15회 통과했다.
 - `@Transactional(propagation = NOT_SUPPORTED)`로 JPA slice의 기본 테스트 트랜잭션을 비활성화해 fixture commit과 worker별 `SearchHistoryService` 트랜잭션을 실제로 분리한다.
 - 클래스 `@Timeout(30초)`, barrier `5초`, completion latch `15초`, executor termination `5초` 제한이 있다.
-- 각 task의 `Throwable`을 수집하고 `success + expected failure + unexpected failure = 8`, expected/unexpected failure 0, success 8, 미완료 0, executor 종료를 공통 assertion으로 검증한다.
+- 각 task의 `Throwable`을 수집한다. `success + expected failure + unexpected failure = 8`은 outcome
+  누락 진단에 사용하고, 성공 조건은 success 8과 approved expected failure 0의 합계 8,
+  unexpected failure collection 비어 있음, 미완료 0, executor 종료를 각각 assertion한다.
 - E-01은 기존 ID 불변과 `2000-01-01T00:00:00Z`보다 `lastSearchedAt`이 증가했음을 실제 MySQL 결과로 3회 확인했다.
 - R-01 suffix는 `same-user-keyword` 17자, 구분자 1자, UUID hex 12자로 총 30자다. `UserFixture`의 `nick-` 접두사까지 35자로 `User.name` 50자 제한을 만족한다.
 - mock은 사용하지 않는다.
@@ -77,7 +79,7 @@
 - 소요시간: 실행 도구 wall time 약 `18.63초`; Gradle 자체 보고 `BUILD FAILED in 21s`
 - 결과: 10 tests completed, 10 failed
 - 최초 원인: `PlaceholderResolutionException: Could not resolve placeholder 'jwt.secret' in value "${jwt.secret}"`
-- 해석: 기존 두 테스트의 full `@SpringBootTest`가 컨텍스트 생성 전에 실패해 repository assertion은 실행되지 않았다. 대상 테스트 변경에 의한 assertion 실패 근거는 없다.
+- 해석: 기존 두 테스트의 full `@SpringBootTest`가 컨텍스트 생성 전에 실패해 repository assertion은 실행되지 않았다. 사용자가 후속 확인한 원인은 외부 환경 변수를 주입하는 gitignored yml이 worktree에 따라오지 않은 것이다. 대상 테스트 변경에 의한 assertion 실패 근거는 없다.
 
 ### 5. 전체 테스트
 
@@ -96,8 +98,8 @@
 | --- | --- | --- | --- |
 | 없음 | 대상 테스트 전체 | 3회 연속 15/15 통과, 모든 task outcome과 자원 종료 assertion 포함 | 관찰된 flaky 신호 없음 |
 | 낮음 | R-01 fixture lifecycle | 검색 기록은 정리하지만 UUID 회원 fixture는 컨텍스트 DB에 남는다 | 축약 UUID로 케이스 충돌 가능성은 낮고 컨테이너 종료 시 제거됨 |
-| 중간 | `artifacts/02-test-cases.md:58` / 구현 파일 | 승인 설계 문서는 `@SpringBootTest`를 명시하지만 최종 구현은 실제 MySQL `@DataJpaTest` slice다 | 승인된 동작과 A 방식 경계는 유지하지만 설계 문서와 최종 컨텍스트 선택이 불일치 |
-| 기존 저장소 한계 | full `@SpringBootTest` 테스트 | `${jwt.secret}` 미설정으로 관련 10건과 전체 23건이 본문 전에 실패 | 대상 변경의 회귀 여부가 아니라 기존 full-context 테스트 환경의 녹색 상태를 확인할 수 없음 |
+| 해소 | `artifacts/02-test-cases.md` / 구현 파일 | 2026-09-08에 승인된 `@DataJpaTest`와 수동 `@Import` 구성을 설계 문서에 동기화 | 설계와 실제 테스트 컨텍스트 불일치 위험 해소 |
+| 기존 저장소 한계 | full `@SpringBootTest` 테스트 | gitignored 외부 환경 yml이 worktree에 없어 `${jwt.secret}` 미설정으로 관련 10건과 전체 23건이 본문 전에 실패 | 대상 변경의 회귀 여부가 아니라 기존 full-context 테스트 환경의 녹색 상태를 확인할 수 없음; 사용자가 별도 수정 예정 |
 
 ## 미검증 범위
 
