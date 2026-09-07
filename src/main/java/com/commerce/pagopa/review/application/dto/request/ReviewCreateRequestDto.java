@@ -9,12 +9,12 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record ReviewCreateRequestDto(
+        @NotBlank(message = "{validation.notBlank}")
+        String content,
+
         @NotNull(message = "{validation.notNull}")
         @Range(min = 1, max = 5, message = "{validation.range}")
         Integer rating,     // 1 ~ 5
-
-        @NotBlank(message = "{validation.notBlank}")
-        String content,
 
         @NotNull(message = "{validation.notNull}")
         Long orderItemId,
