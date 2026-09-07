@@ -21,4 +21,9 @@ public record ReviewCreateRequestDto(
 
         List<@Size(max = 512, message = "{validation.size}") String> imageUrls
 ) {
+        public ReviewCreateRequestDto {
+                if (imageUrls == null) {
+                        imageUrls = List.of();
+                }
+        }
 }
