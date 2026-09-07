@@ -1,6 +1,7 @@
 package com.commerce.pagopa.review.application;
 
 import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.orderitem.domain.model.OrderItem;
 import com.commerce.pagopa.orderitem.domain.repository.OrderItemRepository;
 import com.commerce.pagopa.product.domain.repository.ProductRepository;
@@ -11,8 +12,6 @@ import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
 import com.commerce.pagopa.review.domain.model.Review;
 import com.commerce.pagopa.review.domain.model.ReviewImage;
 import com.commerce.pagopa.review.domain.repository.ReviewRepository;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,19 +27,27 @@ import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final OrderItemRepository orderItemRepository;
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
-        User user = userRepository.findByIdOrThrow(userId);
-        OrderItem orderItem = orderItemRepository.findByIdOrThrow(requestDto.orderProductId());
+        OrderItem orderItem = orderItemRepository.findByIdOrThrow(requestDto.orderItemId());
 
-        Review review = Review.create(requestDto.rating(), requestDto.content(), user, orderItem);
+        validateOrdererId(orderItem, userId);
+
+        Review review = Review.create(
+                requestDto.content(),
+                requestDto.rating(),
+                orderItem
+        );
 
         for (int i = 0; i < requestDto.imageUrls().size(); i++) {
-            ReviewImage reviewImage = ReviewImage.create(requestDto.imageUrls().get(i), i + 1);
+            ReviewImage reviewImage = ReviewImage.create(
+                    requestDto.imageUrls().get(i),
+                    i + 1,
+                    review
+            );
             review.addImage(reviewImage);
         }
 
@@ -58,7 +65,7 @@ public class ReviewService {
     @Transactional
     public void update(Long reviewId, ReviewUpdateRequestDto requestDto) {
         Review review = reviewRepository.findByIdOrThrow(reviewId);
-        review.update(requestDto.rating(), requestDto.content());
+        review.update(requestDto.content(), requestDto.rating());
     }
 
     @Transactional
@@ -72,8 +79,18 @@ public class ReviewService {
             throw new BusinessException(PRODUCT_NOT_FOUND);
         }
 
-        return reviewRepository.findAllByProductIdWithUserAndReviewImages(productId).stream()
+        return reviewRepository.findAllWithDetailsByProductId(productId).stream()
                 .map(ProductReviewResponseDto::from)
                 .toList();
+    }
+
+    private void validateOrdererId(OrderItem orderItem, Long userId) {
+		Long ordererId = orderItem.getOrder()
+			    .getUser()
+                .getId();
+
+        if (!ordererId.equals(userId)) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_MINE);
+        }
     }
 }
