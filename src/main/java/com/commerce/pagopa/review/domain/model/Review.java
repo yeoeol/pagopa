@@ -54,7 +54,7 @@ public class Review extends BaseTimeEntity {
     @OneToMany(
             mappedBy = "review",
             cascade = {
-                    CascadeType.ALL,
+                    CascadeType.PERSIST,
                     CascadeType.REMOVE
             },
             orphanRemoval = true
@@ -78,7 +78,6 @@ public class Review extends BaseTimeEntity {
 
     public void addImage(ReviewImage image) {
         this.images.add(image);
-        image.assignReview(this);
     }
 
     public void update(String content, Integer rating) {
