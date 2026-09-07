@@ -2,75 +2,90 @@ package com.commerce.pagopa.review.domain.model;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.orderitem.domain.model.OrderItem;
-import com.commerce.pagopa.user.domain.model.User;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "reviews")
+@ToString(onlyExplicitlyIncluded = true)
+@Table(
+        name = "review",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_review_order_item_id",
+                        columnNames = {"order_item_id"}
+                )
+        }
+)
 public class Review extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "review_id")
+    @ToString.Include
+    @Column(name = "review_id", nullable = false)
     private Long id;
 
-    private int rating;     // 1 ~ 5
-
-    @Column(columnDefinition = "TEXT")
+    @ToString.Include
+    @Column(name = "content", length = 100, nullable = false)
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Min(1)
+    @Max(5)
+    @ToString.Include
+    @Column(name = "rating", nullable = false)
+    private Integer rating;     // 1 ~ 5
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_product_id", nullable = false)
+    @JoinColumn(
+            name = "order_item_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_review_order_item")
+    )
     private OrderItem orderItem;
 
     @OneToMany(
             mappedBy = "review",
             cascade = {
-                    CascadeType.ALL,
+                    CascadeType.PERSIST,
                     CascadeType.REMOVE
             },
             orphanRemoval = true
     )
-    private List<ReviewImage> images = new ArrayList<>();
+    private final List<ReviewImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Review(int rating, String content, User user, OrderItem orderItem) {
+    private Review(String content, Integer rating, OrderItem orderItem) {
         this.rating = rating;
         this.content = content;
-        this.user = user;
         this.orderItem = orderItem;
     }
 
-    public static Review create(int rating, String content, User user, OrderItem orderItem) {
+    public static Review create(String content, Integer rating, OrderItem orderItem) {
         return Review.builder()
-                .rating(rating)
                 .content(content)
-                .user(user)
+                .rating(rating)
                 .orderItem(orderItem)
                 .build();
     }
 
     public void addImage(ReviewImage image) {
         this.images.add(image);
-        image.assignReview(this);
     }
 
-    public void update(int rating, String content) {
-        this.rating = rating;
-        this.content = content;
+    public void update(String content, Integer rating) {
+        if (content != null && !content.isBlank()) {
+            this.content = content;
+        }
+        if (rating != null && (1 <= rating && rating <= 5)) {
+            this.rating = rating;
+        }
     }
 }
