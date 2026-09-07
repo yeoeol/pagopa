@@ -16,7 +16,11 @@ public record ProductReviewResponseDto(
                 review.getId(),
                 review.getRating(),
                 review.getContent(),
-                ReviewAuthorResponseDto.from(review.getUser()),
+                ReviewAuthorResponseDto.from(
+                        review.getOrderItem()
+                                .getOrder()
+                                .getUser()
+                ),
                 review.getImages().stream()
                         .map(ReviewImageResponseDto::from)
                         .toList()
