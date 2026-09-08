@@ -50,7 +50,7 @@ public class AdminSecurityConfig {
 
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
 
-                        .anyRequest().authenticated()
+                        .anyRequest().hasRole("ADMIN")
                 )
 
                 .oauth2Login(oauth2Login -> oauth2Login

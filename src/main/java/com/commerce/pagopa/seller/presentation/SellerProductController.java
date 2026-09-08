@@ -5,7 +5,6 @@ import com.commerce.pagopa.product.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.seller.application.SellerProductService;
 import com.commerce.pagopa.seller.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.seller.application.dto.product.request.ProductRegisterRequestDto;
-import jakarta.validation.Valid;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -17,6 +16,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "SELLER PRODUCT API", description = "판매자 - 상품 관리 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/seller/products")
+@RequestMapping("/api/v1/sellers/products")
 public class SellerProductController {
 
     private final SellerProductService sellerProductService;
