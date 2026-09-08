@@ -15,10 +15,12 @@ public interface ReviewJpaRepository extends JpaRepository<Review, Long>, Review
     @Query("""
             SELECT DISTINCT r
             FROM Review r
-                JOIN r.orderItem oi
-                JOIN FETCH r.user u
+                JOIN FETCH r.orderItem oi
+                JOIN FETCH oi.order o
+                JOIN FETCH oi.product p
+                JOIN FETCH o.user u
                 LEFT JOIN FETCH r.images ri
-            WHERE oi.product.id = :productId
+            WHERE p.id = :productId
             """)
-    List<Review> findAllByProductIdWithUserAndReviewImages(@Param("productId") Long productId);
+    List<Review> findAllWithDetailsByProductId(@Param("productId") Long productId);
 }
