@@ -1,12 +1,13 @@
 package com.commerce.pagopa.global.seeder;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 
 @Profile("local")
 @Order(4)
@@ -23,29 +24,32 @@ class ProductImageSeeder implements Seeder {
 
     @Override
     public String name() {
-        return "product_images";
+        return "product_image";
     }
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM product_images", Integer.class);
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
-        List<Long> productIds = batch.loadIds("products", "product_id");
+        List<Long> productIds = batch.loadIds("product", "product_id");
         if (productIds.isEmpty()) {
-            throw new IllegalStateException("product 없음 - products 시드 먼저 필요");
+            throw new IllegalStateException("product 없음 - product 시드 먼저 필요");
         }
 
-        // 총량을 상품 수에 종속시켜 partial 라운드 자체를 제거
         int productSize = productIds.size();
         int total = productSize * IMAGES_PER_PRODUCT;
 
         String sql = """
-                INSERT INTO product_images(image_url, display_order, is_thumbnail, product_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO product_images(
+                    image_url,
+                    display_order,
+                    is_thumbnail,
+                    product_id
+                ) VALUES (?, ?, ?, ?)
                 """;
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {

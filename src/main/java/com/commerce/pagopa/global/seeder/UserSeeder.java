@@ -32,7 +32,7 @@ class UserSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM user", Integer.class);
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
         return n != null && n == 0;
     }
 
