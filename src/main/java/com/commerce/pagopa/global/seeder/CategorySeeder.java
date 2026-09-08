@@ -73,7 +73,8 @@ class CategorySeeder implements Seeder {
                          ON c.parent_id = d.category_id
                     WHERE d.depth < 1
                 )
-                SELECT * FROM descendants
+                SELECT category_id
+                FROM descendants
                 WHERE depth = 1
                 ORDER BY category_id
                 """,

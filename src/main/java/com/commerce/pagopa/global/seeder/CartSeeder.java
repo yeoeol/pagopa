@@ -37,7 +37,7 @@ class CartSeeder implements Seeder {
         // buyer 후보 - ROLE_USER + ACTIVE
         List<Long> buyerIds = jdbc.queryForList(
                 """
-                SELECT user_id
+                SELECT u.user_id
                 FROM user u
                 JOIN user_role ur
                     ON u.user_id = ur.user_id
@@ -45,7 +45,7 @@ class CartSeeder implements Seeder {
                     ON ur.role_id = r.role_id
                 WHERE u.status = 'ACTIVE'
                     AND r.code = 'ROLE_USER'
-                ORDER BY user_id
+                ORDER BY u.user_id
                 """,
                 Long.class
         );

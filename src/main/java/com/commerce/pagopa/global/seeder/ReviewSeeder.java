@@ -55,7 +55,7 @@ class ReviewSeeder implements Seeder {
 
         String sql = """
                 INSERT INTO review(content, rating, order_item_id, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {

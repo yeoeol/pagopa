@@ -49,6 +49,10 @@ class CartItemSeeder implements Seeder {
         int cartSize = cartIds.size();
         int productSize = productIds.size();
 
+        if ((long) total > (long) cartSize * productSize) {
+            throw new IllegalArgumentException("cartItems exceeds unique cart-product pairs");
+        }
+
         String sql = """
                 INSERT INTO cart_item(cart_id, product_id, cart_quantity, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)
@@ -56,8 +60,7 @@ class CartItemSeeder implements Seeder {
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
             ps.setLong(1, cartIds.get(i % cartSize));
-            // product를 prime stride로 분산 - cart당 같은 product 중복 회피
-            ps.setLong(2, productIds.get((int) ((long) i * 31 % productSize)));
+            ps.setLong(2, productIds.get((i / cartSize) % productSize));
             ps.setInt(3, faker.number().numberBetween(1, 10));
             ps.setTimestamp(4, now);
             ps.setTimestamp(5, now);

@@ -26,7 +26,7 @@ class ProductSeeder implements Seeder {
 
     @Override
     public String name() {
-        return "products";
+        return "product";
     }
 
     @Override
@@ -40,10 +40,10 @@ class ProductSeeder implements Seeder {
         // seller 후보 - ROLE_SELLER + ACTIVE 사용자만
         List<Long> sellerIds = jdbc.queryForList(
                 """
-                SELECT u.user_id
-                FROM seller s
+                SELECT seller_id
+                FROM seller
                 WHERE status = 'ACTIVE'
-                ORDER BY s.seller_id
+                ORDER BY seller_id
                 """,
                 Long.class
         );
