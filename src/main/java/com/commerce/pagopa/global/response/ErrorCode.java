@@ -80,11 +80,6 @@ public enum ErrorCode {
     REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "REVIEW_003", "이미 리뷰를 작성했습니다."),
     REVIEW_NOT_PURCHASED(HttpStatus.FORBIDDEN, "REVIEW_004", "구매한 상품만 리뷰를 작성할 수 있습니다."),
 
-    // SCRAP
-    SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, "SCRAP_001", "존재하지 않는 스크랩입니다."),
-    SCRAP_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCRAP_002", "이미 스크랩한 항목입니다."),
-    SCRAP_TARGET_UNSUPPORTED(HttpStatus.BAD_REQUEST, "SCRAP_003", "지원하지 않는 스크랩 대상 타입입니다."),
-
     // PAYMENT
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_001", "해당 주문의 결제 정보가 존재하지 않습니다."),
     PAYMENT_CANCEL(HttpStatus.BAD_REQUEST, "PAYMENT_002", "결제를 취소합니다."),
