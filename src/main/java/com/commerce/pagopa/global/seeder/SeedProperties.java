@@ -12,13 +12,12 @@ public record SeedProperties(
             int users,
             int products,
             int carts,
+            int cartItems,
             int orders,
-            int sellerOrders,
-            int orderProducts,
+            int orderItems,
             int payments,
             int reviews,
             int reviewImages,
-            int scraps,
             int searchHistories
     ) {}
 }

@@ -1,7 +1,5 @@
 package com.commerce.pagopa.global.seeder;
 
-import lombok.RequiredArgsConstructor;
-import net.datafaker.Faker;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +9,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 @Profile("local")
 @Order(5)
 @Component
@@ -18,18 +18,17 @@ import java.util.List;
 class CartSeeder implements Seeder {
 
     private final JdbcTemplate jdbc;
-    private final Faker faker;
     private final SeedProperties props;
     private final BatchInsertExecutor batch;
 
     @Override
     public String name() {
-        return "carts";
+        return "cart";
     }
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM carts", Integer.class);
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
         return n != null && n == 0;
     }
 
@@ -37,32 +36,36 @@ class CartSeeder implements Seeder {
     public void seed() {
         // buyer 후보 - ROLE_USER + ACTIVE
         List<Long> buyerIds = jdbc.queryForList(
-                "SELECT user_id FROM users WHERE role = 'ROLE_USER' AND user_status = 'ACTIVE' ORDER BY user_id",
+                """
+                SELECT u.user_id
+                FROM user u
+                JOIN user_role ur
+                    ON u.user_id = ur.user_id
+                JOIN role r
+                    ON ur.role_id = r.role_id
+                WHERE u.status = 'ACTIVE'
+                    AND r.code = 'ROLE_USER'
+                ORDER BY u.user_id
+                """,
                 Long.class
         );
-        List<Long> productIds = batch.loadIds("products", "product_id");
-
-        if (buyerIds.isEmpty() || productIds.isEmpty()) {
-            throw new IllegalStateException("buyer 또는 product 부족");
+        if (buyerIds.isEmpty()) {
+            throw new IllegalStateException("buyer 부족");
         }
 
         int total = props.counts().carts();
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         int buyerSize = buyerIds.size();
-        int productSize = productIds.size();
 
         String sql = """
-                INSERT INTO carts(quantity, user_id, product_id, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO cart(user_id, created_at, updated_at)
+                VALUES (?, ?, ?)
                 """;
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setInt(1, faker.number().numberBetween(1, 10));
-            ps.setLong(2, buyerIds.get(i % buyerSize));
-            // product를 prime stride로 분산 - user당 같은 product 중복 회피
-            ps.setLong(3, productIds.get((int) ((long) i * 31 % productSize)));
-            ps.setTimestamp(4, now);
-            ps.setTimestamp(5, now);
+            ps.setLong(1, buyerIds.get(i % buyerSize));
+            ps.setTimestamp(2, now);
+            ps.setTimestamp(3, now);
         });
     }
 }

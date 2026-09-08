@@ -14,10 +14,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 @Profile("local")
-@Order(7)
+@Order(11)
 @Component
 @RequiredArgsConstructor
-class ReviewSeeder implements Seeder {
+class CartItemSeeder implements Seeder {
 
     private final JdbcTemplate jdbc;
     private final Faker faker;
@@ -26,7 +26,7 @@ class ReviewSeeder implements Seeder {
 
     @Override
     public String name() {
-        return "review";
+        return "cart_item";
     }
 
     @Override
@@ -37,31 +37,31 @@ class ReviewSeeder implements Seeder {
 
     @Override
     public void seed() {
-        // OrderProduct와 1:1 매핑 - @OneToOne 제약 충족
-        List<Long> orderItemIds = batch.loadIds("order_item", "order_item_id");
+        List<Long> cartIds = batch.loadIds("cart", "cart_id");
+        List<Long> productIds = batch.loadIds("product", "product_id");
 
-        if (orderItemIds.isEmpty()) {
-            throw new IllegalStateException("order_item 부족");
+        if (cartIds.isEmpty() || productIds.isEmpty()) {
+            throw new IllegalStateException("cart 또는 product 부족");
         }
 
-        int total = props.counts().reviews();
-        if (total > orderItemIds.size()) {
-            throw new IllegalStateException(
-                    "review(%d) > order_item(%d) - 1:1 매핑 불가".formatted(total, orderItemIds.size())
-            );
-        }
-
+        int total = props.counts().cartItems();
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        int cartSize = cartIds.size();
+        int productSize = productIds.size();
+
+        if ((long) total > (long) cartSize * productSize) {
+            throw new IllegalArgumentException("cartItems exceeds unique cart-product pairs");
+        }
 
         String sql = """
-                INSERT INTO review(content, rating, order_item_id, created_at, updated_at)
+                INSERT INTO cart_item(cart_id, product_id, cart_quantity, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setString(1, faker.lorem().sentence(15));
-            ps.setInt(2, i % 5 + 1);                          // 1~5 균등
-            ps.setLong(3, orderItemIds.get(i));            // 처음 total개 OrderItem에 부여
+            ps.setLong(1, cartIds.get(i % cartSize));
+            ps.setLong(2, productIds.get((i / cartSize) % productSize));
+            ps.setInt(3, faker.number().numberBetween(1, 10));
             ps.setTimestamp(4, now);
             ps.setTimestamp(5, now);
         });
