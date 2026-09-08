@@ -12,6 +12,7 @@ public record SeedProperties(
             int users,
             int products,
             int carts,
+            int cartItems,
             int orders,
             int orderItems,
             int payments,
