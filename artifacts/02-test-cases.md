@@ -1,5 +1,8 @@
 # SearchHistoryService 동시성 테스트 설계
 
+- 작성 역할: `spring-test-case-designer`
+- canonical task name: `/root/spring_test_case_designer`
+- runtime agent ID: 플랫폼에서 별도 숫자 ID를 제공하지 않아 canonical task name으로 실행 주체를 식별함
 - 대상: `SearchHistoryService.saveHistory(Long userId, String sessionId, String keyword)`
 - 기준 브랜치/커밋: `test/search-history-concurrency` / `bef0348065ff8049e768f96d4bf983965bc1c762`
 - 테스트 DB: 기존 `TestcontainersConfig`의 MySQL 8.0.36
@@ -34,6 +37,40 @@
   코드·메시지를 보존해 실패시키며 barrier 실패, task 내부 예외와 DB 경합 예외를 삼키지 않는다.
 - `성공 + 예상 실패 + 예상 밖 실패 = 참여자 수` 집계는 outcome 누락 진단에만 사용하며 성공
   판정식을 대신하지 않는다.
+
+## 사용자 요구사항 → 시나리오 → 예상 assertion 추적표
+
+| 요구사항 ID | 사용자 요구사항 | 시나리오 ID | 예상 assertion |
+| --- | --- | --- | --- |
+| REQ-01 | 동일 `userId`와 동일 `keyword`의 동시 요청 후 검색 기록 1건 | R-01 | 성공 8, 승인된 예상 실패 0, 예상 밖 실패 0, 완료 8, 회원 기록 1건, keyword 일치 |
+| REQ-02 | 동일 `sessionId`와 동일 `keyword`의 동시 요청 후 검색 기록 1건 | R-02 | 성공 8, 승인된 예상 실패 0, 예상 밖 실패 0, 완료 8, 세션 기록 1건, keyword 일치 |
+| REQ-03 | 서로 다른 `keyword`의 동시 요청은 각각 저장 | N-01 | 성공 8, 승인된 예상 실패 0, 예상 밖 실패 0, 완료 8, 최종 8건, keyword 집합 일치 |
+| REQ-04 | 앞뒤 공백 제거 후 같은 `keyword`의 동시 요청은 1건 | B-01 | 성공 8, 승인된 예상 실패 0, 예상 밖 실패 0, 완료 8, 최종 1건, 저장 keyword=`"keyword"` |
+| REQ-05 | 기존 동일 주체·동일 keyword 행은 교체하지 않고 `lastSearchedAt` 갱신 | E-01 | 성공 8, 승인된 예상 실패 0, 예상 밖 실패 0, 완료 8, 최종 1건, id 불변, timestamp 증가 |
+| REQ-06 | 예상하지 못한 예외, 미완료 작업, timeout 없음 | N-01, E-01, B-01, R-01, R-02 | `성공 + 승인된 예상 실패 = 8`, 승인된 예상 실패 0, 예상 밖 실패 0, latch 제한 시간 내 완료, 미완료 0, executor 제한 시간 내 종료 |
+| REQ-07 | 정상·예외·경계값·회귀 관점으로 분류 | N-01, E-01, B-01, R-01, R-02 | 정상 1, 예외 안전성 1, 경계값 1, 회귀 2로 분류하고 각 케이스의 독립 DB 불변식 검증 |
+| REQ-08 | 테스트 메서드명을 영어 `snake_case`로 일관되게 작성 | N-01, E-01, B-01, R-01, R-02 | 아래 메서드명 표의 5개 이름이 모두 영어 `snake_case` |
+| REQ-09 | 기존 Testcontainers 설정과 실제 MySQL을 사용하는 동시성 통합 테스트 | N-01, E-01, B-01, R-01, R-02 | 연결 DB product가 MySQL이고 실제 native upsert·복합 유니크 제약 경로에서 최종 상태 검증 |
+
+## 시나리오 → 사용자 요구사항 역추적표
+
+| 시나리오 ID | 역추적 요구사항 | 핵심 assertion 계약 |
+| --- | --- | --- |
+| N-01 | REQ-03, REQ-06, REQ-07, REQ-08, REQ-09 | 8개 호출 성공 및 작업 완료, 실패 0, 서로 다른 keyword 8건과 집합 일치 |
+| E-01 | REQ-05, REQ-06, REQ-07, REQ-08, REQ-09 | 8개 호출 성공 및 작업 완료, 실패 0, 기존 id 유지, `lastSearchedAt` 증가, 최종 1건 |
+| B-01 | REQ-04, REQ-06, REQ-07, REQ-08, REQ-09 | 8개 호출 성공 및 작업 완료, 실패 0, trim 결과 keyword로 최종 1건 |
+| R-01 | REQ-01, REQ-06, REQ-07, REQ-08, REQ-09 | 8개 호출 성공 및 작업 완료, 실패 0, 동일 회원 기록 1건과 keyword 일치 |
+| R-02 | REQ-02, REQ-06, REQ-07, REQ-08, REQ-09 | 8개 호출 성공 및 작업 완료, 실패 0, 동일 세션 기록 1건과 keyword 일치 |
+
+## 2026-09-08 독립 재설계 결론
+
+- 기존 테스트 구현과 검증 산출물을 읽지 않고 원 요청, 프로젝트 컨텍스트, 빌드, 운영
+  서비스·entity·repository·스키마 단서와 가장 가까운 기존 동시성 테스트만으로 요구사항과 예상
+  assertion 초안을 먼저 확정했다.
+- 독립 초안은 N-01, E-01, B-01, R-01, R-02의 기존 5개 케이스, 참여자 8명, 실제 MySQL
+  통합 수준, 동시성 판정 계약과 의미상 차이가 없다.
+- 결론: **변경 없음**. 기존 사용자 승인 범위와 승인 상태를 그대로 유지하며 재승인은 필요하지 않다.
+- 이 재설계에서는 테스트 코드와 구현·검증 산출물을 읽거나 수정하지 않았다.
 
 ## 동시성 실행 계약
 

@@ -24,6 +24,23 @@
 - 다음 버전에서 바꿀 규칙: 실제 Maven 프로젝트에서 wrapper 감지와 대상·관련·전체 명령 기록을
   실행 사례로 검증한다.
 
+## 2026-09-08 — v0.2 독립 Test Designer·Quality Reviewer
+
+- 실행한 요청: 테스트 시나리오 설계자와 테스트 의미 검증자를 서로 다른 에이전트·컨텍스트로 분리
+- 기대한 결과: Designer가 원 요청에서 시나리오를 만들고, Reviewer가 생성자 대화 없이 원
+  요구사항을 재도출해 실제 테스트와 assertion을 독립 판정
+- 실제 결과: `/root/spring_test_case_designer`가 구현·검증 결과를 보기 전에 재설계한 5개
+  시나리오는 기존 승인 목록과 일치했다. `/root/spring_test_quality_reviewer_final`은 별도 새
+  컨텍스트에서 요구사항을 재도출하고 테스트 코드와 대조한 뒤 실제 MySQL 강제 재실행 5/5 통과를
+  확인했다. 관련·전체 suite는 gitignored 외부 yml 제약으로 미실행해 LIMITED PASS를 유지했다.
+- 잘된 점: canonical task name으로 두 실행 주체의 분리를 증명했고, 요구사항↔시나리오↔assertion
+  양방향 추적표와 false-positive 점검을 산출물에 남겼다.
+- 막힌 점: 플랫폼이 숫자 runtime agent ID를 노출하지 않아 canonical task name을 대체 증거로
+  사용했다. 앞선 Reviewer 두 실행은 테스트 종료 후 검증 산출물을 저장하지 않아 무효 처리하고
+  최종 Reviewer로 재시도했다.
+- 다음 버전에서 바꿀 규칙: Reviewer가 테스트 종료 뒤 산출물을 저장하지 않는 실패를 결함 주입
+  프롬프트로 추가하고, 재시도 횟수·종료 조건을 실제 실행 비용과 함께 검토한다.
+
 ## 기록 템플릿
 
 - 날짜:

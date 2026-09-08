@@ -1,5 +1,52 @@
 # SearchHistoryService 동시성 테스트 최종 검증
 
+## 2026-09-08 독립 재검증
+
+- 최종 판정: **LIMITED PASS**
+- Reviewer 역할: `spring-test-quality-reviewer`
+- Reviewer canonical task: `/root/spring_test_quality_reviewer_final`
+- Reviewer 숫자 ID: 플랫폼에서 별도 숫자 ID를 제공하지 않음
+- Designer canonical task: `/root/spring_test_case_designer`
+- 실행 주체 분리: Reviewer와 Designer의 canonical task가 서로 다름
+- 독립 검증 순서: `artifacts/02-test-cases.md`, `artifacts/03-implementation.md`, 구현 테스트와 기존 검증 기록을 읽기 전에 원 요청, 프로젝트 컨텍스트, 빌드 파일과 `SearchHistoryService`·repository·entity만으로 아래 요구사항과 필수 assertion을 먼저 확정함
+
+### 독립 요구사항-테스트-assertion 대조
+
+| 독립 요구사항 | 대응 테스트 | 필수 assertion 및 실제 대조 | 판정 |
+| --- | --- | --- | --- |
+| 동일 `userId`와 동일 keyword의 동시 저장은 정확히 1행이어야 한다 | `concurrent_same_user_keyword_results_in_one_history` (R-01) | 공통 실행 assertion으로 8건 성공·실패 0·완료·종료를 확인하고, 사용자 조회 결과의 단일 행과 keyword를 직접 검증한다 | 충족 |
+| 동일 `sessionId`와 동일 keyword의 동시 저장은 정확히 1행이어야 한다 | `concurrent_same_session_keyword_results_in_one_history` (R-02) | 공통 실행 assertion과 세션 조회 결과의 단일 행·keyword assertion이 연결된다 | 충족 |
+| 동일 세션의 서로 다른 keyword는 유실 없이 각각 저장되어야 한다 | `concurrent_different_keywords_are_all_saved` (N-01) | 성공 8건 뒤 최종 행 수 8과 전체 keyword 집합의 정확한 일치를 검증한다 | 충족 |
+| 앞뒤 공백을 `trim()`한 결과가 같은 동시 keyword는 1행이어야 한다 | `concurrent_whitespace_variants_are_deduplicated` (B-01) | 4종 변형 8건의 정상 완료 뒤 단일 행과 저장 keyword `keyword`를 검증한다 | 충족 |
+| 기존 동일 주체·keyword 행은 교체되지 않고 검색 시각이 갱신되어야 한다 | `concurrent_updates_of_existing_history_complete_without_errors` (E-01) | 기존 세션 행의 최초 ID를 보존하고 최종 1행, ID 불변, `lastSearchedAt` 증가를 검증한다 | 충족 |
+| 모든 동시 케이스에 예상 밖 예외, outcome 누락, 미완료, timeout 또는 executor 미종료가 없어야 한다 | 위 5개 테스트의 `execute_concurrently` / `assert_successful_execution` | 제한 시간 내 완료, 미완료 0, executor 종료, 전체 outcome 8, 승인된 예상 실패 0, 예상 밖 실패 0, 성공 8을 각각 assertion한다 | 충족 |
+| 정상·예외 안전성·경계값·회귀 분류, 영어 `snake_case`, 실제 MySQL이어야 한다 | N-01 / E-01 / B-01 / R-01 / R-02 및 `verify_mysql_database` | 각 분류 tag와 영어 메서드명을 사용하며 매 테스트 전 JDBC product name이 MySQL인지 검증한다 | 충족 |
+
+역추적 결과, 구현된 각 테스트는 위 요구사항 중 하나 이상의 DB 불변식과 공통 동시 실행 계약을 직접 검증한다. 승인되지 않은 추가 동작을 테스트하거나 mock 호출 횟수 같은 구현 세부사항만 검증하는 케이스는 없다.
+
+### False-positive 점검
+
+- worker의 모든 `Throwable`은 예상 밖 실패 목록에 보존되고 빈 목록 assertion으로 이어져 예외를 성공으로 삼키지 않는다.
+- latch 결과, 남은 작업 수, 성공 수, 전체 outcome 수와 executor 종료를 각각 검사하므로 일부 작업 미실행이나 timeout이 최종 행 수만 맞아 통과할 수 없다.
+- N-01은 행 수뿐 아니라 keyword 전체 집합을, B-01/R-01/R-02는 단일 행과 실제 keyword를 함께 검사한다.
+- E-01은 행 수나 시각만 보지 않고 최초 ID 불변과 과거 기준 시각보다 증가를 함께 검사해 delete+insert 또는 무갱신 성공을 구분한다.
+- 실제 MySQL product assertion, native upsert, 복합 유니크 제약과 worker별 서비스 트랜잭션을 사용하며 H2나 mock 기반 대체 통과 경로가 없다.
+- 남은 낮은 위험은 R-01의 회원 fixture가 검색 기록 정리 후 컨테이너 DB에 남는 점이다. UUID suffix로 격리되고 대상 실행에서 충돌·불안정 신호는 없었다.
+
+### 이번 실행 결과
+
+- working directory: `C:\Users\gnsl3\harness_practice\pagopa-docs-harness`
+- 명령: `.\gradlew.bat test --tests com.commerce.pagopa.searchhistory.application.SearchHistoryServiceConcurrencyTest --rerun-tasks`
+- 실행 횟수: 정확히 1회
+- exit code: `0`
+- wall time: 실행 도구 기준 약 `30.00초`; Gradle 보고 `BUILD SUCCESSFUL in 31s`
+- XML: `tests=5`, `failures=0`, `errors=0`, `skipped=0`, suite time `22.679초`
+- 결과: 대상 5개 테스트 모두 통과했으며 이번 실행에서 timeout, 미완료, 예상 밖 실패, assertion 실패 또는 flaky 신호가 관찰되지 않음
+
+### 최종 판정과 미검증 범위
+
+대상 테스트의 요구사항 매핑, assertion 강도, A 방식 범위와 이번 실제 MySQL 실행은 통과했다. 관련 repository 테스트와 전체 suite는 기존 기록의 gitignored 외부 yml 부재로 `${jwt.secret}` 설정을 확보할 수 없는 환경 제약이 있고, 이번 독립 재검증 지시도 대상 명령 1회 외 추가 실행을 금지했으므로 재실행하지 않았다. 따라서 실행한 범위는 통과했지만 관련·전체 회귀 범위는 여전히 미검증이며 최종 판정은 **LIMITED PASS**로 유지한다.
+
 - 판정: **LIMITED PASS**
 - 검증 대상: `SearchHistoryServiceConcurrencyTest`
 - 승인 케이스: N-01, E-01, B-01, R-01, R-02

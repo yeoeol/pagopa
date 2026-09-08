@@ -56,14 +56,16 @@ description: >
 
 ## Phase 3. 팀 패턴 선택
 
-Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 설계 → 승인 → 구현 → 독립 검증 순서를
-지키며 구현자가 자기 결과를 최종 합격 처리하지 않는다.
+Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 독립 설계 → 승인 → 구현 → 독립 검증
+순서를 지킨다. Test Designer, Builder와 Reviewer는 서로 다른 실행 주체이며, Reviewer는 생성자의
+대화 컨텍스트를 상속하지 않는다.
 
 ## Phase 4. Agent 설계
 
 - `spring-test-context-analyst`: 읽기 전용 프로젝트 분석과 근거 수집
+- `spring-test-case-designer`: 원 요청과 운영 코드에서 시나리오·assertion 독립 설계
 - `spring-test-code-builder`: 승인된 테스트의 A 방식 최소 구현
-- `spring-test-quality-reviewer`: 테스트 실행과 회귀·가독성 판정
+- `spring-test-quality-reviewer`: 원 요구사항 재도출, 테스트 의미·실행·회귀 판정
 
 ## Phase 5. Skill 설계
 
@@ -77,19 +79,35 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 설계 → 승�
 ## Phase 6. 승인 구현
 
 1. 분석 결과에서 테스트 가능한 동작과 위험을 확인한다.
-2. `design-spring-test-cases`로 정상·예외·경계값·회귀 목록을 작성한다.
+2. 새 `spring-test-case-designer` 실행에 원 요청·분석·대상 코드 경로만 전달하고
+   `design-spring-test-cases`로 정상·예외·경계값·회귀 목록을 작성하게 한다.
 3. 승인 게이트 1에서 테스트 목록과 예상 수정 파일을 사용자에게 보여주고 멈춘다.
 4. 명시적 승인 후에만 `implement-spring-tests`로 테스트 코드를 수정한다.
 
 ## Phase 7. 독립 검증·개선
 
-1. `verify-spring-tests`로 대상 테스트, 관련 테스트와 가능한 범위의 전체 테스트를 검증한다.
-2. 검증 실패가 테스트 구현 문제이면 최대 2회까지 구현→검증을 반복한다. 매 라운드 diff와
+1. Designer·Builder와 다른 새 `spring-test-quality-reviewer` 실행을 시작한다. 생성자의 대화 내역은
+   전달하지 않고 원 요청, 산출물과 코드 경로만 전달한다.
+2. Reviewer가 원 요청과 운영 코드에서 요구사항·assertion을 먼저 독립 도출한 뒤
+   `verify-spring-tests`로 대상 테스트, 관련 테스트와 가능한 범위의 전체 테스트를 검증한다.
+3. `artifacts/02-test-cases.md`와 `artifacts/04-verification.md`의 역할·canonical task name 또는
+   실행 ID가 다름을 확인한다. 같거나 누락되면 PASS를 금지한다.
+4. 검증 실패가 테스트 구현 문제이면 최대 2회까지 구현→검증을 반복한다. 매 라운드 diff와
    결과를 보존하고 악화되면 직전 best로 돌아간다.
-3. 운영 코드 결함, 환경 차단, 두 번의 수정 후 미통과이면 자동 통과시키지 않고 사용자에게
+5. 운영 코드 결함, 환경 차단, 두 번의 수정 후 미통과이면 자동 통과시키지 않고 사용자에게
    선택지를 보고한다.
-4. `artifacts/final.md`, Git diff와 상태를 보여주고 승인 게이트 2에서 멈춘다.
-5. 사용자가 최종 결과를 직접 확인하고 별도로 승인해야만 커밋할 수 있다.
+6. `artifacts/final.md`, Git diff와 상태를 보여주고 승인 게이트 2에서 멈춘다.
+7. 사용자가 최종 결과를 직접 확인하고 별도로 승인해야만 커밋할 수 있다.
+
+## 멀티에이전트 실행 계약
+
+- Test Designer와 Quality Reviewer는 서로 다른 새 에이전트 실행으로 호출한다.
+- Reviewer는 생성자의 채팅 기록을 상속하지 않는 새 컨텍스트에서 시작하고 파일 산출물로만
+  인수인계받는다.
+- `artifacts/02-test-cases.md`에는 Designer 역할과 canonical task name 또는 실행 ID를,
+  `artifacts/04-verification.md`에는 Reviewer 역할·실행 주체와 두 주체가 다르다는 확인을 기록한다.
+- 실행 플랫폼이 숫자 ID를 제공하지 않으면 서로 다른 canonical task name을 증거로 사용한다.
+- 역할 분리 증거가 없거나 동일 주체가 두 산출물을 만들면 테스트 실행 성공과 무관하게 FAIL이다.
 
 ## 승인 게이트 1: 테스트 계획
 
@@ -131,9 +149,9 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 설계 → 승�
 | --- | --- | --- | --- |
 | Phase 0 | `artifacts/00-request.md` | Orchestrator | 모든 역할 |
 | Phase 1 | `artifacts/01-project-context.md` | Context Analyst | Test Designer, Builder |
-| Phase 2 | `artifacts/02-test-cases.md` | Test Designer | 사용자, Builder |
+| Phase 2 | `artifacts/02-test-cases.md` | `spring-test-case-designer` | 사용자, Builder, Reviewer |
 | Phase 6 | `artifacts/03-implementation.md` | Builder | Reviewer |
-| Phase 7 | `artifacts/04-verification.md` | Reviewer | Orchestrator, 사용자 |
+| Phase 7 | `artifacts/04-verification.md` | `spring-test-quality-reviewer` | Orchestrator, 사용자 |
 | Phase 7 | `artifacts/final.md` | Orchestrator | 사용자, 다음 실행 |
 | Phase 7 | `artifacts/improvement-log.md` | Orchestrator | 다음 하네스 개선 |
 
@@ -148,6 +166,8 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 설계 → 승�
 - 필요한 의존성이 없으면 임의로 추가하지 않고 장단점과 대안을 사용자에게 제시한다.
 - 테스트가 현재 운영 코드 결함을 재현하면 assertion을 약화하거나 운영 코드를 자동 수정하지 않는다.
 - 사용자 변경과 충돌하면 해당 파일 수정을 멈추고 범위를 다시 확인한다.
+- Designer와 Reviewer를 별도 실행할 수 없거나 실행 주체를 증명할 수 없으면 형식적으로 독립 검증을
+  완료하지 않고 FAIL 또는 BLOCKED로 보고한다.
 
 ## 사용 예시
 

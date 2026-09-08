@@ -4,12 +4,12 @@
 
 ## 현재 상태
 
-- 하네스 버전: v0.1
+- 하네스 버전: v0.2
 - 구성 방식: A — 대상 테스트 파일 내부의 외과적 변경
 - 현재 브랜치: `test/search-history-concurrency`
-- 실행 상태: 구현 및 독립 검증 완료 — **LIMITED PASS (2026-09-04)**
+- 실행 상태: 독립 Test Designer·Quality Reviewer 재검증 완료 — **LIMITED PASS (2026-09-08)**
 - 테스트 구현 커밋: `3076fe7` (`test: 검색 기록 저장 동시성 및 정상 흐름, 예외 흐름 테스트 코드 구현`)
-- 현재 상태: 품질 리뷰에 따른 하네스 계약·산출물 동기화와 사용자 검토 완료 (2026-09-08)
+- 현재 상태: v0.2 역할 분리와 현재 테스트 재검증 완료 — 사용자 검토·커밋 승인 완료 (2026-09-08)
 
 ## 산출물 지도
 
@@ -17,12 +17,13 @@
 | --- | --- | --- | --- | --- |
 | `00-request.md` | 요청과 범위 | Phase 0 | 모든 단계 | 요청 기록 완료 |
 | `01-project-context.md` | 프로젝트·스타일 분석 | Phase 1 | 테스트 설계·구현 | 분석 완료 |
-| `02-test-cases.md` | 정상·예외·경계값·회귀 목록 | Phase 2 | 사용자·구현 | 승인 완료, 최종 컨텍스트 동기화 |
+| `02-test-cases.md` | 정상·예외·경계값·회귀 목록 | Phase 2 | 사용자·구현 | 독립 Designer 재설계 완료, 기존 승인 범위와 차이 없음 |
 | `03-implementation.md` | 코드 변경과 케이스 매핑 | Phase 6 | 검증 | 구현 완료 |
-| `04-verification.md` | 테스트 결과와 회귀 위험 | Phase 7 | 사용자 | LIMITED PASS (2026-09-04) |
+| `04-verification.md` | 테스트 결과와 회귀 위험 | Phase 7 | 사용자 | 독립 Reviewer LIMITED PASS (2026-09-08) |
 | `final.md` | 최종 테스트 설명과 인수인계 | Phase 7 | 사용자·다음 실행 | LIMITED PASS 결과 기록 |
-| `improvement-log.md` | 실패와 개선 기록 | Phase 7 | 다음 개선 | 품질 리뷰 반영 기록 |
+| `improvement-log.md` | 실패와 개선 기록 | Phase 7 | 다음 개선 | v0.2 역할 분리 실행 기록 |
 | `decisions/ADR-001-surgical-test-changes.md` | A 방식 선택 근거 | 설계 | 다음 구조 변경 | 채택 |
+| `decisions/ADR-002-independent-test-design-review.md` | 설계자·검증자 실행 분리 근거 | 설계 | Orchestrator·다음 구조 변경 | 채택 |
 | `evals/test-prompts.md` | 하네스 정상·부정·회귀 시험 | Phase 7 | 하네스 검증 | 작성 완료 |
 | `evals/trigger-cases.md` | 자연어 라우팅 near-miss | Phase 7 | Skill 트리거 검증 | 작성 완료 |
 | `evals/ab-comparison.md` | with-harness와 baseline 비교 | Phase 7 | 하네스 가치 평가 | 실제 요청 대기 |

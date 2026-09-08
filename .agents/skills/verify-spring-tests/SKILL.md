@@ -11,18 +11,25 @@ description: >
 
 구현자가 만든 테스트를 낙관적으로 승인하지 않고 실행 결과와 diff에 기반해 판정한다.
 
+검증자는 Test Designer와 Builder의 대화 컨텍스트를 상속하지 않는 별도 실행 주체여야 한다.
+산출물과 원 요청을 통해서만 인수인계받아 자기 설계·구현에 대한 확증 편향을 줄인다.
+
 ## 절차
 
-1. `artifacts/02-test-cases.md`, `artifacts/03-implementation.md`와 실제 diff를 읽는다.
-2. 승인 범위 밖 파일이 변경되지 않았는지 확인한다.
-3. 테스트 목록의 각 ID가 코드와 assertion에 연결되는지 대조한다.
-4. 빌드 파일과 Wrapper를 감지한 뒤 가장 좁은 대상 테스트를 실행하고 정확한 명령, 종료 코드,
+1. `artifacts/00-request.md`, `artifacts/01-project-context.md`와 대상 운영 코드를 먼저 읽는다.
+2. 테스트 목록과 구현 기록을 읽기 전에 사용자 요구사항, 운영 불변식과 필요한 assertion을
+   독립적으로 도출해 `artifacts/04-verification.md`의 독립 검증 기준으로 고정한다.
+3. 그 뒤 `artifacts/02-test-cases.md`, `artifacts/03-implementation.md`와 실제 diff를 읽는다.
+4. Designer와 Reviewer의 역할, canonical task name 또는 실행 ID가 서로 다른지 확인하고 기록한다.
+5. 승인 범위 밖 파일이 변경되지 않았는지 확인한다.
+6. 요구사항 → 테스트 → assertion과 테스트 → 요구사항을 양방향으로 대조한다.
+7. 빌드 파일과 Wrapper를 감지한 뒤 가장 좁은 대상 테스트를 실행하고 정확한 명령, 종료 코드,
    실행 시간과 결과를 기록한다.
-5. 공유 Fixture나 연관 동작 위험이 있으면 관련 테스트를 실행한다.
-6. 환경과 시간이 허용하면 전체 테스트를 실행한다. 실행하지 못한 범위는 미검증으로 남긴다.
-7. 동시성 테스트는 합리적인 범위에서 반복 실행해 flaky 신호, timeout, 누락된 outcome과 자원
+8. 공유 Fixture나 연관 동작 위험이 있으면 관련 테스트를 실행한다.
+9. 환경과 시간이 허용하면 전체 테스트를 실행한다. 실행하지 못한 범위는 미검증으로 남긴다.
+10. 동시성 테스트는 합리적인 범위에서 반복 실행해 flaky 신호, timeout, 누락된 outcome과 자원
    정리를 점검한다.
-8. 결과와 회귀 위험을 `artifacts/04-verification.md`에 저장한다.
+11. 결과와 회귀 위험을 `artifacts/04-verification.md`에 저장한다.
 
 ## 빌드 도구 선택
 
@@ -44,10 +51,13 @@ description: >
 - `BLOCKED`: Docker, 외부 서비스, 권한 등 필요한 환경을 확보할 수 없다.
 
 애매하면 PASS가 아니라 LIMITED PASS 또는 FAIL로 판정한다.
+Designer와 Reviewer의 실행 주체가 같거나 분리 증거가 없으면 실행 결과가 통과해도 FAIL로 판정한다.
 
 ## 회귀 위험 체크
 
 - 보호해야 할 운영 동작이 assertion에 직접 연결되는가?
+- 원 요청의 각 요구사항이 실행되는 테스트와 최종 상태 assertion에 연결되는가?
+- 테스트 이름만 요구사항을 말하고 실제 assertion은 다른 결과를 확인하지 않는가?
 - 정상·예외·경계값·회귀 중 누락 또는 형식적 케이스가 있는가?
 - 시간, 순서, 현재 시각, 무작위 값, 공유 DB 상태에 불필요하게 의존하는가?
 - mock이 구현 세부사항에 과도하게 결합되어 있는가?
