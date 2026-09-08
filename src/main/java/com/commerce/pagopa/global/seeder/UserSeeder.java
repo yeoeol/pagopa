@@ -40,7 +40,7 @@ class UserSeeder implements Seeder {
     public void seed() {
         int total = props.counts().users();
         String sql = """
-                INSERT INTO users(
+                INSERT INTO user(
                     provider,
                     provider_id,
                     name,

@@ -44,7 +44,7 @@ class ProductImageSeeder implements Seeder {
         int total = productSize * IMAGES_PER_PRODUCT;
 
         String sql = """
-                INSERT INTO product_images(
+                INSERT INTO product_image(
                     image_url,
                     display_order,
                     is_thumbnail,
