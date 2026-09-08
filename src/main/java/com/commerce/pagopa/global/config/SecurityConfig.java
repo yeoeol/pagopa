@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -60,41 +59,30 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        .requestMatchers("/api/v1/local-test/**").permitAll()
+                        .requestMatchers(
+                                "/actuator/health/**",
+                                "/actuator/prometheus"
+                        ).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                        .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
-
-                        .requestMatchers("/api/v1/images/**").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasAnyRole("SELLER", "ADMIN")
-                        .requestMatchers("/api/v1/products/**").permitAll()
-
-                        .requestMatchers("/api/v1/users/**").hasAnyRole("USER", "SELLER")
-
-                        .requestMatchers("/api/v1/cart/**").hasRole("USER")
-
-                        .requestMatchers("/api/v1/orders/**").hasRole("USER")
-
-                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").permitAll()
-                        .requestMatchers("/api/v1/reviews/**").permitAll()
-
-                        .requestMatchers("/api/v1/scraps/**").hasRole("USER")
-
-                        .requestMatchers("/api/v1/search-histories/**").permitAll()
-
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-
-                        .requestMatchers("/actuator/health/**", "/actuator/prometheus").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
 
-                        .requestMatchers("/api/v1/seller/**").hasRole("SELLER")
-                        .requestMatchers("/api/v1/sellers/**").authenticated()
-
-                        .requestMatchers("/api/v1/auth/refresh").permitAll()
-                        .requestMatchers("/api/v1/auth/**").authenticated()
-
                         .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/v1/sellers/**").hasRole("SELLER")
+
+                        .requestMatchers("/api/v1/local-test/**").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh").permitAll()
+                        .requestMatchers("/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/products/**").permitAll()
+                        .requestMatchers("/api/v1/search-histories/**").permitAll()
+
+                        .requestMatchers("/api/v1/auth/**").authenticated()
+                        .requestMatchers("/api/v1/users/**").authenticated()
+                        .requestMatchers("/api/v1/orders/**").authenticated()
+                        .requestMatchers("/api/v1/reviews/**").authenticated()
+                        .requestMatchers("/api/v1/cart/**").authenticated()
+                        .requestMatchers("/api/v1/cart-items").authenticated()
+                        .requestMatchers("/api/v1/images/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
