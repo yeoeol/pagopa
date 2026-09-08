@@ -1,0 +1,72 @@
+# Harness Improvement Log
+
+## 2026-09-03 — v0.1 초기 구성
+
+- 실행한 요청: 정상·예외·경계값·회귀 테스트 생성 하네스 구성
+- 기대한 결과: 기존 스타일을 읽고 목록 승인 후 최소 구현하며, 독립 검증과 커밋 전 승인을 강제
+- 실제 결과: A 방식 청사진을 실행 하네스 구조로 구성
+- 잘된 점: 사용자 실패 경험을 컨텍스트 분석, 테스트 목록, 생성자-검증자 분리, 두 승인 게이트로 외부화
+- 막힌 점: 실제 테스트 대상이 없어 테스트 생성 흐름은 아직 실행하지 않음
+- 다음 버전에서 검토할 규칙: 반복 중복이 누적되면 B 방식 공용 테스트 도구 추출을 별도 검토
+
+## 2026-09-08 — 품질 리뷰 계약 동기화
+
+- 실행한 요청: 완료된 `SearchHistoryService.saveHistory` 동시성 테스트와 하네스 문서에 대한 8개
+  코드 리뷰의 타당성 판정과 반영
+- 기대한 결과: 동시성 실패 판정, 승인 stale 조건, Gradle/Maven 실행, A 방식 경계, Phase와 실행
+  상태가 역할 카드·Skill·산출물에서 모순 없이 일치
+- 실제 결과: 1·2·3·4·5·7·8은 반영했고, 6은 의미상 모호성만 반영해 E-01을 예외 안전성으로
+  명확히 했다. 사용자 승인 범위 밖인 `USER_NOT_FOUND` 테스트는 추가하지 않았다.
+- 잘된 점: 테스트·운영 코드를 바꾸지 않고 계약과 과거 실행 기록을 동기화했으며 사용자의 기존
+  `spring-test-code-builder.toml` 변경을 보존했다.
+- 막힌 점: gitignored 외부 환경 yml이 worktree에 없어 기존 full-context suite는 LIMITED PASS
+  근거로 남아 있다. 사용자가 별도로 수정할 예정이다.
+- 다음 버전에서 바꿀 규칙: 실제 Maven 프로젝트에서 wrapper 감지와 대상·관련·전체 명령 기록을
+  실행 사례로 검증한다.
+
+## 2026-09-08 — v0.2 독립 Test Designer·Quality Reviewer
+
+- 실행한 요청: 테스트 시나리오 설계자와 테스트 의미 검증자를 서로 다른 에이전트·컨텍스트로 분리
+- 기대한 결과: Designer가 원 요청에서 시나리오를 만들고, Reviewer가 생성자 대화 없이 원
+  요구사항을 재도출해 실제 테스트와 assertion을 독립 판정
+- 실제 결과: `/root/spring_test_case_designer`가 구현·검증 결과를 보기 전에 재설계한 5개
+  시나리오는 기존 승인 목록과 일치했다. `/root/spring_test_quality_reviewer_final`은 별도 새
+  컨텍스트에서 요구사항을 재도출하고 테스트 코드와 대조한 뒤 실제 MySQL 강제 재실행 5/5 통과를
+  확인했다. 관련·전체 suite는 gitignored 외부 yml 제약으로 미실행해 LIMITED PASS를 유지했다.
+- 잘된 점: canonical task name으로 두 실행 주체의 분리를 증명했고, 요구사항↔시나리오↔assertion
+  양방향 추적표와 false-positive 점검을 산출물에 남겼다.
+- 막힌 점: 플랫폼이 숫자 runtime agent ID를 노출하지 않아 canonical task name을 대체 증거로
+  사용했다. 앞선 Reviewer 두 실행은 테스트 종료 후 검증 산출물을 저장하지 않아 무효 처리하고
+  최종 Reviewer로 재시도했다.
+- 다음 버전에서 바꿀 규칙: Reviewer가 테스트 종료 뒤 산출물을 저장하지 않는 실패를 결함 주입
+  프롬프트로 추가하고, 재시도 횟수·종료 조건을 실제 실행 비용과 함께 검토한다.
+
+## 2026-09-08 — v0.3 Designer·Builder·Reviewer 쌍별 독립성과 세션 격리
+
+- 실행한 요청: Builder의 실행 주체도 독립성 검증에 포함하고 Designer·Builder·Reviewer를 서로
+  다른 실제 실행 주체이자 서로의 대화·메모리를 상속하지 않는 별도 세션으로 증명
+- 기대한 결과: 02에는 Designer, 03에는 Builder, 04에는 Reviewer 식별자를 각각 기록하고 세
+  식별자의 존재와 쌍별 차이를 Reviewer가 검증하며, 누락·중복이면 실행 성공과 무관하게 FAIL
+- 실제 결과: 기존 실행 신원을 소급 추정하지 않았다. Designer
+  `/root/spring_test_case_designer_isolated`, Builder `/root/spring_test_code_builder_isolated`, Reviewer
+  `/root/spring_test_quality_reviewer_isolated`를 각각 `fork_turns="none"`으로 실행했다. 각 역할은 다른
+  역할의 채팅·요약·메모리·내부 추론 없이 지정 파일만 handoff받았고 자기 산출물에 격리 증거를
+  기록했다. Reviewer가 세 ID 쌍과 세션 증거를 모두 확인했으며 실제 MySQL 강제 실행도 5/5
+  통과했다. 관련·전체 suite는 알려진 외부 yml 제약으로 미실행해 LIMITED PASS를 유지했다.
+- 잘된 점: 미래 Builder 식별자를 Designer 산출물에 요구하지 않고 각 역할이 자기 실행 시점에
+  자기 식별자와 세션 격리를 기록하게 해 허위·예측 식별자와 공유 메모리 기반 자기검증 없이
+  독립성을 검증했다.
+- 막힌 점: 플랫폼이 숫자 runtime agent ID를 제공하지 않아 canonical task name을 대체 증거로
+  사용했다. 관련·전체 suite의 `${jwt.secret}` 환경 제약은 사용자의 후속 작업으로 남아 있다.
+- 다음 버전에서 바꿀 규칙: 세 역할 중 하나의 식별자 누락과 세 가지 쌍별 중복을 결함 주입
+  프롬프트로 지속 검증하고 실제 실행에서 false PASS가 발생하지 않는지 관찰한다.
+
+## 기록 템플릿
+
+- 날짜:
+- 실행한 요청:
+- 기대한 결과:
+- 실제 결과:
+- 잘된 점:
+- 막힌 점:
+- 다음 버전에서 바꿀 규칙:
