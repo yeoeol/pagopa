@@ -1,7 +1,7 @@
 package com.commerce.pagopa.global.seeder;
 
-import lombok.RequiredArgsConstructor;
 import net.datafaker.Faker;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 
 @Profile("local")
 @Order(7)
@@ -24,49 +26,44 @@ class ReviewSeeder implements Seeder {
 
     @Override
     public String name() {
-        return "reviews";
+        return "review";
     }
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM reviews", Integer.class);
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
         // OrderProduct와 1:1 매핑 - @OneToOne 제약 충족
-        List<Long> orderProductIds = batch.loadIds("order_product", "order_product_id");
-        List<Long> buyerIds = jdbc.queryForList(
-                "SELECT user_id FROM users WHERE role = 'ROLE_USER' AND user_status = 'ACTIVE' ORDER BY user_id",
-                Long.class);
+        List<Long> orderItemIds = batch.loadIds("order_item", "order_item_id");
 
-        if (orderProductIds.isEmpty() || buyerIds.isEmpty()) {
-            throw new IllegalStateException("order_product/buyer 부족");
+        if (orderItemIds.isEmpty()) {
+            throw new IllegalStateException("order_item 부족");
         }
 
         int total = props.counts().reviews();
-        if (total > orderProductIds.size()) {
+        if (total > orderItemIds.size()) {
             throw new IllegalStateException(
-                    "reviews(%d) > order_product(%d) - 1:1 매핑 불가".formatted(total, orderProductIds.size())
+                    "review(%d) > order_item(%d) - 1:1 매핑 불가".formatted(total, orderItemIds.size())
             );
         }
 
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-        int buyerSize = buyerIds.size();
 
         String sql = """
-                INSERT INTO reviews(rating, content, user_id, order_product_id, created_at, updated_at)
+                INSERT INTO review(content, rating, order_item_id, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setInt(1, i % 5 + 1);                          // 1~5 균등
-            ps.setString(2, faker.lorem().sentence(15));
-            ps.setLong(3, buyerIds.get(i % buyerSize));
-            ps.setLong(4, orderProductIds.get(i));            // 처음 total개 OrderProduct에 부여
+            ps.setString(1, faker.lorem().sentence(15));
+            ps.setInt(2, i % 5 + 1);                          // 1~5 균등
+            ps.setLong(3, orderItemIds.get(i));            // 처음 total개 OrderItem에 부여
+            ps.setTimestamp(4, now);
             ps.setTimestamp(5, now);
-            ps.setTimestamp(6, now);
         });
     }
 }

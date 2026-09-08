@@ -1,12 +1,13 @@
 package com.commerce.pagopa.global.seeder;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 
 @Profile("local")
 @Order(8)
@@ -20,18 +21,18 @@ class ReviewImageSeeder implements Seeder {
 
     @Override
     public String name() {
-        return "review_images";
+        return "review_image";
     }
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM review_images", Integer.class);
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
-        List<Long> reviewIds = batch.loadIds("reviews", "review_id");
+        List<Long> reviewIds = batch.loadIds("review", "review_id");
         if (reviewIds.isEmpty()) {
             throw new IllegalStateException("review 없음");
         }
@@ -39,13 +40,13 @@ class ReviewImageSeeder implements Seeder {
         int total = props.counts().reviewImages();
         if (total > reviewIds.size()) {
             throw new IllegalStateException(
-                    "review_images(%d) > reviews(%d) - 처음 N개 Review에 1장씩 부여 전제"
+                    "review_image(%d) > review(%d) - 처음 N개 Review에 1장씩 부여 전제"
                             .formatted(total, reviewIds.size())
             );
         }
 
         String sql = """
-                INSERT INTO review_images(image_url, display_order, review_id)
+                INSERT INTO review_image(image_url, display_order, review_id)
                 VALUES (?, ?, ?)
                 """;
 
