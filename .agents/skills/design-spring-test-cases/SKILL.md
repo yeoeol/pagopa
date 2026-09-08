@@ -11,13 +11,14 @@ description: >
 
 테스트 코드보다 먼저 왜 필요한 테스트인지 합의할 수 있는 목록을 만든다.
 
-이 Skill은 `spring-test-case-designer`가 새 실행 컨텍스트에서 사용한다. 같은 실행 주체가
+이 Skill은 `spring-test-case-designer`가 `fork_turns="none"` 또는 동등한 무상속 방식으로 생성된
+새 세션에서 사용한다. 다른 역할의 대화·메모리를 전달받지 않으며, 같은 실행 주체가
 `verify-spring-tests`로 자기 설계를 최종 검증하지 않는다.
 
 ## 절차
 
-1. `artifacts/00-request.md`, `artifacts/01-project-context.md`와 대상 코드를 읽고 작성 역할과
-   canonical task name 또는 실행 ID를 기록한다.
+1. `artifacts/00-request.md`, `artifacts/01-project-context.md`와 대상 코드를 읽고 작성 역할,
+   canonical task name 또는 실행 ID, 세션 격리 방식과 허용된 입력을 기록한다.
 2. 보호할 동작과 실패했을 때의 영향을 한 문장으로 정의한다.
 3. 다음 유형을 각각 검토한다.
    - 정상: 대표적인 성공 흐름과 최종 상태
@@ -59,4 +60,6 @@ description: >
 - 모든 사용자 요구사항이 하나 이상의 시나리오와 assertion에 연결되고, 모든 시나리오도 원
   요구사항 또는 코드 위험으로 역추적되어야 한다.
 - 작성 역할과 실행 주체가 없으면 승인 가능한 테스트 목록으로 표시하지 않는다.
+- 다른 역할의 대화·메모리를 상속하지 않은 세션 격리 증거가 없으면 승인 가능한 목록으로 표시하지
+  않는다.
 - 코드와 빌드 파일을 수정하지 않는다.

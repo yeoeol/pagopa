@@ -11,8 +11,9 @@ description: >
 
 구현자가 만든 테스트를 낙관적으로 승인하지 않고 실행 결과와 diff에 기반해 판정한다.
 
-검증자는 Test Designer와 Builder의 대화 컨텍스트를 상속하지 않는 별도 실행 주체여야 한다.
-산출물과 원 요청을 통해서만 인수인계받아 자기 설계·구현에 대한 확증 편향을 줄인다.
+검증자는 `fork_turns="none"` 또는 동등한 무상속 방식으로 시작해 Test Designer와 Builder의 대화·
+메모리·내부 추론을 상속하지 않는 별도 세션이어야 한다. 산출물과 원 요청을 통해서만
+인수인계받아 자기 설계·구현에 대한 확증 편향을 줄인다.
 
 ## 절차
 
@@ -20,7 +21,10 @@ description: >
 2. 테스트 목록과 구현 기록을 읽기 전에 사용자 요구사항, 운영 불변식과 필요한 assertion을
    독립적으로 도출해 `artifacts/04-verification.md`의 독립 검증 기준으로 고정한다.
 3. 그 뒤 `artifacts/02-test-cases.md`, `artifacts/03-implementation.md`와 실제 diff를 읽는다.
-4. Designer와 Reviewer의 역할, canonical task name 또는 실행 ID가 서로 다른지 확인하고 기록한다.
+4. `artifacts/02-test-cases.md`의 Designer, `artifacts/03-implementation.md`의 Builder와 현재
+   Reviewer의 역할·canonical task name 또는 실행 ID와 세션 격리 증거가 모두 존재하는지
+   확인한다. 세 식별자를 쌍별 비교하고 각 역할이 다른 역할의 대화·메모리를 상속하지 않았는지
+   기록한다.
 5. 승인 범위 밖 파일이 변경되지 않았는지 확인한다.
 6. 요구사항 → 테스트 → assertion과 테스트 → 요구사항을 양방향으로 대조한다.
 7. 빌드 파일과 Wrapper를 감지한 뒤 가장 좁은 대상 테스트를 실행하고 정확한 명령, 종료 코드,
@@ -51,11 +55,14 @@ description: >
 - `BLOCKED`: Docker, 외부 서비스, 권한 등 필요한 환경을 확보할 수 없다.
 
 애매하면 PASS가 아니라 LIMITED PASS 또는 FAIL로 판정한다.
-Designer와 Reviewer의 실행 주체가 같거나 분리 증거가 없으면 실행 결과가 통과해도 FAIL로 판정한다.
+Designer, Builder와 Reviewer 중 하나의 실행 주체 식별자나 세션 격리 증거가 없거나, 어느 두
+식별자라도 같거나, 다른 역할의 대화·메모리를 상속했다면 실행 결과가 통과해도 FAIL로 판정한다.
 
 ## 회귀 위험 체크
 
 - 보호해야 할 운영 동작이 assertion에 직접 연결되는가?
+- Designer, Builder와 Reviewer 식별자가 세 산출물에 각각 있고 세 쌍이 모두 다른가?
+- 세 역할이 서로의 대화·메모리를 상속하지 않은 별도 세션이며 파일 산출물만 handoff했는가?
 - 원 요청의 각 요구사항이 실행되는 테스트와 최종 상태 assertion에 연결되는가?
 - 테스트 이름만 요구사항을 말하고 실제 assertion은 다른 결과를 확인하지 않는가?
 - 정상·예외·경계값·회귀 중 누락 또는 형식적 케이스가 있는가?

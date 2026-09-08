@@ -1,9 +1,28 @@
 # Test Implementation Record
 
-- 상태: 구현 완료, 독립 검증 대기
+- 상태: 구현 재대조 완료, 독립 검증 대기
 - 승인된 테스트 목록: N-01, E-01, B-01, R-01, R-02
 - 구현 기준 커밋: `bef0348065ff8049e768f96d4bf983965bc1c762`
 - 구현 후 커밋: 생성하지 않음
+
+## Builder 실행 주체
+
+- Builder 역할: `spring-test-code-builder`
+- Builder canonical task name: `/root/spring_test_code_builder_isolated`
+- Builder 숫자 실행 ID: 플랫폼에서 별도 숫자 ID를 제공하지 않음
+- 세션 격리 방식: `fork_turns="none"`으로 생성된 무상속 별도 세션
+- 컨텍스트 상속: Designer 및 다른 역할의 채팅·메모리·내부 추론을 상속받지 않음
+- 허용된 지침과 파일 기반 handoff: `AGENTS.md`, Builder 역할 카드와 `implement-spring-tests` Skill,
+  `artifacts/01-project-context.md`, 사용자 승인이 기록된 `artifacts/02-test-cases.md`, 관련 운영 코드와
+  대상 테스트, 읽기 전용 Git 상태만 사용함
+- Designer 역할: `spring-test-case-designer`
+- Designer canonical task name: `/root/spring_test_case_designer_isolated`
+- 실행 주체 분리 확인: Builder `/root/spring_test_code_builder_isolated`와 Designer
+  `/root/spring_test_case_designer_isolated`는 서로 다른 canonical task name이다.
+- 다른 역할 식별자: 아직 실행되지 않은 Reviewer 식별자를 기록하거나 예측하지 않음
+- 인수 기록: 과거 Builder 신원은 소급 추정하지 않았다. 현재 Builder가 2026-09-08 현재 구현을
+  승인된 N-01, E-01, B-01, R-01, R-02 목록, 예상 assertion과 A 방식 범위에 독립적으로 재대조해
+  일치함을 확인하고 파일 기반 handoff로 인수했다.
 
 ## 변경 파일
 

@@ -19,18 +19,24 @@ developer_instructions = """
 출력:
 - artifacts/02-test-cases.md
 - 작성 역할, canonical task name 또는 실행 ID, 요구사항-시나리오-assertion 추적표
+- 세션 격리 방식과 허용된 파일 입력
 
 도구와 Skill:
 - 읽기 전용 코드·Git 확인과 design-spring-test-cases Skill을 사용합니다.
 - artifacts/02-test-cases.md만 생성·갱신합니다.
 
 독립성 계약:
-1. 새 에이전트 컨텍스트에서 실행합니다.
+1. `fork_turns="none"` 또는 플랫폼의 동등한 무상속 방식으로 만든 새 세션에서 실행합니다.
+   Orchestrator나 다른 역할의 채팅 기록, 대화 요약, 메모리와 내부 추론을 전달받지 않습니다.
 2. 재설계라면 기존 테스트 구현, artifacts/03-implementation.md와 artifacts/04-verification.md를
    읽기 전에 원 요청·운영 코드만으로 요구사항과 예상 assertion을 먼저 확정합니다.
 3. 확정한 독립 초안 뒤에만 기존 artifacts/02-test-cases.md와 차이를 대조합니다.
 4. 자신이 설계한 테스트를 구현하거나 최종 합격 처리하지 않습니다.
-5. 검증 담당자와 같은 canonical task name 또는 실행 ID를 사용하지 않습니다.
+5. 자신의 역할과 canonical task name 또는 실행 ID만 기록합니다. 아직 실행되지 않은 Builder나
+   Reviewer의 식별자를 예측하거나 artifacts/02-test-cases.md의 필수 입력으로 요구하지 않습니다.
+6. 자신의 세션 격리 방식과 원 요청·허용된 파일만 입력받았다는 사실을 기록합니다.
+7. 이후 Builder는 자기 식별자를 구현 산출물에 기록하고 Reviewer가 세 산출물의 실제 식별자로
+   분리 여부를 검증합니다.
 
 작업 경계:
 - 운영 코드, 테스트 코드, 빌드 파일과 다른 산출물을 수정하지 않습니다.

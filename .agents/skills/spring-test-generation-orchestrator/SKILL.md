@@ -57,8 +57,8 @@ description: >
 ## Phase 3. 팀 패턴 선택
 
 Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 독립 설계 → 승인 → 구현 → 독립 검증
-순서를 지킨다. Test Designer, Builder와 Reviewer는 서로 다른 실행 주체이며, Reviewer는 생성자의
-대화 컨텍스트를 상속하지 않는다.
+순서를 지킨다. Test Designer, Builder와 Reviewer는 서로 다른 실행 주체이자 서로의 대화·메모리를
+상속하지 않는 별도 세션이어야 한다. 에이전트 간 인수인계는 지정된 파일 산출물로만 수행한다.
 
 ## Phase 4. Agent 설계
 
@@ -79,19 +79,29 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 독립 설계 �
 ## Phase 6. 승인 구현
 
 1. 분석 결과에서 테스트 가능한 동작과 위험을 확인한다.
-2. 새 `spring-test-case-designer` 실행에 원 요청·분석·대상 코드 경로만 전달하고
-   `design-spring-test-cases`로 정상·예외·경계값·회귀 목록을 작성하게 한다.
+2. `fork_turns="none"` 또는 플랫폼의 동등한 무상속 방식으로 새 `spring-test-case-designer` 세션을
+   시작하고 원 요청·분석·대상 코드 경로만 전달한다. 다른 역할의 대화·메모리·내부 추론은 전달하지
+   않고 `design-spring-test-cases`로 정상·예외·경계값·회귀 목록을 작성하게 한다.
 3. 승인 게이트 1에서 테스트 목록과 예상 수정 파일을 사용자에게 보여주고 멈춘다.
-4. 명시적 승인 후에만 `implement-spring-tests`로 테스트 코드를 수정한다.
+4. 명시적 승인 후 `fork_turns="none"` 또는 동등한 무상속 방식으로 Designer와 다른 새
+   `spring-test-code-builder` 세션을 시작한다. Builder에는 대화·메모리가 아니라 승인된 산출물과
+   코드 경로만 전달한다.
+5. Builder가 `implement-spring-tests`로 테스트 코드를 수정하고 자신의 역할과 canonical task name
+   또는 실행 ID, 세션 격리 방식을 `artifacts/03-implementation.md`에 기록한다. 미래 Reviewer
+   식별자는 요구하지 않는다.
 
 ## Phase 7. 독립 검증·개선
 
-1. Designer·Builder와 다른 새 `spring-test-quality-reviewer` 실행을 시작한다. 생성자의 대화 내역은
-   전달하지 않고 원 요청, 산출물과 코드 경로만 전달한다.
+1. `fork_turns="none"` 또는 동등한 무상속 방식으로 Designer·Builder와 다른 새
+   `spring-test-quality-reviewer` 세션을 시작한다. 생성자의 대화·메모리·내부 추론은 전달하지 않고
+   원 요청, 산출물과 코드 경로만 전달한다.
 2. Reviewer가 원 요청과 운영 코드에서 요구사항·assertion을 먼저 독립 도출한 뒤
    `verify-spring-tests`로 대상 테스트, 관련 테스트와 가능한 범위의 전체 테스트를 검증한다.
-3. `artifacts/02-test-cases.md`와 `artifacts/04-verification.md`의 역할·canonical task name 또는
-   실행 ID가 다름을 확인한다. 같거나 누락되면 PASS를 금지한다.
+3. `artifacts/02-test-cases.md`의 Designer, `artifacts/03-implementation.md`의 Builder와
+   `artifacts/04-verification.md`의 Reviewer에 식별자와 세션 격리 증거가 모두 존재하는지 확인한다.
+   세 식별자가 쌍별로 다르고 각 세션이 다른 역할의 대화·메모리를 상속하지 않았어야 한다. 식별자나
+   격리 증거가 하나라도 누락되거나, 두 식별자가 같거나, 컨텍스트 상속이 확인되면 테스트 실행
+   성공과 무관하게 FAIL로 판정한다.
 4. 검증 실패가 테스트 구현 문제이면 최대 2회까지 구현→검증을 반복한다. 매 라운드 diff와
    결과를 보존하고 악화되면 직전 best로 돌아간다.
 5. 운영 코드 결함, 환경 차단, 두 번의 수정 후 미통과이면 자동 통과시키지 않고 사용자에게
@@ -101,13 +111,22 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 독립 설계 �
 
 ## 멀티에이전트 실행 계약
 
-- Test Designer와 Quality Reviewer는 서로 다른 새 에이전트 실행으로 호출한다.
-- Reviewer는 생성자의 채팅 기록을 상속하지 않는 새 컨텍스트에서 시작하고 파일 산출물로만
-  인수인계받는다.
-- `artifacts/02-test-cases.md`에는 Designer 역할과 canonical task name 또는 실행 ID를,
-  `artifacts/04-verification.md`에는 Reviewer 역할·실행 주체와 두 주체가 다르다는 확인을 기록한다.
+- Test Designer, Builder와 Quality Reviewer는 모두 `fork_turns="none"` 또는 플랫폼의 동등한
+  무상속 방식으로 서로 다른 새 세션에서 호출한다.
+- 세 역할 사이에 채팅 기록, 대화 요약, 메모리나 내부 추론을 전달하지 않는다. 원 요청, 허용된
+  프로젝트 파일과 이전 단계의 지정 산출물만 명시적인 handoff로 전달한다.
+- `artifacts/02-test-cases.md`에는 Designer 역할과 canonical task name 또는 실행 ID를 기록한다.
+  세션 격리 방식과 허용된 입력도 기록하되, 아직 실행되지 않은 Builder나 Reviewer의 식별자를
+  예측해 기록하게 하지 않는다.
+- `artifacts/03-implementation.md`에는 Builder 역할과 자신의 canonical task name 또는 실행 ID를
+  기록한다. Designer 대화·메모리를 상속하지 않은 세션 격리 방식과 파일 기반 handoff를 기록하되,
+  아직 실행되지 않은 Reviewer의 식별자를 예측해 기록하게 하지 않는다.
+- `artifacts/04-verification.md`에는 Reviewer 역할과 자신의 canonical task name 또는 실행 ID,
+  Designer·Builder 대화·메모리를 상속하지 않은 세션 격리 방식, 세 실행 주체가 모두 존재하고
+  쌍별로 서로 다르다는 확인을 기록한다.
 - 실행 플랫폼이 숫자 ID를 제공하지 않으면 서로 다른 canonical task name을 증거로 사용한다.
-- 역할 분리 증거가 없거나 동일 주체가 두 산출물을 만들면 테스트 실행 성공과 무관하게 FAIL이다.
+- 세 역할 중 하나의 식별자 또는 세션 격리 증거가 없거나, 어느 두 식별자라도 같거나, 다른 역할의
+  대화·메모리를 상속한 실행이면 테스트 실행 성공과 무관하게 FAIL이다.
 
 ## 승인 게이트 1: 테스트 계획
 
@@ -150,7 +169,7 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 독립 설계 �
 | Phase 0 | `artifacts/00-request.md` | Orchestrator | 모든 역할 |
 | Phase 1 | `artifacts/01-project-context.md` | Context Analyst | Test Designer, Builder |
 | Phase 2 | `artifacts/02-test-cases.md` | `spring-test-case-designer` | 사용자, Builder, Reviewer |
-| Phase 6 | `artifacts/03-implementation.md` | Builder | Reviewer |
+| Phase 6 | `artifacts/03-implementation.md` | `spring-test-code-builder` | Reviewer |
 | Phase 7 | `artifacts/04-verification.md` | `spring-test-quality-reviewer` | Orchestrator, 사용자 |
 | Phase 7 | `artifacts/final.md` | Orchestrator | 사용자, 다음 실행 |
 | Phase 7 | `artifacts/improvement-log.md` | Orchestrator | 다음 하네스 개선 |
@@ -166,8 +185,9 @@ Pipeline과 Producer-Reviewer를 함께 사용한다. 분석 → 독립 설계 �
 - 필요한 의존성이 없으면 임의로 추가하지 않고 장단점과 대안을 사용자에게 제시한다.
 - 테스트가 현재 운영 코드 결함을 재현하면 assertion을 약화하거나 운영 코드를 자동 수정하지 않는다.
 - 사용자 변경과 충돌하면 해당 파일 수정을 멈추고 범위를 다시 확인한다.
-- Designer와 Reviewer를 별도 실행할 수 없거나 실행 주체를 증명할 수 없으면 형식적으로 독립 검증을
-  완료하지 않고 FAIL 또는 BLOCKED로 보고한다.
+- Designer, Builder와 Reviewer를 각각 무상속 별도 세션으로 실행하지 않았거나, 세 실행 주체의
+  식별자·세션 격리를 증명할 수 없거나, 어느 두 식별자라도 같거나, 역할 간 대화·메모리를
+  상속했다면 독립 검증을 FAIL로 보고한다.
 
 ## 사용 예시
 

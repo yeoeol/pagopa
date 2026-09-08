@@ -4,9 +4,19 @@
 - 판정: **LIMITED PASS**
 - 기준 브랜치/커밋: `test/search-history-concurrency` / `bef0348065ff8049e768f96d4bf983965bc1c762`
 - 방식: A — 신규 대상 테스트 파일 내부의 외과적 변경
-- 검증 일시: 2026-09-04 (Asia/Seoul)
+- 최신 검증 일시: 2026-09-08 (Asia/Seoul)
 - 테스트 구현 커밋: `3076fe7`
-- 현재 하네스 리뷰 변경: 사용자 검토 및 커밋 승인 완료 (2026-09-08)
+- 현재 하네스 리뷰 변경: 세 실행 주체·무상속 세션 계약 반영 및 사용자 커밋 승인 완료
+
+## 실행 주체 독립성
+
+- Designer: `spring-test-case-designer` / `/root/spring_test_case_designer_isolated`
+- Builder: `spring-test-code-builder` / `/root/spring_test_code_builder_isolated`
+- Reviewer: `spring-test-quality-reviewer` / `/root/spring_test_quality_reviewer_isolated`
+- 쌍별 판정: Designer↔Builder, Designer↔Reviewer, Builder↔Reviewer 모두 서로 다른 canonical task
+  name으로 확인했다. 세 역할은 모두 `fork_turns="none"`인 별도 세션에서 시작해 서로의 대화·
+  메모리·내부 추론을 상속하지 않고 파일 산출물로만 handoff했다. 식별자나 세션 격리 증거가 없거나,
+  어느 두 값이라도 같거나, 컨텍스트 상속이 확인되면 테스트 결과와 무관하게 FAIL로 판정한다.
 
 ## 최종 테스트 코드
 
@@ -35,7 +45,8 @@
 | 대상 테스트 최초 실행 | PASS — 5/5 | 실제 MySQL 8.0.36, exit 0 |
 | 대상 강제 반복 1 | PASS — 5/5 | `--rerun-tasks`, exit 0 |
 | 대상 강제 반복 2 | PASS — 5/5 | `--rerun-tasks`, exit 0 |
-| 대상 합계 | PASS — 15/15 | flaky, timeout, 미완료, 예외, executor 종료 실패 없음 |
+| 초기 3회 합계 | PASS — 15/15 | flaky, timeout, 미완료, 예외, executor 종료 실패 없음 |
+| 무상속 세션 독립 Reviewer 강제 실행 | PASS — 5/5 | 실제 MySQL 8.0.36, `--rerun-tasks`, exit 0 |
 | 관련 MySQL repository 테스트 | FAIL — 10/10 context 실패 | 기존 full-context `${jwt.secret}` 미설정, 대상 변경과 무관 |
 | 전체 테스트 | FAIL — 36개 중 13 PASS/23 FAIL | 대상 5건과 auth 8건 PASS; 기존 full-context 테스트 23건은 같은 설정 문제 |
 | 변경 범위 및 whitespace | PASS | 운영 코드·빌드·공용 Fixture 변경 없음, `git diff --check` exit 0 |
@@ -63,8 +74,14 @@
 
 ## 현재 하네스 리뷰 변경 확인
 
+- 이번 v0.3 변경은 Orchestrator, 설계·구현·검증 Skill, Designer·Builder·Reviewer 역할 카드,
+  `AGENTS.md`, ADR-002, 회귀 프롬프트와 상태 산출물에 무상속 별도 세션 계약을 동기화했다.
+- 테스트 소스와 운영 코드에는 이번 변경의 diff가 없다.
 - [x] 하네스 계약·산출물 변경 파일과 diff를 확인했다.
 - [x] 승인한 5개 테스트가 구현됐다.
 - [x] 대상 테스트를 실제 MySQL에서 3회 실행했다.
 - [x] 테스트 구현은 `3076fe7`로 커밋됐다.
-- [x] 현재 하네스 리뷰 변경의 커밋을 별도로 승인했다.
+- [x] 이전 v0.2 하네스 리뷰 변경의 커밋을 별도로 승인했다.
+- [x] Designer·Builder·Reviewer 식별자가 모두 존재하고 세 쌍이 서로 다름을 검증했다.
+- [x] 세 역할이 서로의 대화·메모리를 상속하지 않은 `fork_turns="none"` 별도 세션임을 검증했다.
+- [x] 현재 v0.3 세 실행 주체·세션 격리 계약 변경의 커밋을 별도로 승인했다.

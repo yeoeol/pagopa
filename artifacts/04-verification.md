@@ -1,5 +1,77 @@
 # SearchHistoryService 동시성 테스트 최종 검증
 
+## 2026-09-08 무상속 세션 독립성 재검증
+
+- 최종 판정: **LIMITED PASS**
+- Reviewer 역할: `spring-test-quality-reviewer`
+- Reviewer canonical task name: `/root/spring_test_quality_reviewer_isolated`
+- Reviewer 숫자 실행 ID: 플랫폼에서 별도 숫자 ID를 제공하지 않음
+- Reviewer 세션 격리: `fork_turns="none"`으로 생성된 Designer·Builder와 다른 무상속 별도 세션
+- Reviewer 컨텍스트 상속: Designer·Builder·Orchestrator의 채팅 기록, 대화 요약, 메모리와 내부 추론을 상속받지 않았으며 지정 파일 산출물만 handoff받음
+- Reviewer 허용 입력: `AGENTS.md`, Reviewer 역할 카드와 `verify-spring-tests` Skill, 독립 기준 확정 전에는 `artifacts/00-request.md`, `artifacts/01-project-context.md`, `build.gradle`과 대상 운영 서비스·repository·entity·사용자 repository만 사용함. 독립 기준 확정 뒤에만 `artifacts/02-test-cases.md`, `artifacts/03-implementation.md`, 대상 테스트, 기존 `artifacts/04-verification.md`, Git diff와 실행 결과를 읽음
+- 독립 검증 순서: 승인 목록·구현·기존 검증을 읽기 전에 원 요청과 운영 코드만으로 아래 요구사항·불변식·필수 assertion을 확정했으며, 이후 대조 과정에서 기준을 변경하지 않음
+
+### 세 실행 주체와 무상속 증거
+
+| 역할 | canonical task name | 숫자 ID | 세션 격리·무상속 및 파일 handoff 증거 | 결과 |
+| --- | --- | --- | --- | --- |
+| Designer | `/root/spring_test_case_designer_isolated` | 플랫폼 미제공 | `artifacts/02-test-cases.md`에 `fork_turns="none"`, Orchestrator·Builder·Reviewer 채팅·메모리·내부 추론 무상속, 허용 입력과 독립 초안 선확정 기록이 존재 | PASS |
+| Builder | `/root/spring_test_code_builder_isolated` | 플랫폼 미제공 | `artifacts/03-implementation.md`에 `fork_turns="none"`, Designer 및 다른 역할 채팅·메모리·내부 추론 무상속, 승인된 02와 허용 파일만을 통한 handoff 기록이 존재 | PASS |
+| Reviewer | `/root/spring_test_quality_reviewer_isolated` | 플랫폼 미제공 | 현재 실행이 `fork_turns="none"` 무상속 별도 세션이고 Designer·Builder·Orchestrator 기록·요약·메모리·내부 추론 없이 원 요청과 지정 파일만 받았음을 현재 실행 프롬프트와 이 절차 기록으로 확인 | PASS |
+
+| 비교 쌍 | 식별자 비교 | 무상속 별도 세션 | 결과 |
+| --- | --- | --- | --- |
+| Designer ↔ Builder | `/root/spring_test_case_designer_isolated` ≠ `/root/spring_test_code_builder_isolated` | 두 산출물 모두 `fork_turns="none"`과 상호 대화·메모리 무상속 명시 | PASS |
+| Designer ↔ Reviewer | `/root/spring_test_case_designer_isolated` ≠ `/root/spring_test_quality_reviewer_isolated` | 각각 `fork_turns="none"`; Reviewer는 Designer 기록·요약·메모리·내부 추론 미상속 | PASS |
+| Builder ↔ Reviewer | `/root/spring_test_code_builder_isolated` ≠ `/root/spring_test_quality_reviewer_isolated` | 각각 `fork_turns="none"`; Reviewer는 Builder 기록·요약·메모리·내부 추론 미상속 | PASS |
+
+세 역할의 역할명과 canonical task name이 각 산출물 및 현재 실행에 존재하고 세 쌍이 모두 다르며, 세 세션 모두 무상속과 파일 기반 handoff 증거가 있어 독립성 강제 FAIL 조건에 해당하지 않는다.
+
+### 독립 요구사항-테스트-assertion 추적
+
+| 독립 요구사항·운영 불변식 | 승인/실행 테스트 | 최종 상태 및 실행 assertion | 대조 결과 |
+| --- | --- | --- | --- |
+| 동일 `userId`와 동일 normalized keyword의 동시 저장은 `(user_id, keyword)` 유니크 키와 native upsert 뒤 정확히 1행이어야 한다 | R-01 `concurrent_same_user_keyword_results_in_one_history` | 공통 실행 계약 후 사용자 조회 결과 `singleElement()`와 keyword 일치 | 충족 |
+| 동일 `sessionId`와 동일 normalized keyword의 동시 저장은 `(session_id, keyword)` 유니크 키와 native upsert 뒤 정확히 1행이어야 한다 | R-02 `concurrent_same_session_keyword_results_in_one_history` | 공통 실행 계약 후 세션 조회 결과 `singleElement()`와 keyword 일치 | 충족 |
+| 동일 세션의 서로 다른 keyword는 유실 없이 각각 저장되어야 한다 | N-01 `concurrent_different_keywords_are_all_saved` | 최종 행 수 8과 제출한 keyword 전체 집합의 정확한 일치 | 충족 |
+| `trim()` 후 같은 앞뒤 공백 변형 keyword는 정규화된 1행이어야 한다 | B-01 `concurrent_whitespace_variants_are_deduplicated` | 최종 `singleElement()`와 저장 keyword `keyword` 일치 | 충족 |
+| 기존 동일 주체·keyword 행은 새 행으로 교체되지 않고 `lastSearchedAt`이 갱신되어야 한다 | E-01 `concurrent_updates_of_existing_history_complete_without_errors` | 최종 1행, 최초 ID 불변, `lastSearchedAt`이 고정 과거 시각보다 이후 | 충족 |
+| 각 workload는 실제 경합하며 timeout·미완료·outcome 누락·예상 밖 예외·executor 미종료 없이 8개 호출이 성공해야 한다 | 5개 테스트 공통 `execute_concurrently` / `assert_successful_execution` | 8-thread/8-party barrier, 제한 시간 내 완료, 미완료 0, executor 종료, outcome 8, 승인된 예상 실패 0, 예상 밖 실패 0, 성공 8을 각각 assertion | 충족 |
+| 정상·예외 안전성·경계값·회귀 분류, 영어 `snake_case`, 실제 MySQL 통합 수준이어야 한다 | N-01/E-01/B-01/R-01/R-02와 `verify_mysql_database` | `normal`/`exception`/`boundary`/`regression` tag, 영어 메서드명, JDBC product `MySQL` assertion | 충족 |
+
+양방향 대조 결과 승인된 N-01, E-01, B-01, R-01, R-02는 모두 독립 요구사항과 최종 DB assertion에 연결된다. 반대로 실제 5개 테스트도 모두 승인 요구사항을 증명하며 승인 밖 동작이나 mock 호출 횟수만 확인하는 테스트는 없다.
+
+### 이번 강제 실행 증거
+
+- working directory: `C:\Users\gnsl3\harness_practice\pagopa-docs-harness`
+- 빌드 감지: 루트 `build.gradle`과 대응하는 Windows Wrapper `gradlew.bat` 사용; `pom.xml`/Maven Wrapper로 임의 대체하지 않음
+- 전체 명령: `.\gradlew.bat test --tests com.commerce.pagopa.searchhistory.application.SearchHistoryServiceConcurrencyTest --rerun-tasks`
+- 실행 횟수: 현재 Reviewer가 정확히 1회 강제 실행
+- exit code: `0`
+- wall time: 실행 도구 기준 `29.7189271초`; Gradle 보고 `BUILD SUCCESSFUL in 29s`
+- XML: `build/test-results/test/TEST-com.commerce.pagopa.searchhistory.application.SearchHistoryServiceConcurrencyTest.xml`; `tests=5`, `failures=0`, `errors=0`, `skipped=0`, `time=22.016초`, timestamp `2026-09-08T09:45:37.544Z`
+- 실제 MySQL 증거: XML system-out에서 Testcontainers `mysql:8.0.36` 생성·기동, JDBC URL, MySQL Connector/J, `MySQLDialect`, DB version `8.0.36`과 native `ON DUPLICATE KEY UPDATE` 실행을 확인함
+- 결과: 5/5 PASS. 이번 실행에서 assertion 실패, timeout, 미완료 작업, 예상 밖 예외 또는 executor 미종료 신호가 관찰되지 않음
+- 관련·전체 suite: 사용자가 후속 수정하기로 한 gitignored 외부 yml/`${jwt.secret}` 제약과 이번 실행 범위 지시에 따라 재실행하지 않았으며 통과로 간주하지 않음
+
+### A 방식·false-positive·flaky 및 회귀 위험
+
+| 심각도 | 위치 | 근거 | 판단 |
+| --- | --- | --- | --- |
+| 없음 | `SearchHistoryServiceConcurrencyTest.java:73-193` | 승인된 5개 테스트만 존재하고 각 테스트가 승인 시나리오에 1:1 대응한다 | 대상 테스트 구현은 A 방식 범위에 부합 |
+| 없음 | `SearchHistoryServiceConcurrencyTest.java:195-249` | 8-thread executor·8-party barrier와 유한 gate/completion/termination, 완료·성공·전체 outcome·예상 실패·예상 밖 실패·종료를 분리 assertion한다 | 일부 작업 실패·미실행이나 예외를 최종 행 수만으로 성공 처리하는 false positive 경로가 보이지 않음 |
+| 없음 | `SearchHistoryServiceConcurrencyTest.java:86-189` | N-01은 행 수와 전체 keyword 집합, B-01/R-01/R-02는 단일 행과 keyword, E-01은 행 수·ID·시각을 함께 검사한다 | 중복·유실·delete+insert·무갱신 성공을 구분함 |
+| 없음 | `SearchHistoryServiceConcurrencyTest.java:41-70` | embedded DB 대체를 금지하고 JDBC product를 매 테스트 전에 확인하며 mock을 사용하지 않는다 | H2·mock으로 MySQL 경합 검증을 대체해 통과할 경로가 없음 |
+| 낮음 | 현재 Reviewer의 flaky 탐지력 | 지시에 따라 대상 강제 실행은 1회만 수행했고 5/5 통과했다. 과거 반복 이력은 아래 역사 섹션에 보존하지만 현재 Reviewer의 새 관측은 1회다 | 이번 실행에서 flaky 신호는 없으나 장기 비결정성을 단일 신규 관측만으로 배제할 수 없음 |
+| 낮음 | `SearchHistoryServiceConcurrencyTest.java:153-171` | R-01은 검색 기록을 정리하지만 저장한 회원 fixture를 명시적으로 삭제하지 않는다 | UUID suffix와 일회성 컨테이너로 충돌 가능성은 낮으나 장기 공유 컨텍스트에서는 잔존 데이터 비용이 있음 |
+| 미검증 | 관련 repository·`StockConcurrencyTest`·전체 suite | gitignored 외부 yml/`${jwt.secret}` 제약으로 이번 Reviewer는 재실행하지 않았고 과거 실패 이력만 보존됨 | 관련·전체 회귀 상태는 녹색으로 판정할 수 없음 |
+
+현재 working-tree diff에는 하네스 계약·산출물 변경이 존재하지만 대상 테스트·운영 코드·빌드·공용 Fixture의 미커밋 변경은 없다. 기록된 기준 커밋 대비 대상 테스트 구현은 신규 `SearchHistoryServiceConcurrencyTest.java` 한 파일과 그 내부 private helper이며, 이번 Reviewer는 `artifacts/04-verification.md` 외 파일을 수정하지 않았다.
+
+### 최종 판정
+
+세 실행 주체 식별자와 무상속 별도 세션 증거가 모두 존재하고 세 쌍이 다르다. 승인 목록과 실제 구현은 독립 요구사항에 양방향으로 연결되며 A 방식 경계, assertion 강도와 실제 MySQL 대상 강제 실행 1회가 통과했다. 관련·전체 suite는 알려진 외부 설정 제약으로 이번에 실행하지 않아 미검증이므로 최종 판정은 **LIMITED PASS**다.
+
 ## 2026-09-08 독립 재검증
 
 - 최종 판정: **LIMITED PASS**

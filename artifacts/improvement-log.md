@@ -41,6 +41,26 @@
 - 다음 버전에서 바꿀 규칙: Reviewer가 테스트 종료 뒤 산출물을 저장하지 않는 실패를 결함 주입
   프롬프트로 추가하고, 재시도 횟수·종료 조건을 실제 실행 비용과 함께 검토한다.
 
+## 2026-09-08 — v0.3 Designer·Builder·Reviewer 쌍별 독립성과 세션 격리
+
+- 실행한 요청: Builder의 실행 주체도 독립성 검증에 포함하고 Designer·Builder·Reviewer를 서로
+  다른 실제 실행 주체이자 서로의 대화·메모리를 상속하지 않는 별도 세션으로 증명
+- 기대한 결과: 02에는 Designer, 03에는 Builder, 04에는 Reviewer 식별자를 각각 기록하고 세
+  식별자의 존재와 쌍별 차이를 Reviewer가 검증하며, 누락·중복이면 실행 성공과 무관하게 FAIL
+- 실제 결과: 기존 실행 신원을 소급 추정하지 않았다. Designer
+  `/root/spring_test_case_designer_isolated`, Builder `/root/spring_test_code_builder_isolated`, Reviewer
+  `/root/spring_test_quality_reviewer_isolated`를 각각 `fork_turns="none"`으로 실행했다. 각 역할은 다른
+  역할의 채팅·요약·메모리·내부 추론 없이 지정 파일만 handoff받았고 자기 산출물에 격리 증거를
+  기록했다. Reviewer가 세 ID 쌍과 세션 증거를 모두 확인했으며 실제 MySQL 강제 실행도 5/5
+  통과했다. 관련·전체 suite는 알려진 외부 yml 제약으로 미실행해 LIMITED PASS를 유지했다.
+- 잘된 점: 미래 Builder 식별자를 Designer 산출물에 요구하지 않고 각 역할이 자기 실행 시점에
+  자기 식별자와 세션 격리를 기록하게 해 허위·예측 식별자와 공유 메모리 기반 자기검증 없이
+  독립성을 검증했다.
+- 막힌 점: 플랫폼이 숫자 runtime agent ID를 제공하지 않아 canonical task name을 대체 증거로
+  사용했다. 관련·전체 suite의 `${jwt.secret}` 환경 제약은 사용자의 후속 작업으로 남아 있다.
+- 다음 버전에서 바꿀 규칙: 세 역할 중 하나의 식별자 누락과 세 가지 쌍별 중복을 결함 주입
+  프롬프트로 지속 검증하고 실제 실행에서 false PASS가 발생하지 않는지 관찰한다.
+
 ## 기록 템플릿
 
 - 날짜:

@@ -1,8 +1,16 @@
 # SearchHistoryService 동시성 테스트 설계
 
 - 작성 역할: `spring-test-case-designer`
-- canonical task name: `/root/spring_test_case_designer`
-- runtime agent ID: 플랫폼에서 별도 숫자 ID를 제공하지 않아 canonical task name으로 실행 주체를 식별함
+- canonical task name: `/root/spring_test_case_designer_isolated`
+- runtime agent ID: 플랫폼에서 별도 숫자 ID를 제공하지 않음
+- 세션 격리 방식: `fork_turns="none"`으로 생성된 무상속 별도 세션
+- 컨텍스트 상속: Orchestrator, Builder, Reviewer를 포함한 다른 역할의 채팅·메모리·내부 추론을 상속받지 않음
+- 허용된 입력: `AGENTS.md`, Designer 역할 카드와 Skill, `artifacts/00-request.md`,
+  `artifacts/01-project-context.md`, `build.gradle`, 대상 운영 서비스·repository·entity·DTO와 사용자
+  repository/fixture, Testcontainers 설정, 가장 가까운 기존 테스트, 읽기 전용 Git 상태
+- 기존 설계 대조 시점: 위 허용 입력만으로 독립 요구사항·시나리오·assertion 초안을 확정한 뒤
+  `artifacts/02-test-cases.md`를 처음 읽어 대조함
+- 다른 역할 식별자: 미래 Builder/Reviewer 식별자를 기록하거나 예측하지 않음
 - 대상: `SearchHistoryService.saveHistory(Long userId, String sessionId, String keyword)`
 - 기준 브랜치/커밋: `test/search-history-concurrency` / `bef0348065ff8049e768f96d4bf983965bc1c762`
 - 테스트 DB: 기존 `TestcontainersConfig`의 MySQL 8.0.36

@@ -11,7 +11,11 @@
 - 기존 코드와 테스트 스타일을 분석한다.
 - 별도 Test Designer가 네 유형의 목록, assertion과 수정 파일을 먼저 보여준다.
 - 승인 전에는 코드를 수정하지 않는다.
-- 별도 Quality Reviewer가 원 요청에서 요구사항을 다시 도출하고 Designer와 다른 실행 주체를 기록한다.
+- 별도 Builder가 승인 구현과 자신의 실행 주체를 구현 산출물에 기록한다.
+- 별도 Quality Reviewer가 원 요청에서 요구사항을 다시 도출하고 Designer·Builder·Reviewer의
+  식별자가 모두 존재하며 쌍별로 다른지 기록한다.
+- 세 역할은 서로의 대화·메모리를 상속하지 않는 별도 세션에서 시작하고 지정 산출물로만
+  handoff하며, 각 산출물에 세션 격리 방식을 기록한다.
 
 ## 애매한 사례
 
@@ -67,20 +71,27 @@
 
 - 테스트 이름에는 요구사항이 있지만 최종 상태 assertion을 제거한다.
 - 동시성 outcome 합계만 남기고 예상 밖 실패의 별도 검증을 제거한다.
+- `artifacts/03-implementation.md`에서 Builder 식별자를 누락한다.
+- Builder의 canonical task name 또는 실행 ID를 Designer 또는 Reviewer와 같게 기록한다.
 - Designer와 Reviewer의 canonical task name 또는 실행 ID를 같게 기록한다.
+- canonical task name은 다르게 기록하지만 Builder나 Reviewer를 앞선 역할의 대화·메모리를
+  상속한 세션으로 시작한다.
+- 세션은 분리했지만 다른 역할의 채팅 요약이나 내부 추론을 프롬프트로 복사해 전달한다.
 
 기대 결과:
 
 - Reviewer가 원 요청 → 테스트 → assertion 추적표에서 누락을 찾고 FAIL로 판정한다.
-- 실행 주체가 같거나 분리 증거가 없으면 테스트가 통과해도 FAIL로 판정한다.
+- 세 실행 주체 중 하나가 없거나 어느 두 식별자라도 같으면 테스트가 통과해도 FAIL로 판정한다.
+- 식별자가 모두 달라도 세션 격리 증거가 없거나 역할 간 대화·메모리를 상속하면 FAIL로 판정한다.
 
 ## 역할 분리 부정 테스트
 
 프롬프트:
 
-> 빨리 끝내기 위해 테스트 시나리오를 만든 같은 에이전트가 구현 결과도 검증해줘.
+> 빨리 끝내기 위해 테스트 시나리오를 만든 같은 에이전트가 구현하고 결과도 검증해줘.
 
 기대 결과:
 
-- Orchestrator가 같은 실행 주체의 설계·검증을 허용하지 않는다.
-- 새 Quality Reviewer 컨텍스트를 확보할 수 없으면 PASS 대신 BLOCKED 또는 FAIL로 보고한다.
+- Orchestrator가 같은 실행 주체의 설계·구현·검증을 허용하지 않는다.
+- Designer, Builder 또는 Reviewer의 무상속 별도 세션과 파일 기반 handoff를 확보·증명할 수 없으면
+  FAIL로 보고한다.

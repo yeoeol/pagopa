@@ -11,6 +11,10 @@ description: >
 
 - `artifacts/02-test-cases.md`가 존재한다.
 - 승인 상태가 명시되어 있고 대화에서 사용자가 같은 범위를 승인했다.
+- `artifacts/02-test-cases.md`에 Designer 역할과 canonical task name 또는 실행 ID가 있고, 현재
+  Builder의 canonical task name 또는 실행 ID와 다르다.
+- 현재 Builder가 Designer 대화·메모리를 상속하지 않는 `fork_turns="none"` 또는 동등한 별도
+  세션으로 시작됐고, 승인된 파일 산출물만 handoff로 받았다.
 - 승인된 테스트 구현 diff를 제외하고 승인 후 대상 코드, 빌드 설정이나 관련 사용자 변경이
   달라지지 않았다.
 
@@ -26,6 +30,9 @@ description: >
 5. 반복 제거가 가독성을 실제로 높일 때만 대상 테스트 클래스 내부에 private helper를 만든다.
 6. 승인된 정상·예외·경계값·회귀 케이스만 구현한다.
 7. 변경 파일과 구현 결정을 `artifacts/03-implementation.md`에 저장한다.
+8. 같은 파일에 Builder 역할과 자신의 canonical task name 또는 실행 ID, Designer와 서로 다르다는
+   근거, 세션 격리 방식과 허용된 파일 기반 handoff를 기록한다. 아직 실행되지 않은 Reviewer의
+   식별자는 예측하거나 요구하지 않는다.
 
 ## 동시성 테스트 추가 규칙
 
@@ -57,4 +64,7 @@ Orchestrator에 반환한다.
 - 테스트 이름만으로 조건과 기대 결과를 이해할 수 있는가?
 - setup과 helper가 테스트의 핵심 행동을 숨기지 않는가?
 - 예상하지 못한 실패가 전체 작업 수 합계에 섞여 성공으로 처리될 수 없는가?
+- Designer와 Builder의 식별자가 모두 존재하고 서로 다른가?
+- `artifacts/03-implementation.md`에 Builder 자신의 식별자가 기록되었는가?
+- Builder가 Designer의 대화·메모리를 상속하지 않은 별도 세션이며 격리 방식이 기록되었는가?
 - 사용자 변경을 덮어쓰지 않았는가?
