@@ -83,7 +83,23 @@ public class Order extends BaseTimeEntity {
         orderItem.assignOrder(this);
     }
 
-    // == 주문 취소 로직 ==
+    public void confirmPayment(int paidAmount) {
+        if (this.status != OrderStatus.PENDING_PAYMENT) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_PAY);
+        }
+        if (getTotalAmount() != paidAmount) {
+            throw new BusinessException(ErrorCode.ORDER_INCORRECT_AMOUNT);
+        }
+        this.status = OrderStatus.CONFIRMED;
+    }
+
+    public void complete() {
+        if (this.status != OrderStatus.CONFIRMED) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_COMPLETE);
+        }
+        this.status = OrderStatus.COMPLETED;
+    }
+
     public void cancel(Instant canceledAt) {
         if (this.status != OrderStatus.PENDING_PAYMENT) {
             throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);

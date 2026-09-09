@@ -21,6 +21,10 @@ import lombok.*;
                 @UniqueConstraint(
                         name = "uq_payment_order_id",
                         columnNames = "order_id"
+                ),
+                @UniqueConstraint(
+                        name = "uq_payment_provider_transaction_id",
+                        columnNames = "provider_transaction_id"
                 )
         }
 )
@@ -53,6 +57,10 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "canceled_at", nullable = true)
     private Instant canceledAt;
 
+    @ToString.Include
+    @Column(name = "provider_transaction_id", length = 255, nullable = true)
+    private String providerTransactionId;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "order_id",
@@ -83,12 +91,19 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
-    public void pay() {
+    public void approve(
+            String providerTransactionId,
+            Integer approveAmount,
+            Instant approvedAt
+    ) {
         if (this.status != PaymentStatus.READY) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
-        this.paidAt = Instant.now();
-        this.canceledAt = null;
+        if (!this.amount.equals(approveAmount)) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+        this.providerTransactionId = providerTransactionId;
+        this.paidAt = approvedAt;
         this.status = PaymentStatus.PAID;
     }
 }
