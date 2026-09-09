@@ -53,10 +53,6 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "canceled_at", nullable = true)
     private Instant canceledAt;
 
-    @ToString.Include
-    @Column(unique = true, length = 200)
-    private String paymentKey; // 토스 페이먼츠에서 발급하는 고유 키
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "order_id",
@@ -87,12 +83,12 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
-    public void pay(String paymentKey) {
+    public void pay() {
         if (this.status != PaymentStatus.READY) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
         this.paidAt = Instant.now();
+        this.canceledAt = null;
         this.status = PaymentStatus.PAID;
-        this.paymentKey = paymentKey;
     }
 }
