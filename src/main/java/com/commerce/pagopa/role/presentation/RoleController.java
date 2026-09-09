@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "ROLE API", description = "역할(권한) 관리 API")
+@Tag(name = "ADMIN - ROLE API", description = "[관리자용] 역할(권한) 관리 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/roles")

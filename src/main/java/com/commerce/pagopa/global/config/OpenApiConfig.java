@@ -56,10 +56,10 @@ public class OpenApiConfig {
     }
 
     @Bean
-    public GroupedOpenApi adminUserApi() {
+    public GroupedOpenApi roleApi() {
         return GroupedOpenApi.builder()
                 .group("<관리자> 관리자용 API 관리")
-                .pathsToMatch("/admin/**")
+                .pathsToMatch("/api/v1/roles/**")
                 .build();
     }
 
