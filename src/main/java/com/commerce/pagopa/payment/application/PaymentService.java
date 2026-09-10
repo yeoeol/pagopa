@@ -1,12 +1,13 @@
 package com.commerce.pagopa.payment.application;
 
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.order.application.OrderPaymentService;
 import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.order.domain.repository.OrderRepository;
+import com.commerce.pagopa.payment.application.dto.request.CancelPaymentCommand;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
+import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCommand;
 import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalResponse;
+import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
 import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import com.commerce.pagopa.payment.domain.model.Payment;
@@ -22,14 +23,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PaymentService {
 
+	private final OrderPaymentService orderPaymentService;
 	private final PaymentRepository paymentRepository;
-	private final OrderRepository orderRepository;
 	private final PaymentGateway paymentGateway;
 
 	@Transactional
 	public PaymentResult pay(Long userId, PaymentCommand command) {
-		Order order = orderRepository.findByIdOrThrow(command.orderId());
-		validateOrdererId(userId, order);
+		Order order = orderPaymentService.getOrderForUpdate(userId, command.orderId());
 
 		Payment payment = Payment.create(
 				command.paymentMethod(),
@@ -51,16 +51,31 @@ public class PaymentService {
 				approval.approvedAt()
 		);
 
-		order.confirmPayment(approval.approvedAmount());
+		orderPaymentService.confirmPayment(order.getId(), approval.approvedAmount());
 		return PaymentResult.from(payment);
 	}
 
-	private static void validateOrdererId(
-			Long userId,
-			Order order
-	) {
-		if (!order.getUser().getId().equals(userId)) {
-			throw new BusinessException(ErrorCode.ORDER_NOT_MINE);
-		}
+	@Transactional
+	public PaymentResult cancel(Long userId, CancelPaymentCommand command) {
+		Payment payment = paymentRepository.findByIdForUpdateOrThrow(command.paymentId());
+		Order order = orderPaymentService.getOrderForUpdate(
+				userId,
+				payment.getOrder().getId()
+		);
+
+		PaymentCancellationResponse cancellation = paymentGateway.cancel(
+				PaymentCancellationRequest.of(
+						payment.getProviderTransactionId(),
+						payment.getAmount()
+				)
+		);
+		payment.cancel(
+				cancellation.transactionId(),
+				cancellation.canceledAmount(),
+				cancellation.canceledAt()
+		);
+
+		orderPaymentService.cancelAfterPayment(order.getId());
+		return PaymentResult.from(payment);
 	}
 }

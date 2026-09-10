@@ -106,4 +106,26 @@ public class Payment extends BaseTimeEntity {
         this.paidAt = approvedAt;
         this.status = PaymentStatus.PAID;
     }
+
+    // 이미 결제완료 상태인 엔티티는 환불 요청으로 처리해야 함
+    public void cancel(
+            String providerTransactionId,
+            Integer canceledAmount,
+            Instant canceledAt
+    ) {
+        if (!this.providerTransactionId.equals(providerTransactionId)) {
+            throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+        }
+        if (this.status == PaymentStatus.CANCELED) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_CANCELLED);
+        }
+        if (this.status != PaymentStatus.PAID) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
+        }
+        if (!this.amount.equals(canceledAmount)) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+        this.canceledAt = canceledAt;
+        this.status = PaymentStatus.CANCELED;
+    }
 }

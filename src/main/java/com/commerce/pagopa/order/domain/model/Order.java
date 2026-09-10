@@ -112,6 +112,18 @@ public class Order extends BaseTimeEntity {
         this.canceledAt = canceledAt;
     }
 
+    public void cancelAfterPayment(Instant canceledAt) {
+        if (this.status != OrderStatus.CONFIRMED) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
+        if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
+
+        this.status = OrderStatus.CANCELED;
+        this.canceledAt = canceledAt;
+    }
+
     public Integer getTotalAmount() {
         return orderItems.stream()
                 .mapToInt(OrderItem::getTotalPrice)

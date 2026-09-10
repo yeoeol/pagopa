@@ -2,6 +2,7 @@ package com.commerce.pagopa.payment.presentation;
 
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.payment.application.PaymentService;
+import com.commerce.pagopa.payment.application.dto.request.CancelPaymentCommand;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCommand;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
 
@@ -28,6 +29,16 @@ public class PaymentController {
 	) {
 		return ResponseEntity.ok(
 				ApiResponse.ok(paymentService.pay(userId, command))
+		);
+	}
+
+	@PostMapping("/cancel")
+	public ResponseEntity<ApiResponse<PaymentResult>> cancel(
+			@AuthenticationPrincipal(expression = "userId") Long userId,
+			@RequestBody CancelPaymentCommand command
+	) {
+		return ResponseEntity.ok(
+				ApiResponse.ok(paymentService.cancel(userId, command))
 		);
 	}
 }

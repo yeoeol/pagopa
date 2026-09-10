@@ -1,7 +1,9 @@
 package com.commerce.pagopa.payment.infrastructure.gateway;
 
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
+import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalResponse;
+import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
 import com.commerce.pagopa.payment.application.port.PaymentGateway;
 
 import org.springframework.stereotype.Component;
@@ -22,6 +24,15 @@ public class InternalPaymentGateway implements PaymentGateway {
 
 		return PaymentApprovalResponse.of(
 				transactionId,
+				request.amount(),
+				Instant.now()
+		);
+	}
+
+	@Override
+	public PaymentCancellationResponse cancel(PaymentCancellationRequest request) {
+		return PaymentCancellationResponse.of(
+				request.transactionId(),
 				request.amount(),
 				Instant.now()
 		);
