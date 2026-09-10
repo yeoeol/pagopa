@@ -27,9 +27,9 @@ public class PaymentService {
 	private final PaymentGateway paymentGateway;
 
 	@Transactional
-	public PaymentResult pay(PaymentCommand command) {
+	public PaymentResult pay(Long userId, PaymentCommand command) {
 		Order order = orderRepository.findByIdOrThrow(command.orderId());
-		validateOrdererId(command.userId(), order);
+		validateOrdererId(userId, order);
 
 		Payment payment = Payment.create(
 				command.paymentMethod(),
