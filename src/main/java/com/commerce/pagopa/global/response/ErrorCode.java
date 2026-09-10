@@ -61,6 +61,7 @@ public enum ErrorCode {
     ORDER_CANNOT_DELIVER(HttpStatus.BAD_REQUEST, "ORDER_005", "배송을 진행할 수 없는 주문 상태입니다."),
     ORDER_CANNOT_COMPLETE(HttpStatus.BAD_REQUEST, "ORDER_006", "배송 완료를 진행할 수 없는 주문 상태입니다."),
     ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "ORDER_007", "이미 취소된 주문입니다."),
+    ORDER_INCORRECT_AMOUNT(HttpStatus.BAD_REQUEST, "ORDER_008", "주문 금액이 일치하지 않습니다."),
 
     // ORDER ITEM
     ORDER_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_PRODUCT_001", "존재하지 않는 주문 상품입니다."),
@@ -95,6 +96,7 @@ public enum ErrorCode {
     PAYMENT_CONFIRM_REJECTED(HttpStatus.BAD_REQUEST, "PAYMENT_012", "결제 승인이 거절되었습니다."),
     PAYMENT_CANCEL_REJECTED(HttpStatus.BAD_REQUEST, "PAYMENT_013", "결제 취소가 거절되었습니다."),
     PAYMENT_CANCEL_IN_PROGRESS(HttpStatus.CONFLICT, "PAYMENT_014", "이미 결제 취소가 진행 중입니다."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "PAYMENT_015", "결제 승인 금액이 일치하지 않습니다."),
 
     // SELLER
     SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "SELLER_001", "존재하지 않는 판매자입니다."),

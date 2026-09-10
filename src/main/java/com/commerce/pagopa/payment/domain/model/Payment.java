@@ -21,6 +21,10 @@ import lombok.*;
                 @UniqueConstraint(
                         name = "uq_payment_order_id",
                         columnNames = "order_id"
+                ),
+                @UniqueConstraint(
+                        name = "uq_payment_provider_transaction_id",
+                        columnNames = "provider_transaction_id"
                 )
         }
 )
@@ -54,8 +58,8 @@ public class Payment extends BaseTimeEntity {
     private Instant canceledAt;
 
     @ToString.Include
-    @Column(unique = true, length = 200)
-    private String paymentKey; // 토스 페이먼츠에서 발급하는 고유 키
+    @Column(name = "provider_transaction_id", length = 255, nullable = true)
+    private String providerTransactionId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -87,12 +91,51 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
-    public void pay(String paymentKey) {
+    public void approve(
+            String providerTransactionId,
+            Integer approveAmount,
+            Instant approvedAt
+    ) {
+        validateApprovable();
+        if (!this.amount.equals(approveAmount)) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+        this.providerTransactionId = providerTransactionId;
+        this.paidAt = approvedAt;
+        this.status = PaymentStatus.PAID;
+    }
+
+    // 이미 결제완료 상태인 엔티티는 환불 요청으로 처리해야 함
+
+    public void cancel(
+            String providerTransactionId,
+            Integer canceledAmount,
+            Instant canceledAt
+    ) {
+        validateCancelable();
+        if (!this.providerTransactionId.equals(providerTransactionId)) {
+            throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+        }
+        if (!this.amount.equals(canceledAmount)) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+        this.canceledAt = canceledAt;
+        this.status = PaymentStatus.CANCELED;
+    }
+
+    // == 상태 검증 메서드 == //
+    public void validateCancelable() {
+        if (this.status == PaymentStatus.CANCELED) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_CANCELLED);
+        }
+        if (this.status != PaymentStatus.PAID) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
+        }
+    }
+
+    public void validateApprovable() {
         if (this.status != PaymentStatus.READY) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
-        this.paidAt = Instant.now();
-        this.status = PaymentStatus.PAID;
-        this.paymentKey = paymentKey;
     }
 }
