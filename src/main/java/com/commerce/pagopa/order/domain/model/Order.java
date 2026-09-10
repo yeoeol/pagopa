@@ -84,41 +84,24 @@ public class Order extends BaseTimeEntity {
     }
 
     public void confirmPayment(int paidAmount) {
-        if (this.status != OrderStatus.PENDING_PAYMENT) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_PAY);
-        }
+        validateConfirmPayment();
         if (getTotalAmount() != paidAmount) {
             throw new BusinessException(ErrorCode.ORDER_INCORRECT_AMOUNT);
         }
         this.status = OrderStatus.CONFIRMED;
     }
 
-    public void complete() {
-        if (this.status != OrderStatus.CONFIRMED) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_COMPLETE);
-        }
-        this.status = OrderStatus.COMPLETED;
-    }
-
     public void cancel(Instant canceledAt) {
-        if (this.status != OrderStatus.PENDING_PAYMENT) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
-        }
-        if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
-        }
+        validateCancelable();
+        validateCanceledAt(canceledAt);
 
         this.status = OrderStatus.CANCELED;
         this.canceledAt = canceledAt;
     }
 
     public void cancelAfterPayment(Instant canceledAt) {
-        if (this.status != OrderStatus.CONFIRMED) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
-        }
-        if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
-            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
-        }
+        validateCancelAfterPayment();
+        validateCanceledAt(canceledAt);
 
         this.status = OrderStatus.CANCELED;
         this.canceledAt = canceledAt;
@@ -128,5 +111,30 @@ public class Order extends BaseTimeEntity {
         return orderItems.stream()
                 .mapToInt(OrderItem::getTotalPrice)
                 .sum();
+    }
+
+    // == 상태 검증 메서드 == //
+    public void validateConfirmPayment() {
+        if (this.status != OrderStatus.PENDING_PAYMENT) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_PAY);
+        }
+    }
+
+    public void validateCancelable() {
+        if (this.status != OrderStatus.PENDING_PAYMENT) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
+    }
+
+    public void validateCancelAfterPayment() {
+        if (this.status != OrderStatus.CONFIRMED) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
+    }
+
+    private void validateCanceledAt(Instant canceledAt) {
+        if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
+            throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
+        }
     }
 }

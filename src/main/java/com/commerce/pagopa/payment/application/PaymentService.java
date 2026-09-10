@@ -30,6 +30,7 @@ public class PaymentService {
 	@Transactional
 	public PaymentResult pay(Long userId, PaymentCommand command) {
 		Order order = orderPaymentService.getOrderForUpdate(userId, command.orderId());
+		order.validateConfirmPayment();
 
 		Payment payment = Payment.create(
 				command.paymentMethod(),
@@ -38,6 +39,7 @@ public class PaymentService {
 		);
 		paymentRepository.save(payment);
 
+		payment.validateApprovable();
 		PaymentApprovalResponse approval = paymentGateway.approve(
 				PaymentApprovalRequest.of(
 						order.getId(),
@@ -62,7 +64,9 @@ public class PaymentService {
 				userId,
 				payment.getOrder().getId()
 		);
+		order.validateCancelAfterPayment();
 
+		payment.validateCancelable();
 		PaymentCancellationResponse cancellation = paymentGateway.cancel(
 				PaymentCancellationRequest.of(
 						payment.getProviderTransactionId(),
