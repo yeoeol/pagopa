@@ -108,4 +108,16 @@ public class PaymentTransactionService {
 		}
 		return PaymentResult.from(payment);
 	}
+
+	@Transactional
+	public void markApprovalFailed(Long paymentId) {
+		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
+		payment.fail();
+	}
+
+	@Transactional
+	public void revertCancellation(Long paymentId) {
+		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
+		payment.revertCancellation();
+	}
 }

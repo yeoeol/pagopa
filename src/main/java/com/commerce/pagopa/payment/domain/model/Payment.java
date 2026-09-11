@@ -161,6 +161,20 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.CANCELLING;
     }
 
+    public void fail() {
+        if (this.status != PaymentStatus.APPROVING) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        }
+        this.status = PaymentStatus.FAILED;
+    }
+
+    public void revertCancellation() {
+        if (this.status != PaymentStatus.CANCELLING) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
+        }
+        this.status = PaymentStatus.PAID;
+    }
+
     // == 상태 검증 메서드 == //
     public void validateCancelable() {
         if (this.status == PaymentStatus.CANCELED) {
