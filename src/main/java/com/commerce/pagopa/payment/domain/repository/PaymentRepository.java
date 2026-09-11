@@ -14,6 +14,8 @@ public interface PaymentRepository {
 
     Optional<Payment> findByIdForUpdate(Long paymentId);
 
+    Optional<Payment> findByOrderId(Long orderId);
+
     default Payment findByIdOrThrow(Long paymentId) {
         return findById(paymentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));

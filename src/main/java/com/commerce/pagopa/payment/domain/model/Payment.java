@@ -96,31 +96,55 @@ public class Payment extends BaseTimeEntity {
             Integer approveAmount,
             Instant approvedAt
     ) {
-        validateApprovable();
+        if (this.status != PaymentStatus.APPROVING) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        }
         if (!this.amount.equals(approveAmount)) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+        if (providerTransactionId == null || providerTransactionId.isBlank() || approvedAt == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAIL);
         }
         this.providerTransactionId = providerTransactionId;
         this.paidAt = approvedAt;
         this.status = PaymentStatus.PAID;
     }
 
-    // 이미 결제완료 상태인 엔티티는 환불 요청으로 처리해야 함
-
     public void cancel(
             String providerTransactionId,
             Integer canceledAmount,
             Instant canceledAt
     ) {
-        validateCancelable();
+        if (this.status != PaymentStatus.CANCELLING) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
+        }
         if (!this.providerTransactionId.equals(providerTransactionId)) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
         if (!this.amount.equals(canceledAmount)) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
+        if (canceledAt == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
+        }
         this.canceledAt = canceledAt;
         this.status = PaymentStatus.CANCELED;
+    }
+
+    public void startApproval() {
+        if (this.status == PaymentStatus.APPROVING) {
+            return;
+        }
+        validateApprovable();
+        this.status = PaymentStatus.APPROVING;
+    }
+
+    public void startCancellation() {
+        if (this.status == PaymentStatus.CANCELLING) {
+            return;
+        }
+        validateCancelable();
+        this.status = PaymentStatus.CANCELLING;
     }
 
     // == 상태 검증 메서드 == //
@@ -134,8 +158,14 @@ public class Payment extends BaseTimeEntity {
     }
 
     public void validateApprovable() {
+        if (this.status == PaymentStatus.PAID || this.status == PaymentStatus.CANCELED) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_COMPLETED);
+        }
+        if (this.status == PaymentStatus.FAILED) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_FAILED);
+        }
         if (this.status != PaymentStatus.READY) {
-            throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
         }
     }
 }

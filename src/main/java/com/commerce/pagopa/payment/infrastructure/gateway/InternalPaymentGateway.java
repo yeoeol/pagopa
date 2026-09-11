@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * 서버 내부 테스트용 결제 서비스
@@ -22,7 +21,7 @@ public class InternalPaymentGateway implements PaymentGateway {
 
 	@Override
 	public PaymentApprovalResponse approve(PaymentApprovalRequest request) {
-		String transactionId = "INTERNAL-" + UUID.randomUUID();
+		String transactionId = "INTERNAL-" + request.idempotencyKey();
 
 		return PaymentApprovalResponse.of(
 				transactionId,

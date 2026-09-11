@@ -32,6 +32,11 @@ public class OrderPaymentService {
 		return order;
 	}
 
+	@Transactional(readOnly = true)
+	public Order getOrderForUpdate(Long orderId) {
+		return orderRepository.findByIdForUpdateOrThrow(orderId);
+	}
+
 	@Transactional
 	public void cancelAfterPayment(Long orderId) {
 		// 주문 존재 여부 확인
