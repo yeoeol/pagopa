@@ -32,7 +32,7 @@ public class PaymentTransactionService {
 
 	@Transactional
 	public PaymentResult request(Long userId, PaymentCommand command) {
-		Order order = orderPaymentService.getOrderForUpdate(userId, command.orderId());
+		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, command.orderId());
 		order.validateConfirmPayment();
 
 		return paymentRepository.findByOrderId(order.getId())
@@ -45,7 +45,7 @@ public class PaymentTransactionService {
 	@Transactional
 	public PaymentApprovalRequest prepareApproval(Long userId, Long paymentId) {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-		Order order = orderPaymentService.getOrderForUpdate(userId, payment.getOrder().getId());
+		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, payment.getOrder().getId());
 		order.validateConfirmPayment();
 
 		payment.startApproval();
@@ -65,19 +65,21 @@ public class PaymentTransactionService {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
 		Order order = orderPaymentService.getOrderForUpdate(payment.getOrder().getId());
 
-		payment.approve(
+		boolean approved = payment.approve(
 				approval.transactionId(),
 				approval.approvedAmount(),
 				approval.approvedAt()
 		);
-		orderPaymentService.confirmPayment(order.getId(), approval.approvedAmount());
+		if (approved) {
+			orderPaymentService.confirmPayment(order.getId(), approval.approvedAmount());
+		}
 		return PaymentResult.from(payment);
 	}
 
 	@Transactional
 	public PaymentCancellationRequest prepareCancellation(Long userId, Long paymentId) {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-		Order order = orderPaymentService.getOrderForUpdate(userId, payment.getOrder().getId());
+		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, payment.getOrder().getId());
 		order.validateCancelAfterPayment();
 
 		payment.startCancellation();
@@ -96,12 +98,14 @@ public class PaymentTransactionService {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
 		Order order = orderPaymentService.getOrderForUpdate(payment.getOrder().getId());
 
-		payment.cancel(
+		boolean canceled = payment.cancel(
 				cancellation.transactionId(),
 				cancellation.canceledAmount(),
 				cancellation.canceledAt()
 		);
-		orderPaymentService.cancelAfterPayment(order.getId());
+		if (canceled) {
+			orderPaymentService.cancelAfterPayment(order.getId());
+		}
 		return PaymentResult.from(payment);
 	}
 }

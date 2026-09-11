@@ -9,7 +9,7 @@ public record PaymentCommand(
 		Long orderId,
 
 		@NotBlank(message = "{validation.notblank}")
-		@Size(max = 50)
+		@Size(min = 1, max = 50, message = "{validation.size}")
 		String paymentMethod
 ) {
 }

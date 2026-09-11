@@ -26,7 +26,7 @@ public class OrderPaymentService {
 	private final ProductRepository productRepository;
 
 	@Transactional
-	public Order getOrderForUpdate(Long userId, Long orderId) {
+	public Order getOrderForUpdateWithValidateOrdererId(Long userId, Long orderId) {
 		Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
 		validateOrdererId(userId, order);
 		return order;

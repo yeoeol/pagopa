@@ -91,44 +91,58 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
-    public void approve(
+    public boolean approve(
             String providerTransactionId,
             Integer approveAmount,
             Instant approvedAt
     ) {
-        if (this.status != PaymentStatus.APPROVING) {
-            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        if (providerTransactionId == null || providerTransactionId.isBlank() || approvedAt == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAIL);
         }
         if (!this.amount.equals(approveAmount)) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
-        if (providerTransactionId == null || providerTransactionId.isBlank() || approvedAt == null) {
-            throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAIL);
+        if (this.status == PaymentStatus.PAID) {
+            if (!providerTransactionId.equals(this.providerTransactionId)) {
+                throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+            }
+            return false;
+        }
+        if (this.status != PaymentStatus.APPROVING) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
         }
         this.providerTransactionId = providerTransactionId;
         this.paidAt = approvedAt;
         this.status = PaymentStatus.PAID;
+        return true;
     }
 
-    public void cancel(
+    public boolean cancel(
             String providerTransactionId,
             Integer canceledAmount,
             Instant canceledAt
     ) {
+        if (canceledAt == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
+        }
+        if (!this.amount.equals(canceledAmount)) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+        if (this.status == PaymentStatus.CANCELED) {
+            if (!this.providerTransactionId.equals(providerTransactionId)) {
+                throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+            }
+            return false;
+        }
         if (this.status != PaymentStatus.CANCELLING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
         }
         if (!this.providerTransactionId.equals(providerTransactionId)) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
-        if (!this.amount.equals(canceledAmount)) {
-            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
-        }
-        if (canceledAt == null) {
-            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
-        }
         this.canceledAt = canceledAt;
         this.status = PaymentStatus.CANCELED;
+        return true;
     }
 
     public void startApproval() {
