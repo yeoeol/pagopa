@@ -91,14 +91,14 @@ public class PaymentTransactionService {
 			PaymentCancellationResponse cancellation
 	) {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-		orderPaymentService.getOrderForUpdate(payment.getOrder().getId());
+		Order order = orderPaymentService.getOrderForUpdate(payment.getOrder().getId());
 
 		payment.cancel(
 				cancellation.transactionId(),
 				cancellation.canceledAmount(),
 				cancellation.canceledAt()
 		);
-		orderPaymentService.cancelAfterPayment(payment.getOrder().getId());
+		orderPaymentService.cancelAfterPayment(order.getId());
 		return PaymentResult.from(payment);
 	}
 }
