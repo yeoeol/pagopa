@@ -5,7 +5,15 @@ import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRe
 import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
 
+import java.util.Optional;
+
 public interface PaymentGateway {
+
 	PaymentApprovalResponse approve(PaymentApprovalRequest request);
+
 	PaymentCancellationResponse cancel(PaymentCancellationRequest request);
+
+	Optional<PaymentApprovalResponse> findApprovalByIdempotencyKey(String idempotencyKey);
+
+	Optional<PaymentCancellationResponse> findCancellationByIdempotencyKey(String idempotencyKey);
 }
