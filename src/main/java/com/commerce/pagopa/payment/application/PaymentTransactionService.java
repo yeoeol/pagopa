@@ -24,6 +24,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PaymentTransactionService {
 
+	private static final String APPROVAL_IDEMPOTENCY_KEY_PREFIX = "payment-approval-";
+	private static final String CANCELLATION_IDEMPOTENCY_KEY_PREFIX = "payment-cancellation-";
+
 	private final OrderPaymentService orderPaymentService;
 	private final PaymentRepository paymentRepository;
 
@@ -50,7 +53,7 @@ public class PaymentTransactionService {
 				order.getId(),
 				payment.getAmount(),
 				payment.getPaymentMethod(),
-				"payment-approval-" + payment.getId()
+				APPROVAL_IDEMPOTENCY_KEY_PREFIX + payment.getId()
 		);
 	}
 
@@ -81,7 +84,7 @@ public class PaymentTransactionService {
 		return PaymentCancellationRequest.of(
 				payment.getProviderTransactionId(),
 				payment.getAmount(),
-				"payment-cancellation-" + payment.getId()
+				CANCELLATION_IDEMPOTENCY_KEY_PREFIX + payment.getId()
 		);
 	}
 

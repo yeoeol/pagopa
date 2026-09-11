@@ -1,10 +1,6 @@
 package com.commerce.pagopa.payment.application;
 
-import com.commerce.pagopa.payment.application.dto.request.CancelPaymentCommand;
-import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalCommand;
-import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
-import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
-import com.commerce.pagopa.payment.application.dto.request.PaymentCommand;
+import com.commerce.pagopa.payment.application.dto.request.*;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
 import com.commerce.pagopa.payment.application.port.PaymentGateway;
 
@@ -30,6 +26,7 @@ public class PaymentService {
 	public PaymentResult approve(Long userId, PaymentApprovalCommand command) {
 		PaymentApprovalRequest request =
 				paymentTransactionService.prepareApproval(userId, command.paymentId());
+
 		return paymentTransactionService.completeApproval(
 				command.paymentId(),
 				paymentGateway.approve(request)
@@ -39,6 +36,7 @@ public class PaymentService {
 	public PaymentResult cancel(Long userId, CancelPaymentCommand command) {
 		PaymentCancellationRequest request =
 				paymentTransactionService.prepareCancellation(userId, command.paymentId());
+
 		return paymentTransactionService.completeCancellation(
 				command.paymentId(),
 				paymentGateway.cancel(request)

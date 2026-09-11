@@ -25,14 +25,14 @@ public class OrderPaymentService {
 	private final OrderRepository orderRepository;
 	private final ProductRepository productRepository;
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public Order getOrderForUpdate(Long userId, Long orderId) {
 		Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
 		validateOrdererId(userId, order);
 		return order;
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public Order getOrderForUpdate(Long orderId) {
 		return orderRepository.findByIdForUpdateOrThrow(orderId);
 	}
