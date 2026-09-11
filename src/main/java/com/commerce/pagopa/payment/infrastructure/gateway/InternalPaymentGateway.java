@@ -6,6 +6,7 @@ import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalRespo
 import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
 import com.commerce.pagopa.payment.application.port.PaymentGateway;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -16,6 +17,7 @@ import java.util.UUID;
  * 모든 요청을 항상 승인하는 무상태 PG 시뮬레이터
  */
 @Component
+@Profile({"local", "test"})
 public class InternalPaymentGateway implements PaymentGateway {
 
 	@Override
