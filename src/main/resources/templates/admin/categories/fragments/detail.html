@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="card h-100"
+         id="category-detail-panel"
+         aria-labelledby="category-detail-title"
+         th:fragment="detail"
+         th:data-selected-category-id="${detail.categoryId}">
+    <div class="card-header d-block">
+        <ol class="breadcrumb category-breadcrumb mb-3" aria-label="카테고리 경로">
+            <li class="breadcrumb-item"
+                th:classappend="${detail.categoryId == null} ? 'active'">
+                <span th:if="${detail.categoryId == null}">전체 카테고리</span>
+                <a th:if="${detail.categoryId != null}"
+                   th:href="@{/admin/categories}"
+                   th:attr="hx-get=@{/admin/categories/root},hx-push-url=@{/admin/categories}"
+                   hx-target="#category-detail-panel"
+                   hx-swap="outerHTML">전체 카테고리</a>
+            </li>
+            <li class="breadcrumb-item"
+                th:each="breadcrumb, status : ${detail.breadcrumbs}"
+                th:classappend="${status.last} ? 'active'">
+                <span th:if="${status.last}" th:text="${breadcrumb.name}">현재 카테고리</span>
+                <a th:unless="${status.last}"
+                   th:text="${breadcrumb.name}"
+                   th:href="@{/admin/categories(categoryId=${breadcrumb.categoryId})}"
+                   th:attr="hx-get=@{/admin/categories/{categoryId}(categoryId=${breadcrumb.categoryId})},
+                            hx-push-url=@{/admin/categories(categoryId=${breadcrumb.categoryId})}"
+                   hx-target="#category-detail-panel"
+                   hx-swap="outerHTML">상위 카테고리</a>
+            </li>
+        </ol>
+
+        <div class="d-flex align-items-start gap-3">
+            <div class="min-w-0">
+                <h3 class="card-title fs-2"
+                    id="category-detail-title"
+                    th:text="${detail.categoryId == null ? '전체 카테고리' : detail.name}">
+                    전체 카테고리
+                </h3>
+                <div class="card-subtitle text-truncate"
+                     th:text="${detail.categoryId == null ? '루트 카테고리를 확인합니다.' : detail.path}">
+                    루트 카테고리를 확인합니다.
+                </div>
+            </div>
+            <button class="btn btn-outline-primary ms-auto text-nowrap"
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#category-create-modal"
+                    th:data-category-parent-id="${detail.categoryId}"
+                    th:text="${detail.categoryId == null ? '루트 카테고리 추가' : '이 카테고리 아래에 추가'}">
+                루트 카테고리 추가
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body" th:if="${detail.categoryId == null}">
+        <div class="alert alert-info mb-0" role="status">
+            왼쪽 계층이나 아래 루트 카테고리를 선택하면 상세 정보와 직계 자식을 확인할 수 있습니다.
+        </div>
+    </div>
+
+    <dl class="row card-body mb-0" th:if="${detail.categoryId != null}">
+        <dt class="col-5 text-secondary">카테고리 번호</dt>
+        <dd class="col-7 text-end" th:text="${detail.categoryId}">-</dd>
+        <dt class="col-5 text-secondary">Depth</dt>
+        <dd class="col-7 text-end" th:text="|depth ${detail.depth}|">depth 0</dd>
+        <dt class="col-5 text-secondary">상위 카테고리</dt>
+        <dd class="col-7 text-end"
+            th:text="${detail.parentName == null ? '없음 (루트)' : detail.parentName}">-</dd>
+        <dt class="col-5 text-secondary">직계 자식</dt>
+        <dd class="col-7 text-end" th:text="|${#lists.size(detail.children)}개|">0개</dd>
+    </dl>
+
+    <div class="card-header border-top">
+        <div>
+            <h3 class="card-title"
+                th:text="${detail.categoryId == null ? '루트 카테고리' : '직계 자식 카테고리'}">
+                루트 카테고리
+            </h3>
+            <div class="card-subtitle">
+                <span th:text="${#lists.size(detail.children)}">0</span>개의 카테고리가 있습니다.
+            </div>
+        </div>
+    </div>
+
+    <div class="list-group list-group-flush" aria-live="polite">
+        <a class="list-group-item list-group-item-action category-child-link py-3"
+           th:each="child : ${detail.children}"
+           th:href="@{/admin/categories(categoryId=${child.categoryId})}"
+           th:attr="hx-get=@{/admin/categories/{categoryId}(categoryId=${child.categoryId})},
+                    hx-push-url=@{/admin/categories(categoryId=${child.categoryId})}"
+           hx-target="#category-detail-panel"
+           hx-swap="outerHTML">
+            <div class="d-flex align-items-center gap-3">
+                <div class="min-w-0">
+                    <div class="fw-semibold text-truncate" th:text="${child.name}">카테고리명</div>
+                    <div class="text-secondary small mt-1 text-truncate"
+                         th:text="${child.path}">전체 경로</div>
+                </div>
+                <span class="badge bg-secondary-lt ms-auto text-nowrap"
+                      th:text="|depth ${child.depth}|">depth 1</span>
+            </div>
+        </a>
+
+        <div class="empty py-5" th:if="${#lists.isEmpty(detail.children)}">
+            <p class="empty-title"
+               th:text="${detail.categoryId == null ? '등록된 카테고리가 없습니다.' : '하위 카테고리가 없습니다.'}">
+                하위 카테고리가 없습니다.
+            </p>
+            <p class="empty-subtitle text-secondary">필요하면 새 하위 카테고리를 추가하세요.</p>
+        </div>
+    </div>
+</section>
+</body>
+</html>

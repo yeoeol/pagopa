@@ -207,6 +207,71 @@
         });
     }
 
+    function configureCategoryPage() {
+        var page = document.getElementById("category-admin-page");
+        if (!page) {
+            return;
+        }
+
+        function syncActiveCategory() {
+            var detail = document.getElementById("category-detail-panel");
+            var selectedId = detail
+                ? detail.dataset.selectedCategoryId || ""
+                : "";
+
+            page.querySelectorAll("[data-category-tree-link]").forEach(function (link) {
+                var active = link.dataset.categoryId === selectedId;
+                link.classList.toggle("active", active);
+                if (active) {
+                    link.setAttribute("aria-current", "page");
+                } else {
+                    link.removeAttribute("aria-current");
+                }
+            });
+        }
+
+        document.body.addEventListener("htmx:afterSwap", syncActiveCategory);
+        document.body.addEventListener("htmx:historyRestore", syncActiveCategory);
+
+        var modal = document.getElementById("category-create-modal");
+        var form = document.getElementById("category-create-form");
+        var parentSelect = document.getElementById("category-parent");
+        var nameInput = document.getElementById("category-name");
+
+        modal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            parentSelect.value = trigger
+                ? trigger.dataset.categoryParentId || ""
+                : "";
+        });
+
+        modal.addEventListener("shown.bs.modal", function () {
+            nameInput.focus();
+        });
+
+        modal.addEventListener("hidden.bs.modal", function () {
+            form.reset();
+            nameInput.setCustomValidity("");
+        });
+
+        form.addEventListener("submit", function (event) {
+            nameInput.value = nameInput.value.trim();
+            if (nameInput.value) {
+                return;
+            }
+
+            event.preventDefault();
+            nameInput.setCustomValidity("카테고리명을 입력해 주세요.");
+            nameInput.reportValidity();
+        });
+
+        nameInput.addEventListener("input", function () {
+            nameInput.setCustomValidity("");
+        });
+
+        syncActiveCategory();
+    }
+
     function refreshUserResults() {
         var userResults = document.getElementById("user-results");
 
@@ -243,5 +308,6 @@
         configureModal();
         configureSellerRejectModal();
         configureRolePopovers(document);
+        configureCategoryPage();
     });
 })();

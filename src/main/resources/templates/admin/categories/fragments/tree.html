@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="card h-100"
+         aria-labelledby="category-tree-title"
+         th:fragment="tree">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title" id="category-tree-title">전체 카테고리</h3>
+            <div class="card-subtitle">
+                총 <strong class="text-body"
+                          th:text="${#lists.size(categories)}">0</strong>개
+                · 루트 <strong class="text-body" th:text="${rootCount}">0</strong>개
+            </div>
+        </div>
+        <a class="btn btn-sm btn-outline-secondary ms-auto"
+           th:href="@{/admin/categories}"
+           th:attr="hx-get=@{/admin/categories/root},hx-push-url=@{/admin/categories}"
+           hx-target="#category-detail-panel"
+           hx-swap="outerHTML">전체 보기</a>
+    </div>
+
+    <div class="category-tree" id="category-tree" aria-live="polite">
+        <a class="category-tree-link"
+           th:each="category : ${categories}"
+           th:classappend="${detail.categoryId == category.categoryId} ? 'active'"
+           th:href="@{/admin/categories(categoryId=${category.categoryId})}"
+           th:attr="hx-get=@{/admin/categories/{categoryId}(categoryId=${category.categoryId})},
+                    hx-push-url=@{/admin/categories(categoryId=${category.categoryId})}"
+           th:style="|--category-depth: ${category.depth}|"
+           th:aria-current="${detail.categoryId == category.categoryId} ? 'page' : null"
+           hx-target="#category-detail-panel"
+           hx-swap="outerHTML"
+           data-category-tree-link
+           th:data-category-id="${category.categoryId}">
+            <span class="category-tree-name" th:text="${category.name}">카테고리명</span>
+            <span class="badge bg-secondary-lt ms-auto"
+                  th:text="|depth ${category.depth}|">depth 0</span>
+        </a>
+
+        <div class="empty py-6" th:if="${#lists.isEmpty(categories)}">
+            <p class="empty-title">등록된 카테고리가 없습니다.</p>
+            <p class="empty-subtitle text-secondary">첫 루트 카테고리를 생성해 주세요.</p>
+        </div>
+    </div>
+
+    <noscript>
+        <div class="alert alert-warning m-3">
+            카테고리 탐색을 사용하려면 JavaScript를 활성화해 주세요.
+        </div>
+    </noscript>
+
+</section>
+</body>
+</html>
