@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="modal modal-blur fade"
+     id="category-update-modal"
+     tabindex="-1"
+     aria-labelledby="category-update-title"
+     aria-hidden="true"
+     th:fragment="updateModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <form class="modal-content"
+              id="category-update-form"
+              method="post"
+              th:action="@{/admin/categories/{categoryId}/rename(categoryId=${detail.categoryId})}">
+            <input th:if="${_csrf != null}"
+                   type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+            <div class="modal-header">
+                <div>
+                    <div class="text-secondary small">CATEGORY</div>
+                    <h3 class="modal-title" id="category-update-title">카테고리 이름 변경</h3>
+                </div>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="닫기"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">선택한 카테고리</label>
+                    <div class="form-control-plaintext fw-semibold"
+                         th:text="${detail.name}">-</div>
+                </div>
+
+                <div>
+                    <label class="form-label required" for="category-update-name">변경할 카테고리명</label>
+                    <input class="form-control"
+                           id="category-update-name"
+                           name="name"
+                           type="text"
+                           maxlength="50"
+                           required
+                           th:value="${detail.name}"
+                           pattern=".*\S.*"
+                           autocomplete="off"
+                           title="공백을 제외한 카테고리명을 입력해 주세요">
+                    <div class="form-hint">이름을 변경하면 하위 카테고리의 전체 경로에도 반영됩니다.</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">취소</button>
+                <button type="submit" class="btn btn-primary">이름 변경</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
