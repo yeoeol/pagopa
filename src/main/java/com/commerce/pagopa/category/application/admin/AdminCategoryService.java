@@ -21,7 +21,7 @@ import static com.commerce.pagopa.global.util.StringUtil.normalize;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryAdminService {
+public class AdminCategoryService {
 
 	private final CategoryRepository categoryRepository;
 

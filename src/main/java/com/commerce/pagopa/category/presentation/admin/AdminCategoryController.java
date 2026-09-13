@@ -1,6 +1,6 @@
 package com.commerce.pagopa.category.presentation.admin;
 
-import com.commerce.pagopa.category.application.admin.CategoryAdminService;
+import com.commerce.pagopa.category.application.admin.AdminCategoryService;
 import com.commerce.pagopa.category.application.admin.dto.request.AdminCategoryCreateRequestDto;
 import com.commerce.pagopa.category.application.admin.dto.response.AdminCategoryPageResponseDto;
 import com.commerce.pagopa.category.application.dto.response.CategorySimpleResponseDto;
@@ -18,14 +18,14 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/admin/categories")
 public class AdminCategoryController {
 
-	private final CategoryAdminService categoryAdminService;
+	private final AdminCategoryService adminCategoryService;
 
 	@GetMapping
 	public String list(
 			@RequestParam(name = "categoryId", required = false) Long categoryId,
 			Model model
 	) {
-		AdminCategoryPageResponseDto result = categoryAdminService.findPage(categoryId);
+		AdminCategoryPageResponseDto result = adminCategoryService.findPage(categoryId);
 
 		model.addAttribute("categories", result.categories());
 		model.addAttribute("rootCount", result.rootCount());
@@ -38,7 +38,7 @@ public class AdminCategoryController {
 	public String root(Model model) {
 		model.addAttribute(
 				"detail",
-				categoryAdminService.findDetail(null)
+				adminCategoryService.findDetail(null)
 		);
 
 		return "admin/categories/fragments/detail :: detail";
@@ -51,7 +51,7 @@ public class AdminCategoryController {
 	) {
 		model.addAttribute(
 				"detail",
-				categoryAdminService.findDetail(categoryId)
+				adminCategoryService.findDetail(categoryId)
 		);
 
 		return "admin/categories/fragments/detail :: detail";
@@ -61,7 +61,7 @@ public class AdminCategoryController {
 	public String create(
 			@Valid @ModelAttribute AdminCategoryCreateRequestDto requestDto
 	) {
-		CategorySimpleResponseDto created = categoryAdminService.create(requestDto);
+		CategorySimpleResponseDto created = adminCategoryService.create(requestDto);
 
 		return "redirect:/admin/categories?categoryId="
 				+ created.categoryId();
