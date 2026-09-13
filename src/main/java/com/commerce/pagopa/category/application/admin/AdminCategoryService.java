@@ -1,6 +1,7 @@
 package com.commerce.pagopa.category.application.admin;
 
 import com.commerce.pagopa.category.application.admin.dto.request.AdminCategoryCreateRequestDto;
+import com.commerce.pagopa.category.application.admin.dto.request.AdminCategoryUpdateRequestDto;
 import com.commerce.pagopa.category.application.admin.dto.response.AdminCategoryDetailResponseDto;
 import com.commerce.pagopa.category.application.admin.dto.response.AdminCategoryPageResponseDto;
 import com.commerce.pagopa.category.application.admin.dto.response.AdminCategoryTreeItemResponseDto;
@@ -68,6 +69,15 @@ public class AdminCategoryService {
 				buildTreeItems(categoryRepository.findAll());
 
 		return buildDetail(categoryId, categories);
+	}
+
+	@Transactional
+	public void update(
+			Long categoryId,
+			AdminCategoryUpdateRequestDto requestDto
+	) {
+		Category category = categoryRepository.findByIdOrThrow(categoryId);
+		category.rename(normalize(requestDto.name()));
 	}
 
 	private List<AdminCategoryTreeItemResponseDto> buildTreeItems(

@@ -2,6 +2,7 @@ package com.commerce.pagopa.category.presentation.admin;
 
 import com.commerce.pagopa.category.application.admin.AdminCategoryService;
 import com.commerce.pagopa.category.application.admin.dto.request.AdminCategoryCreateRequestDto;
+import com.commerce.pagopa.category.application.admin.dto.request.AdminCategoryUpdateRequestDto;
 import com.commerce.pagopa.category.application.admin.dto.response.AdminCategoryPageResponseDto;
 import com.commerce.pagopa.category.application.dto.response.CategorySimpleResponseDto;
 
@@ -65,5 +66,15 @@ public class AdminCategoryController {
 
 		return "redirect:/admin/categories?categoryId="
 				+ created.categoryId();
+	}
+
+	@PostMapping("/{categoryId}/rename")
+	public String update(
+			@PathVariable("categoryId") Long categoryId,
+			@Valid @ModelAttribute AdminCategoryUpdateRequestDto requestDto
+	) {
+		adminCategoryService.update(categoryId, requestDto);
+		return "redirect:/admin/categories?categoryId="
+				+ categoryId;
 	}
 }
