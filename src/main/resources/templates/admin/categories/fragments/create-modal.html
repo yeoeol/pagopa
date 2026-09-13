@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="modal modal-blur fade"
+     id="category-create-modal"
+     tabindex="-1"
+     aria-labelledby="category-create-title"
+     aria-hidden="true"
+     th:fragment="createModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <form class="modal-content"
+              id="category-create-form"
+              method="post"
+              th:action="@{/admin/categories}">
+            <input th:if="${_csrf != null}"
+                   type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+            <div class="modal-header">
+                <div>
+                    <div class="text-secondary small">CATEGORY</div>
+                    <h3 class="modal-title" id="category-create-title">카테고리 생성</h3>
+                </div>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="닫기"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="category-parent">상위 카테고리</label>
+                    <select class="form-select" id="category-parent" name="parentId">
+                        <option value="">상위 카테고리 없음 (루트로 생성)</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category.categoryId}"
+                                th:text="|${category.path} (depth ${category.depth})|">카테고리 경로</option>
+                    </select>
+                    <div class="form-hint">선택하지 않으면 루트 카테고리로 생성됩니다.</div>
+                </div>
+
+                <div>
+                    <label class="form-label required" for="category-name">카테고리명</label>
+                    <input class="form-control"
+                           id="category-name"
+                           name="name"
+                           type="text"
+                           maxlength="50"
+                           required
+                           autocomplete="off"
+                           placeholder="카테고리명을 입력하세요">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">취소</button>
+                <button type="submit" class="btn btn-primary">생성</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -23,6 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+
+import static com.commerce.pagopa.global.util.StringUtil.normalize;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class AdminUserService {
     public AdminUserPageResponseDto search(AdminUserSearchRequestDto requestDto) {
         int page = requestDto.page() == null ? 0 : requestDto.page();
         int size = requestDto.size() == null ? DEFAULT_PAGE_SIZE : requestDto.size();
-        String keyword = normalizeKeyword(requestDto.keyword());
+        String keyword = normalize(requestDto.keyword());
 
         Pageable pageable = PageRequest.of(
                 page,
@@ -111,12 +112,5 @@ public class AdminUserService {
                                 Collectors.toList()
                         )
                 ));
-    }
-
-    private String normalizeKeyword(String keyword) {
-        if (!StringUtils.hasText(keyword)) {
-            return null;
-        }
-        return keyword.trim();
     }
 }

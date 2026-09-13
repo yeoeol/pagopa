@@ -15,6 +15,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -93,12 +94,25 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ErrorCode.INVALID_TYPE_VALUE));
     }
 
+    // 권한 거부
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException e) {
         log.warn("[AccessDenied] {}", e.getMessage());
         return ResponseEntity
                 .status(ErrorCode.ACCESS_DENIED.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.ACCESS_DENIED));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException e) {
+        log.debug("[ResourceNotFound] method={}, path={}, message={}",
+                e.getHttpMethod(),
+                e.getResourcePath(),
+                e.getMessage()
+        );
+        return ResponseEntity
+                .status(ErrorCode.RESOURCE_NOT_FOUND.getHttpStatus())
+                .body(ApiResponse.error(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     // 나머지 모든 예외

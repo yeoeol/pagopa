@@ -14,6 +14,8 @@ public interface CategoryRepository {
 
     Optional<Category> findById(Long id);
 
+    List<Category> findAll();
+
     void deleteById(Long id);
 
     List<Category> findRootCategories();

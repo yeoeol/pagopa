@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/shell :: shell('카테고리 관리', 'categories', ~{::main})}">
+<body>
+<main id="category-admin-page">
+    <div class="page-header d-print-none">
+        <div class="container-xl">
+            <div class="row g-2 align-items-center">
+                <div class="col">
+                    <div class="page-pretitle">CATEGORY OPERATIONS</div>
+                    <h2 class="page-title">카테고리 관리</h2>
+                    <div class="text-secondary mt-1">
+                        전체 카테고리 계층을 확인하고 하위 단계로 이동할 수 있습니다.
+                    </div>
+                </div>
+                <div class="col-auto ms-auto">
+                    <button class="btn btn-primary"
+                            type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#category-create-modal"
+                            data-category-parent-id="">
+                        카테고리 생성
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+            <div class="row row-cards">
+                <div class="col-12 col-lg-5">
+                    <section th:replace="~{admin/categories/fragments/tree :: tree}"></section>
+                </div>
+                <div class="col-12 col-lg-7">
+                    <section th:replace="~{admin/categories/fragments/detail :: detail}"></section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{admin/categories/fragments/create-modal :: createModal}"></div>
+</main>
+</body>
+</html>

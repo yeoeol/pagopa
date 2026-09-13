@@ -14,6 +14,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.commerce.pagopa.global.util.StringUtil.normalize;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -27,7 +28,7 @@ public class SearchHistoryService {
     public void saveHistory(Long userId, String sessionId, String keyword) {
         Instant now = Instant.now();
 
-        String normalizeKeyword = normalizeKeyword(keyword);
+        String normalizeKeyword = normalize(keyword);
         if (normalizeKeyword == null) {
             return;
         }
@@ -88,12 +89,5 @@ public class SearchHistoryService {
         } else if (hasText(sessionId)) {
             searchHistoryRepository.deleteBySessionId(sessionId);
         }
-    }
-
-    private String normalizeKeyword(String keyword) {
-        if (!hasText(keyword)) {
-            return null;
-        }
-        return keyword.trim();
     }
 }

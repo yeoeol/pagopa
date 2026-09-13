@@ -56,6 +56,23 @@
                         <span class="nav-link-title">판매자 관리</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${activeMenu == 'categories'} ? 'active'"
+                       th:href="@{/admin/categories}">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h6v6h-6z"/>
+                                <path d="M14 4h6v6h-6z"/>
+                                <path d="M4 14h6v6h-6z"/>
+                                <path d="M14 14h6v6h-6z"/>
+                            </svg>
+                        </span>
+                        <span class="nav-link-title">카테고리 관리</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
