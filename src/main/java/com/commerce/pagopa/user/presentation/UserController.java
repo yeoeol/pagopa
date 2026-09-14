@@ -1,6 +1,5 @@
 package com.commerce.pagopa.user.presentation;
 
-import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.user.application.UserService;
 import com.commerce.pagopa.user.application.dto.request.UserUpdateRequestDto;
@@ -26,21 +25,21 @@ public class UserController {
     @Operation(summary = "내 정보 조회", description = "사용자 본인의 정보를 조회합니다.")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDto>> getInfo(
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal(expression = "userId") Long userId
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(userService.find(userDetails.getUserId()))
+                ApiResponse.ok(userService.find(userId))
         );
     }
 
     @Operation(summary = "내 정보 수정", description = "사용자 본인의 정보를 수정합니다.")
     @PatchMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateInfo(
-            @RequestBody UserUpdateRequestDto requestDto,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @RequestBody UserUpdateRequestDto requestDto
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(userService.update(userDetails.getUserId(), requestDto))
+                ApiResponse.ok(userService.update(userId, requestDto))
         );
     }
 }

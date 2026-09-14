@@ -6,14 +6,14 @@ import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.orderitem.application.dto.response.OrderItemResponseDto;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record OrderResponseDto(
         Long orderId,
         StatusResponseDto<OrderStatus> status,
-        Instant orderedAt,
-        Instant canceledAt,
+        LocalDateTime orderedAt,
+        LocalDateTime canceledAt,
         UserResponseDto user,
         List<OrderItemResponseDto> orderItems
 ) {

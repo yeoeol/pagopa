@@ -3,15 +3,15 @@ package com.commerce.pagopa.review.application.dto.response;
 import com.commerce.pagopa.orderitem.application.dto.response.OrderItemResponseDto;
 import com.commerce.pagopa.review.domain.model.Review;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record ReviewResponseDto(
         Long reviewId,
         String content,
         int rating,
-        Instant createdAt,
-        Instant updatedAt,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
         OrderItemResponseDto orderItem,
         List<ReviewImageResponseDto> reviewImages
 ) {

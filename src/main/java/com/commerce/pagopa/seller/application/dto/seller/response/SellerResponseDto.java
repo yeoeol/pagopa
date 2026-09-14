@@ -6,13 +6,13 @@ import com.commerce.pagopa.seller.domain.model.enums.SellerStatus;
 import com.commerce.pagopa.seller.domain.model.enums.VerificationStatus;
 import com.commerce.pagopa.user.application.dto.response.UserResponseDto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record SellerResponseDto(
 		Long sellerId,
 		StatusResponseDto<SellerStatus> status,
 		StatusResponseDto<VerificationStatus> verificationStatus,
-		Instant statusChangedAt,
+		LocalDateTime statusChangedAt,
 		UserResponseDto user
 ) {
 	public static SellerResponseDto from(Seller seller) {

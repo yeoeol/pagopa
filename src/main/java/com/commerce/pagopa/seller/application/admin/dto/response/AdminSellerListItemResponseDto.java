@@ -5,7 +5,7 @@ import com.commerce.pagopa.seller.domain.model.Seller;
 import com.commerce.pagopa.seller.domain.model.enums.SellerStatus;
 import com.commerce.pagopa.seller.domain.model.enums.VerificationStatus;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record AdminSellerListItemResponseDto(
         Long sellerId,
@@ -14,7 +14,7 @@ public record AdminSellerListItemResponseDto(
         String email,
         StatusResponseDto<SellerStatus> status,
         StatusResponseDto<VerificationStatus> verificationStatus,
-        Instant requestedAt
+        LocalDateTime requestedAt
 ) {
     public static AdminSellerListItemResponseDto from(Seller seller) {
         return new AdminSellerListItemResponseDto(

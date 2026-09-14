@@ -7,7 +7,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 
@@ -16,8 +16,8 @@ import lombok.Getter;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseTimeEntity {
     @CreatedDate
-    protected Instant createdAt;
+    protected LocalDateTime createdAt;
 
     @LastModifiedDate
-    protected Instant updatedAt;
+    protected LocalDateTime updatedAt;
 }

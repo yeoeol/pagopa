@@ -16,7 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,19 +83,19 @@ public class AdminUserService {
     @Transactional
     public void activate(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
-        user.activate(Instant.now());
+        user.activate(LocalDateTime.now());
     }
 
     @Transactional
     public void suspend(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
-        user.suspend(Instant.now());
+        user.suspend(LocalDateTime.now());
     }
 
     @Transactional
     public void ban(Long userId) {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
-        user.ban(Instant.now());
+        user.ban(LocalDateTime.now());
     }
 
     private Map<Long, List<AdminUserRoleResponseDto>> findRolesByUserIds(List<Long> userIds) {

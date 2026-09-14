@@ -5,7 +5,7 @@ import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record UserResponseDto(
         Long userId,
@@ -14,7 +14,7 @@ public record UserResponseDto(
         String email,
         String profileImageUrl,
         StatusResponseDto<UserStatus> status,
-        Instant statusChangedAt
+        LocalDateTime statusChangedAt
 ) {
     public static UserResponseDto from(User user) {
         return new UserResponseDto(

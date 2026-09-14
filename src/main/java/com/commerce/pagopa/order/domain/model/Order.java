@@ -6,9 +6,10 @@ import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
 import com.commerce.pagopa.orderitem.domain.model.OrderItem;
 import com.commerce.pagopa.user.domain.model.User;
+
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,11 +43,11 @@ public class Order extends BaseTimeEntity {
 
     @ToString.Include
     @Column(name = "ordered_at", nullable = false)
-    private Instant orderedAt;
+    private LocalDateTime orderedAt;
 
     @ToString.Include
     @Column(name = "canceled_at", nullable = true)
-    private Instant canceledAt;
+    private LocalDateTime canceledAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -62,7 +63,7 @@ public class Order extends BaseTimeEntity {
     @Builder(access = AccessLevel.PRIVATE)
     private Order(
             OrderStatus status,
-            Instant orderedAt,
+            LocalDateTime orderedAt,
             User user
     ) {
         this.status = status;
@@ -73,7 +74,7 @@ public class Order extends BaseTimeEntity {
     public static Order init(User user) {
         return Order.builder()
                 .status(OrderStatus.PENDING_PAYMENT)
-                .orderedAt(Instant.now())
+                .orderedAt(LocalDateTime.now())
                 .user(user)
                 .build();
     }
@@ -91,7 +92,7 @@ public class Order extends BaseTimeEntity {
         this.status = OrderStatus.CONFIRMED;
     }
 
-    public void cancel(Instant canceledAt) {
+    public void cancel(LocalDateTime canceledAt) {
         validateCancelable();
         validateCanceledAt(canceledAt);
 
@@ -99,7 +100,7 @@ public class Order extends BaseTimeEntity {
         this.canceledAt = canceledAt;
     }
 
-    public void cancelAfterPayment(Instant canceledAt) {
+    public void cancelAfterPayment(LocalDateTime canceledAt) {
         validateCancelAfterPayment();
         validateCanceledAt(canceledAt);
 
@@ -132,7 +133,7 @@ public class Order extends BaseTimeEntity {
         }
     }
 
-    private void validateCanceledAt(Instant canceledAt) {
+    private void validateCanceledAt(LocalDateTime canceledAt) {
         if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
             throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }

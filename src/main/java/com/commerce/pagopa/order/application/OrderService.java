@@ -25,7 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -155,7 +155,7 @@ public class OrderService {
     public OrderResponseDto cancelOrder(Long orderId) {
         // 주문 존재 여부 확인
         Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
-        order.cancel(Instant.now());
+        order.cancel(LocalDateTime.now());
 
         // 데드락 방지
         List<Long> productIds = order.getOrderItems().stream()
@@ -189,7 +189,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
         OrderSearch search = orderSearch == null ? new OrderSearch(null, null) : orderSearch;
-        Instant now = Instant.now();
+        LocalDateTime now = LocalDateTime.now();
 
         Page<Order> pageOrder = orderRepository.findAllByPeriod(
                 userId,

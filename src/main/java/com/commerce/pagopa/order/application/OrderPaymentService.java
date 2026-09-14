@@ -11,7 +11,7 @@ import com.commerce.pagopa.product.domain.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class OrderPaymentService {
 	public void cancelAfterPayment(Long orderId) {
 		// 주문 존재 여부 확인
 		Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
-		order.cancelAfterPayment(Instant.now());
+		order.cancelAfterPayment(LocalDateTime.now());
 
 		// 데드락 방지
 		List<Long> productIds = order.getOrderItems().stream()

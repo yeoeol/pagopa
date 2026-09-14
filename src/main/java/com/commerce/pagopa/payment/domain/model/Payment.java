@@ -7,7 +7,7 @@ import com.commerce.pagopa.order.domain.model.Order;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.*;
 
@@ -51,11 +51,11 @@ public class Payment extends BaseTimeEntity {
 
     @ToString.Include
     @Column(name = "paid_at", nullable = true)
-    private Instant paidAt;
+    private LocalDateTime paidAt;
 
     @ToString.Include
     @Column(name = "canceled_at", nullable = true)
-    private Instant canceledAt;
+    private LocalDateTime canceledAt;
 
     @ToString.Include
     @Column(name = "provider_transaction_id", length = 255, nullable = true)
@@ -94,7 +94,7 @@ public class Payment extends BaseTimeEntity {
     public boolean approve(
             String providerTransactionId,
             Integer approveAmount,
-            Instant approvedAt
+            LocalDateTime approvedAt
     ) {
         if (providerTransactionId == null || providerTransactionId.isBlank() || approvedAt == null) {
             throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAIL);
@@ -120,7 +120,7 @@ public class Payment extends BaseTimeEntity {
     public boolean cancel(
             String providerTransactionId,
             Integer canceledAmount,
-            Instant canceledAt
+            LocalDateTime canceledAt
     ) {
         if (canceledAt == null) {
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);

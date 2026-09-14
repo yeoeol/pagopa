@@ -4,7 +4,7 @@ import com.commerce.pagopa.global.response.StatusResponseDto;
 import com.commerce.pagopa.payment.domain.model.Payment;
 import com.commerce.pagopa.payment.domain.model.enums.PaymentStatus;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record PaymentResult(
 		Long paymentId,
@@ -12,8 +12,8 @@ public record PaymentResult(
 		StatusResponseDto<PaymentStatus> status,
 		String paymentMethod,
 		Integer amount,
-		Instant paidAt,
-		Instant canceledAt
+		LocalDateTime paidAt,
+		LocalDateTime canceledAt
 ) {
 	public static PaymentResult from(Payment payment) {
 		return new PaymentResult(

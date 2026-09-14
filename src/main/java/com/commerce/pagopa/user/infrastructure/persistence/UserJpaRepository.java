@@ -16,7 +16,7 @@ import org.springframework.data.repository.query.Param;
 
 import jakarta.persistence.LockModeType;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<User, Long>, UserRepository {
@@ -68,8 +68,8 @@ public interface UserJpaRepository extends JpaRepository<User, Long>, UserReposi
     int bulkUnSuspend(
             @Param("activeStatus") UserStatus activeStatus,
             @Param("suspendedStatus") UserStatus suspendedStatus,
-            @Param("now") Instant now,
-            @Param("threshold") Instant threshold
+            @Param("now") LocalDateTime now,
+            @Param("threshold") LocalDateTime threshold
     );
 
     @Override
