@@ -19,22 +19,17 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
-
-import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,7 +93,7 @@ class SearchHistoryServiceConcurrencyTest {
     void concurrent_updates_of_existing_history_complete_without_errors() throws InterruptedException {
         String sessionId = unique_session_id("existing-history");
         String keyword = "keyword";
-        Instant initialLastSearchedAt = Instant.parse("2000-01-01T00:00:00Z");
+        LocalDateTime initialLastSearchedAt = LocalDateTime.parse("2000-01-01T00:00:00");
         SearchHistory existingHistory = searchHistoryRepository.save(
                 SearchHistory.createForGuest(sessionId, keyword, initialLastSearchedAt)
         );
