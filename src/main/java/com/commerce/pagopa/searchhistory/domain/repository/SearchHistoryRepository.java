@@ -2,7 +2,7 @@ package com.commerce.pagopa.searchhistory.domain.repository;
 
 import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +27,12 @@ public interface SearchHistoryRepository {
     void upsertByUserId(
             Long userId,
             String keyword,
-            Instant lastSearchedAt
+            LocalDateTime lastSearchedAt
     );
 
     void upsertBySessionId(
             String SessionId,
             String keyword,
-            Instant lastSearchedAt
+            LocalDateTime lastSearchedAt
     );
 }

@@ -2,7 +2,7 @@ package com.commerce.pagopa.searchhistory.domain.model;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.*;
 
@@ -48,14 +48,14 @@ public class SearchHistory {
     // 검색어 중복 갱신을 위한 전용 시간 필드
     @ToString.Include
     @Column(name = "last_searched_at", nullable = false)
-    private Instant lastSearchedAt;
+    private LocalDateTime lastSearchedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
     private SearchHistory(
             Long userId,
             String sessionId,
             String keyword,
-            Instant lastSearchedAt
+            LocalDateTime lastSearchedAt
     ) {
         this.userId = userId;
         this.sessionId = sessionId;
@@ -66,7 +66,7 @@ public class SearchHistory {
     public static SearchHistory createForUser(
             Long userId,
             String keyword,
-            Instant lastSearchedAt
+            LocalDateTime lastSearchedAt
     ) {
         return SearchHistory.builder()
                 .userId(userId)
@@ -78,7 +78,7 @@ public class SearchHistory {
     public static SearchHistory createForGuest(
             String sessionId,
             String keyword,
-            Instant lastSearchedAt
+            LocalDateTime lastSearchedAt
     ) {
         return SearchHistory.builder()
                 .sessionId(sessionId)
@@ -88,7 +88,7 @@ public class SearchHistory {
     }
 
     // 중복 검색 시 시간 갱신
-    public void updateLastSearchedAt(Instant lastSearchedAt) {
+    public void updateLastSearchedAt(LocalDateTime lastSearchedAt) {
         this.lastSearchedAt = lastSearchedAt;
     }
 }

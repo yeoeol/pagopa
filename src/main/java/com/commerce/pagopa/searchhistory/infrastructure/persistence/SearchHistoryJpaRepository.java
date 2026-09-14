@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory, Long>, SearchHistoryRepository {
@@ -50,7 +50,7 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
     void upsertByUserId(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
-            @Param("lastSearchedAt") Instant lastSearchedAt
+            @Param("lastSearchedAt") LocalDateTime lastSearchedAt
     );
 
     @Override
@@ -72,6 +72,6 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
     void upsertBySessionId(
             @Param("sessionId") String sessionId,
             @Param("keyword") String keyword,
-            @Param("lastSearchedAt") Instant lastSearchedAt
+            @Param("lastSearchedAt") LocalDateTime lastSearchedAt
     );
 }

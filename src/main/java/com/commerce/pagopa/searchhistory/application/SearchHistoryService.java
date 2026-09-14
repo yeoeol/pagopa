@@ -9,7 +9,7 @@ import com.commerce.pagopa.user.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class SearchHistoryService {
 
     @Transactional
     public void saveHistory(Long userId, String sessionId, String keyword) {
-        Instant now = Instant.now();
+        LocalDateTime now = LocalDateTime.now();
 
         String normalizeKeyword = normalize(keyword);
         if (normalizeKeyword == null) {
