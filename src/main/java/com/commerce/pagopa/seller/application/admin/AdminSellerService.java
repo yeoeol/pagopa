@@ -19,7 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,13 +53,13 @@ public class AdminSellerService {
 		Role sellerRole = roleRepository.findByCode(RoleCode.ROLE_SELLER)
 				.orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
 
-		seller.activate(Instant.now());
+		seller.activate(LocalDateTime.now());
 		user.grantRole(sellerRole);
 	}
 
 	@Transactional
 	public void reject(Long sellerId) {
 		Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-		seller.reject(Instant.now());
+		seller.reject(LocalDateTime.now());
 	}
 }

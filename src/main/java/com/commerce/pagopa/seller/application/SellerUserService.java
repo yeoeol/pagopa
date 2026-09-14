@@ -14,7 +14,7 @@ import com.commerce.pagopa.userrole.domain.model.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +30,7 @@ public class SellerUserService {
 		User user = userRepository.findByIdForUpdateOrThrow(userId);
 		validateRequestable(user);
 
-		Instant requestedAt = Instant.now();
+		LocalDateTime requestedAt = LocalDateTime.now();
 
 		Seller seller = sellerRepository.findByUserId(userId)
 				.map(existingSeller -> {

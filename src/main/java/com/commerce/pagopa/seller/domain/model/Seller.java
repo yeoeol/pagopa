@@ -9,7 +9,7 @@ import com.commerce.pagopa.user.domain.model.User;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.*;
 
@@ -46,7 +46,7 @@ public class Seller extends BaseTimeEntity {
 
 	@ToString.Include
 	@Column(name = "status_changed_at", nullable = false)
-	private Instant statusChangedAt;
+	private LocalDateTime statusChangedAt;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -60,7 +60,7 @@ public class Seller extends BaseTimeEntity {
 	private Seller(
 			SellerStatus status,
 			VerificationStatus verificationStatus,
-			Instant statusChangedAt,
+			LocalDateTime statusChangedAt,
 			User user
 	) {
 		this.status = status;
@@ -69,7 +69,7 @@ public class Seller extends BaseTimeEntity {
 		this.user = user;
 	}
 
-	public static Seller create(User user, Instant requestedAt) {
+	public static Seller create(User user, LocalDateTime requestedAt) {
 		return Seller.builder()
 				.status(SellerStatus.PENDING)
 				.verificationStatus(VerificationStatus.UNVERIFIED)
@@ -78,7 +78,7 @@ public class Seller extends BaseTimeEntity {
 				.build();
 	}
 
-	public void requestAgain(Instant requestedAt) {
+	public void requestAgain(LocalDateTime requestedAt) {
 		if (this.status == SellerStatus.PENDING) {
 			return;
 		}
@@ -89,7 +89,7 @@ public class Seller extends BaseTimeEntity {
 		this.statusChangedAt = requestedAt;
 	}
 
-	public void activate(Instant activatedAt) {
+	public void activate(LocalDateTime activatedAt) {
 		if (this.status != SellerStatus.PENDING) {
 			throw new BusinessException(ErrorCode.SELLER_REQUEST_NOT_ALLOWED);
 		}
@@ -98,7 +98,7 @@ public class Seller extends BaseTimeEntity {
 		this.statusChangedAt = activatedAt;
 	}
 
-	public void reject(Instant rejectedAt) {
+	public void reject(LocalDateTime rejectedAt) {
 		if (this.status != SellerStatus.PENDING) {
 			throw new BusinessException(ErrorCode.SELLER_REQUEST_NOT_ALLOWED);
 		}
