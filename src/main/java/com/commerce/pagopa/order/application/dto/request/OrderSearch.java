@@ -23,6 +23,8 @@ public record OrderSearch(
     }
 
     public LocalDateTime end(LocalDateTime now) {
-        return now;
+        return year == null
+                ? now
+                : LocalDateTime.of(year+1, 1, 1, 0, 0, 0);
     }
 }
