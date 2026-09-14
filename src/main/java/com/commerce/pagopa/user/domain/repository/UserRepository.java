@@ -9,7 +9,7 @@ import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.commerce.pagopa.global.response.ErrorCode.USER_NOT_FOUND;
@@ -32,8 +32,8 @@ public interface UserRepository {
     int bulkUnSuspend(
             UserStatus activeStatus,
             UserStatus suspendedStatus,
-            Instant now,
-            Instant threshold
+            LocalDateTime now,
+            LocalDateTime threshold
     );
 
     Page<User> searchAdminUsers(

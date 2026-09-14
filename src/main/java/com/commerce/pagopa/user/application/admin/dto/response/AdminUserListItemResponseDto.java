@@ -5,7 +5,7 @@ import com.commerce.pagopa.user.domain.model.User;
 import com.commerce.pagopa.user.domain.model.enums.Provider;
 import com.commerce.pagopa.user.domain.model.enums.UserStatus;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record AdminUserListItemResponseDto(
@@ -15,8 +15,8 @@ public record AdminUserListItemResponseDto(
         Provider provider,
         StatusResponseDto<UserStatus> status,
         List<AdminUserRoleResponseDto> roles,
-        Instant statusChangedAt,
-        Instant createdAt
+        LocalDateTime statusChangedAt,
+        LocalDateTime createdAt
 ) {
     public static AdminUserListItemResponseDto from(
             User user,

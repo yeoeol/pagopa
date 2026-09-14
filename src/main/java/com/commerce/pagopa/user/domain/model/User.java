@@ -11,7 +11,7 @@ import com.commerce.pagopa.userrole.domain.model.UserRole;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -81,7 +81,7 @@ public class User extends BaseTimeEntity {
 
     @ToString.Include
     @Column(name = "status_changed_at", nullable = false)
-    private Instant statusChangedAt;  // 탈퇴 일시
+    private LocalDateTime statusChangedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
     private User(
@@ -93,7 +93,7 @@ public class User extends BaseTimeEntity {
             String phoneNumber,
             String profileImageUrl,
             UserStatus status,
-            Instant statusChangedAt
+            LocalDateTime statusChangedAt
     ) {
         this.provider = provider;
         this.providerId = providerId;
@@ -112,7 +112,7 @@ public class User extends BaseTimeEntity {
             String name,
             String email,
             String profileImageUrl,
-            Instant statusChangedAt
+            LocalDateTime statusChangedAt
     ) {
         return User.builder()
                 .provider(provider)
@@ -143,7 +143,7 @@ public class User extends BaseTimeEntity {
         userRoles.add(UserRole.create(this, role));
     }
 
-    public void activate(Instant activatedAt) {
+    public void activate(LocalDateTime activatedAt) {
         if (this.status == UserStatus.WITHDRAWN) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
@@ -151,7 +151,7 @@ public class User extends BaseTimeEntity {
         this.statusChangedAt = activatedAt;
     }
 
-    public void suspend(Instant suspendedAt) {
+    public void suspend(LocalDateTime suspendedAt) {
         if (this.status == UserStatus.WITHDRAWN
                 || this.status != UserStatus.ACTIVE
         ) {
@@ -161,7 +161,7 @@ public class User extends BaseTimeEntity {
         this.statusChangedAt = suspendedAt;
     }
 
-    public void ban(Instant bannedAt) {
+    public void ban(LocalDateTime bannedAt) {
         if (this.status == UserStatus.WITHDRAWN || this.status == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
@@ -169,7 +169,7 @@ public class User extends BaseTimeEntity {
         this.statusChangedAt = bannedAt;
     }
 
-    public void withdraw(Instant withdrawnAt) {
+    public void withdraw(LocalDateTime withdrawnAt) {
         if (this.status == UserStatus.WITHDRAWN) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }

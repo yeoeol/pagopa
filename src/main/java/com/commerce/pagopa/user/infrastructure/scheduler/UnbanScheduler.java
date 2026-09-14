@@ -7,8 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +27,8 @@ public class UnbanScheduler {
     @Scheduled(cron = "0 * * * * *")
     public void unSuspendSchedule() {
         log.info("[unSuspendSchedule] 임시 정지 해제 스케줄링 시작");
-        Instant now = Instant.now();
-        Instant threshold = now.atZone(ZoneId.of("Asia/Seoul"))
-                .minusDays(7)
-                .toInstant();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threshold = now.minusDays(7);
 
         int unSuspendCount = userRepository.bulkUnSuspend(
                 UserStatus.ACTIVE,

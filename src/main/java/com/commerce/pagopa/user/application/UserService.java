@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
@@ -31,12 +31,12 @@ public class UserService {
     @Transactional
     public User register(UserCreateRequestDto requestDto) {
         User user = User.create(
-                requestDto.provider(),
-                requestDto.providerId(),
-                requestDto.name(),
-                requestDto.email(),
-                requestDto.profileImageUrl(),
-                Instant.now()
+				requestDto.provider(),
+				requestDto.providerId(),
+				requestDto.name(),
+				requestDto.email(),
+				requestDto.profileImageUrl(),
+                LocalDateTime.now()
         );
         Role role = roleService.findUserRole();
 
