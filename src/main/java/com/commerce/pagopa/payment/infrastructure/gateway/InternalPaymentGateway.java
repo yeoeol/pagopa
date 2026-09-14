@@ -9,7 +9,7 @@ import com.commerce.pagopa.payment.application.port.PaymentGateway;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,7 +31,7 @@ public class InternalPaymentGateway implements PaymentGateway {
 				key -> PaymentApprovalResponse.of(
 						"INTERNAL-" + key,
 						request.amount(),
-						Instant.now()
+						LocalDateTime.now()
 				)
 		);
 	}
@@ -43,7 +43,7 @@ public class InternalPaymentGateway implements PaymentGateway {
 				key -> PaymentCancellationResponse.of(
 						request.transactionId(),
 						request.amount(),
-						Instant.now()
+						LocalDateTime.now()
 				)
 		);
 	}
