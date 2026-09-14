@@ -12,7 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,12 +28,20 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Order> findAllByPeriod(Long userId, OrderStatus status, Instant start, Instant end, Pageable pageable) {
+    public Page<Order> findAllByPeriod(
+            Long userId,
+            OrderStatus status,
+            LocalDateTime start,
+            LocalDateTime end,
+            Pageable pageable
+    ) {
         List<Order> orders = queryFactory
-                .selectFrom(order).distinct()
+                .selectFrom(order)
+                .distinct()
                 .where(userIdEq(userId),
-                        periodGoeAndLt(start, end),
-                        statusEq(status))
+                       periodGoeAndLt(start, end),
+                       statusEq(status)
+                )
                 .orderBy(orderSpecifiers(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -43,8 +51,9 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .select(order.count())
                 .from(order)
                 .where(userIdEq(userId),
-                        periodGoeAndLt(start, end),
-                        statusEq(status))
+                       periodGoeAndLt(start, end),
+                       statusEq(status)
+                )
                 .fetchOne();
 
         return new PageImpl<>(orders, pageable, total == null ? 0L : total);
@@ -54,7 +63,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return userId == null ? null : order.user.id.eq(userId);
     }
 
-    private BooleanExpression periodGoeAndLt(Instant start, Instant end) {
+    private BooleanExpression periodGoeAndLt(LocalDateTime start, LocalDateTime end) {
         return (start == null || end == null) ? null : order.orderedAt.goe(start).and(order.orderedAt.lt(end));
     }
 
