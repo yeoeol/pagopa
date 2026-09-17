@@ -5,12 +5,6 @@ spring:
   profiles:
     active: test
 
-  datasource:
-    url: jdbc:h2:mem:pagopa-test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
-    username: sa
-    password: ""
-    driver-class-name: org.h2.Driver
-
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -26,7 +20,6 @@ spring:
         blob:
           account-name: devstoreaccount1
           account-key: Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
-          endpoint: http://127.0.0.1:10000/devstoreaccount1
 
   servlet:
     multipart:
@@ -85,7 +78,6 @@ app:
 
   azure:
     container-name: test-container
-    base-url: http://127.0.0.1:10000/devstoreaccount1/test-container
   image:
     max-size: 5242880
     allowed-types: image/jpeg, image/png, image/webp
