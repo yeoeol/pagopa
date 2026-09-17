@@ -60,8 +60,6 @@ dependencies {
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
 
     runtimeOnly 'com.mysql:mysql-connector-j'
-    testRuntimeOnly 'com.h2database:h2'
-
     // API Specification (Swagger API)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
