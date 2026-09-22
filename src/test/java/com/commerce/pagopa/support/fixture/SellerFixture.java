@@ -1,7 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.seller.domain.model.Seller;
-import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.merchant.domain.Seller;
 
 import java.time.LocalDateTime;
 

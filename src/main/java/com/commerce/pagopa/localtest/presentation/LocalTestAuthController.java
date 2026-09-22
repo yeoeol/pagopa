@@ -1,7 +1,7 @@
 package com.commerce.pagopa.localtest.presentation;
 
-import com.commerce.pagopa.auth.jwt.TokenResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;
 import com.commerce.pagopa.localtest.application.LocalTestAuthService;
 import com.commerce.pagopa.localtest.application.dto.request.LocalTestTokenRequestDto;
 

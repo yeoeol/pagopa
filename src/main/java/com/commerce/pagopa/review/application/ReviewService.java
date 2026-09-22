@@ -1,17 +1,17 @@
 package com.commerce.pagopa.review.application;
 
+import com.commerce.pagopa.catalog.domain.ProductRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.orderitem.domain.model.OrderItem;
-import com.commerce.pagopa.orderitem.domain.repository.OrderItemRepository;
-import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.ordering.domain.order.OrderItem;
+import com.commerce.pagopa.ordering.domain.order.OrderItemRepository;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
 import com.commerce.pagopa.review.application.dto.response.ProductReviewResponseDto;
 import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
-import com.commerce.pagopa.review.domain.model.Review;
-import com.commerce.pagopa.review.domain.model.ReviewImage;
-import com.commerce.pagopa.review.domain.repository.ReviewRepository;
+import com.commerce.pagopa.review.domain.Review;
+import com.commerce.pagopa.review.domain.ReviewImage;
+import com.commerce.pagopa.review.domain.ReviewRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

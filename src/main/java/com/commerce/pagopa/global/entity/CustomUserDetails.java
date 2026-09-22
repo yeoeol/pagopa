@@ -1,6 +1,6 @@
 package com.commerce.pagopa.global.entity;
 
-import com.commerce.pagopa.role.domain.model.enums.RoleCode;
+import com.commerce.pagopa.identity.domain.RoleCode;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;

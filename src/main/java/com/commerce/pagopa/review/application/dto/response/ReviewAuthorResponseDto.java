@@ -1,6 +1,6 @@
 package com.commerce.pagopa.review.application.dto.response;
 
-import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.identity.domain.User;
 
 public record ReviewAuthorResponseDto(
         Long userId,

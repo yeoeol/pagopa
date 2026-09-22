@@ -1,9 +1,9 @@
 package com.commerce.pagopa.review.presentation.security;
 
 import com.commerce.pagopa.global.validator.OwnerValidator;
-import com.commerce.pagopa.review.domain.model.Review;
-import com.commerce.pagopa.review.domain.repository.ReviewRepository;
-import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.review.domain.Review;
+import com.commerce.pagopa.review.domain.ReviewRepository;
 
 import org.springframework.stereotype.Component;
 

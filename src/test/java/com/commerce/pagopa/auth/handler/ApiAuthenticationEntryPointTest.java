@@ -1,12 +1,14 @@
 package com.commerce.pagopa.auth.handler;
 
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

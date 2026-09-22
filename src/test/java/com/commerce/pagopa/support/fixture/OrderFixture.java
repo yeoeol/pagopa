@@ -1,7 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.ordering.domain.order.Order;
 
 public final class OrderFixture {
 

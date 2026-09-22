@@ -1,12 +1,13 @@
 package com.commerce.pagopa.searchhistory.application;
 
+import com.commerce.pagopa.discovery.application.SearchHistoryService;
+import com.commerce.pagopa.discovery.domain.SearchHistory;
+import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
 import com.commerce.pagopa.global.config.QueryDSLConfig;
-import com.commerce.pagopa.searchhistory.domain.model.SearchHistory;
-import com.commerce.pagopa.searchhistory.domain.repository.SearchHistoryRepository;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.identity.domain.UserRepository;
 import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;

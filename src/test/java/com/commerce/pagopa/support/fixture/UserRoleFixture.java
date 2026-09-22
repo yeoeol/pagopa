@@ -1,8 +1,8 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.role.domain.model.Role;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.userrole.domain.model.UserRole;
+import com.commerce.pagopa.identity.domain.Role;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.identity.domain.UserRole;
 
 public final class UserRoleFixture {
 	private UserRoleFixture() {

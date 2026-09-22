@@ -1,10 +1,10 @@
 package com.commerce.pagopa.payment.application;
 
+import com.commerce.pagopa.global.exception.PaymentGatewayRejectedException;
 import com.commerce.pagopa.payment.application.dto.request.*;
 import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
-import com.commerce.pagopa.payment.application.exception.PaymentGatewayRejectedException;
 import com.commerce.pagopa.payment.application.port.PaymentGateway;
 
 import org.springframework.stereotype.Service;

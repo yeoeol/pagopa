@@ -1,8 +1,8 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.category.domain.model.Category;
-import com.commerce.pagopa.product.domain.model.Product;
-import com.commerce.pagopa.seller.domain.model.Seller;
+import com.commerce.pagopa.catalog.domain.Category;
+import com.commerce.pagopa.catalog.domain.Product;
+import com.commerce.pagopa.merchant.domain.Seller;
 
 public final class ProductFixture {
 

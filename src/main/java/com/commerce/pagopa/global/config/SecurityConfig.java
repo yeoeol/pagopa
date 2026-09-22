@@ -1,10 +1,10 @@
 package com.commerce.pagopa.global.config;
 
-import com.commerce.pagopa.auth.handler.ApiAuthenticationEntryPoint;
-import com.commerce.pagopa.auth.jwt.JwtAuthenticationFilter;
-import com.commerce.pagopa.auth.oauth.handler.OAuth2LoginFailureHandler;
-import com.commerce.pagopa.auth.oauth.handler.OAuth2LoginSuccessHandler;
-import com.commerce.pagopa.auth.oauth.service.CustomOAuth2UserService;
+import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtAuthenticationFilter;
+import com.commerce.pagopa.identity.infrastructure.oauth.handler.OAuth2LoginFailureHandler;
+import com.commerce.pagopa.identity.infrastructure.oauth.handler.OAuth2LoginSuccessHandler;
+import com.commerce.pagopa.identity.infrastructure.oauth.service.CustomOAuth2UserService;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

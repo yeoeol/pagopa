@@ -1,25 +1,22 @@
 package com.commerce.pagopa.order.application;
 
-import com.commerce.pagopa.category.domain.repository.CategoryRepository;
-import com.commerce.pagopa.delivery.application.dto.request.DeliveryRequestDto;
+import com.commerce.pagopa.catalog.domain.CategoryRepository;
+import com.commerce.pagopa.catalog.domain.Product;
+import com.commerce.pagopa.catalog.domain.ProductRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.orderitem.application.dto.request.OrderItemRequestDto;
-import com.commerce.pagopa.product.domain.model.Product;
-import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.role.domain.model.Role;
-import com.commerce.pagopa.role.domain.model.enums.RoleCode;
-import com.commerce.pagopa.role.domain.repository.RoleRepository;
-import com.commerce.pagopa.seller.domain.model.Seller;
-import com.commerce.pagopa.seller.domain.repository.SellerRepository;
+import com.commerce.pagopa.identity.domain.*;
+import com.commerce.pagopa.merchant.domain.Seller;
+import com.commerce.pagopa.merchant.domain.SellerRepository;
+import com.commerce.pagopa.ordering.application.OrderService;
+import com.commerce.pagopa.ordering.application.dto.request.DeliveryRequestDto;
+import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
+import com.commerce.pagopa.ordering.application.dto.request.OrderItemRequestDto;
+import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
+import com.commerce.pagopa.ordering.domain.order.OrderStatus;
 import com.commerce.pagopa.support.fixture.*;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,7 +49,7 @@ class StockConcurrencyTest {
     }
 
     @Autowired
-    OrderService orderService;
+	OrderService orderService;
     @Autowired
     ProductRepository productRepository;
     @Autowired

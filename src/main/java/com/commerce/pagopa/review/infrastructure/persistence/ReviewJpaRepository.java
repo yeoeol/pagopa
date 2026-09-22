@@ -1,7 +1,7 @@
 package com.commerce.pagopa.review.infrastructure.persistence;
 
-import com.commerce.pagopa.review.domain.model.Review;
-import com.commerce.pagopa.review.domain.repository.ReviewRepository;
+import com.commerce.pagopa.review.domain.Review;
+import com.commerce.pagopa.review.domain.ReviewRepository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

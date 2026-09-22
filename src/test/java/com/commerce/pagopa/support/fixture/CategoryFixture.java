@@ -1,6 +1,6 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.category.domain.model.Category;
+import com.commerce.pagopa.catalog.domain.Category;
 
 public final class CategoryFixture {
 

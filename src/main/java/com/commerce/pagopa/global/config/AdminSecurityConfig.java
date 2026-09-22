@@ -1,7 +1,7 @@
 package com.commerce.pagopa.global.config;
 
-import com.commerce.pagopa.auth.oauth.handler.AdminOAuth2LoginSuccessHandler;
-import com.commerce.pagopa.auth.oauth.service.CustomOAuth2UserService;
+import com.commerce.pagopa.identity.infrastructure.oauth.handler.AdminOAuth2LoginSuccessHandler;
+import com.commerce.pagopa.identity.infrastructure.oauth.service.CustomOAuth2UserService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

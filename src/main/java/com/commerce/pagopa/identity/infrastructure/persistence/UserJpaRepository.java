@@ -1,0 +1,95 @@
+package com.commerce.pagopa.identity.infrastructure.persistence;
+
+import com.commerce.pagopa.identity.domain.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+public interface UserJpaRepository extends JpaRepository<User, Long>, UserRepository {
+
+    @Override
+    @Query("""
+            SELECT u
+            FROM User u
+                LEFT JOIN FETCH u.userRoles ur
+                LEFT JOIN FETCH ur.role r
+            WHERE u.id = :userId
+            """)
+    Optional<User> findById(@Param("userId") Long userId);
+
+    @Override
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT u
+            FROM User u
+                LEFT JOIN FETCH u.userRoles ur
+                LEFT JOIN FETCH ur.role r
+            WHERE u.id = :userId
+            """)
+    Optional<User> findByIdForUpdate(@Param("userId") Long userId);
+
+    @Override
+    @Query("""
+            SELECT u
+            FROM User u
+                LEFT JOIN FETCH u.userRoles ur
+                LEFT JOIN FETCH ur.role r
+            WHERE u.provider = :provider
+                AND u.providerId = :providerId
+            """)
+    Optional<User> findByProviderAndProviderId(
+            @Param("provider") Provider provider,
+            @Param("providerId") String providerId
+    );
+
+    @Override
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            UPDATE User u
+            SET u.status = :activeStatus,
+                u.statusChangedAt = :now
+            WHERE u.status = :suspendedStatus
+              AND u.statusChangedAt <= :threshold
+            """)
+    int bulkUnSuspend(
+            @Param("activeStatus") UserStatus activeStatus,
+            @Param("suspendedStatus") UserStatus suspendedStatus,
+            @Param("now") LocalDateTime now,
+            @Param("threshold") LocalDateTime threshold
+    );
+
+    @Override
+    @Query("""
+            SELECT u
+            FROM User u
+            WHERE (:keyword IS NULL
+                OR LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND (:status IS NULL OR u.status = :status)
+              AND (:roleCode IS NULL OR EXISTS (
+                    SELECT ur.id
+                    FROM UserRole ur
+                    JOIN ur.role r
+                    WHERE ur.user = u
+                        AND r.code = :roleCode
+                        AND r.enabled = true
+              ))
+            ORDER BY u.statusChangedAt DESC, u.id DESC
+            """)
+    Page<User> searchAdminUsers(
+            @Param("keyword") String keyword,
+            @Param("status") UserStatus status,
+            @Param("roleCode") RoleCode roleCode,
+            Pageable pageable
+    );
+}

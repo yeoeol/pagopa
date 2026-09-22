@@ -1,15 +1,15 @@
 package com.commerce.pagopa.payment.application;
 
-import com.commerce.pagopa.order.application.OrderPaymentService;
-import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.ordering.application.OrderPaymentService;
+import com.commerce.pagopa.ordering.domain.order.Order;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCommand;
 import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
-import com.commerce.pagopa.payment.domain.model.Payment;
-import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
+import com.commerce.pagopa.payment.domain.Payment;
+import com.commerce.pagopa.payment.domain.PaymentRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,7 +1,7 @@
 package com.commerce.pagopa.payment.infrastructure.persistence;
 
-import com.commerce.pagopa.payment.domain.model.Payment;
-import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
+import com.commerce.pagopa.payment.domain.Payment;
+import com.commerce.pagopa.payment.domain.PaymentRepository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

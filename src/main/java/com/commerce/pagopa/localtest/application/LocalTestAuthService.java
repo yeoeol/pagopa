@@ -1,15 +1,10 @@
 package com.commerce.pagopa.localtest.application;
 
-import com.commerce.pagopa.auth.jwt.TokenResponseDto;
-import com.commerce.pagopa.auth.service.AuthService;
-import com.commerce.pagopa.role.domain.model.Role;
-import com.commerce.pagopa.role.domain.model.enums.RoleCode;
-import com.commerce.pagopa.user.application.UserService;
-import com.commerce.pagopa.user.application.dto.request.UserCreateRequestDto;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.Provider;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
-import com.commerce.pagopa.userrole.domain.model.UserRole;
+import com.commerce.pagopa.identity.application.AuthService;
+import com.commerce.pagopa.identity.application.UserService;
+import com.commerce.pagopa.identity.application.dto.request.UserCreateRequestDto;
+import com.commerce.pagopa.identity.domain.*;
+import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

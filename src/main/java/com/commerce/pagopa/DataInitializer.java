@@ -1,8 +1,8 @@
 package com.commerce.pagopa;
 
-import com.commerce.pagopa.category.domain.model.Category;
-import com.commerce.pagopa.category.domain.repository.CategoryRepository;
-import com.commerce.pagopa.category.infrastructure.persistence.CategoryJpaRepository;
+import com.commerce.pagopa.catalog.domain.Category;
+import com.commerce.pagopa.catalog.domain.CategoryRepository;
+import com.commerce.pagopa.catalog.infrastructure.persistence.CategoryJpaRepository;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;

@@ -1,7 +1,7 @@
 package com.commerce.pagopa.review.application.dto.response;
 
-import com.commerce.pagopa.orderitem.application.dto.response.OrderItemResponseDto;
-import com.commerce.pagopa.review.domain.model.Review;
+import com.commerce.pagopa.ordering.application.dto.response.OrderItemResponseDto;
+import com.commerce.pagopa.review.domain.Review;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.model.enums.Provider;
+import com.commerce.pagopa.identity.domain.Provider;
+import com.commerce.pagopa.identity.domain.User;
 
 import java.time.LocalDateTime;
 

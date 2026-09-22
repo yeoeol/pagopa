@@ -1,7 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.orderitem.domain.model.OrderItem;
-import com.commerce.pagopa.review.domain.model.Review;
+import com.commerce.pagopa.ordering.domain.order.OrderItem;
+import com.commerce.pagopa.review.domain.Review;
 
 public final class ReviewFixture {
 

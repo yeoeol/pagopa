@@ -1,7 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.role.domain.model.Role;
-import com.commerce.pagopa.role.domain.model.enums.RoleCode;
+import com.commerce.pagopa.identity.domain.Role;
+import com.commerce.pagopa.identity.domain.RoleCode;
 
 public final class RoleFixture {
 	public RoleFixture() {

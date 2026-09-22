@@ -1,0 +1,61 @@
+package com.commerce.pagopa.merchant.application.admin;
+
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.identity.domain.*;
+import com.commerce.pagopa.merchant.application.admin.dto.response.AdminSellerPageResponseDto;
+import com.commerce.pagopa.merchant.domain.Seller;
+import com.commerce.pagopa.merchant.domain.SellerRepository;
+import com.commerce.pagopa.merchant.domain.SellerStatus;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class AdminSellerService {
+
+	private final SellerRepository sellerRepository;
+	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
+
+	@Transactional(readOnly = true)
+	public AdminSellerPageResponseDto getPendingSellers(Pageable pageable) {
+		Pageable pageRequest = PageRequest.of(
+				pageable.getPageNumber(),
+				pageable.getPageSize(),
+				Sort.by(Sort.Direction.DESC, "statusChangedAt")
+						.and(Sort.by(Sort.Direction.DESC, "id"))
+		);
+		Page<Seller> sellers = sellerRepository
+				.findPendingRequests(SellerStatus.PENDING, pageRequest);
+
+		return AdminSellerPageResponseDto.from(sellers);
+	}
+
+	@Transactional
+	public void approve(Long sellerId) {
+		Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+		User user = userRepository.findByIdOrThrow(seller.getUser().getId());
+
+		Role sellerRole = roleRepository.findByCode(RoleCode.ROLE_SELLER)
+				.orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
+
+		seller.activate(LocalDateTime.now());
+		user.grantRole(sellerRole);
+	}
+
+	@Transactional
+	public void reject(Long sellerId) {
+		Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+		seller.reject(LocalDateTime.now());
+	}
+}

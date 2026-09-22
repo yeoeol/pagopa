@@ -1,7 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.cart.domain.model.Cart;
-import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.basket.domain.Cart;
+import com.commerce.pagopa.identity.domain.User;
 
 public final class CartFixture {
 

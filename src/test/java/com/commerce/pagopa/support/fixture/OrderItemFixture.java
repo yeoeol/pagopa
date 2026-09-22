@@ -1,8 +1,8 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.orderitem.domain.model.OrderItem;
-import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.catalog.domain.Product;
+import com.commerce.pagopa.ordering.domain.order.Order;
+import com.commerce.pagopa.ordering.domain.order.OrderItem;
 
 public final class OrderItemFixture {
 

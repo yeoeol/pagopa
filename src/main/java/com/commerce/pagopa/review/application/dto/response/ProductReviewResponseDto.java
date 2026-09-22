@@ -1,6 +1,6 @@
 package com.commerce.pagopa.review.application.dto.response;
 
-import com.commerce.pagopa.review.domain.model.Review;
+import com.commerce.pagopa.review.domain.Review;
 
 import java.util.List;
 
