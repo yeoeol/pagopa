@@ -1,5 +1,5 @@
 @ApplicationModule(type = OPEN)
-package com.commerce.pagopa.ordering;
+package com.commerce.pagopa.identity;
 
 import org.springframework.modulith.ApplicationModule;
 
