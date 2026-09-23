@@ -42,6 +42,9 @@ public class Review extends BaseTimeEntity {
     @Column(name = "rating", nullable = false)
     private Integer rating;     // 1 ~ 5
 
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
+
     @Column(name = "order_item_id", nullable = false)
     private Long orderItemId;
 
@@ -62,11 +65,13 @@ public class Review extends BaseTimeEntity {
     private Review(
             String content,
             Integer rating,
+            Long productId,
             Long orderItemId,
             Long userId
     ) {
-        this.rating = rating;
         this.content = content;
+        this.rating = rating;
+        this.productId = productId;
         this.orderItemId = orderItemId;
         this.userId = userId;
     }
@@ -74,12 +79,14 @@ public class Review extends BaseTimeEntity {
     public static Review create(
             String content,
             Integer rating,
+            Long productId,
             Long orderItemId,
             Long userId
     ) {
         return Review.builder()
                 .content(content)
                 .rating(rating)
+                .productId(productId)
                 .orderItemId(orderItemId)
                 .userId(userId)
                 .build();

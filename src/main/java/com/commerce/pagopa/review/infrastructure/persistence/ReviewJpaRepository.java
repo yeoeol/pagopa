@@ -16,7 +16,7 @@ public interface ReviewJpaRepository extends JpaRepository<Review, Long>, Review
             SELECT DISTINCT r
             FROM Review r
                 LEFT JOIN FETCH r.images ri
-            WHERE p.id = :productId
+            WHERE r.productId = :productId
             """)
     List<Review> findAllWithDetailsByProductId(@Param("productId") Long productId);
 }

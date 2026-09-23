@@ -1,7 +1,8 @@
 @ApplicationModule(
 		allowedDependencies = {
 				"identity :: api",
-				"catalog :: api"
+				"catalog :: api",
+				"ordering :: api"
 		},
 		type = OPEN
 )

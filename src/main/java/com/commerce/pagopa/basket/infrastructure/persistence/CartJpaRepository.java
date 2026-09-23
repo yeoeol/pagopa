@@ -18,7 +18,6 @@ public interface CartJpaRepository extends JpaRepository<Cart, Long>, CartReposi
                 LEFT JOIN FETCH c.cartItems ci
                 LEFT JOIN FETCH ci.product p
                 LEFT JOIN FETCH p.category
-                LEFT JOIN FETCH p.seller
             WHERE u.id = :userId
             """)
     Optional<Cart> findByUserIdWithItems(Long userId);

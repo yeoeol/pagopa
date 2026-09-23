@@ -4,6 +4,8 @@ import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.identity.api.ReviewAuthorQuery;
 import com.commerce.pagopa.identity.api.ReviewAuthorSummary;
+import com.commerce.pagopa.ordering.api.OrderItemApi;
+import com.commerce.pagopa.ordering.api.OrderItemSummary;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
 import com.commerce.pagopa.review.application.dto.response.ProductReviewResponseDto;
@@ -28,13 +30,17 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewAuthorQuery reviewAuthorQuery;
     private final ProductApi productApi;
+    private final OrderItemApi orderItemApi;
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
+        OrderItemSummary summary = orderItemApi.get(requestDto.orderItemId());
+
         Review review = Review.create(
                 requestDto.content(),
                 requestDto.rating(),
-                requestDto.orderItemId(),
+                summary.productId(),
+                summary.orderItemId(),
                 userId
         );
 
