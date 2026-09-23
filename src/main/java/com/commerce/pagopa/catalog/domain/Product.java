@@ -3,7 +3,7 @@ package com.commerce.pagopa.catalog.domain;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.merchant.domain.Seller;
+
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -61,13 +61,8 @@ public class Product extends BaseTimeEntity {
     )
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "seller_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_product_seller")
-    )
-    private Seller seller;
+    @Column(name = "seller_id", nullable = false)
+    private Long sellerId;
 
     @OneToMany(
             mappedBy = "product",
@@ -88,7 +83,7 @@ public class Product extends BaseTimeEntity {
             Integer stockQuantity,
             ProductStatus status,
             Category category,
-            Seller seller
+            Long sellerId
     ) {
         this.name = name;
         this.description = description;
@@ -96,7 +91,7 @@ public class Product extends BaseTimeEntity {
         this.stockQuantity = stockQuantity;
         this.status = status;
         this.category = category;
-        this.seller = seller;
+        this.sellerId = sellerId;
     }
 
     public static Product create(
@@ -105,7 +100,7 @@ public class Product extends BaseTimeEntity {
             Integer price,
             Integer stockQuantity,
             Category category,
-            Seller seller
+            Long sellerId
     ) {
         return Product.builder()
                 .name(name)
@@ -114,7 +109,7 @@ public class Product extends BaseTimeEntity {
                 .stockQuantity(stockQuantity)
                 .status(ProductStatus.ACTIVE)
                 .category(category)
-                .seller(seller)
+                .sellerId(sellerId)
                 .build();
     }
 

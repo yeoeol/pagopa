@@ -53,7 +53,7 @@ public class SellerProductService {
                 requestDto.price(),
                 requestDto.stockQuantity(),
                 category,
-                seller
+                seller.getId()
         );
 
         for (int i = 0; i < requestDto.imageUrls().size(); i++) {

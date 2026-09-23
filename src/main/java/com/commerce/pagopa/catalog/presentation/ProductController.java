@@ -3,7 +3,7 @@ package com.commerce.pagopa.catalog.presentation;
 import com.commerce.pagopa.catalog.application.ProductService;
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.discovery.application.SearchHistoryService;
+import com.commerce.pagopa.discovery.api.DiscoveryApi;
 import com.commerce.pagopa.global.cookie.GuestSessionCookieFactory;
 import com.commerce.pagopa.global.response.ApiResponse;
 
@@ -34,8 +34,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ProductController {
 
     private final ProductService productService;
-    private final SearchHistoryService searchHistoryService;
     private final GuestSessionCookieFactory guestSessionCookieFactory;
+    private final DiscoveryApi discoveryApi;
 
     @Operation(summary = "상품 목록 조회", description = "전체 상품 목록을 조회합니다.")
     @GetMapping
@@ -68,7 +68,7 @@ public class ProductController {
         String keyword = productSearchCondition.productName();
         String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
 
-        searchHistoryService.saveHistory(userId, sessionId, keyword);
+        discoveryApi.saveHistory(userId, sessionId, keyword);
 
         return ResponseEntity.ok(
                 ApiResponse.ok(productService.search(productSearchCondition))

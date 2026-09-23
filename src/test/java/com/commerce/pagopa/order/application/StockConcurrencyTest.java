@@ -95,7 +95,7 @@ class StockConcurrencyTest {
         categoryRepository.save(tree.root());
 
         // 상품 등록
-        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller));
+        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId()));
 
         // 스레드풀 생성
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -173,7 +173,7 @@ class StockConcurrencyTest {
         // N개 상품 미리 생성, 각 stockQuantity=1 → 동시 주문 시 row 경합 0
         List<Product> products = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
-            products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10+(i*5))));
+            products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 10+(i*5))));
         }
 
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -248,9 +248,9 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        Product product1 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10));
-        Product product2 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 20));
-        Product product3 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 30));
+        Product product1 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 10));
+        Product product2 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 20));
+        Product product3 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 30));
 
         // 상품 주문
         OrderResponseDto created = orderService.order(buyer.getId(),
@@ -341,7 +341,7 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, N));
+        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), N));
 
         // 상품 주문
         List<Long> orderIds = new ArrayList<>(N);

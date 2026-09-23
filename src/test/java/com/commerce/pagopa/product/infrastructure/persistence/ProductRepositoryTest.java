@@ -74,7 +74,7 @@ class ProductRepositoryTest {
                 1000,
                 10,
                 category,
-                seller
+                seller.getId()
         );
         Product product2 = ProductFixture.aProduct(
                 "productB",
@@ -82,7 +82,7 @@ class ProductRepositoryTest {
                 2000,
                 20,
                 category,
-                seller
+                seller.getId()
         );
         Product product3 = ProductFixture.aProduct(
                 "productC",
@@ -90,7 +90,7 @@ class ProductRepositoryTest {
                 3000,
                 30,
                 category,
-                seller
+                seller.getId()
         );
         products.add(productRepository.save(product1));
         products.add(productRepository.save(product2));
