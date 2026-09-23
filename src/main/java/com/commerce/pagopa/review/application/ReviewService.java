@@ -1,10 +1,9 @@
 package com.commerce.pagopa.review.application;
 
-import com.commerce.pagopa.catalog.domain.ProductRepository;
+import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.ordering.domain.order.OrderItem;
-import com.commerce.pagopa.ordering.domain.order.OrderItemRepository;
+import com.commerce.pagopa.identity.api.ReviewAuthorQuery;
+import com.commerce.pagopa.identity.api.ReviewAuthorSummary;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
 import com.commerce.pagopa.review.application.dto.response.ProductReviewResponseDto;
@@ -27,19 +26,16 @@ import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final ProductRepository productRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final ReviewAuthorQuery reviewAuthorQuery;
+    private final ProductApi productApi;
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
-        OrderItem orderItem = orderItemRepository.findByIdOrThrow(requestDto.orderItemId());
-
-        validateOrdererId(orderItem, userId);
-
         Review review = Review.create(
                 requestDto.content(),
                 requestDto.rating(),
-                orderItem
+                requestDto.orderItemId(),
+                userId
         );
 
         for (int i = 0; i < requestDto.imageUrls().size(); i++) {
@@ -75,22 +71,15 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ProductReviewResponseDto> findAllByProduct(Long productId) {
-        if (!productRepository.existsById(productId)) {
+        if (!productApi.existsById(productId)) {
             throw new BusinessException(PRODUCT_NOT_FOUND);
         }
 
         return reviewRepository.findAllWithDetailsByProductId(productId).stream()
-                .map(ProductReviewResponseDto::from)
+                .map(review -> {
+                    ReviewAuthorSummary author = reviewAuthorQuery.findById(review.getUserId());
+                    return ProductReviewResponseDto.from(review, author);
+                })
                 .toList();
-    }
-
-    private void validateOrdererId(OrderItem orderItem, Long userId) {
-		Long ordererId = orderItem.getOrder()
-			    .getUser()
-                .getId();
-
-        if (!ordererId.equals(userId)) {
-            throw new BusinessException(ErrorCode.ORDER_NOT_MINE);
-        }
     }
 }

@@ -1,7 +1,6 @@
 package com.commerce.pagopa.review.domain;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.ordering.domain.order.OrderItem;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -43,13 +42,11 @@ public class Review extends BaseTimeEntity {
     @Column(name = "rating", nullable = false)
     private Integer rating;     // 1 ~ 5
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "order_item_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_review_order_item")
-    )
-    private OrderItem orderItem;
+    @Column(name = "order_item_id", nullable = false)
+    private Long orderItemId;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @OneToMany(
             mappedBy = "review",
@@ -62,17 +59,29 @@ public class Review extends BaseTimeEntity {
     private final List<ReviewImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Review(String content, Integer rating, OrderItem orderItem) {
+    private Review(
+            String content,
+            Integer rating,
+            Long orderItemId,
+            Long userId
+    ) {
         this.rating = rating;
         this.content = content;
-        this.orderItem = orderItem;
+        this.orderItemId = orderItemId;
+        this.userId = userId;
     }
 
-    public static Review create(String content, Integer rating, OrderItem orderItem) {
+    public static Review create(
+            String content,
+            Integer rating,
+            Long orderItemId,
+            Long userId
+    ) {
         return Review.builder()
                 .content(content)
                 .rating(rating)
-                .orderItem(orderItem)
+                .orderItemId(orderItemId)
+                .userId(userId)
                 .build();
     }
 

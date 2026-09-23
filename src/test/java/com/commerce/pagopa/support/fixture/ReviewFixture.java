@@ -1,6 +1,5 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.ordering.domain.order.OrderItem;
 import com.commerce.pagopa.review.domain.Review;
 
 public final class ReviewFixture {
@@ -8,15 +7,21 @@ public final class ReviewFixture {
     private ReviewFixture() {
     }
 
-    public static Review aReview(OrderItem orderItem) {
+    public static Review aReview(Long orderItemId, Long userId) {
         return aReview(
                 "좋아요",
                 5,
-                orderItem
+                orderItemId,
+                userId
         );
     }
 
-    public static Review aReview(String content, Integer rating, OrderItem orderItem) {
-        return Review.create(content, rating, orderItem);
+    public static Review aReview(
+            String content,
+            Integer rating,
+            Long orderItemId,
+            Long userId
+    ) {
+        return Review.create(content, rating, orderItemId, userId);
     }
 }
