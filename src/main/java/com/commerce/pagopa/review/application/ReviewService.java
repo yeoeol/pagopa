@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -81,11 +84,19 @@ public class ReviewService {
             throw new BusinessException(PRODUCT_NOT_FOUND);
         }
 
-        return reviewRepository.findAllWithDetailsByProductId(productId).stream()
-                .map(review -> {
-                    ReviewAuthorSummary author = reviewAuthorQuery.findById(review.getUserId());
-                    return ProductReviewResponseDto.from(review, author);
-                })
+        List<Review> reviews = reviewRepository.findAllWithDetailsByProductId(productId);
+
+        Set<Long> userIds = reviews.stream()
+                .map(Review::getUserId)
+                .collect(Collectors.toSet());
+
+        Map<Long, ReviewAuthorSummary> authors = reviewAuthorQuery.findAllByIds(userIds);
+
+        return reviews.stream()
+                .map(review -> ProductReviewResponseDto.from(
+                        review,
+                        authors.get(review.getUserId())
+                ))
                 .toList();
     }
 }

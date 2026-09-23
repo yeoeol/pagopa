@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static com.commerce.pagopa.global.response.ErrorCode.USER_NOT_FOUND;
@@ -19,6 +21,8 @@ public interface UserRepository {
     Optional<User> findByIdForUpdate(Long userId);
 
     Page<User> findAll(Pageable pageable);
+
+    List<User> findByIdIn(Collection<Long> userIds);
 
     Optional<User> findByProviderAndProviderId(
             Provider provider,
