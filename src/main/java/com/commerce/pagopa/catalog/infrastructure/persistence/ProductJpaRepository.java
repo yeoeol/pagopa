@@ -1,4 +1,4 @@
-package com.commerce.pagopa.ordering.infrastructure.persistence;
+package com.commerce.pagopa.catalog.infrastructure.persistence;
 
 import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.catalog.domain.ProductRepository;

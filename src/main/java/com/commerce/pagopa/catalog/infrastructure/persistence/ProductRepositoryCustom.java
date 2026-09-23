@@ -1,4 +1,4 @@
-package com.commerce.pagopa.ordering.infrastructure.persistence;
+package com.commerce.pagopa.catalog.infrastructure.persistence;
 
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.catalog.domain.Product;

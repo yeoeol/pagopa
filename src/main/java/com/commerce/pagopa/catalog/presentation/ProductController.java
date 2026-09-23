@@ -1,4 +1,4 @@
-package com.commerce.pagopa.ordering.presentation;
+package com.commerce.pagopa.catalog.presentation;
 
 import com.commerce.pagopa.catalog.application.ProductService;
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;

@@ -1,4 +1,4 @@
-package com.commerce.pagopa.media.api;
+package com.commerce.pagopa.media.presenatation;
 
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.media.application.ImageService;
