@@ -39,7 +39,7 @@ public class CartItemApiService implements CartItemApi {
 	private CartItemSummary toSummary(CartItem cartItem) {
 		return new CartItemSummary(
 				cartItem.getId(),
-				cartItem.getProduct().getId(),
+				cartItem.getProductId(),
 				cartItem.getCartQuantity()
 		);
 	}

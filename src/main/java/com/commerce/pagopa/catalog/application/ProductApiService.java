@@ -37,6 +37,12 @@ public class ProductApiService implements ProductApi {
 		return productSummary;
 	}
 
+	@Override
+	public ProductSummary find(Long productId) {
+		Product product = productRepository.findByIdOrThrow(productId);
+		return toSummary(product);
+	}
+
 	private ProductSummary toSummary(Product product) {
 		return new ProductSummary(
 				product.getId(),

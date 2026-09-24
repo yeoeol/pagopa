@@ -5,8 +5,8 @@ import com.commerce.pagopa.basket.application.dto.response.CartItemResponseDto;
 import com.commerce.pagopa.basket.domain.Cart;
 import com.commerce.pagopa.basket.domain.CartItem;
 import com.commerce.pagopa.basket.domain.CartItemRepository;
-import com.commerce.pagopa.catalog.domain.Product;
-import com.commerce.pagopa.catalog.domain.ProductRepository;
+import com.commerce.pagopa.catalog.api.ProductApi;
+import com.commerce.pagopa.catalog.api.ProductSummary;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,22 +18,22 @@ import lombok.RequiredArgsConstructor;
 public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
-    private final ProductRepository productRepository;
     private final CartService cartService;
+    private final ProductApi productApi;
 
     @Transactional
     public CartItemResponseDto addCartItem(Long userId, CartItemAddRequestDto requestDto) {
         Cart cart = cartService.getOrCreate(userId);
 
-        Product product = productRepository.findByIdOrThrow(requestDto.productId());
+        ProductSummary product = productApi.find(requestDto.productId());
 
-        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product)
+        CartItem cartItem = cartItemRepository.findByCartAndProductId(cart, product.productId())
                 .map(existing -> {
                     existing.addQuantity(requestDto.quantity());
                     return existing;
                 })
                 .orElseGet(() -> cartItemRepository.save(
-                        CartItem.create(cart, product, requestDto.quantity()))
+                        CartItem.create(cart, product.productId(), requestDto.quantity()))
                 );
 
         return CartItemResponseDto.from(cartItem);

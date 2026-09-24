@@ -1,6 +1,5 @@
 package com.commerce.pagopa.basket.domain;
 
-import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 
@@ -14,7 +13,7 @@ public interface CartItemRepository {
 
 	Optional<CartItem> findByIdForUpdate(Long cartItemId);
 
-	Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
+	Optional<CartItem> findByCartAndProductId(Cart cart, Long productId);
 
 	List<CartItem> findAllByIdInAndUserIdForUpdate(
 			List<Long> cartItemIds,

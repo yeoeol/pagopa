@@ -1,6 +1,5 @@
 package com.commerce.pagopa.basket.domain;
 
-import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 
 import jakarta.persistence.*;
@@ -36,13 +35,8 @@ public class CartItem extends BaseTimeEntity {
 	)
 	private Cart cart;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "product_id",
-			nullable = false,
-			foreignKey = @ForeignKey(name = "fk_cart_item_product")
-	)
-	private Product product;
+	@Column(name = "product_id",  nullable = false)
+	private Long productId;
 
 	@ToString.Include
 	@Column(name = "cart_quantity", nullable = false)
@@ -51,22 +45,22 @@ public class CartItem extends BaseTimeEntity {
 	@Builder(access = AccessLevel.PRIVATE)
 	private CartItem(
 			Cart cart,
-			Product product,
+			Long productId,
 			Integer cartQuantity
 	) {
 		this.cart = cart;
-		this.product = product;
+		this.productId = productId;
 		this.cartQuantity = cartQuantity;
 	}
 
 	public static CartItem create(
 			Cart cart,
-			Product product,
+			Long productId,
 			Integer cartQuantity
 	) {
 		return CartItem.builder()
 				.cart(cart)
-				.product(product)
+				.productId(productId)
 				.cartQuantity(cartQuantity)
 				.build();
 	}

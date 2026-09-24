@@ -7,4 +7,6 @@ public interface ProductApi {
 	boolean existsById(Long productId);
 
 	Map<Long, ProductSummary> findAllByIds(Collection<Long> productIds);
+
+	ProductSummary find(Long productId);
 }
