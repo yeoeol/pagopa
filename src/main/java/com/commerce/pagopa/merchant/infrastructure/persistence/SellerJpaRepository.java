@@ -17,7 +17,6 @@ public interface SellerJpaRepository extends JpaRepository<Seller, Long>, Seller
 	@Query("""
 			SELECT s
 			FROM Seller s
-			JOIN FETCH s.user u
 			WHERE s.id = :sellerId
 			""")
 	Optional<Seller> findById(@Param("sellerId") Long sellerId);
@@ -26,7 +25,6 @@ public interface SellerJpaRepository extends JpaRepository<Seller, Long>, Seller
 	@Query(value = """
 					SELECT s
 					FROM Seller s
-					JOIN FETCH s.user u
 					WHERE s.status = :status
 					""",
 		   countQuery = """

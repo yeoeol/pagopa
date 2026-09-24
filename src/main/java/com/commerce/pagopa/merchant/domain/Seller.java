@@ -3,7 +3,6 @@ package com.commerce.pagopa.merchant.domain;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.domain.User;
 
 import jakarta.persistence.*;
 
@@ -46,33 +45,28 @@ public class Seller extends BaseTimeEntity {
 	@Column(name = "status_changed_at", nullable = false)
 	private LocalDateTime statusChangedAt;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "user_id",
-			nullable = false,
-			foreignKey = @ForeignKey(name = "fk_seller_user")
-	)
-	private User user;
+	@Column(name = "user_id", nullable = false)
+	private Long userId;
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Seller(
 			SellerStatus status,
 			VerificationStatus verificationStatus,
 			LocalDateTime statusChangedAt,
-			User user
+			Long userId
 	) {
 		this.status = status;
 		this.verificationStatus = verificationStatus;
 		this.statusChangedAt = statusChangedAt;
-		this.user = user;
+		this.userId = userId;
 	}
 
-	public static Seller create(User user, LocalDateTime requestedAt) {
+	public static Seller create(Long userId, LocalDateTime requestedAt) {
 		return Seller.builder()
 				.status(SellerStatus.PENDING)
 				.verificationStatus(VerificationStatus.UNVERIFIED)
 				.statusChangedAt(requestedAt)
-				.user(user)
+				.userId(userId)
 				.build();
 	}
 

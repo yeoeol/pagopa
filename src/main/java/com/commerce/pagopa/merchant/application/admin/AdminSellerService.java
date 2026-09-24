@@ -1,8 +1,7 @@
 package com.commerce.pagopa.merchant.application.admin;
 
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.domain.*;
+import com.commerce.pagopa.identity.api.UserApi;
+import com.commerce.pagopa.identity.api.UserSummary;
 import com.commerce.pagopa.merchant.application.admin.dto.response.AdminSellerPageResponseDto;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,8 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminSellerService {
 
 	private final SellerRepository sellerRepository;
-	private final UserRepository userRepository;
-	private final RoleRepository roleRepository;
+	private final UserApi userApi;
 
 	@Transactional(readOnly = true)
 	public AdminSellerPageResponseDto getPendingSellers(Pageable pageable) {
@@ -38,19 +37,20 @@ public class AdminSellerService {
 		Page<Seller> sellers = sellerRepository
 				.findPendingRequests(SellerStatus.PENDING, pageRequest);
 
-		return AdminSellerPageResponseDto.from(sellers);
+		Map<Long, UserSummary> summary = userApi.findAllByIdIn(
+				sellers.stream()
+						.map(Seller::getUserId)
+						.toList()
+		);
+		return AdminSellerPageResponseDto.from(sellers, summary);
 	}
 
 	@Transactional
 	public void approve(Long sellerId) {
 		Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-		User user = userRepository.findByIdOrThrow(seller.getUser().getId());
 
-		Role sellerRole = roleRepository.findByCode(RoleCode.ROLE_SELLER)
-				.orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
-
+		userApi.grantSellerRole(seller.getUserId());
 		seller.activate(LocalDateTime.now());
-		user.grantRole(sellerRole);
 	}
 
 	@Transactional

@@ -65,7 +65,7 @@ class ProductRepositoryTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
 
-        Seller seller = sellerRepository.save(SellerFixture.aSeller(user));
+        Seller seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         // 검색 테스트가 productA/B/C name으로 매칭하므로 fixture 디폴트 대신 명시 생성
         Product product1 = ProductFixture.aProduct(

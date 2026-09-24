@@ -1,8 +1,6 @@
 package com.commerce.pagopa.merchant.application;
 
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.domain.*;
+import com.commerce.pagopa.identity.api.UserValidateApi;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
 
@@ -18,12 +16,11 @@ import lombok.RequiredArgsConstructor;
 public class SellerUserService {
 
 	private final SellerRepository sellerRepository;
-	private final UserRepository userRepository;
+	private final UserValidateApi userValidateApi;
 
 	@Transactional
 	public void request(Long userId) {
-		User user = userRepository.findByIdForUpdateOrThrow(userId);
-		validateRequestable(user);
+		userValidateApi.validateRequestable(userId);
 
 		LocalDateTime requestedAt = LocalDateTime.now();
 
@@ -32,23 +29,8 @@ public class SellerUserService {
 					existingSeller.requestAgain(requestedAt);
 					return existingSeller;
 				})
-				.orElseGet(() -> Seller.create(user, requestedAt));
+				.orElseGet(() -> Seller.create(userId, requestedAt));
 
 		sellerRepository.save(seller);
-	}
-
-	private void validateRequestable(User user) {
-		boolean hasAlreadySellerRole = user.getUserRoles()
-				.stream()
-				.map(UserRole::getRole)
-				.map(Role::getCode)
-				.anyMatch(roleCode -> roleCode == RoleCode.ROLE_SELLER);
-
-		if (hasAlreadySellerRole) {
-			throw new BusinessException(ErrorCode.ROLE_ALREADY_EXISTS);
-		}
-		if (user.getStatus() != UserStatus.ACTIVE) {
-			throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
-		}
 	}
 }

@@ -2,8 +2,6 @@ package com.commerce.pagopa.merchant.application;
 
 import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.catalog.domain.*;
-import com.commerce.pagopa.identity.domain.User;
-import com.commerce.pagopa.identity.domain.UserRepository;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.merchant.domain.Seller;
@@ -20,15 +18,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SellerProductService {
 
-    private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SellerRepository sellerRepository;
 
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> findAll(Long userId, Pageable pageable) {
-        User user = userRepository.findByIdOrThrow(userId);
-        Seller seller = sellerRepository.findByUserIdOrThrow(user.getId());
+        Seller seller = sellerRepository.findByUserIdOrThrow(userId);
 
         Page<Product> pageProduct = productRepository.findAllBySellerId(seller.getId(), pageable);
         return pageProduct.map(ProductResponseDto::from);
@@ -42,8 +38,7 @@ public class SellerProductService {
 
     @Transactional
     public ProductResponseDto register(Long userId, ProductRegisterRequestDto requestDto) {
-        User user = userRepository.findByIdOrThrow(userId);
-        Seller seller = sellerRepository.findByUserIdOrThrow(user.getId());
+        Seller seller = sellerRepository.findByUserIdOrThrow(userId);
 
         Category category = categoryRepository.findByIdOrThrow(requestDto.categoryId());
 

@@ -1,10 +1,12 @@
 package com.commerce.pagopa.merchant.application.admin.dto.response;
 
+import com.commerce.pagopa.identity.api.UserSummary;
 import com.commerce.pagopa.merchant.domain.Seller;
 
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -22,7 +24,10 @@ public record AdminSellerPageResponseDto(
 ) {
     private static final int PAGE_WINDOW_SIZE = 10;
 
-    public static AdminSellerPageResponseDto from(Page<Seller> sellers) {
+    public static AdminSellerPageResponseDto from(
+            Page<Seller> sellers,
+            Map<Long, UserSummary> summary
+    ) {
         int totalPages = sellers.getTotalPages();
         int currentPage = sellers.getNumber();
         int startPage = max(0, currentPage - PAGE_WINDOW_SIZE / 2);
@@ -34,7 +39,10 @@ public record AdminSellerPageResponseDto(
 
         return new AdminSellerPageResponseDto(
                 sellers.getContent().stream()
-                        .map(AdminSellerListItemResponseDto::from)
+                        .map(seller -> AdminSellerListItemResponseDto.from(
+                                seller,
+                                summary.get(seller.getUserId())
+                        ))
                         .toList(),
                 currentPage,
                 sellers.getSize(),

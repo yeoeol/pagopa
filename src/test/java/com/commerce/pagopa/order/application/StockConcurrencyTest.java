@@ -86,7 +86,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("order-stock-contention-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
@@ -162,7 +162,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("order-stock-no-contention-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
@@ -239,7 +239,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("cancel-idem-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
@@ -332,7 +332,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("cross-order-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
