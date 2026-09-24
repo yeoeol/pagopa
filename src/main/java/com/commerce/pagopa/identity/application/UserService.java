@@ -4,7 +4,7 @@ import com.commerce.pagopa.identity.application.dto.request.UserCreateRequestDto
 import com.commerce.pagopa.identity.application.dto.request.UserUpdateRequestDto;
 import com.commerce.pagopa.identity.application.dto.response.UserResponseDto;
 import com.commerce.pagopa.identity.domain.*;
-import com.commerce.pagopa.media.application.ImageService;
+import com.commerce.pagopa.media.api.ImageApi;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ImageService imageService;
+    private final ImageApi imageApi;
     private final RoleService roleService;
 
     @Transactional
@@ -53,7 +53,7 @@ public class UserService {
 
         // 기존 이미지 삭제
         if (StringUtils.hasText(requestDto.profileImage())) {
-            imageService.delete(user.getProfileImageUrl());
+            imageApi.delete(user.getProfileImageUrl());
         }
 
         user.updateProfile(requestDto.name(), requestDto.profileImage());
