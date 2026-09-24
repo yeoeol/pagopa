@@ -4,7 +4,7 @@ import com.commerce.pagopa.discovery.application.dto.response.SearchHistoryRespo
 import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.domain.UserRepository;
+import com.commerce.pagopa.identity.api.UserApi;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class SearchHistoryService {
 
     private final SearchHistoryRepository searchHistoryRepository;
-    private final UserRepository userRepository;
+    private final UserApi userApi;
 
     @Transactional
     public void saveHistory(Long userId, String sessionId, String keyword) {
@@ -35,7 +35,7 @@ public class SearchHistoryService {
 
         // 로그인 회원
         if (userId != null) {
-            if (!userRepository.existsById(userId)) {
+            if (!userApi.existsById(userId)) {
                 throw new BusinessException(ErrorCode.USER_NOT_FOUND);
             }
 
