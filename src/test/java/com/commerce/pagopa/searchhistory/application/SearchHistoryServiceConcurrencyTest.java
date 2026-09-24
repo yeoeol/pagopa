@@ -4,6 +4,7 @@ import com.commerce.pagopa.discovery.application.SearchHistoryService;
 import com.commerce.pagopa.discovery.domain.SearchHistory;
 import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
 import com.commerce.pagopa.global.config.QueryDSLConfig;
+import com.commerce.pagopa.identity.api.UserApi;
 import com.commerce.pagopa.identity.domain.User;
 import com.commerce.pagopa.identity.domain.UserRepository;
 import com.commerce.pagopa.support.fixture.UserFixture;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,7 @@ import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -54,6 +57,9 @@ class SearchHistoryServiceConcurrencyTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @MockitoBean
+    UserApi userApi;
 
     @Autowired
     DataSource dataSource;
@@ -152,6 +158,7 @@ class SearchHistoryServiceConcurrencyTest {
         User user = userRepository.save(UserFixture.aUser(unique_suffix("same-user-keyword")));
         String keyword = "keyword";
 
+        given(userApi.existsById(user.getId())).willReturn(true);
         try {
             ConcurrencyResult result = execute_concurrently(
                     ignored -> searchHistoryService.saveHistory(user.getId(), null, keyword)
