@@ -31,6 +31,7 @@ public class CartItemApiService implements CartItemApi {
 	}
 
 	@Override
+	@Transactional
 	public void deleteAllByIdIn(List<Long> cartItemIds) {
 		cartItemRepository.deleteAllByIdIn(cartItemIds);
 	}
