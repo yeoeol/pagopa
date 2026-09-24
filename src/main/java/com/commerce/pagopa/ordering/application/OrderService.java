@@ -5,8 +5,6 @@ import com.commerce.pagopa.basket.domain.CartItemRepository;
 import com.commerce.pagopa.catalog.api.*;
 import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.identity.domain.User;
-import com.commerce.pagopa.identity.domain.UserRepository;
 import com.commerce.pagopa.ordering.application.dto.request.*;
 import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseDto;
@@ -37,7 +35,6 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
-    private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductStockApi productStockApi;
     private final ProductApi productApi;
@@ -63,8 +60,7 @@ public class OrderService {
         );
 
         // OrderItem 목록 생성 및 총액 계산
-        User user = userRepository.findByIdOrThrow(userId);
-        Order order = Order.init(user);
+        Order order = Order.init(userId);
 
         for (ProductStockResult result : products) {
             OrderItem orderItem = OrderItem.create(

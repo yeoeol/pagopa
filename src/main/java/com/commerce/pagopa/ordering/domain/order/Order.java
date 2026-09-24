@@ -3,7 +3,6 @@ package com.commerce.pagopa.ordering.domain.order;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.domain.User;
 
 import jakarta.persistence.*;
 
@@ -47,13 +46,8 @@ public class Order extends BaseTimeEntity {
     @Column(name = "canceled_at", nullable = true)
     private LocalDateTime canceledAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_orders_user")
-    )
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
     private final List<OrderItem> orderItems = new ArrayList<>();
@@ -62,18 +56,18 @@ public class Order extends BaseTimeEntity {
     private Order(
             OrderStatus status,
             LocalDateTime orderedAt,
-            User user
+            Long userId
     ) {
         this.status = status;
         this.orderedAt = orderedAt;
-        this.user = user;
+        this.userId = userId;
     }
 
-    public static Order init(User user) {
+    public static Order init(Long userId) {
         return Order.builder()
                 .status(OrderStatus.PENDING_PAYMENT)
                 .orderedAt(LocalDateTime.now())
-                .user(user)
+                .userId(userId)
                 .build();
     }
 
