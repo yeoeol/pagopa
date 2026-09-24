@@ -20,7 +20,7 @@ public interface CartItemJpaRepository extends JpaRepository<CartItem, Long>, Ca
 			SELECT ci
 			FROM CartItem ci
 			WHERE ci.id IN :cartItemIds
-				AND ci.cart.user.id = :userId
+				AND ci.cart.userId = :userId
 			ORDER BY ci.id
 			""")
 	List<CartItem> findAllByIdInAndUserIdForUpdate(

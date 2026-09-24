@@ -1,7 +1,7 @@
 package com.commerce.pagopa.basket.domain;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.identity.domain.User;
+
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -31,13 +31,8 @@ public class Cart extends BaseTimeEntity {
     @Column(name = "cart_id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_cart_user")
-    )
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @OneToMany(
             mappedBy = "cart",
@@ -50,13 +45,13 @@ public class Cart extends BaseTimeEntity {
     private final List<CartItem> cartItems = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Cart(User user) {
-        this.user = user;
+    private Cart(Long userId) {
+        this.userId = userId;
     }
 
-    public static Cart create(User user) {
+    public static Cart create(Long userId) {
         return Cart.builder()
-                .user(user)
+                .userId(userId)
                 .build();
     }
 

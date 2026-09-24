@@ -3,7 +3,6 @@ package com.commerce.pagopa.basket.presentation.security;
 import com.commerce.pagopa.basket.domain.CartItem;
 import com.commerce.pagopa.basket.domain.CartItemRepository;
 import com.commerce.pagopa.global.validator.OwnerValidator;
-import com.commerce.pagopa.identity.domain.User;
 
 import org.springframework.stereotype.Component;
 
@@ -24,8 +23,6 @@ public class CartItemOwnerValidator extends OwnerValidator<CartItem, Long> {
 
     @Override
     protected Long extractOwnerId(CartItem cartItem) {
-        return Optional.ofNullable(cartItem.getCart().getUser())
-                .map(User::getId)
-                .orElse(null);
+        return cartItem.getCart().getUserId();
     }
 }
