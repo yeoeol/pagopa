@@ -1,7 +1,5 @@
 package com.commerce.pagopa.ordering.application;
 
-import com.commerce.pagopa.basket.domain.CartItem;
-import com.commerce.pagopa.basket.domain.CartItemRepository;
 import com.commerce.pagopa.catalog.api.*;
 import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.exception.BusinessException;
@@ -20,8 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,9 +34,9 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
-    private final CartItemRepository cartItemRepository;
     private final ProductStockApi productStockApi;
     private final ProductApi productApi;
+    private final CartItemApi cartItemApi;
 
     /**
      * 바로 주문을 생성합니다.
@@ -98,11 +97,10 @@ public class OrderService {
     @Transactional
     public OrderStockResponseDto orderFromCart(Long userId, CartItemOrderRequestDto requestDto) {
         // 선택된 장바구니 항목 조회
-        List<CartItem> cartItems = cartItemRepository.findAllByIdInAndUserIdForUpdate(
+        List<CartItemSummary> cartItems = cartItemApi.findAllByIdInAndUserIdForUpdate(
                 requestDto.cartItemIds(),
                 userId
         );
-        validateRequestedCartItems(requestDto.cartItemIds(), cartItems);
 
         OrderCreateRequestDto orderCreateRequestDto = getOrderCreateRequestDto(
                 requestDto,
@@ -111,9 +109,9 @@ public class OrderService {
         OrderStockResponseDto response = order(userId, orderCreateRequestDto);
 
         // 장바구니 목록 삭제
-        cartItemRepository.deleteAllByIdIn(
+        cartItemApi.deleteAllByIdIn(
                 cartItems.stream()
-                        .map(CartItem::getId)
+                        .map(CartItemSummary::cartItemId)
                         .toList()
         );
         return response;
@@ -168,7 +166,7 @@ public class OrderService {
 
     private OrderCreateRequestDto getOrderCreateRequestDto(
             CartItemOrderRequestDto requestDto,
-            List<CartItem> cartItems
+            List<CartItemSummary> cartItems
     ) {
         if (cartItems.isEmpty()) {
             throw new BusinessException(CART_ITEM_NOT_FOUND);
@@ -176,10 +174,10 @@ public class OrderService {
 
         // order() 메서드에 보내기 위한 재료 만들기
         List<OrderItemRequestDto> orderItemRequestDtos = new ArrayList<>();
-        for (CartItem cartItem : cartItems) {
+        for (CartItemSummary cartItem : cartItems) {
             OrderItemRequestDto dto = new OrderItemRequestDto(
-                    cartItem.getProduct().getId(),
-                    cartItem.getCartQuantity()
+                    cartItem.productId(),
+                    cartItem.quantity()
             );
             orderItemRequestDtos.add(dto);
         }
@@ -188,18 +186,5 @@ public class OrderService {
                 requestDto.delivery(),
                 orderItemRequestDtos
         );
-    }
-
-    private void validateRequestedCartItems(
-            List<Long> requestedItemIds,
-            List<CartItem> cartItems
-    ) {
-        Set<Long> requestedIds = new HashSet<>(requestedItemIds);
-        Set<Long> foundIds = cartItems.stream()
-                .map(CartItem::getId)
-                .collect(Collectors.toSet());
-        if (!requestedIds.equals(foundIds)) {
-            throw new BusinessException(CART_ITEM_NOT_FOUND);
-        }
     }
 }
