@@ -7,6 +7,7 @@ import com.commerce.pagopa.ordering.application.dto.request.CartItemOrderRequest
 import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderSearch;
 import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
+import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseDto;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,7 @@ public class OrderController {
 
     @Operation(summary = "장바구니 항목 주문 생성", description = "장바구니에서 선택된 항목들을 대상으로 주문을 생성합니다.")
     @PostMapping("/cart")
-    public ResponseEntity<ApiResponse<OrderResponseDto>> orderFromCart(
+    public ResponseEntity<ApiResponse<OrderStockResponseDto>> orderFromCart(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody CartItemOrderRequestDto requestDto
     ) {
@@ -47,7 +48,7 @@ public class OrderController {
 
     @Operation(summary = "바로 주문 생성", description = "장바구니를 거치지 않고 즉시 주문을 생성합니다.")
     @PostMapping
-    public ResponseEntity<ApiResponse<OrderResponseDto>> order(
+    public ResponseEntity<ApiResponse<OrderStockResponseDto>> order(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody OrderCreateRequestDto requestDto
     ) {
@@ -82,7 +83,7 @@ public class OrderController {
     @Operation(summary = "주문 전체 취소", description = "취소 가능한 주문 출고 단위를 CANCELLED 상태로 변경하고 차감된 재고를 복구합니다.")
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
-    public ResponseEntity<ApiResponse<OrderResponseDto>> cancelOrder(@PathVariable("id") Long orderId) {
+    public ResponseEntity<ApiResponse<OrderStockResponseDto>> cancelOrder(@PathVariable("id") Long orderId) {
         return ResponseEntity.ok(
                 ApiResponse.ok(orderService.cancelOrder(orderId))
         );

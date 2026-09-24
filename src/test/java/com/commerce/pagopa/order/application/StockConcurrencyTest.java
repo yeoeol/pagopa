@@ -13,6 +13,7 @@ import com.commerce.pagopa.ordering.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderItemRequestDto;
 import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
+import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseDto;
 import com.commerce.pagopa.ordering.domain.order.OrderStatus;
 import com.commerce.pagopa.support.fixture.*;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
@@ -253,8 +254,8 @@ class StockConcurrencyTest {
         Product product3 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 30));
 
         // 상품 주문
-        OrderResponseDto created = orderService.order(buyer.getId(),
-                new OrderCreateRequestDto(
+        OrderStockResponseDto created = orderService.order(buyer.getId(),
+														   new OrderCreateRequestDto(
                         new DeliveryRequestDto(
                                 "메모",
                                 "01010",
@@ -346,8 +347,8 @@ class StockConcurrencyTest {
         // 상품 주문
         List<Long> orderIds = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
-            OrderResponseDto created = orderService.order(buyer.getId(),
-                    new OrderCreateRequestDto(
+            OrderStockResponseDto created = orderService.order(buyer.getId(),
+															   new OrderCreateRequestDto(
                             new DeliveryRequestDto(
                                     "메모",
                                     "01010",

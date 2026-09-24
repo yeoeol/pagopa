@@ -40,7 +40,7 @@ public interface ProductRepository {
 
     List<Product> searchProducts(@NonNull ProductSearchCondition condition);
 
-    List<Product> findAllByIdIn(List<Long> productIds);
+    List<Product> findByIdIn(Collection<Long> productIds);
 
     Optional<Product> findByIdForUpdate(Long id);
 

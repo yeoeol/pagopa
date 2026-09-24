@@ -1,6 +1,5 @@
 package com.commerce.pagopa.ordering.domain.order;
 
-import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 
 import jakarta.persistence.*;
@@ -48,13 +47,8 @@ public class OrderItem extends BaseTimeEntity {
     )
     private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "product_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_order_item_product")
-    )
-    private Product product;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
     @Builder(access = AccessLevel.PRIVATE)
     private OrderItem(
@@ -62,13 +56,13 @@ public class OrderItem extends BaseTimeEntity {
             Integer orderPrice,
             Integer orderQuantity,
             Order order,
-            Product product
+            Long productId
     ) {
         this.productName = productName;
         this.orderPrice = orderPrice;
         this.orderQuantity = orderQuantity;
         this.order = order;
-        this.product = product;
+        this.productId = productId;
     }
 
     public static OrderItem create(
@@ -76,14 +70,14 @@ public class OrderItem extends BaseTimeEntity {
             Integer orderPrice,
             Integer orderQuantity,
             Order order,
-            Product product
+            Long productId
     ) {
         return OrderItem.builder()
                 .productName(productName)
                 .orderPrice(orderPrice)
                 .orderQuantity(orderQuantity)
                 .order(order)
-                .product(product)
+                .productId(productId)
                 .build();
     }
 

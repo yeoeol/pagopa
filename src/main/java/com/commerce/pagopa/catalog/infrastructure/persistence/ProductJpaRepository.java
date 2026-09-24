@@ -12,16 +12,12 @@ import org.springframework.data.repository.query.Param;
 
 import jakarta.persistence.LockModeType;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository, ProductRepositoryCustom {
 
     @Override
     Page<Product> findAllBySellerId(Long userId, Pageable pageable);
-
-    @Override
-    List<Product> findAllByIdIn(List<Long> productIds);
 
     @Override
     @Query("""

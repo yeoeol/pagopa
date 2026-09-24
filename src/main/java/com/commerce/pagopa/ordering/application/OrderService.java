@@ -2,14 +2,14 @@ package com.commerce.pagopa.ordering.application;
 
 import com.commerce.pagopa.basket.domain.CartItem;
 import com.commerce.pagopa.basket.domain.CartItemRepository;
-import com.commerce.pagopa.catalog.domain.Product;
-import com.commerce.pagopa.catalog.domain.ProductRepository;
+import com.commerce.pagopa.catalog.api.*;
 import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.identity.domain.User;
 import com.commerce.pagopa.identity.domain.UserRepository;
 import com.commerce.pagopa.ordering.application.dto.request.*;
 import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
+import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseDto;
 import com.commerce.pagopa.ordering.domain.delivery.Delivery;
 import com.commerce.pagopa.ordering.domain.delivery.DeliveryRepository;
 import com.commerce.pagopa.ordering.domain.order.Order;
@@ -38,63 +38,43 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
+    private final ProductStockApi productStockApi;
+    private final ProductApi productApi;
 
     /**
      * 바로 주문을 생성합니다.
      */
     @Counted("my.order")
     @Transactional
-    public OrderResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
-        // 동일 상품 수량 합산
-        Map<Long, Integer> totalQuantityByProductId = new HashMap<>();
+    public OrderStockResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
+        List<ProductStockRequest> stockRequests =
+                requestDto.products().stream()
+                        .map(item -> new ProductStockRequest(
+                                item.productId(),
+                                item.quantity()
+                        ))
+                        .toList();
 
-        for (OrderItemRequestDto orderItem : requestDto.products()) {
-            totalQuantityByProductId.merge(
-                    orderItem.productId(),
-                    orderItem.quantity(),
-                    Integer::sum
-            );
-        }
-
-        // 데드락 방지
-        List<Long> productIds = totalQuantityByProductId.keySet()
-                .stream()
-                .sorted()
-                .toList();
-
-        // 모든 상품 검증 (존재 여부 / 판매 여부 / 재고 부족 여부)
-        Map<Long, Product> productMap = new HashMap<>();
-
-        // 존재 여부 검증 및 row 락 걸기
-        for (Long productId : productIds) {
-            Product product = productRepository.findByIdForUpdateOrThrow(productId);
-            productMap.put(productId, product);
-        }
+        List<ProductStockResult> products = productStockApi.decreaseStocks(stockRequests);
+        Map<Long, ProductSummary> summary = productApi.findAllByIds(
+                products.stream()
+                        .map(ProductStockResult::productId).toList()
+        );
 
         // OrderItem 목록 생성 및 총액 계산
         User user = userRepository.findByIdOrThrow(userId);
         Order order = Order.init(user);
 
-        for (OrderItemRequestDto op : requestDto.products()) {
-            Product product = productMap.get(op.productId());
-
+        for (ProductStockResult result : products) {
             OrderItem orderItem = OrderItem.create(
-                    product.getName(),
-                    product.getPrice(),
-                    op.quantity(),
+                    result.productName(),
+                    result.unitPrice(),
+                    result.requestedQuantity(),
                     order,
-                    product
+                    result.productId()
             );
             order.addOrderItem(orderItem);
-        }
-
-        // 재고 차감
-        for (Long productId : productIds) {
-            Product product = productMap.get(productId);
-            int orderedQuantity = totalQuantityByProductId.get(productId);
-            product.decreaseStock(orderedQuantity);
         }
 
         Order savedOrder = orderRepository.save(order);
@@ -112,7 +92,7 @@ public class OrderService {
         );
         deliveryRepository.save(delivery);
 
-        return OrderResponseDto.from(savedOrder);
+        return OrderStockResponseDto.from(savedOrder, summary);
     }
 
     /**
@@ -120,7 +100,7 @@ public class OrderService {
      */
     @Counted("my.order")
     @Transactional
-    public OrderResponseDto orderFromCart(Long userId, CartItemOrderRequestDto requestDto) {
+    public OrderStockResponseDto orderFromCart(Long userId, CartItemOrderRequestDto requestDto) {
         // 선택된 장바구니 항목 조회
         List<CartItem> cartItems = cartItemRepository.findAllByIdInAndUserIdForUpdate(
                 requestDto.cartItemIds(),
@@ -132,7 +112,7 @@ public class OrderService {
                 requestDto,
                 cartItems
         );
-        OrderResponseDto response = order(userId, orderCreateRequestDto);
+        OrderStockResponseDto response = order(userId, orderCreateRequestDto);
 
         // 장바구니 목록 삭제
         cartItemRepository.deleteAllByIdIn(
@@ -148,32 +128,25 @@ public class OrderService {
      */
     @Counted("my.order")
     @Transactional
-    public OrderResponseDto cancelOrder(Long orderId) {
+    public OrderStockResponseDto cancelOrder(Long orderId) {
         // 주문 존재 여부 확인
         Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
         order.cancel(LocalDateTime.now());
 
-        // 데드락 방지
-        List<Long> productIds = order.getOrderItems().stream()
-                .map(orderItem -> orderItem.getProduct().getId())
-                .distinct()
-                .sorted()
-                .toList();
+        List<ProductStockResult> products = productStockApi.restoreStocks(
+                order.getOrderItems()
+                        .stream()
+                        .map(oi -> new ProductStockRequest(
+                                oi.getProductId(), oi.getOrderQuantity()
+                        ))
+                        .toList()
+        );
+        Map<Long, ProductSummary> summary = productApi.findAllByIds(
+                products.stream()
+                        .map(ProductStockResult::productId).toList()
+        );
 
-        Map<Long, Product> productMap = new HashMap<>();
-
-        for (Long productId : productIds) {
-            Product product = productRepository.findByIdForUpdateOrThrow(productId);
-            productMap.put(productId, product);
-        }
-
-        // 주문 항목 수량만큼 재고 복구
-        for (OrderItem op : order.getOrderItems()) {
-            Product product = productMap.get(op.getProduct().getId());
-            product.increaseStock(op.getOrderQuantity());
-        }
-
-        return OrderResponseDto.from(order);
+        return OrderStockResponseDto.from(order, summary);
     }
 
     @Transactional(readOnly = true)

@@ -27,7 +27,7 @@ public class OrderItemApiService implements OrderItemApi {
 		return new OrderItemSummary(
 				orderItem.getId(),
 				orderItem.getOrder().getId(),
-				orderItem.getProduct().getId()
+				orderItem.getProductId()
 		);
 	}
 }
