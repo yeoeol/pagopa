@@ -8,5 +8,14 @@ public interface ProductApi {
 
 	Map<Long, ProductSummary> findAllByIds(Collection<Long> productIds);
 
-	ProductSummary find(Long productId);
+	ProductSummary get(Long productId);
+
+	ProductSummary register(ProductRegisterRequest request);
+
+	ProductPageResponseDto findAllByUserId(
+			Long sellerId,
+			int pageSize,
+			int pageNumber,
+			String sort
+	);
 }

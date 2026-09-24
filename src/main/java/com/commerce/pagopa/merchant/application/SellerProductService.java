@@ -1,16 +1,17 @@
 package com.commerce.pagopa.merchant.application;
 
-import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.catalog.domain.*;
+import com.commerce.pagopa.catalog.api.*;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductRegisterRequestDto;
+import com.commerce.pagopa.merchant.application.dto.seller.response.SellerProductPageResponseDto;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,57 +19,62 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SellerProductService {
 
-    private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
     private final SellerRepository sellerRepository;
+    private final ProductApi productApi;
+    private final ProductStockApi productStockApi;
 
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> findAll(Long userId, Pageable pageable) {
+    public SellerProductPageResponseDto findAll(Long userId, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdOrThrow(userId);
 
-        Page<Product> pageProduct = productRepository.findAllBySellerId(seller.getId(), pageable);
-        return pageProduct.map(ProductResponseDto::from);
+		ProductPageResponseDto response = productApi.findAllByUserId(
+				seller.getId(),
+				pageable.getPageSize(),
+				pageable.getPageNumber(),
+				pageable.getSort().toString()
+		);
+
+		return new SellerProductPageResponseDto(
+				response.content(),
+				response.page(),
+				response.size(),
+				response.totalElements(),
+				response.totalPages(),
+				response.first(),
+				response.last(),
+				response.startPage(),
+				response.endPage()
+		);
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDto find(Long productId) {
-        Product product = productRepository.findByIdOrThrow(productId);
-        return ProductResponseDto.from(product);
+    public ProductSummary find(Long productId) {
+        return productApi.get(productId);
     }
 
     @Transactional
-    public ProductResponseDto register(Long userId, ProductRegisterRequestDto requestDto) {
+    public ProductSummary register(Long userId, ProductRegisterRequestDto requestDto) {
         Seller seller = sellerRepository.findByUserIdOrThrow(userId);
 
-        Category category = categoryRepository.findByIdOrThrow(requestDto.categoryId());
-
-        Product product = Product.create(
-                requestDto.name(),
-                requestDto.description(),
-                requestDto.price(),
-                requestDto.stockQuantity(),
-                category,
-                seller.getId()
-        );
-
-        for (int i = 0; i < requestDto.imageUrls().size(); i++) {
-            boolean isThumbnail = (i == 0);
-            ProductImage productImage = ProductImage.create(
-                    requestDto.imageUrls().get(i),
-                    i + 1,
-                    isThumbnail,
-                    product
-            );
-            product.addImage(productImage);
-        }
-
-        return ProductResponseDto.from(productRepository.save(product));
+		return productApi.register(new ProductRegisterRequest(
+				seller.getId(),
+				requestDto.categoryId(),
+				requestDto.name(),
+				requestDto.description(),
+				requestDto.price(),
+				requestDto.stockQuantity(),
+				requestDto.imageUrls()
+		));
     }
 
     @Transactional
-    public ProductResponseDto addStock(Long productId, ProductAddStockRequestDto requestDto) {
-        Product product = productRepository.findByIdOrThrow(productId);
-        product.increaseStock(requestDto.quantity());
-        return ProductResponseDto.from(product);
+    public ProductStockResult addStock(Long productId, ProductAddStockRequestDto requestDto) {
+        List<ProductStockResult> results = productStockApi.restoreStocks(List.of(
+                new ProductStockRequest(
+                        productId,
+                        requestDto.quantity()
+                )
+        ));
+        return results.getFirst();
     }
 }

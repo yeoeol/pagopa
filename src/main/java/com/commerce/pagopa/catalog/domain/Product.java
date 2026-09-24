@@ -61,8 +61,8 @@ public class Product extends BaseTimeEntity {
     )
     private Category category;
 
-    @Column(name = "seller_id", nullable = false)
-    private Long sellerId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @OneToMany(
             mappedBy = "product",
@@ -83,7 +83,7 @@ public class Product extends BaseTimeEntity {
             Integer stockQuantity,
             ProductStatus status,
             Category category,
-            Long sellerId
+            Long userId
     ) {
         this.name = name;
         this.description = description;
@@ -91,7 +91,7 @@ public class Product extends BaseTimeEntity {
         this.stockQuantity = stockQuantity;
         this.status = status;
         this.category = category;
-        this.sellerId = sellerId;
+        this.userId = userId;
     }
 
     public static Product create(
@@ -100,7 +100,7 @@ public class Product extends BaseTimeEntity {
             Integer price,
             Integer stockQuantity,
             Category category,
-            Long sellerId
+            Long userId
     ) {
         return Product.builder()
                 .name(name)
@@ -109,7 +109,7 @@ public class Product extends BaseTimeEntity {
                 .stockQuantity(stockQuantity)
                 .status(ProductStatus.ACTIVE)
                 .category(category)
-                .sellerId(sellerId)
+                .userId(userId)
                 .build();
     }
 

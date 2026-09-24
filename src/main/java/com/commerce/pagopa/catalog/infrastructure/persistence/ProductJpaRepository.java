@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository, ProductRepositoryCustom {
 
     @Override
-    Page<Product> findAllBySellerId(Long userId, Pageable pageable);
+    Page<Product> findAllByUserId(Long userId, Pageable pageable);
 
     @Override
     @Query("""

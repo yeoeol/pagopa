@@ -26,7 +26,7 @@ public class SellerProductOwnerValidator extends OwnerValidator<Product, Long> {
 
     @Override
     protected Long extractOwnerId(Product product) {
-        Seller seller = sellerRepository.findByIdOrThrow(product.getSellerId());
+        Seller seller = sellerRepository.findByIdOrThrow(product.getUserId());
         return seller.getUserId();
     }
 }

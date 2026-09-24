@@ -25,7 +25,7 @@ public class CartItemService {
     public CartItemResponseDto addCartItem(Long userId, CartItemAddRequestDto requestDto) {
         Cart cart = cartService.getOrCreate(userId);
 
-        ProductSummary product = productApi.find(requestDto.productId());
+        ProductSummary product = productApi.get(requestDto.productId());
 
         CartItem cartItem = cartItemRepository.findByCartAndProductId(cart, product.productId())
                 .map(existing -> {
