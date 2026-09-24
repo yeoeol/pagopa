@@ -1,7 +1,6 @@
 package com.commerce.pagopa.support.fixture;
 
 import com.commerce.pagopa.global.entity.Address;
-import com.commerce.pagopa.identity.domain.User;
 import com.commerce.pagopa.ordering.domain.delivery.Delivery;
 import com.commerce.pagopa.ordering.domain.order.Order;
 
@@ -10,10 +9,10 @@ public final class DeliveryFixture {
     private DeliveryFixture() {
     }
 
-    public static Delivery aDelivery(User user) {
+    public static Delivery aDelivery(Long userId) {
         return aDelivery(
                 AddressFixture.anAddress(),
-                OrderFixture.anOrder(user)
+                OrderFixture.anOrder(userId)
         );
     }
 

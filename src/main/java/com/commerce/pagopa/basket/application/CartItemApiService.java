@@ -1,9 +1,9 @@
-package com.commerce.pagopa.catalog.application;
+package com.commerce.pagopa.basket.application;
 
+import com.commerce.pagopa.basket.api.CartItemApi;
+import com.commerce.pagopa.basket.api.CartItemSummary;
 import com.commerce.pagopa.basket.domain.CartItem;
 import com.commerce.pagopa.basket.domain.CartItemRepository;
-import com.commerce.pagopa.catalog.api.CartItemApi;
-import com.commerce.pagopa.catalog.api.CartItemSummary;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

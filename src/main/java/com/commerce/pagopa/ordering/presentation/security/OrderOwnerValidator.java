@@ -1,7 +1,6 @@
 package com.commerce.pagopa.ordering.presentation.security;
 
 import com.commerce.pagopa.global.validator.OwnerValidator;
-import com.commerce.pagopa.identity.domain.User;
 import com.commerce.pagopa.ordering.domain.order.Order;
 import com.commerce.pagopa.ordering.domain.order.OrderRepository;
 
@@ -24,8 +23,6 @@ public class OrderOwnerValidator extends OwnerValidator<Order, Long> {
 
     @Override
     protected Long extractOwnerId(Order order) {
-        return Optional.ofNullable(order.getUser())
-                .map(User::getId)
-                .orElse(null);
+        return order.getUserId();
     }
 }

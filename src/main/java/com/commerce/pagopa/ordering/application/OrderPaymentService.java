@@ -50,7 +50,7 @@ public class OrderPaymentService {
 			Long userId,
 			Order order
 	) {
-		if (!order.getUser().getId().equals(userId)) {
+		if (!order.getUserId().equals(userId)) {
 			throw new BusinessException(ErrorCode.ORDER_NOT_MINE);
 		}
 	}

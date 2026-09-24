@@ -1,5 +1,7 @@
 package com.commerce.pagopa.ordering.application;
 
+import com.commerce.pagopa.basket.api.CartItemApi;
+import com.commerce.pagopa.basket.api.CartItemSummary;
 import com.commerce.pagopa.catalog.api.*;
 import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.exception.BusinessException;

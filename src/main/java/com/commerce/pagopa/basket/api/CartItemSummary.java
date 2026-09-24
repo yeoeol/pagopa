@@ -1,4 +1,4 @@
-package com.commerce.pagopa.catalog.api;
+package com.commerce.pagopa.basket.api;
 
 public record CartItemSummary(
 		Long cartItemId,

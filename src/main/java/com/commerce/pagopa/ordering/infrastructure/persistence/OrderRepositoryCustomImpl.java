@@ -60,7 +60,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     private BooleanExpression userIdEq(Long userId) {
-        return userId == null ? null : order.user.id.eq(userId);
+        return userId == null ? null : order.userId.eq(userId);
     }
 
     private BooleanExpression periodGoeAndLt(LocalDateTime start, LocalDateTime end) {

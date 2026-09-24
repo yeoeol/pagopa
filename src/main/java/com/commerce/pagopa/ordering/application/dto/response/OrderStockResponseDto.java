@@ -2,7 +2,6 @@ package com.commerce.pagopa.ordering.application.dto.response;
 
 import com.commerce.pagopa.catalog.api.ProductSummary;
 import com.commerce.pagopa.global.response.StatusResponseDto;
-import com.commerce.pagopa.identity.application.dto.response.UserResponseDto;
 import com.commerce.pagopa.ordering.domain.order.Order;
 import com.commerce.pagopa.ordering.domain.order.OrderStatus;
 
@@ -15,7 +14,7 @@ public record OrderStockResponseDto(
         StatusResponseDto<OrderStatus> status,
         LocalDateTime orderedAt,
         LocalDateTime canceledAt,
-        UserResponseDto user,
+        Long userId,
         List<OrderItemWithProductResponseDto> orderItems
 ) {
     public static OrderStockResponseDto from(
@@ -27,7 +26,7 @@ public record OrderStockResponseDto(
                 StatusResponseDto.from(order.getStatus()),
                 order.getOrderedAt(),
                 order.getCanceledAt(),
-                UserResponseDto.from(order.getUser()),
+                order.getUserId(),
                 order.getOrderItems().stream()
                         .map(oi -> OrderItemWithProductResponseDto.from(
                                 oi, summary.get(oi.getProductId()))

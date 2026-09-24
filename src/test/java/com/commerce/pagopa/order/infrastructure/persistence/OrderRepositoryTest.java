@@ -145,7 +145,7 @@ class OrderRepositoryTest {
     }
 
     private Order persistOrder(User buyer, LocalDateTime orderedAt, OrderStatus status) {
-        Order order = orderRepository.save(OrderFixture.anOrder(buyer));
+        Order order = orderRepository.save(OrderFixture.anOrder(buyer.getId()));
         // createdAt은 @CreatedDate라 영속 시 now로 채워지므로 bulk update로 backdate, status도 함께 보정
         em.createQuery("""
                        update Order o

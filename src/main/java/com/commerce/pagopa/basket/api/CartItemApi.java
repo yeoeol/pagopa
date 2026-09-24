@@ -1,4 +1,4 @@
-package com.commerce.pagopa.catalog.api;
+package com.commerce.pagopa.basket.api;
 
 import java.util.List;
 
@@ -7,7 +7,6 @@ public interface CartItemApi {
 			List<Long> cartItemIds,
 			Long userId
 	);
-
 
 	void deleteAllByIdIn(List<Long> cartItemIds);
 }
