@@ -1,4 +1,4 @@
-package com.commerce.pagopa.localtest.application;
+package com.commerce.pagopa.identity.localtest.application;
 
 import com.commerce.pagopa.identity.application.AuthService;
 import com.commerce.pagopa.identity.application.UserService;

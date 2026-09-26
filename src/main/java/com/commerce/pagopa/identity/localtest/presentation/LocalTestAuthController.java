@@ -1,9 +1,9 @@
-package com.commerce.pagopa.localtest.presentation;
+package com.commerce.pagopa.identity.localtest.presentation;
 
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;
-import com.commerce.pagopa.localtest.application.LocalTestAuthService;
-import com.commerce.pagopa.localtest.application.dto.request.LocalTestTokenRequestDto;
+import com.commerce.pagopa.identity.localtest.application.LocalTestAuthService;
+import com.commerce.pagopa.identity.localtest.application.dto.request.LocalTestTokenRequestDto;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
