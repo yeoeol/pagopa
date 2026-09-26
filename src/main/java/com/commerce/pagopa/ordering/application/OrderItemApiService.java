@@ -18,8 +18,10 @@ public class OrderItemApiService implements OrderItemApi {
 	private final OrderItemRepository orderItemRepository;
 
 	@Override
-	public OrderItemSummary get(Long orderItemId) {
+	public OrderItemSummary getReviewableOrderItem(Long userId, Long orderItemId) {
 		OrderItem orderItem = orderItemRepository.findByIdOrThrow(orderItemId);
+		orderItem.validateOrderUser(userId);
+
 		return toSummary(orderItem);
 	}
 

@@ -37,7 +37,7 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
-        OrderItemSummary summary = orderItemApi.get(requestDto.orderItemId());
+        OrderItemSummary summary = orderItemApi.getReviewableOrderItem(userId, requestDto.orderItemId());
 
         Review review = Review.create(
                 requestDto.content(),

@@ -106,6 +106,10 @@ public class Order extends BaseTimeEntity {
                 .sum();
     }
 
+    public boolean isOwner(Long userId) {
+        return this.userId.equals(userId);
+    }
+
     // == 상태 검증 메서드 == //
     public void validateConfirmPayment() {
         if (this.status != OrderStatus.PENDING_PAYMENT) {
