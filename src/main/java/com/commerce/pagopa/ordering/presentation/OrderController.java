@@ -1,6 +1,5 @@
 package com.commerce.pagopa.ordering.presentation;
 
-import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.ordering.application.OrderService;
 import com.commerce.pagopa.ordering.application.dto.request.CartItemOrderRequestDto;
@@ -49,12 +48,12 @@ public class OrderController {
     @Operation(summary = "바로 주문 생성", description = "장바구니를 거치지 않고 즉시 주문을 생성합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<OrderStockResponseDto>> order(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody OrderCreateRequestDto requestDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(orderService.order(userDetails.getUserId(), requestDto)));
+                .body(ApiResponse.ok(orderService.order(userId, requestDto)));
     }
 
     @Operation(summary = "주문 상세 조회", description = "주문에 대한 정보를 상세 조회합니다.")
@@ -71,12 +70,12 @@ public class OrderController {
     @Operation(summary = "주문 목록 조회", description = "본인 주문 목록을 조회합니다. year 미지정 시 최근 6개월, year 지정 시 해당 연도. status로 추가 필터링 가능합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthenticationPrincipal(expression = "userId") Long userId,
             @ParameterObject @ModelAttribute OrderSearch orderSearch,
             @ParameterObject @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(orderService.findAll(userDetails.getUserId(), orderSearch, pageable))
+                ApiResponse.ok(orderService.findAll(userId, orderSearch, pageable))
         );
     }
 

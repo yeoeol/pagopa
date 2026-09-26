@@ -1,4 +1,4 @@
-package com.commerce.pagopa;
+package com.commerce.pagopa.identity.presentation.admin;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

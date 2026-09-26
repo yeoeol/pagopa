@@ -1,11 +1,11 @@
 package com.commerce.pagopa.auth.controller;
 
 import com.commerce.pagopa.global.config.CookieSettings;
-import com.commerce.pagopa.global.cookie.JwtCookieFactory;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.global.util.JwtCookieUtil;
 import com.commerce.pagopa.identity.application.AuthService;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtCookieFactory;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtCookieUtil;
 import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenProvider;
 import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;
 import com.commerce.pagopa.identity.presentation.AuthController;

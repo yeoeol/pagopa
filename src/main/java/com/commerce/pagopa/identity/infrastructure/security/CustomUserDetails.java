@@ -1,4 +1,4 @@
-package com.commerce.pagopa.global.entity;
+package com.commerce.pagopa.identity.infrastructure.security;
 
 import com.commerce.pagopa.identity.domain.RoleCode;
 

@@ -1,12 +1,8 @@
 package com.commerce.pagopa.identity.presentation;
 
-import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenProvider;
-import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenType;
-import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;
-import com.commerce.pagopa.global.cookie.JwtCookieFactory;
 import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.global.util.JwtCookieUtil;
 import com.commerce.pagopa.identity.application.AuthService;
+import com.commerce.pagopa.identity.infrastructure.jwt.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -102,6 +102,10 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    systemProperty(
+            'spring.modulith.detection-strategy',
+            'explicitly-annotated'
+    )
 }
 
 tasks.withType(JavaCompile).configureEach {

@@ -1,7 +1,7 @@
 package com.commerce.pagopa.merchant.presentation.security;
 
-import com.commerce.pagopa.catalog.domain.Product;
-import com.commerce.pagopa.catalog.domain.ProductRepository;
+import com.commerce.pagopa.catalog.api.ProductApi;
+import com.commerce.pagopa.catalog.api.ProductSummary;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
@@ -14,19 +14,19 @@ import lombok.RequiredArgsConstructor;
 
 @Component("sellerProductOwnerValidator")
 @RequiredArgsConstructor
-public class SellerProductOwnerValidator extends OwnerValidator<Product, Long> {
+public class SellerProductOwnerValidator extends OwnerValidator<ProductSummary, Long> {
 
-    private final ProductRepository productRepository;
     private final SellerRepository sellerRepository;
+    private final ProductApi productApi;
 
     @Override
-    protected Optional<Product> findResource(Long productId) {
-        return productRepository.findById(productId);
+    protected Optional<ProductSummary> findResource(Long productId) {
+        return Optional.ofNullable(productApi.get(productId));
     }
 
     @Override
-    protected Long extractOwnerId(Product product) {
-        Seller seller = sellerRepository.findByIdOrThrow(product.getUserId());
+    protected Long extractOwnerId(ProductSummary product) {
+        Seller seller = sellerRepository.findByIdOrThrow(product.sellerId());
         return seller.getUserId();
     }
 }

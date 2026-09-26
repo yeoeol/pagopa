@@ -1,4 +1,4 @@
-package com.commerce.pagopa;
+package com.commerce.pagopa.catalog.infrastructure.initializer;
 
 import com.commerce.pagopa.catalog.domain.Category;
 import com.commerce.pagopa.catalog.domain.CategoryRepository;

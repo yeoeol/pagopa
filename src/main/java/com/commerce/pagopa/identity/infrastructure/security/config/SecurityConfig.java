@@ -1,4 +1,4 @@
-package com.commerce.pagopa.global.config;
+package com.commerce.pagopa.identity.infrastructure.security.config;
 
 import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
 import com.commerce.pagopa.identity.infrastructure.jwt.JwtAuthenticationFilter;

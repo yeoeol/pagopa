@@ -1,11 +1,11 @@
 package com.commerce.pagopa.identity.infrastructure.jwt;
 
-import com.commerce.pagopa.global.entity.CustomUserDetails;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.identity.application.JwtAuthenticationService;
 import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
 import com.commerce.pagopa.identity.infrastructure.jwt.resolver.TokenResolver;
+import com.commerce.pagopa.identity.infrastructure.security.CustomUserDetails;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

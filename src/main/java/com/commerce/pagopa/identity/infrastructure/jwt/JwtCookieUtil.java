@@ -1,8 +1,7 @@
-package com.commerce.pagopa.global.util;
+package com.commerce.pagopa.identity.infrastructure.jwt;
 
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenType;
 
 import jakarta.servlet.http.Cookie;
 

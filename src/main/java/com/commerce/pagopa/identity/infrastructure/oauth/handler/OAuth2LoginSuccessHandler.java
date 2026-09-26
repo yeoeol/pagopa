@@ -1,7 +1,7 @@
 package com.commerce.pagopa.identity.infrastructure.oauth.handler;
 
-import com.commerce.pagopa.global.cookie.JwtCookieFactory;
 import com.commerce.pagopa.identity.application.AuthService;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtCookieFactory;
 import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenProvider;
 import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenType;
 import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;

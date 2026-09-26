@@ -1,7 +1,6 @@
-package com.commerce.pagopa.global.cookie;
+package com.commerce.pagopa.identity.infrastructure.jwt;
 
 import com.commerce.pagopa.global.config.CookieSettings;
-import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenType;
 
 import org.springframework.stereotype.Component;
 
