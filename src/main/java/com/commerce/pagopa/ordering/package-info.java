@@ -1,6 +1,9 @@
-@ApplicationModule(type = OPEN)
+@ApplicationModule(
+		allowedDependencies = {
+				"catalog :: api",
+				"basket :: api"
+		}
+)
 package com.commerce.pagopa.ordering;
 
 import org.springframework.modulith.ApplicationModule;
-
-import static org.springframework.modulith.ApplicationModule.Type.OPEN;

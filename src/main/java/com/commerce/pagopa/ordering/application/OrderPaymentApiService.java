@@ -5,6 +5,7 @@ import com.commerce.pagopa.ordering.api.OrderPaymentSummary;
 import com.commerce.pagopa.ordering.domain.order.Order;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,9 @@ public class OrderPaymentApiService implements OrderPaymentApi {
 	private final OrderPaymentService orderPaymentService;
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional(
+			propagation = Propagation.MANDATORY
+	)
 	public OrderPaymentSummary validateConfirmPayment(
 			Long userId,
 			Long orderId
@@ -31,7 +34,9 @@ public class OrderPaymentApiService implements OrderPaymentApi {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional(
+			propagation = Propagation.MANDATORY
+	)
 	public void validateCancelAfterPayment(
 			Long userId,
 			Long orderId
@@ -41,7 +46,9 @@ public class OrderPaymentApiService implements OrderPaymentApi {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(
+			propagation = Propagation.MANDATORY
+	)
 	public void confirmPayment(
 			Long orderId,
 			Integer approvedAmount
@@ -51,6 +58,9 @@ public class OrderPaymentApiService implements OrderPaymentApi {
 	}
 
 	@Override
+	@Transactional(
+			propagation = Propagation.MANDATORY
+	)
 	public void cancelAfterPayment(Long orderId) {
 		Order order = orderPaymentService.getOrderForUpdate(orderId);
 		orderPaymentService.cancelAfterPayment(order.getId());

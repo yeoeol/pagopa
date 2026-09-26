@@ -1,6 +1,8 @@
-@ApplicationModule(type = OPEN)
+@ApplicationModule(
+		allowedDependencies = {
+				"identity :: api"
+		}
+)
 package com.commerce.pagopa.discovery;
 
 import org.springframework.modulith.ApplicationModule;
-
-import static org.springframework.modulith.ApplicationModule.Type.OPEN;

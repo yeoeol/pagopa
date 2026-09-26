@@ -6,6 +6,7 @@ import com.commerce.pagopa.identity.api.UserValidateApi;
 import com.commerce.pagopa.identity.domain.*;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,9 @@ public class UserValidateApiService implements UserValidateApi {
 	private final UserRepository userRepository;
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional(
+			propagation = Propagation.MANDATORY
+	)
 	public void validateRequestable(Long userId) {
 		User user = userRepository.findByIdForUpdateOrThrow(userId);
 

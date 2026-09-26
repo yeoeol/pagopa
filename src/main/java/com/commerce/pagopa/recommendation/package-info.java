@@ -1,6 +1,4 @@
-@ApplicationModule(type = OPEN)
+@ApplicationModule
 package com.commerce.pagopa.recommendation;
 
 import org.springframework.modulith.ApplicationModule;
-
-import static org.springframework.modulith.ApplicationModule.Type.OPEN;
