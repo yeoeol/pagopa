@@ -1,5 +1,7 @@
 package com.commerce.pagopa.order.application;
 
+import com.commerce.pagopa.basket.api.CartItemApi;
+import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.catalog.domain.CategoryRepository;
 import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.catalog.domain.ProductRepository;
@@ -8,6 +10,7 @@ import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.identity.domain.*;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
+import com.commerce.pagopa.ordering.api.OrderPaymentApi;
 import com.commerce.pagopa.ordering.application.OrderService;
 import com.commerce.pagopa.ordering.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
@@ -61,6 +64,12 @@ class StockConcurrencyTest {
     UserRepository userRepository;
     @Autowired
 	SellerRepository sellerRepository;
+    @Autowired
+    ProductApi productApi;
+    @Autowired
+    CartItemApi cartItemApi;
+    @Autowired
+    OrderPaymentApi orderPaymentApi;
 
     private User user;
     private Seller seller;

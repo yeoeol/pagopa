@@ -1,0 +1,58 @@
+package com.commerce.pagopa.ordering.application;
+
+import com.commerce.pagopa.ordering.api.OrderPaymentApi;
+import com.commerce.pagopa.ordering.api.OrderPaymentSummary;
+import com.commerce.pagopa.ordering.domain.order.Order;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class OrderPaymentApiService implements OrderPaymentApi {
+
+	private final OrderPaymentService orderPaymentService;
+
+	@Override
+	@Transactional(readOnly = true)
+	public OrderPaymentSummary validateConfirmPayment(
+			Long userId,
+			Long orderId
+	) {
+		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, orderId);
+		order.validateConfirmPayment();
+
+		return new OrderPaymentSummary(
+				order.getId(),
+				order.getTotalAmount()
+		);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public void validateCancelAfterPayment(
+			Long userId,
+			Long orderId
+	) {
+		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, orderId);
+		order.validateCancelAfterPayment();
+	}
+
+	@Override
+	@Transactional
+	public void confirmPayment(
+			Long orderId,
+			Integer approvedAmount
+	) {
+		Order order = orderPaymentService.getOrderForUpdate(orderId);
+		order.confirmPayment(approvedAmount);
+	}
+
+	@Override
+	public void cancelAfterPayment(Long orderId) {
+		Order order = orderPaymentService.getOrderForUpdate(orderId);
+		orderPaymentService.cancelAfterPayment(order.getId());
+	}
+}

@@ -3,7 +3,6 @@ package com.commerce.pagopa.payment.domain;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.ordering.domain.order.Order;
 
 import jakarta.persistence.*;
 
@@ -61,33 +60,28 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "provider_transaction_id", length = 255, nullable = true)
     private String providerTransactionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "order_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_payment_orders")
-    )
-    private Order order;
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
 
     @Builder(access = AccessLevel.PRIVATE)
     private Payment(
             String paymentMethod,
             Integer amount,
             PaymentStatus status,
-            Order order
+            Long orderId
     ) {
         this.paymentMethod = paymentMethod;
         this.amount = amount;
         this.status = status;
-        this.order = order;
+        this.orderId = orderId;
     }
 
-    public static Payment create(String paymentMethod, Integer amount, Order order) {
+    public static Payment create(String paymentMethod, Integer amount, Long orderId) {
         return Payment.builder()
                 .paymentMethod(paymentMethod)
                 .amount(amount)
                 .status(PaymentStatus.READY)
-                .order(order)
+                .orderId(orderId)
                 .build();
     }
 

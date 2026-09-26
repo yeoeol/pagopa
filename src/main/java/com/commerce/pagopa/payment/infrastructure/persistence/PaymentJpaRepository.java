@@ -19,6 +19,6 @@ public interface PaymentJpaRepository extends JpaRepository<Payment, Long>, Paym
 	Optional<Payment> findByIdForUpdate(@Param("paymentId") Long paymentId);
 
 	@Override
-	@Query("SELECT p FROM Payment p WHERE p.order.id = :orderId")
+	@Query("SELECT p FROM Payment p WHERE p.orderId = :orderId")
 	Optional<Payment> findByOrderId(@Param("orderId") Long orderId);
 }

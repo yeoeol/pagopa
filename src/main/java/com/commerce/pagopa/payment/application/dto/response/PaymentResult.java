@@ -18,7 +18,7 @@ public record PaymentResult(
 	public static PaymentResult from(Payment payment) {
 		return new PaymentResult(
 				payment.getId(),
-				payment.getOrder().getId(),
+				payment.getOrderId(),
 				StatusResponseDto.from(payment.getStatus()),
 				payment.getPaymentMethod(),
 				payment.getAmount(),
