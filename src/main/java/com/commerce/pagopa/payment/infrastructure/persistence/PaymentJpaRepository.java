@@ -1,7 +1,7 @@
 package com.commerce.pagopa.payment.infrastructure.persistence;
 
-import com.commerce.pagopa.payment.domain.model.Payment;
-import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
+import com.commerce.pagopa.payment.domain.Payment;
+import com.commerce.pagopa.payment.domain.PaymentRepository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -19,6 +19,6 @@ public interface PaymentJpaRepository extends JpaRepository<Payment, Long>, Paym
 	Optional<Payment> findByIdForUpdate(@Param("paymentId") Long paymentId);
 
 	@Override
-	@Query("SELECT p FROM Payment p WHERE p.order.id = :orderId")
+	@Query("SELECT p FROM Payment p WHERE p.orderId = :orderId")
 	Optional<Payment> findByOrderId(@Param("orderId") Long orderId);
 }

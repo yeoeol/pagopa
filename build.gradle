@@ -27,6 +27,16 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    set('springModulithVersion', "2.0.8")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
+    }
+}
+
 dependencies {
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
@@ -42,6 +52,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
+
+    // Spring Modulith
+    implementation "org.springframework.modulith:spring-modulith-starter-core"
+    testImplementation "org.springframework.modulith:spring-modulith-starter-test"
+    testImplementation "org.springframework.modulith:spring-modulith-docs"
 
     // Azure Blob Storage
     implementation 'com.azure.spring:spring-cloud-azure-starter-storage-blob:7.1.0'
@@ -60,6 +75,7 @@ dependencies {
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
 
     runtimeOnly 'com.mysql:mysql-connector-j'
+
     // API Specification (Swagger API)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
@@ -86,6 +102,10 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    systemProperty(
+            'spring.modulith.detection-strategy',
+            'explicitly-annotated'
+    )
 }
 
 tasks.withType(JavaCompile).configureEach {

@@ -1,15 +1,15 @@
 package com.commerce.pagopa.payment.application;
 
-import com.commerce.pagopa.order.application.OrderPaymentService;
-import com.commerce.pagopa.order.domain.model.Order;
+import com.commerce.pagopa.ordering.api.OrderPaymentApi;
+import com.commerce.pagopa.ordering.api.OrderPaymentSummary;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCommand;
 import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
-import com.commerce.pagopa.payment.domain.model.Payment;
-import com.commerce.pagopa.payment.domain.repository.PaymentRepository;
+import com.commerce.pagopa.payment.domain.Payment;
+import com.commerce.pagopa.payment.domain.PaymentRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,30 +27,36 @@ public class PaymentTransactionService {
 	private static final String APPROVAL_IDEMPOTENCY_KEY_PREFIX = "payment-approval-";
 	private static final String CANCELLATION_IDEMPOTENCY_KEY_PREFIX = "payment-cancellation-";
 
-	private final OrderPaymentService orderPaymentService;
+	private final OrderPaymentApi orderPaymentApi;
 	private final PaymentRepository paymentRepository;
 
 	@Transactional
 	public PaymentResult request(Long userId, PaymentCommand command) {
-		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, command.orderId());
-		order.validateConfirmPayment();
+		OrderPaymentSummary summary = orderPaymentApi.validateConfirmPayment(userId, command.orderId());
 
-		return paymentRepository.findByOrderId(order.getId())
+		return paymentRepository.findByOrderId(summary.orderId())
 				.map(PaymentResult::from)
 				.orElseGet(() -> PaymentResult.from(paymentRepository.save(
-						Payment.create(command.paymentMethod(), order.getTotalAmount(), order)
+						Payment.create(
+								command.paymentMethod(),
+								summary.totalAmount(),
+								summary.orderId()
+						)
 				)));
 	}
 
 	@Transactional
 	public PaymentApprovalRequest prepareApproval(Long userId, Long paymentId) {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, payment.getOrder().getId());
-		order.validateConfirmPayment();
+
+		OrderPaymentSummary summary = orderPaymentApi.validateConfirmPayment(
+				userId,
+				payment.getOrderId()
+		);
 
 		payment.startApproval();
 		return PaymentApprovalRequest.of(
-				order.getId(),
+				summary.orderId(),
 				payment.getAmount(),
 				payment.getPaymentMethod(),
 				APPROVAL_IDEMPOTENCY_KEY_PREFIX + payment.getId()
@@ -63,7 +69,6 @@ public class PaymentTransactionService {
 			PaymentApprovalResponse approval
 	) {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-		Order order = orderPaymentService.getOrderForUpdate(payment.getOrder().getId());
 
 		boolean approved = payment.approve(
 				approval.transactionId(),
@@ -71,7 +76,7 @@ public class PaymentTransactionService {
 				approval.approvedAt()
 		);
 		if (approved) {
-			orderPaymentService.confirmPayment(order.getId(), approval.approvedAmount());
+			orderPaymentApi.confirmPayment(payment.getOrderId(), approval.approvedAmount());
 		}
 		return PaymentResult.from(payment);
 	}
@@ -79,8 +84,7 @@ public class PaymentTransactionService {
 	@Transactional
 	public PaymentCancellationRequest prepareCancellation(Long userId, Long paymentId) {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-		Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, payment.getOrder().getId());
-		order.validateCancelAfterPayment();
+		orderPaymentApi.validateCancelAfterPayment(userId, payment.getOrderId());
 
 		payment.startCancellation();
 		return PaymentCancellationRequest.of(
@@ -96,7 +100,6 @@ public class PaymentTransactionService {
 			PaymentCancellationResponse cancellation
 	) {
 		Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-		Order order = orderPaymentService.getOrderForUpdate(payment.getOrder().getId());
 
 		boolean canceled = payment.cancel(
 				cancellation.transactionId(),
@@ -104,7 +107,7 @@ public class PaymentTransactionService {
 				cancellation.canceledAt()
 		);
 		if (canceled) {
-			orderPaymentService.cancelAfterPayment(order.getId());
+			orderPaymentApi.cancelAfterPayment(payment.getOrderId());
 		}
 		return PaymentResult.from(payment);
 	}

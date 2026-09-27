@@ -1,0 +1,41 @@
+package com.commerce.pagopa.identity.infrastructure.scheduler;
+
+import com.commerce.pagopa.identity.domain.UserRepository;
+import com.commerce.pagopa.identity.domain.UserStatus;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class UnbanScheduler {
+
+    private final UserRepository userRepository;
+
+    /**
+     * TODO: 다중 인스턴스 실행 시 단일 실행 보장
+     * 매 분 실행
+     */
+    @Transactional
+    @Scheduled(cron = "0 * * * * *")
+    public void unSuspendSchedule() {
+        log.info("[unSuspendSchedule] 임시 정지 해제 스케줄링 시작");
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threshold = now.minusDays(7);
+
+        int unSuspendCount = userRepository.bulkUnSuspend(
+                UserStatus.ACTIVE,
+                UserStatus.SUSPENDED,
+                now,
+                threshold
+        );
+		log.info("[unSuspendSchedule] 임시 정지 해제 회원 수: {}", unSuspendCount);
+    }
+}

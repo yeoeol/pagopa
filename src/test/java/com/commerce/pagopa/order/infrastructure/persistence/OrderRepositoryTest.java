@@ -1,17 +1,17 @@
 package com.commerce.pagopa.order.infrastructure.persistence;
 
-import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.order.domain.repository.OrderRepository;
-import com.commerce.pagopa.role.domain.model.Role;
-import com.commerce.pagopa.role.domain.repository.RoleRepository;
+import com.commerce.pagopa.identity.domain.Role;
+import com.commerce.pagopa.identity.domain.RoleRepository;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.identity.domain.UserRepository;
+import com.commerce.pagopa.ordering.domain.order.Order;
+import com.commerce.pagopa.ordering.domain.order.OrderRepository;
+import com.commerce.pagopa.ordering.domain.order.OrderStatus;
 import com.commerce.pagopa.support.fixture.OrderFixture;
 import com.commerce.pagopa.support.fixture.RoleFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.support.fixture.UserRoleFixture;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -145,7 +145,7 @@ class OrderRepositoryTest {
     }
 
     private Order persistOrder(User buyer, LocalDateTime orderedAt, OrderStatus status) {
-        Order order = orderRepository.save(OrderFixture.anOrder(buyer));
+        Order order = orderRepository.save(OrderFixture.anOrder(buyer.getId()));
         // createdAt은 @CreatedDate라 영속 시 now로 채워지므로 bulk update로 backdate, status도 함께 보정
         em.createQuery("""
                        update Order o

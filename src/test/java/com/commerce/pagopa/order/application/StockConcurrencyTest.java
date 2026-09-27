@@ -1,25 +1,26 @@
 package com.commerce.pagopa.order.application;
 
-import com.commerce.pagopa.category.domain.repository.CategoryRepository;
-import com.commerce.pagopa.delivery.application.dto.request.DeliveryRequestDto;
+import com.commerce.pagopa.basket.api.CartItemApi;
+import com.commerce.pagopa.catalog.api.ProductApi;
+import com.commerce.pagopa.catalog.domain.CategoryRepository;
+import com.commerce.pagopa.catalog.domain.Product;
+import com.commerce.pagopa.catalog.domain.ProductRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.order.application.dto.request.OrderCreateRequestDto;
-import com.commerce.pagopa.order.application.dto.response.OrderResponseDto;
-import com.commerce.pagopa.order.domain.model.enums.OrderStatus;
-import com.commerce.pagopa.orderitem.application.dto.request.OrderItemRequestDto;
-import com.commerce.pagopa.product.domain.model.Product;
-import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.role.domain.model.Role;
-import com.commerce.pagopa.role.domain.model.enums.RoleCode;
-import com.commerce.pagopa.role.domain.repository.RoleRepository;
-import com.commerce.pagopa.seller.domain.model.Seller;
-import com.commerce.pagopa.seller.domain.repository.SellerRepository;
+import com.commerce.pagopa.identity.domain.*;
+import com.commerce.pagopa.merchant.domain.Seller;
+import com.commerce.pagopa.merchant.domain.SellerRepository;
+import com.commerce.pagopa.ordering.api.OrderPaymentApi;
+import com.commerce.pagopa.ordering.application.OrderService;
+import com.commerce.pagopa.ordering.application.dto.request.DeliveryRequestDto;
+import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
+import com.commerce.pagopa.ordering.application.dto.request.OrderItemRequestDto;
+import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
+import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseDto;
+import com.commerce.pagopa.ordering.domain.order.OrderStatus;
 import com.commerce.pagopa.support.fixture.*;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,7 +53,7 @@ class StockConcurrencyTest {
     }
 
     @Autowired
-    OrderService orderService;
+	OrderService orderService;
     @Autowired
     ProductRepository productRepository;
     @Autowired
@@ -63,6 +64,12 @@ class StockConcurrencyTest {
     UserRepository userRepository;
     @Autowired
 	SellerRepository sellerRepository;
+    @Autowired
+    ProductApi productApi;
+    @Autowired
+    CartItemApi cartItemApi;
+    @Autowired
+    OrderPaymentApi orderPaymentApi;
 
     private User user;
     private Seller seller;
@@ -88,7 +95,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("order-stock-contention-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
@@ -98,7 +105,7 @@ class StockConcurrencyTest {
         categoryRepository.save(tree.root());
 
         // 상품 등록
-        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller));
+        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId()));
 
         // 스레드풀 생성
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -164,7 +171,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("order-stock-no-contention-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
@@ -176,7 +183,7 @@ class StockConcurrencyTest {
         // N개 상품 미리 생성, 각 stockQuantity=1 → 동시 주문 시 row 경합 0
         List<Product> products = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
-            products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10+(i*5))));
+            products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 10+(i*5))));
         }
 
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -241,7 +248,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("cancel-idem-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
@@ -251,13 +258,13 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        Product product1 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 10));
-        Product product2 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 20));
-        Product product3 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, 30));
+        Product product1 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 10));
+        Product product2 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 20));
+        Product product3 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 30));
 
         // 상품 주문
-        OrderResponseDto created = orderService.order(buyer.getId(),
-                new OrderCreateRequestDto(
+        OrderStockResponseDto created = orderService.order(buyer.getId(),
+														   new OrderCreateRequestDto(
                         new DeliveryRequestDto(
                                 "메모",
                                 "01010",
@@ -334,7 +341,7 @@ class StockConcurrencyTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
-        seller = sellerRepository.save(SellerFixture.aSeller(user));
+        seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("cross-order-buyer-" + N);
         buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
@@ -344,13 +351,13 @@ class StockConcurrencyTest {
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller, N));
+        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), N));
 
         // 상품 주문
         List<Long> orderIds = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
-            OrderResponseDto created = orderService.order(buyer.getId(),
-                    new OrderCreateRequestDto(
+            OrderStockResponseDto created = orderService.order(buyer.getId(),
+															   new OrderCreateRequestDto(
                             new DeliveryRequestDto(
                                     "메모",
                                     "01010",

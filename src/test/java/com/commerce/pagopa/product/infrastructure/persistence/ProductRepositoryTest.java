@@ -1,20 +1,16 @@
 package com.commerce.pagopa.product.infrastructure.persistence;
 
-import com.commerce.pagopa.category.domain.model.Category;
-import com.commerce.pagopa.category.domain.repository.CategoryRepository;
-import com.commerce.pagopa.product.application.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.product.domain.model.Product;
-import com.commerce.pagopa.product.domain.model.enums.ProductStatus;
-import com.commerce.pagopa.product.domain.repository.ProductRepository;
-import com.commerce.pagopa.role.domain.model.Role;
-import com.commerce.pagopa.role.domain.repository.RoleRepository;
-import com.commerce.pagopa.seller.domain.model.Seller;
-import com.commerce.pagopa.seller.domain.repository.SellerRepository;
+import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.catalog.domain.*;
+import com.commerce.pagopa.identity.domain.Role;
+import com.commerce.pagopa.identity.domain.RoleRepository;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.identity.domain.UserRepository;
+import com.commerce.pagopa.merchant.domain.Seller;
+import com.commerce.pagopa.merchant.domain.SellerRepository;
 import com.commerce.pagopa.support.fixture.*;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-import com.commerce.pagopa.user.domain.model.User;
-import com.commerce.pagopa.user.domain.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,7 +65,7 @@ class ProductRepositoryTest {
         user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
         userRepository.save(user);
 
-        Seller seller = sellerRepository.save(SellerFixture.aSeller(user));
+        Seller seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         // 검색 테스트가 productA/B/C name으로 매칭하므로 fixture 디폴트 대신 명시 생성
         Product product1 = ProductFixture.aProduct(
@@ -78,7 +74,7 @@ class ProductRepositoryTest {
                 1000,
                 10,
                 category,
-                seller
+                seller.getId()
         );
         Product product2 = ProductFixture.aProduct(
                 "productB",
@@ -86,7 +82,7 @@ class ProductRepositoryTest {
                 2000,
                 20,
                 category,
-                seller
+                seller.getId()
         );
         Product product3 = ProductFixture.aProduct(
                 "productC",
@@ -94,7 +90,7 @@ class ProductRepositoryTest {
                 3000,
                 30,
                 category,
-                seller
+                seller.getId()
         );
         products.add(productRepository.save(product1));
         products.add(productRepository.save(product2));

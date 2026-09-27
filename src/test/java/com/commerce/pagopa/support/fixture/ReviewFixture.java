@@ -1,22 +1,29 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.orderitem.domain.model.OrderItem;
-import com.commerce.pagopa.review.domain.model.Review;
+import com.commerce.pagopa.review.domain.Review;
 
 public final class ReviewFixture {
 
     private ReviewFixture() {
     }
 
-    public static Review aReview(OrderItem orderItem) {
+    public static Review aReview(Long productId, Long orderItemId, Long userId) {
         return aReview(
                 "좋아요",
                 5,
-                orderItem
+                productId,
+                orderItemId,
+                userId
         );
     }
 
-    public static Review aReview(String content, Integer rating, OrderItem orderItem) {
-        return Review.create(content, rating, orderItem);
+    public static Review aReview(
+            String content,
+            Integer rating,
+            Long productId,
+            Long orderItemId,
+            Long userId
+    ) {
+        return Review.create(content, rating, productId, orderItemId, userId);
     }
 }

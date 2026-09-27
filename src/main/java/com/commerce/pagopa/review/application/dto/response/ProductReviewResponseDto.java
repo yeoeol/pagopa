@@ -1,6 +1,7 @@
 package com.commerce.pagopa.review.application.dto.response;
 
-import com.commerce.pagopa.review.domain.model.Review;
+import com.commerce.pagopa.identity.api.ReviewAuthorSummary;
+import com.commerce.pagopa.review.domain.Review;
 
 import java.util.List;
 
@@ -8,19 +9,18 @@ public record ProductReviewResponseDto(
         Long reviewId,
         int rating,
         String content,
-        ReviewAuthorResponseDto user,
+        ReviewAuthorSummary author,
         List<ReviewImageResponseDto> images
 ) {
-    public static ProductReviewResponseDto from(Review review) {
+    public static ProductReviewResponseDto from(
+            Review review,
+            ReviewAuthorSummary author
+    ) {
         return new ProductReviewResponseDto(
                 review.getId(),
                 review.getRating(),
                 review.getContent(),
-                ReviewAuthorResponseDto.from(
-                        review.getOrderItem()
-                                .getOrder()
-                                .getUser()
-                ),
+                author,
                 review.getImages().stream()
                         .map(ReviewImageResponseDto::from)
                         .toList()

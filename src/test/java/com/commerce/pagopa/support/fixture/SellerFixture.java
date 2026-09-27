@@ -1,7 +1,6 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.seller.domain.model.Seller;
-import com.commerce.pagopa.user.domain.model.User;
+import com.commerce.pagopa.merchant.domain.Seller;
 
 import java.time.LocalDateTime;
 
@@ -10,9 +9,9 @@ public final class SellerFixture {
 	public SellerFixture() {
 	}
 
-	public static Seller aSeller(User user) {
+	public static Seller aSeller(Long userId) {
 		return Seller.create(
-				user,
+				userId,
 				LocalDateTime.now()
 		);
 	}

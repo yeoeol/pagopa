@@ -1,14 +1,15 @@
 package com.commerce.pagopa.auth.controller;
 
-import com.commerce.pagopa.auth.jwt.JwtTokenProvider;
-import com.commerce.pagopa.auth.jwt.TokenResponseDto;
-import com.commerce.pagopa.auth.service.AuthService;
 import com.commerce.pagopa.global.config.CookieSettings;
-import com.commerce.pagopa.global.cookie.JwtCookieFactory;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.global.util.JwtCookieUtil;
-import jakarta.servlet.http.Cookie;
+import com.commerce.pagopa.identity.application.AuthService;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtCookieFactory;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtCookieUtil;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenProvider;
+import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;
+import com.commerce.pagopa.identity.presentation.AuthController;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import jakarta.servlet.http.Cookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

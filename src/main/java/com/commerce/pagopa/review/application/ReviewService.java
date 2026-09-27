@@ -1,22 +1,26 @@
 package com.commerce.pagopa.review.application;
 
+import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.orderitem.domain.model.OrderItem;
-import com.commerce.pagopa.orderitem.domain.repository.OrderItemRepository;
-import com.commerce.pagopa.product.domain.repository.ProductRepository;
+import com.commerce.pagopa.identity.api.ReviewAuthorQuery;
+import com.commerce.pagopa.identity.api.ReviewAuthorSummary;
+import com.commerce.pagopa.ordering.api.OrderItemApi;
+import com.commerce.pagopa.ordering.api.OrderItemSummary;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
 import com.commerce.pagopa.review.application.dto.response.ProductReviewResponseDto;
 import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
-import com.commerce.pagopa.review.domain.model.Review;
-import com.commerce.pagopa.review.domain.model.ReviewImage;
-import com.commerce.pagopa.review.domain.repository.ReviewRepository;
+import com.commerce.pagopa.review.domain.Review;
+import com.commerce.pagopa.review.domain.ReviewImage;
+import com.commerce.pagopa.review.domain.ReviewRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,19 +31,20 @@ import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final ProductRepository productRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final ReviewAuthorQuery reviewAuthorQuery;
+    private final ProductApi productApi;
+    private final OrderItemApi orderItemApi;
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
-        OrderItem orderItem = orderItemRepository.findByIdOrThrow(requestDto.orderItemId());
-
-        validateOrdererId(orderItem, userId);
+        OrderItemSummary summary = orderItemApi.getReviewableOrderItem(userId, requestDto.orderItemId());
 
         Review review = Review.create(
                 requestDto.content(),
                 requestDto.rating(),
-                orderItem
+                summary.productId(),
+                summary.orderItemId(),
+                userId
         );
 
         for (int i = 0; i < requestDto.imageUrls().size(); i++) {
@@ -75,22 +80,23 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ProductReviewResponseDto> findAllByProduct(Long productId) {
-        if (!productRepository.existsById(productId)) {
+        if (!productApi.existsById(productId)) {
             throw new BusinessException(PRODUCT_NOT_FOUND);
         }
 
-        return reviewRepository.findAllWithDetailsByProductId(productId).stream()
-                .map(ProductReviewResponseDto::from)
+        List<Review> reviews = reviewRepository.findAllWithDetailsByProductId(productId);
+
+        Set<Long> userIds = reviews.stream()
+                .map(Review::getUserId)
+                .collect(Collectors.toSet());
+
+        Map<Long, ReviewAuthorSummary> authors = reviewAuthorQuery.findAllByIds(userIds);
+
+        return reviews.stream()
+                .map(review -> ProductReviewResponseDto.from(
+                        review,
+                        authors.get(review.getUserId())
+                ))
                 .toList();
-    }
-
-    private void validateOrdererId(OrderItem orderItem, Long userId) {
-		Long ordererId = orderItem.getOrder()
-			    .getUser()
-                .getId();
-
-        if (!ordererId.equals(userId)) {
-            throw new BusinessException(ErrorCode.ORDER_NOT_MINE);
-        }
     }
 }

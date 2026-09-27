@@ -1,0 +1,90 @@
+package com.commerce.pagopa.ordering.presentation;
+
+import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.ordering.application.OrderService;
+import com.commerce.pagopa.ordering.application.dto.request.CartItemOrderRequestDto;
+import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
+import com.commerce.pagopa.ordering.application.dto.request.OrderSearch;
+import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
+import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseDto;
+
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "ORDER API", description = "주문 관리 API")
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    @Operation(summary = "장바구니 항목 주문 생성", description = "장바구니에서 선택된 항목들을 대상으로 주문을 생성합니다.")
+    @PostMapping("/cart")
+    public ResponseEntity<ApiResponse<OrderStockResponseDto>> orderFromCart(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @Valid @RequestBody CartItemOrderRequestDto requestDto
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(orderService.orderFromCart(userId, requestDto)));
+    }
+
+    @Operation(summary = "바로 주문 생성", description = "장바구니를 거치지 않고 즉시 주문을 생성합니다.")
+    @PostMapping
+    public ResponseEntity<ApiResponse<OrderStockResponseDto>> order(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @Valid @RequestBody OrderCreateRequestDto requestDto
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(orderService.order(userId, requestDto)));
+    }
+
+    @Operation(summary = "주문 상세 조회", description = "주문에 대한 정보를 상세 조회합니다.")
+    @GetMapping("/{id}")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(
+            @PathVariable("id") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(orderService.find(orderId))
+        );
+    }
+
+    @Operation(summary = "주문 목록 조회", description = "본인 주문 목록을 조회합니다. year 미지정 시 최근 6개월, year 지정 시 해당 연도. status로 추가 필터링 가능합니다.")
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @ParameterObject @ModelAttribute OrderSearch orderSearch,
+            @ParameterObject @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(orderService.findAll(userId, orderSearch, pageable))
+        );
+    }
+
+    @Operation(summary = "주문 전체 취소", description = "취소 가능한 주문 출고 단위를 CANCELLED 상태로 변경하고 차감된 재고를 복구합니다.")
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
+    public ResponseEntity<ApiResponse<OrderStockResponseDto>> cancelOrder(@PathVariable("id") Long orderId) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(orderService.cancelOrder(orderId))
+        );
+    }
+}

@@ -1,0 +1,4 @@
+@ApplicationModule
+package com.commerce.pagopa.recommendation;
+
+import org.springframework.modulith.ApplicationModule;

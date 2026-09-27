@@ -1,0 +1,175 @@
+package com.commerce.pagopa.identity.domain;
+
+import com.commerce.pagopa.global.entity.Address;
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import lombok.*;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
+@Table(
+        name = "user",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_user_email",
+                        columnNames = "email"
+                ),
+                @UniqueConstraint(
+                        name = "uq_user_provider_provider_id",
+                        columnNames = {"provider", "provider_id"}
+                )
+        }
+)
+public class User extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
+    @Column(name = "user_id", nullable = false)
+    private Long id;
+
+    @ToString.Include
+    @Enumerated(EnumType.STRING)
+    @Column(name = "provider", length = 50, nullable = false)
+    private Provider provider;
+
+    @ToString.Include
+    @Column(name = "provider_id", length = 255, nullable = false)
+    private String providerId;
+
+    @ToString.Include
+    @Column(name = "name", length = 50, nullable = false)
+    private String name;
+
+    @ToString.Include
+    @Column(name = "email", length = 100, nullable = false)
+    private String email;
+
+    @ToString.Include
+    @Embedded
+    private Address address;
+
+    @ToString.Include
+    @Column(name = "phone_number", length = 20, nullable = true)
+    private String phoneNumber;
+
+    @ToString.Include
+    @Column(name = "profile_image_url", length = 512, nullable = false)
+    private String profileImageUrl;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+    private final Set<UserRole> userRoles = new HashSet<>();
+
+    @ToString.Include
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20, nullable = false)
+    private UserStatus status;
+
+    @ToString.Include
+    @Column(name = "status_changed_at", nullable = false)
+    private LocalDateTime statusChangedAt;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private User(
+            Provider provider,
+            String providerId,
+            String name,
+            String email,
+            Address address,
+            String phoneNumber,
+            String profileImageUrl,
+            UserStatus status,
+            LocalDateTime statusChangedAt
+    ) {
+        this.provider = provider;
+        this.providerId = providerId;
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.phoneNumber = phoneNumber;
+        this.profileImageUrl = profileImageUrl;
+        this.status = status;
+        this.statusChangedAt = statusChangedAt;
+    }
+
+    public static User create(
+            Provider provider,
+            String providerId,
+            String name,
+            String email,
+            String profileImageUrl,
+            LocalDateTime statusChangedAt
+    ) {
+        return User.builder()
+                .provider(provider)
+                .providerId(providerId)
+                .name(name)
+                .email(email)
+                .profileImageUrl(profileImageUrl)
+                .status(UserStatus.ACTIVE)
+                .statusChangedAt(statusChangedAt)
+                .build();
+    }
+
+    public void updateProfile(String name, String profileImage) {
+        if (name != null && !name.isBlank()) {
+            this.name = name;
+        }
+        if (profileImage != null && !profileImage.isBlank()) {
+            this.profileImageUrl = profileImage;
+        }
+    }
+
+    public void addUserRole(UserRole userRole) {
+        this.userRoles.add(userRole);
+        userRole.assignUser(this);
+    }
+
+    public void grantRole(Role role) {
+        userRoles.add(UserRole.create(this, role));
+    }
+
+    public void activate(LocalDateTime activatedAt) {
+        if (this.status == UserStatus.WITHDRAWN) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        this.status = UserStatus.ACTIVE;
+        this.statusChangedAt = activatedAt;
+    }
+
+    public void suspend(LocalDateTime suspendedAt) {
+        if (this.status == UserStatus.WITHDRAWN
+                || this.status != UserStatus.ACTIVE
+        ) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        this.status = UserStatus.SUSPENDED;
+        this.statusChangedAt = suspendedAt;
+    }
+
+    public void ban(LocalDateTime bannedAt) {
+        if (this.status == UserStatus.WITHDRAWN || this.status == UserStatus.BANNED) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        this.status = UserStatus.BANNED;
+        this.statusChangedAt = bannedAt;
+    }
+
+    public void withdraw(LocalDateTime withdrawnAt) {
+        if (this.status == UserStatus.WITHDRAWN) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        this.status = UserStatus.WITHDRAWN;
+        this.statusChangedAt = withdrawnAt;
+    }
+}

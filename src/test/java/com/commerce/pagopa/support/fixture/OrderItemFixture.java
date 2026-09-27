@@ -1,8 +1,7 @@
 package com.commerce.pagopa.support.fixture;
 
-import com.commerce.pagopa.order.domain.model.Order;
-import com.commerce.pagopa.orderitem.domain.model.OrderItem;
-import com.commerce.pagopa.product.domain.model.Product;
+import com.commerce.pagopa.ordering.domain.order.Order;
+import com.commerce.pagopa.ordering.domain.order.OrderItem;
 
 public final class OrderItemFixture {
 
@@ -10,29 +9,33 @@ public final class OrderItemFixture {
     }
 
     public static OrderItem anOrderItem(
-            Product product,
+            String productName,
+            Integer price,
+            Long productId,
             Order order
     ) {
         return anOrderItem(
-                product,
+                productName,
+                productId,
                 1,
-                product.getPrice(),
+                price,
                 order
         );
     }
 
     private static OrderItem anOrderItem(
-            Product product,
+            String productName,
+            Long productId,
             int quantity,
             Integer price,
             Order order
     ) {
         return OrderItem.create(
-                product.getName(),
+                productName,
                 price,
                 quantity,
                 order,
-                product
+                productId
         );
     }
 }
