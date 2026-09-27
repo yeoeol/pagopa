@@ -54,6 +54,7 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
 
     // Spring Modulith
+    implementation 'org.springframework.modulith:spring-modulith-starter-jdbc'
     implementation "org.springframework.modulith:spring-modulith-starter-core"
     testImplementation "org.springframework.modulith:spring-modulith-starter-test"
     testImplementation "org.springframework.modulith:spring-modulith-docs"

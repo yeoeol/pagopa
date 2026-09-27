@@ -74,6 +74,10 @@ spring:
 
   modulith:
     detection-strategy: explicitly-annotated
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: false
 
 jwt:
   secret: ${JWT_SECRET}
