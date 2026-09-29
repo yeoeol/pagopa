@@ -51,7 +51,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 		HttpServletRequest request =
 				webRequest.getNativeRequest(HttpServletRequest.class);
 		HttpServletResponse response =
-				webRequest.getNativeRequest(HttpServletResponse.class);
+				webRequest.getNativeResponse(HttpServletResponse.class);
 
 		String sessionId =
 				guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
