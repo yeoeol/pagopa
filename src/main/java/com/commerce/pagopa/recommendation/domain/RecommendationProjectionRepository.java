@@ -2,12 +2,22 @@ package com.commerce.pagopa.recommendation.domain;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public interface RecommendationProjectionRepository {
-	boolean tryClaim(UUID eventId);
 
-	void recordSearch(UUID eventId, Long userId, String keyword, LocalDateTime searchedAt);
+	boolean saveEventIfAbsent(RecommendationEvent event);
 
-	void recordPurchasedProducts(UUID eventId, Long userId, List<Long> productIds);
+	void increaseInterest(
+			Long userId,
+			InterestType type,
+			String interestKey,
+			int weight,
+			LocalDateTime occurredAt
+	);
+
+	List<RecommendationInterest> findTopInterests(
+			Long userId,
+			InterestType type,
+			int limit
+	);
 }
