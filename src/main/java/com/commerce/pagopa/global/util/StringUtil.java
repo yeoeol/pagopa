@@ -1,5 +1,7 @@
 package com.commerce.pagopa.global.util;
 
+import java.util.Locale;
+
 import static org.springframework.util.StringUtils.hasText;
 
 public class StringUtil {
@@ -8,6 +10,6 @@ public class StringUtil {
 		if (!hasText(str)) {
 			return null;
 		}
-		return str.trim();
+		return str.trim().toLowerCase(Locale.ROOT);
 	}
 }

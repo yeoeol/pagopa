@@ -2,7 +2,6 @@ package com.commerce.pagopa.recommendation.application;
 
 import com.commerce.pagopa.discovery.event.UserSearchRecorded;
 import com.commerce.pagopa.ordering.event.OrderConfirmed;
-import com.commerce.pagopa.recommendation.domain.RecommendationProjectionRepository;
 
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
@@ -15,36 +14,19 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 class RecommendationEventListener {
 
-	private final RecommendationProjectionRepository projections;
+	private final RecommendationProjectionService recommendationProjectionService;
 
 	@ApplicationModuleListener
 	void on(UserSearchRecorded event) {
-		if (!projections.tryClaim(event.eventId())) return;
-
 		log.info("Received user search for {}", event.eventId());
-
-		projections.recordSearch(
-				event.eventId(),
-				event.userId(),
-				event.keyword(),
-				event.searchedAt()
-		);
-
+		recommendationProjectionService.project(event);
 		log.info("Finished user search for {}", event.eventId());
 	}
 
 	@ApplicationModuleListener
 	void on(OrderConfirmed event) {
-		if (!projections.tryClaim(event.eventId())) return;
-
 		log.info("Received order confirm for {}", event.eventId());
-
-		projections.recordPurchasedProducts(
-				event.eventId(),
-				event.userId(),
-				event.productIds()
-		);
-
+		recommendationProjectionService.project(event);
 		log.info("Finished order confirm for {}", event.eventId());
 	}
 }
