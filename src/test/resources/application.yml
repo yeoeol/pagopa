@@ -67,6 +67,9 @@ spring:
             user-info-uri: http://127.0.0.1/oauth/naver/user
             user-name-attribute: response
 
+  modulith:
+    detection-strategy: explicitly-annotated
+
 jwt:
   secret: test-only-jwt-secret-key-must-be-at-least-32-bytes-long
   access-token-expiry: 1800000

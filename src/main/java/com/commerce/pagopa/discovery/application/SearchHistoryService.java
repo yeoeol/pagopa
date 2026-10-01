@@ -2,15 +2,18 @@ package com.commerce.pagopa.discovery.application;
 
 import com.commerce.pagopa.discovery.application.dto.response.SearchHistoryResponseDto;
 import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
+import com.commerce.pagopa.discovery.event.UserSearchRecorded;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.identity.api.UserApi;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +26,7 @@ public class SearchHistoryService {
 
     private final SearchHistoryRepository searchHistoryRepository;
     private final UserApi userApi;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public void saveHistory(Long userId, String sessionId, String keyword) {
@@ -44,6 +48,13 @@ public class SearchHistoryService {
                     normalizeKeyword,
                     now
             );
+
+            events.publishEvent(new UserSearchRecorded(
+                    UUID.randomUUID(),
+                    userId,
+                    normalizeKeyword,
+                    now
+            ));
         }
         // 비로그인 사용자 (세션 기반)
         else if (hasText(sessionId)) {
