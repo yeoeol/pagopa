@@ -8,7 +8,6 @@ import com.commerce.pagopa.recommendation.domain.RecommendationEventType;
 import com.commerce.pagopa.recommendation.domain.RecommendationInterest;
 import com.commerce.pagopa.support.testcontainers.JacksonTestConfig;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-import tools.jackson.databind.json.JsonMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,8 +49,6 @@ class RecommendationProjectionJdbcRepositoryTest {
 	RecommendationProjectionJdbcRepository recommendationProjectionJdbcRepository;
 	@Autowired
 	NamedParameterJdbcTemplate jdbcTemplate;
-	@Autowired
-	JsonMapper jsonMapper;
 	@Autowired
 	DataSource dataSource;
 
