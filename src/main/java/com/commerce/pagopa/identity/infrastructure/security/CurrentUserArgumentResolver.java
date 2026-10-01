@@ -43,9 +43,9 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 						.getAuthentication();
 
 		if (authentication != null
-				&& authentication.getPrincipal() instanceof UserIdentity user
+				&& authentication.getPrincipal() instanceof CustomUserDetails user
 		) {
-			return new UserIdentity(user.userId(), null);
+			return new UserIdentity(user.getUserId(), null);
 		}
 
 		HttpServletRequest request =

@@ -1,6 +1,5 @@
 package com.commerce.pagopa.identity.infrastructure.security.config;
 
-import com.commerce.pagopa.global.cookie.GuestSessionCookieFactory;
 import com.commerce.pagopa.identity.infrastructure.security.CurrentUserArgumentResolver;
 
 import org.springframework.context.annotation.Configuration;
@@ -15,12 +14,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-	private final GuestSessionCookieFactory guestSessionCookieFactory;
+	private final CurrentUserArgumentResolver currentUserArgumentResolver;
 
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		resolvers.add(
-				new CurrentUserArgumentResolver(guestSessionCookieFactory)
-		);
+		resolvers.add(currentUserArgumentResolver);
 	}
 }
