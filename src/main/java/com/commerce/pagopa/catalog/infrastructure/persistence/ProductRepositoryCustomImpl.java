@@ -101,6 +101,59 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Product> findRecommendationCandidatesByKeyword(
+            String keyword,
+            Collection<Long> excludedProductIds,
+            int limit
+    ) {
+        return queryFactory
+                .selectFrom(product)
+                .where(
+                        isSellable(),
+                        nameContains(keyword),
+                        productIdNotIn(excludedProductIds)
+                )
+                .orderBy(
+                        product.createdAt.desc(),
+                        product.id.desc()
+                )
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<Product> findDefaultRecommendationProducts(
+            Collection<Long> excludedProductIds,
+            int limit
+    ) {
+        return queryFactory
+                .selectFrom(product)
+                .where(
+                        isSellable(),
+                        productIdNotIn(excludedProductIds)
+                )
+                .orderBy(
+                        product.createdAt.desc(),
+                        product.id.desc()
+                )
+                .limit(limit)
+                .fetch();
+    }
+
+    private BooleanExpression productIdNotIn(Collection<Long> excludedProductIds) {
+        if (excludedProductIds == null || excludedProductIds.isEmpty()) {
+            return null;
+        }
+
+        return product.id.notIn(excludedProductIds);
+	}
+
+    private BooleanExpression isSellable() {
+        return product.status.eq(ProductStatus.ACTIVE)
+                .and(product.stockQuantity.gt(0));
+    }
+
     private BooleanExpression nameContains(String name) {
         return hasText(name) ? product.name.containsIgnoreCase(name) : null;
     }
