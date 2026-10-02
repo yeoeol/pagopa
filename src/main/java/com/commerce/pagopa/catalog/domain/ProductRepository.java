@@ -44,6 +44,17 @@ public interface ProductRepository {
 
     Optional<Product> findByIdForUpdate(Long id);
 
+	List<Product> findRecommendationCandidatesByKeyword(
+			String keyword,
+			Collection<Long> excludedProductIds,
+			int limit
+	);
+
+	List<Product> findDefaultRecommendationProducts(
+			Collection<Long> excludedProductIds,
+			int limit
+	);
+
     default Product findByIdForUpdateOrThrow(Long id) {
         return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }

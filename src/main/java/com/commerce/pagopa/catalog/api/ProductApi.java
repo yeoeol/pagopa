@@ -1,6 +1,7 @@
 package com.commerce.pagopa.catalog.api;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface ProductApi {
@@ -17,5 +18,16 @@ public interface ProductApi {
 			int pageSize,
 			int pageNumber,
 			String sort
+	);
+
+	List<ProductSummary> findCandidatesByKeyword(
+			String keyword,
+			Collection<Long> excludedProductIds,
+			int limit
+	);
+
+	List<ProductSummary> findDefaultProducts(
+			Collection<Long> excludedProductIds,
+			int limit
 	);
 }
