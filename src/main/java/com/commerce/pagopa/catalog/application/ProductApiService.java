@@ -120,6 +120,46 @@ public class ProductApiService implements ProductApi {
 		);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<ProductSummary> findCandidatesByKeyword(
+			String keyword,
+			Collection<Long> excludedProductIds,
+			int limit
+	) {
+		if (limit <= 0) {
+			return List.of();
+		}
+
+		return productRepository
+				.findRecommendationCandidatesByKeyword(
+						keyword,
+						excludedProductIds,
+						limit
+				).stream()
+				.map(this::toSummary)
+				.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<ProductSummary> findDefaultProducts(
+			Collection<Long> excludedProductIds,
+			int limit
+	) {
+		if (limit <= 0) {
+			return List.of();
+		}
+
+		return productRepository
+				.findDefaultRecommendationProducts(
+						excludedProductIds,
+						limit
+				).stream()
+				.map(this::toSummary)
+				.toList();
+	}
+
 	private ProductSummary toSummary(Product product) {
 		return new ProductSummary(
 				product.getId(),

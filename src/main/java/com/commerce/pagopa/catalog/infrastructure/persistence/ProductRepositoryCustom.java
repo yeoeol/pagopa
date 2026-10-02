@@ -22,4 +22,15 @@ public interface ProductRepositoryCustom {
     );
 
     List<Product> searchProducts(@NonNull ProductSearchCondition condition);
+
+    List<Product> findRecommendationCandidatesByKeyword(
+            String keyword,
+            Collection<Long> excludedProductIds,
+            int limit
+    );
+
+    List<Product> findDefaultRecommendationProducts(
+            Collection<Long> excludedProductIds,
+            int limit
+    );
 }
