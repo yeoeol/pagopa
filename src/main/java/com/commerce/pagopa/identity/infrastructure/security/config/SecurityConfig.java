@@ -81,8 +81,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/orders/**").authenticated()
                         .requestMatchers("/api/v1/reviews/**").authenticated()
                         .requestMatchers("/api/v1/cart/**").authenticated()
-                        .requestMatchers("/api/v1/cart-items").authenticated()
+                        .requestMatchers("/api/v1/cart-items/**").authenticated()
                         .requestMatchers("/api/v1/images/**").authenticated()
+                        .requestMatchers("/api/v1/recommendations/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
