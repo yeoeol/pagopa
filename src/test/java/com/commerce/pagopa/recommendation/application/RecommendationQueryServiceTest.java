@@ -617,69 +617,6 @@ class RecommendationQueryServiceTest {
 		);
 	}
 
-	/**
-	 * 후보/기본 상품 쿼리가 INACTIVE·SOLD_OUT·재고 0 상품을 제외
-	 * limit이 0 또는 101이면 예외
-	 */
-	@Test
-	void candidate_default_product_query_exclude_inactive_sold_out_zero_stock_quantity_product() {
-		Long userId = 1L;
-		int limit = 3;
-		LocalDateTime occurredAt = LocalDateTime.of(2026, 1, 1, 12, 0);
-
-		ProductSummary product10 = activeProduct(10L);
-		ProductSummary product20 = activeProduct(20L);
-		ProductSummary product30 = activeProduct(30L);
-
-		List<RecommendationInterest> productInterests = List.of(
-				new RecommendationInterest(
-						userId,
-						InterestType.PRODUCT,
-						"10",
-						10,
-						occurredAt
-				),
-				new RecommendationInterest(
-						userId,
-						InterestType.PRODUCT,
-						"20",
-						5,
-						occurredAt
-				),
-				new RecommendationInterest(
-						userId,
-						InterestType.PRODUCT,
-						"30",
-						3,
-						occurredAt
-				)
-		);
-
-		given(recommendationProjectionRepository.findTopInterests(
-				eq(userId),
-				eq(InterestType.PRODUCT),
-				anyInt()
-		)).willReturn(productInterests);
-
-		given(productApi.findAllByIds(
-				List.of(10L, 20L, 30L)
-		)).willReturn(Map.of(
-				10L, product10,
-				20L, product20,
-				30L, product30
-		));
-
-		given(recommendationProjectionRepository.findTopInterests(
-				eq(userId),
-				eq(InterestType.KEYWORD),
-				anyInt()
-		)).willReturn(List.of());
-
-		given(productApi.findDefaultProducts(
-				List.of()
-		)).willReturn();
-	}
-
 	private ProductSummary activeProduct(Long productId) {
 		return new ProductSummary(
 				productId,
