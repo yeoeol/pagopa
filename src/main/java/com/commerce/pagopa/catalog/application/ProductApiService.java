@@ -5,6 +5,8 @@ import com.commerce.pagopa.catalog.api.ProductPageResponseDto;
 import com.commerce.pagopa.catalog.api.ProductRegisterRequest;
 import com.commerce.pagopa.catalog.api.ProductSummary;
 import com.commerce.pagopa.catalog.domain.*;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +32,8 @@ public class ProductApiService implements ProductApi {
 	private final CategoryRepository categoryRepository;
 
 	private static final int PAGE_WINDOW_SIZE = 10;
+	private static final int MIN_RECOMMENDATION_LIMIT = 1;
+	private static final int MAX_RECOMMENDATION_LIMIT = 100;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -127,9 +131,7 @@ public class ProductApiService implements ProductApi {
 			Collection<Long> excludedProductIds,
 			int limit
 	) {
-		if (limit <= 0) {
-			return List.of();
-		}
+		validateRecommendationLimit(limit);
 
 		return productRepository
 				.findRecommendationCandidatesByKeyword(
@@ -147,9 +149,7 @@ public class ProductApiService implements ProductApi {
 			Collection<Long> excludedProductIds,
 			int limit
 	) {
-		if (limit <= 0) {
-			return List.of();
-		}
+		validateRecommendationLimit(limit);
 
 		return productRepository
 				.findDefaultRecommendationProducts(
@@ -158,6 +158,16 @@ public class ProductApiService implements ProductApi {
 				).stream()
 				.map(this::toSummary)
 				.toList();
+	}
+
+	private void validateRecommendationLimit(int limit) {
+		if (limit < MIN_RECOMMENDATION_LIMIT
+				|| limit > MAX_RECOMMENDATION_LIMIT) {
+			throw new BusinessException(
+					ErrorCode.RECOMMENDATION_INVALID_LIMIT,
+					"limit must be between 1 and 100: " + limit
+			);
+		}
 	}
 
 	private ProductSummary toSummary(Product product) {
