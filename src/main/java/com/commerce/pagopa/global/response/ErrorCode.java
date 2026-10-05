@@ -108,6 +108,9 @@ public enum ErrorCode {
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_002", "존재하지 않는 역할(권한)입니다."),
     ROLE_ALREADY_DISABLED(HttpStatus.CONFLICT, "ROLE_003", "이미 비활성화된 역할(권한)입니다."),
     ROLE_ALREADY_ENABLED(HttpStatus.CONFLICT, "ROLE_004", "이미 활성화된 역할(권한)입니다."),
+
+    // RECOMMENDATION
+    RECOMMENDATION_INVALID_LIMIT(HttpStatus.BAD_REQUEST, "RECOMMENDATION_001", "유효하지 않은 limit입니다."),
     ;
     private final HttpStatus httpStatus;
     private final String code;
