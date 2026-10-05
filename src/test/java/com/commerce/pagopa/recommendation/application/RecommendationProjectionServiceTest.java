@@ -19,7 +19,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,10 +43,6 @@ import static org.mockito.Mockito.doThrow;
 		TestcontainersConfig.class,
 		JacksonTestConfig.class
 })
-@Sql(
-		scripts = "/sql/recommendation-schema.sql",
-		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
-)
 @Timeout(value = 30, unit = TimeUnit.SECONDS)
 class RecommendationProjectionServiceTest {
 
