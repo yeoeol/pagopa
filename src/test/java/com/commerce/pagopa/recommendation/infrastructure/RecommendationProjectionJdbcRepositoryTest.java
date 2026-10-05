@@ -18,7 +18,6 @@ import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
 
 import javax.sql.DataSource;
 
@@ -38,10 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 		TestcontainersConfig.class,
 		JacksonTestConfig.class
 })
-@Sql(
-		scripts = "/sql/recommendation-schema.sql",
-		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
-)
 @Timeout(value = 30, unit = TimeUnit.SECONDS)
 class RecommendationProjectionJdbcRepositoryTest {
 
