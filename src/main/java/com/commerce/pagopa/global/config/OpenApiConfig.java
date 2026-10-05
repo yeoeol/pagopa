@@ -150,4 +150,12 @@ public class OpenApiConfig {
                 .pathsToMatch("/api/v1/images/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi recommendationApi() {
+        return GroupedOpenApi.builder()
+                .group("추천 상품 관리")
+                .pathsToMatch("/api/v1/recommendations/**")
+                .build();
+    }
 }
