@@ -1,8 +1,9 @@
 package com.commerce.pagopa.global.config;
 
-import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import org.springdoc.core.models.GroupedOpenApi;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -13,38 +14,35 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 @Configuration
 public class OpenApiConfig {
 
-    private static final String jwtSchemeName = "JWT Bearer Auth";
+    private static final String JWT_SCHEME_NAME = "JWT Bearer Auth";
 
     @Bean
     public OpenAPI openAPI() {
-        return new OpenAPI()
-                .info(getInfo())
+        return new OpenAPI().info(getInfo())
                 .addSecurityItem(getSecurityRequirement())
                 .components(getComponents());
     }
 
     private Info getInfo() {
-        return new Info()
-                .title("Pagopa API Server")
+        return new Info().title("Pagopa API Server")
                 .description("Pagopa REST API Specification")
                 .version("v1");
     }
 
     private Components getComponents() {
         SecurityScheme securityScheme = getSecurityScheme();
-        return new Components().addSecuritySchemes(jwtSchemeName, securityScheme);
+        return new Components().addSecuritySchemes(JWT_SCHEME_NAME, securityScheme);
     }
 
     private SecurityScheme getSecurityScheme() {
-        return new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
+        return new SecurityScheme().type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT")
                 .description("Authorization 헤더에 토큰 입력 (Bearer를 제외한 토큰만 입력)");
     }
 
     private SecurityRequirement getSecurityRequirement() {
-        return new SecurityRequirement().addList(jwtSchemeName);
+        return new SecurityRequirement().addList(JWT_SCHEME_NAME);
     }
 
     @Bean

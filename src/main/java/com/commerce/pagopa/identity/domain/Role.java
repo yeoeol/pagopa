@@ -1,9 +1,5 @@
 package com.commerce.pagopa.identity.domain;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-
 import jakarta.persistence.*;
 
 import lombok.AccessLevel;
@@ -11,80 +7,63 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(
-		name = "role",
-		uniqueConstraints = {
-				@UniqueConstraint(
-						name = "uq_role_code",
-						columnNames = {"code"}
-				)
-		}
-)
+@Table(name = "role", uniqueConstraints = {@UniqueConstraint(name = "uq_role_code", columnNames = {"code"})})
 public class Role extends BaseTimeEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "role_id", nullable = false)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id", nullable = false)
+    private Long id;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "code", length = 20, nullable = false)
-	private RoleCode code;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "code", length = 20, nullable = false)
+    private RoleCode code;
 
-	@Column(name = "description", length = 50, nullable = false)
-	private String description;
+    @Column(name = "description", length = 50, nullable = false)
+    private String description;
 
-	@Column(name = "enabled", nullable = false)
-	private boolean enabled = true;
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true;
 
-	@Builder(access = AccessLevel.PRIVATE)
-	private Role(
-			RoleCode code,
-			String description,
-			boolean enabled
-	) {
-		this.code = code;
-		this.description = description;
-		this.enabled = enabled;
-	}
+    @Builder(access = AccessLevel.PRIVATE)
+    private Role(RoleCode code, String description, boolean enabled) {
+        this.code = code;
+        this.description = description;
+        this.enabled = enabled;
+    }
 
-	public static Role create(
-			RoleCode code,
-			String description
-	) {
-		return Role.builder()
-				.code(code)
-				.description(description)
-				.enabled(true)
-				.build();
-	}
+    public static Role create(RoleCode code, String description) {
+        return Role.builder()
+                .code(code)
+                .description(description)
+                .enabled(true)
+                .build();
+    }
 
-	public void active() {
-		if (this.enabled) {
-			throw new BusinessException(ErrorCode.ROLE_ALREADY_ENABLED);
-		}
-		this.enabled = true;
-	}
+    public void active() {
+        if (this.enabled) {
+            throw new BusinessException(ErrorCode.ROLE_ALREADY_ENABLED);
+        }
+        this.enabled = true;
+    }
 
-	public void inactive() {
-		if (!this.enabled) {
-			throw new BusinessException(ErrorCode.ROLE_ALREADY_DISABLED);
-		}
-		this.enabled = false;
-	}
+    public void inactive() {
+        if (!this.enabled) {
+            throw new BusinessException(ErrorCode.ROLE_ALREADY_DISABLED);
+        }
+        this.enabled = false;
+    }
 
-	@Override
-	public String toString() {
-		return "Role{" +
-				"id=" + id +
-				", code=" + code +
-				", description='" + description + '\'' +
-				", enabled=" + enabled +
-				", createdAt=" + createdAt +
-				", updatedAt=" + updatedAt +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "Role{" + "id=" + id + ", code=" + code + ", description='" + description + '\'' + ", enabled=" + enabled
+                + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + '}';
+    }
 }

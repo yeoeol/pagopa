@@ -1,7 +1,8 @@
 package com.commerce.pagopa.catalog.infrastructure.persistence;
 
-import com.commerce.pagopa.catalog.domain.Product;
-import com.commerce.pagopa.catalog.domain.ProductRepository;
+import java.util.Optional;
+
+import jakarta.persistence.LockModeType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,9 +11,8 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import jakarta.persistence.LockModeType;
-
-import java.util.Optional;
+import com.commerce.pagopa.catalog.domain.Product;
+import com.commerce.pagopa.catalog.domain.ProductRepository;
 
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository, ProductRepositoryCustom {
 

@@ -1,5 +1,12 @@
 package com.commerce.pagopa.catalog.application.admin;
 
+import java.util.*;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+
 import com.commerce.pagopa.catalog.application.admin.dto.request.AdminCategoryCreateRequestDto;
 import com.commerce.pagopa.catalog.application.admin.dto.request.AdminCategoryUpdateRequestDto;
 import com.commerce.pagopa.catalog.application.admin.dto.response.AdminCategoryDetailResponseDto;
@@ -11,218 +18,151 @@ import com.commerce.pagopa.catalog.domain.CategoryRepository;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-
-import lombok.RequiredArgsConstructor;
-
 import static com.commerce.pagopa.global.util.StringUtil.normalize;
 
 @Service
 @RequiredArgsConstructor
 public class AdminCategoryService {
 
-	private final CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
-	private static final Comparator<Category> CATEGORY_ORDER =
-			Comparator.comparing(Category::getName)
-					.thenComparing(Category::getId);
+    private static final Comparator<Category> CATEGORY_ORDER = Comparator.comparing(Category::getName)
+            .thenComparing(Category::getId);
 
-	@Transactional
-	public CategorySimpleResponseDto create(AdminCategoryCreateRequestDto requestDto) {
-		String normalizedName = normalize(requestDto.name());
+    @Transactional
+    public CategorySimpleResponseDto create(AdminCategoryCreateRequestDto requestDto) {
+        String normalizedName = normalize(requestDto.name());
 
-		Category category = requestDto.parentId() == null
-				? Category.createRoot(normalizedName)
-				: categoryRepository.findByIdOrThrow(requestDto.parentId())
-						.addChild(normalizedName);
+        Category category = requestDto.parentId() == null
+                ? Category.createRoot(normalizedName)
+                : categoryRepository.findByIdOrThrow(requestDto.parentId())
+                        .addChild(normalizedName);
 
-		return CategorySimpleResponseDto.from(
-				categoryRepository.save(category)
-		);
-	}
+        return CategorySimpleResponseDto.from(categoryRepository.save(category));
+    }
 
-	@Transactional(readOnly = true)
-	public AdminCategoryPageResponseDto findPage(Long categoryId) {
-		List<AdminCategoryTreeItemResponseDto> categories =
-				buildTreeItems(categoryRepository.findAll());
+    @Transactional(readOnly = true)
+    public AdminCategoryPageResponseDto findPage(Long categoryId) {
+        List<AdminCategoryTreeItemResponseDto> categories = buildTreeItems(categoryRepository.findAll());
 
-		int rootCount = (int) categories.stream()
-				.filter(category -> category.parentId() == null)
-				.count();
+        int rootCount = (int) categories.stream()
+                .filter(category -> category.parentId() == null)
+                .count();
 
-		AdminCategoryDetailResponseDto detail =
-				buildDetail(categoryId, categories);
+        AdminCategoryDetailResponseDto detail = buildDetail(categoryId, categories);
 
-		return AdminCategoryPageResponseDto.of(
-				categories,
-				rootCount,
-				detail
-		);
-	}
+        return AdminCategoryPageResponseDto.of(categories, rootCount, detail);
+    }
 
-	@Transactional(readOnly = true)
-	public AdminCategoryDetailResponseDto findDetail(Long categoryId) {
-		List<AdminCategoryTreeItemResponseDto> categories =
-				buildTreeItems(categoryRepository.findAll());
+    @Transactional(readOnly = true)
+    public AdminCategoryDetailResponseDto findDetail(Long categoryId) {
+        List<AdminCategoryTreeItemResponseDto> categories = buildTreeItems(categoryRepository.findAll());
 
-		return buildDetail(categoryId, categories);
-	}
+        return buildDetail(categoryId, categories);
+    }
 
-	@Transactional
-	public void update(
-			Long categoryId,
-			AdminCategoryUpdateRequestDto requestDto
-	) {
-		Category category = categoryRepository.findByIdOrThrow(categoryId);
-		category.rename(normalize(requestDto.name()));
-	}
+    @Transactional
+    public void update(Long categoryId, AdminCategoryUpdateRequestDto requestDto) {
+        Category category = categoryRepository.findByIdOrThrow(categoryId);
+        category.rename(normalize(requestDto.name()));
+    }
 
-	private List<AdminCategoryTreeItemResponseDto> buildTreeItems(
-			List<Category> categories
-	) {
-		Map<Long, List<Category>> childrenByParentId = new HashMap<>();
+    private List<AdminCategoryTreeItemResponseDto> buildTreeItems(List<Category> categories) {
+        Map<Long, List<Category>> childrenByParentId = new HashMap<>();
 
-		for (Category category : categories) {
-			Long parentId = category.getParent() == null
-					? null
-					: category.getParent().getId();
+        for (Category category : categories) {
+            Long parentId = category.getParent() == null
+                    ? null
+                    : category.getParent()
+                            .getId();
 
-			childrenByParentId
-					.computeIfAbsent(parentId, ignored -> new ArrayList<>())
-					.add(category);
-		}
+            childrenByParentId.computeIfAbsent(parentId, ignored -> new ArrayList<>())
+                    .add(category);
+        }
 
-		childrenByParentId.values()
-				.forEach(children -> children.sort(CATEGORY_ORDER));
+        childrenByParentId.values()
+                .forEach(children -> children.sort(CATEGORY_ORDER));
 
-		List<AdminCategoryTreeItemResponseDto> result = new ArrayList<>();
+        List<AdminCategoryTreeItemResponseDto> result = new ArrayList<>();
 
-		appendTreeItems(
-				null,
-				0,
-				null,
-				childrenByParentId,
-				result
-		);
+        appendTreeItems(null, 0, null, childrenByParentId, result);
 
-		return List.copyOf(result);
-	}
+        return List.copyOf(result);
+    }
 
-	private void appendTreeItems(
-			Long parentId,
-			int depth,
-			String parentPath,
-			Map<Long, List<Category>> childrenByParentId,
-			List<AdminCategoryTreeItemResponseDto> result
-	) {
-		List<Category> children =
-				childrenByParentId.getOrDefault(parentId, List.of());
+    private void appendTreeItems(
+            Long parentId,
+            int depth,
+            String parentPath,
+            Map<Long, List<Category>> childrenByParentId,
+            List<AdminCategoryTreeItemResponseDto> result
+    ) {
+        List<Category> children = childrenByParentId.getOrDefault(parentId, List.of());
 
-		for (Category category : children) {
-			String path = parentPath == null
-					? category.getName()
-					: parentPath + " > " + category.getName();
+        for (Category category : children) {
+            String path = parentPath == null ? category.getName() : parentPath + " > " + category.getName();
 
-			result.add(AdminCategoryTreeItemResponseDto.of(
-					category.getId(),
-					parentId,
-					category.getName(),
-					depth,
-					path
-			));
+            result.add(
+                    AdminCategoryTreeItemResponseDto.of(category.getId(), parentId, category.getName(), depth, path));
 
-			appendTreeItems(
-					category.getId(),
-					depth + 1,
-					path,
-					childrenByParentId,
-					result
-			);
-		}
-	}
+            appendTreeItems(category.getId(), depth + 1, path, childrenByParentId, result);
+        }
+    }
 
-	private AdminCategoryDetailResponseDto buildDetail(
-			Long categoryId,
-			List<AdminCategoryTreeItemResponseDto> categories
-	) {
-		if (categoryId == null) {
-			List<AdminCategoryTreeItemResponseDto> rootCategories =
-					categories.stream()
-							.filter(category -> category.parentId() == null)
-							.toList();
+    private AdminCategoryDetailResponseDto buildDetail(
+            Long categoryId,
+            List<AdminCategoryTreeItemResponseDto> categories
+    ) {
+        if (categoryId == null) {
+            List<AdminCategoryTreeItemResponseDto> rootCategories = categories.stream()
+                    .filter(category -> category.parentId() == null)
+                    .toList();
 
-			return AdminCategoryDetailResponseDto.of(
-					null,
-					null,
-					-1,
-					null,
-					null,
-					List.of(),
-					rootCategories
-			);
-		}
+            return AdminCategoryDetailResponseDto.of(null, null, -1, null, null, List.of(), rootCategories);
+        }
 
-		Map<Long, AdminCategoryTreeItemResponseDto> categoryById =
-				new HashMap<>();
+        Map<Long, AdminCategoryTreeItemResponseDto> categoryById = new HashMap<>();
 
-		for (AdminCategoryTreeItemResponseDto category : categories) {
-			categoryById.put(category.categoryId(), category);
-		}
+        for (AdminCategoryTreeItemResponseDto category : categories) {
+            categoryById.put(category.categoryId(), category);
+        }
 
-		AdminCategoryTreeItemResponseDto selected =
-				categoryById.get(categoryId);
+        AdminCategoryTreeItemResponseDto selected = categoryById.get(categoryId);
 
-		if (selected == null) {
-			throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
-		}
+        if (selected == null) {
+            throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
 
-		List<AdminCategoryTreeItemResponseDto> breadcrumbs =
-				buildBreadcrumbs(selected, categoryById);
+        List<AdminCategoryTreeItemResponseDto> breadcrumbs = buildBreadcrumbs(selected, categoryById);
 
-		List<AdminCategoryTreeItemResponseDto> children =
-				categories.stream()
-						.filter(category ->
-										categoryId.equals(category.parentId())
-						).toList();
+        List<AdminCategoryTreeItemResponseDto> children = categories.stream()
+                .filter(category -> categoryId.equals(category.parentId()))
+                .toList();
 
-		AdminCategoryTreeItemResponseDto parent =
-				selected.parentId() == null
-						? null
-						: categoryById.get(selected.parentId());
+        AdminCategoryTreeItemResponseDto parent = selected.parentId() == null
+                ? null
+                : categoryById.get(selected.parentId());
 
-		return AdminCategoryDetailResponseDto.of(
-				selected.categoryId(),
-				selected.name(),
-				selected.depth(),
-				selected.path(),
-				parent == null ? null : parent.name(),
-				breadcrumbs,
-				children
-		);
-	}
+        return AdminCategoryDetailResponseDto.of(selected.categoryId(), selected.name(), selected.depth(),
+                selected.path(), parent == null ? null : parent.name(), breadcrumbs, children);
+    }
 
-	private List<AdminCategoryTreeItemResponseDto> buildBreadcrumbs(
-			AdminCategoryTreeItemResponseDto selected,
-			Map<Long, AdminCategoryTreeItemResponseDto> categoryById
-	) {
-		List<AdminCategoryTreeItemResponseDto> breadcrumbs =
-				new ArrayList<>();
+    private List<AdminCategoryTreeItemResponseDto> buildBreadcrumbs(
+            AdminCategoryTreeItemResponseDto selected,
+            Map<Long, AdminCategoryTreeItemResponseDto> categoryById
+    ) {
+        List<AdminCategoryTreeItemResponseDto> breadcrumbs = new ArrayList<>();
 
-		AdminCategoryTreeItemResponseDto current = selected;
+        AdminCategoryTreeItemResponseDto current = selected;
 
-		while (current != null) {
-			breadcrumbs.add(current);
+        while (current != null) {
+            breadcrumbs.add(current);
 
-			current = current.parentId() == null
-					? null
-					: categoryById.get(current.parentId());
-		}
+            current = current.parentId() == null ? null : categoryById.get(current.parentId());
+        }
 
-		Collections.reverse(breadcrumbs);
+        Collections.reverse(breadcrumbs);
 
-		return List.copyOf(breadcrumbs);
-	}
+        return List.copyOf(breadcrumbs);
+    }
 }

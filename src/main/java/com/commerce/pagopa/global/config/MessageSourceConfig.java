@@ -13,7 +13,8 @@ public class MessageSourceConfig {
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasename("classpath:messages"); // messages.properties, messages_ko.properties
+        messageSource.setBasename("classpath:messages"); // messages.properties,
+                                                         // messages_ko.properties
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setCacheSeconds(60); // 메시지 파일 변경 감지 주기 (개발 시 0)
         return messageSource;

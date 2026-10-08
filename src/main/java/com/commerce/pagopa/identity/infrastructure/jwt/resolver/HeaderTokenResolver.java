@@ -1,11 +1,11 @@
 package com.commerce.pagopa.identity.infrastructure.jwt.resolver;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 @Order(2)

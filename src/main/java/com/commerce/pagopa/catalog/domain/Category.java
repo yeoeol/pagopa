@@ -1,12 +1,13 @@
 package com.commerce.pagopa.catalog.domain;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
+
 import lombok.*;
+
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
 
 @Entity
 @Getter
@@ -26,20 +27,14 @@ public class Category extends BaseTimeEntity {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "parent_id",
-            foreignKey = @ForeignKey(name = "fk_category_parent")
-    )
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_category_parent"))
     private Category parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)
     private final List<Category> children = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Category(
-            String name,
-            Category parent
-    ) {
+    private Category(String name, Category parent) {
         this.name = name;
         this.parent = parent;
     }

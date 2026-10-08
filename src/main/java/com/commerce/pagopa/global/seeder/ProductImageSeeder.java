@@ -1,11 +1,11 @@
 package com.commerce.pagopa.global.seeder;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 

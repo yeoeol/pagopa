@@ -1,16 +1,16 @@
 package com.commerce.pagopa.global.seeder;
 
-import net.datafaker.Faker;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import net.datafaker.Faker;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,7 +38,8 @@ class UserSeeder implements Seeder {
 
     @Override
     public void seed() {
-        int total = props.counts().users();
+        int total = props.counts()
+                .users();
         String sql = """
                 INSERT INTO user(
                     provider,
@@ -57,9 +58,12 @@ class UserSeeder implements Seeder {
 
         batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
             ps.setString(1, "LOCAL_TEST");
-            ps.setString(2, UUID.nameUUIDFromBytes(("seed-provider-" + i).getBytes()).toString());
-            ps.setString(3, "%s_%d".formatted(faker.name().firstName(), i));
-            ps.setString(4, faker.internet().emailAddress("seed_user_%d".formatted(i)));
+            ps.setString(2, UUID.nameUUIDFromBytes(("seed-provider-" + i).getBytes())
+                    .toString());
+            ps.setString(3, "%s_%d".formatted(faker.name()
+                    .firstName(), i));
+            ps.setString(4, faker.internet()
+                    .emailAddress("seed_user_%d".formatted(i)));
             ps.setString(5, i % 4 == 0 ? null : "https://picsum.photos/seed/u%d/200".formatted(i));
 
             // 95% ACTIVE, 3% WITHDRAWN, 2% BANNED
@@ -68,7 +72,8 @@ class UserSeeder implements Seeder {
             ps.setString(6, status);
 
             // 과거 1년 내 랜덤
-            ps.setTimestamp(7, Timestamp.from(faker.timeAndDate().past(365, TimeUnit.DAYS)));
+            ps.setTimestamp(7, Timestamp.from(faker.timeAndDate()
+                    .past(365, TimeUnit.DAYS)));
 
             ps.setTimestamp(8, now);
             ps.setTimestamp(9, now);

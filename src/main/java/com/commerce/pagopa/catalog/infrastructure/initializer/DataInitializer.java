@@ -1,14 +1,14 @@
 package com.commerce.pagopa.catalog.infrastructure.initializer;
 
-import com.commerce.pagopa.catalog.domain.Category;
-import com.commerce.pagopa.catalog.domain.CategoryRepository;
-import com.commerce.pagopa.catalog.infrastructure.persistence.CategoryJpaRepository;
-
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.catalog.domain.Category;
+import com.commerce.pagopa.catalog.domain.CategoryRepository;
+import com.commerce.pagopa.catalog.infrastructure.persistence.CategoryJpaRepository;
 
 @Component
 @RequiredArgsConstructor

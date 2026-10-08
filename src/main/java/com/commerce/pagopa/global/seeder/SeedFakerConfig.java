@@ -1,13 +1,14 @@
 package com.commerce.pagopa.global.seeder;
 
-import net.datafaker.Faker;
+import java.util.Locale;
+import java.util.Random;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import java.util.Locale;
-import java.util.Random;
+import net.datafaker.Faker;
 
 @Profile("local")
 @Configuration

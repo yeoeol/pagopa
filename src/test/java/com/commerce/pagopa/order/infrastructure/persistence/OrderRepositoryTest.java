@@ -1,5 +1,20 @@
 package com.commerce.pagopa.order.infrastructure.persistence;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.commerce.pagopa.identity.domain.Role;
 import com.commerce.pagopa.identity.domain.RoleRepository;
 import com.commerce.pagopa.identity.domain.User;
@@ -12,20 +27,6 @@ import com.commerce.pagopa.support.fixture.RoleFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.support.fixture.UserRoleFixture;
 import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +43,7 @@ class OrderRepositoryTest {
     @Autowired
     UserRepository userRepository;
     @Autowired
-	RoleRepository roleRepository;
+    RoleRepository roleRepository;
     @PersistenceContext
     EntityManager em;
 
@@ -59,31 +60,21 @@ class OrderRepositoryTest {
     @Test
     void findAllByPeriod_includesStartBoundaryAndExcludesEndBoundary() {
         // given: 경계 규칙 [start, end) 검증용 데이터
-        Order atStart = persistOrder(user, START, OrderStatus.CONFIRMED);                                  // 포함 (>= start)
-        Order inMiddle = persistOrder(user, LocalDateTime.parse("2024-06-15T15:10:00"), OrderStatus.CONFIRMED);  // 포함
+        Order atStart = persistOrder(user, START, OrderStatus.CONFIRMED); // 포함 (>= start)
+        Order inMiddle = persistOrder(user, LocalDateTime.parse("2024-06-15T15:10:00"), OrderStatus.CONFIRMED); // 포함
         Order lastInstant = persistOrder(user, LocalDateTime.parse("2024-12-31T23:59:59"), OrderStatus.CONFIRMED); // 포함
-        persistOrder(user, LocalDateTime.parse("2023-12-31T23:59:59"), OrderStatus.CONFIRMED);             // 제외 (< start)
-        persistOrder(user, END, OrderStatus.CONFIRMED);                                                    // 제외 (== end)
+        persistOrder(user, LocalDateTime.parse("2023-12-31T23:59:59"), OrderStatus.CONFIRMED); // 제외
+                                                                                               // (<
+                                                                                               // start)
+        persistOrder(user, END, OrderStatus.CONFIRMED); // 제외 (== end)
         flushAndClear();
 
         // when
-        Page<Order> result = orderRepository.findAllByPeriod(
-                user.getId(),
-                null,
-                START,
-                END,
-                PageRequest.of(0, 10)
-        );
+        Page<Order> result = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
 
         // then
-        System.out.println("result.size() = " + result.getSize());
-        assertThat(result.getContent())
-                .extracting(Order::getId)
-                .containsExactlyInAnyOrder(
-                        atStart.getId(),
-                        inMiddle.getId(),
-                        lastInstant.getId()
-                );
+        assertThat(result.getContent()).extracting(Order::getId)
+                .containsExactlyInAnyOrder(atStart.getId(), inMiddle.getId(), lastInstant.getId());
         assertThat(result.getTotalElements()).isEqualTo(3);
     }
 
@@ -99,8 +90,7 @@ class OrderRepositoryTest {
         Page<Order> result = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
 
         // then
-        assertThat(result.getContent())
-                .extracting(Order::getId)
+        assertThat(result.getContent()).extracting(Order::getId)
                 .containsExactly(mine.getId());
     }
 
@@ -112,15 +102,14 @@ class OrderRepositoryTest {
         flushAndClear();
 
         // when: status 지정 시 해당 상태만, null이면 전체
-        Page<Order> onlyCancelled = orderRepository.findAllByPeriod(user.getId(), OrderStatus.CANCELED, START, END, PageRequest.of(0, 10));
+        Page<Order> onlyCancelled = orderRepository.findAllByPeriod(user.getId(), OrderStatus.CANCELED, START, END,
+                PageRequest.of(0, 10));
         Page<Order> all = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
 
         // then
-        assertThat(onlyCancelled.getContent())
-                .extracting(Order::getId)
+        assertThat(onlyCancelled.getContent()).extracting(Order::getId)
                 .containsExactly(cancelled.getId());
-        assertThat(all.getContent())
-                .extracting(Order::getId)
+        assertThat(all.getContent()).extracting(Order::getId)
                 .containsExactlyInAnyOrder(ordered.getId(), cancelled.getId());
     }
 
@@ -131,8 +120,10 @@ class OrderRepositoryTest {
         persistOrder(user, LocalDateTime.parse("2024-03-01T00:00:00"), OrderStatus.CONFIRMED);
         persistOrder(user, LocalDateTime.parse("2024-04-01T00:00:00"), OrderStatus.CONFIRMED);
         User other = userRepository.save(UserFixture.aUser("noise-user"));
-        persistOrder(other, LocalDateTime.parse("2024-03-01T00:00:00"), OrderStatus.CONFIRMED); // 타 유저
-        persistOrder(user, LocalDateTime.parse("2023-03-01T00:00:00"), OrderStatus.CONFIRMED);  // 기간 밖
+        persistOrder(other, LocalDateTime.parse("2024-03-01T00:00:00"), OrderStatus.CONFIRMED); // 타
+                                                                                                // 유저
+        persistOrder(user, LocalDateTime.parse("2023-03-01T00:00:00"), OrderStatus.CONFIRMED); // 기간
+                                                                                               // 밖
         flushAndClear();
 
         // when: 페이지 크기 2
@@ -148,10 +139,10 @@ class OrderRepositoryTest {
         Order order = orderRepository.save(OrderFixture.anOrder(buyer.getId()));
         // createdAt은 @CreatedDate라 영속 시 now로 채워지므로 bulk update로 backdate, status도 함께 보정
         em.createQuery("""
-                       update Order o
-                       set o.orderedAt = :orderedAt, o.status = :status
-                       where o.id = :id
-                       """)
+                update Order o
+                set o.orderedAt = :orderedAt, o.status = :status
+                where o.id = :id
+                """)
                 .setParameter("orderedAt", orderedAt)
                 .setParameter("status", status)
                 .setParameter("id", order.getId())

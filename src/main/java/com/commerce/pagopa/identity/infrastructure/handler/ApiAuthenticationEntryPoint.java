@@ -1,20 +1,21 @@
 package com.commerce.pagopa.identity.infrastructure.handler;
 
-import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.global.response.ErrorCode;
-import tools.jackson.databind.json.JsonMapper;
+import java.io.IOException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import tools.jackson.databind.json.JsonMapper;
+
+import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Slf4j
 @Component
@@ -37,17 +38,15 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         ErrorCode errorCode = resolveErrorCode(request);
 
-        log.warn(
-                "[AuthenticationEntryPoint] path={}, errorCode={}, message={}",
-                request.getRequestURI(),
-                errorCode.getCode(),
-                authException.getMessage()
-        );
+        log.warn("[AuthenticationEntryPoint] path={}, errorCode={}, message={}", request.getRequestURI(),
+                errorCode.getCode(), authException.getMessage());
 
-        response.setStatus(errorCode.getHttpStatus().value());
+        response.setStatus(errorCode.getHttpStatus()
+                .value());
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(jsonMapper.writeValueAsString(ApiResponse.error(errorCode)));
+        response.getWriter()
+                .write(jsonMapper.writeValueAsString(ApiResponse.error(errorCode)));
     }
 
     private ErrorCode resolveErrorCode(HttpServletRequest request) {

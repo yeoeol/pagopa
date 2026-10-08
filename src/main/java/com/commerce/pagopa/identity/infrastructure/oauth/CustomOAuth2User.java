@@ -1,29 +1,30 @@
 package com.commerce.pagopa.identity.infrastructure.oauth;
 
-import com.commerce.pagopa.identity.domain.Role;
-import com.commerce.pagopa.identity.domain.RoleCode;
-import com.commerce.pagopa.identity.domain.User;
-import com.commerce.pagopa.identity.domain.UserRole;
-
-import org.jspecify.annotations.Nullable;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
+import org.jspecify.annotations.Nullable;
+
 import lombok.Getter;
+
+import com.commerce.pagopa.identity.domain.Role;
+import com.commerce.pagopa.identity.domain.RoleCode;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.identity.domain.UserRole;
 
 @Getter
 public class CustomOAuth2User implements OAuth2User, UserDetails {
 
     private final User user;
     private final Map<String, Object> attributes;
-    private final String attributeKey;  // Provider별 고유 식별자 키
+    private final String attributeKey; // Provider별 고유 식별자 키
 
     public CustomOAuth2User(User user, Map<String, Object> attributes, String attributeKey) {
         this.user = user;
@@ -33,7 +34,8 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getUserRoles().stream()
+        return user.getUserRoles()
+                .stream()
                 .map(UserRole::getRole)
                 .filter(Role::isEnabled)
                 .map(Role::getCode)
@@ -66,7 +68,8 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
     }
 
     public Set<String> getRoles() {
-        return user.getUserRoles().stream()
+        return user.getUserRoles()
+                .stream()
                 .map(UserRole::getRole)
                 .filter(Role::isEnabled)
                 .map(Role::getCode)

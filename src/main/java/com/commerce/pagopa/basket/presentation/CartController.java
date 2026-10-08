@@ -1,9 +1,5 @@
 package com.commerce.pagopa.basket.presentation;
 
-import com.commerce.pagopa.basket.application.CartService;
-import com.commerce.pagopa.basket.application.dto.response.CartResponseDto;
-import com.commerce.pagopa.global.response.ApiResponse;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,10 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.RequiredArgsConstructor;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.basket.application.CartService;
+import com.commerce.pagopa.basket.application.dto.response.CartResponseDto;
+import com.commerce.pagopa.global.response.ApiResponse;
 
 @Tag(name = "CART API", description = "장바구니 전체 단위 기능 관리 API")
 @RestController
@@ -29,9 +29,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponseDto>> getCart(
             @AuthenticationPrincipal(expression = "userId") Long userId
     ) {
-		return ResponseEntity.ok(
-                ApiResponse.ok(cartService.findUserCart(userId))
-        );
+        return ResponseEntity.ok(ApiResponse.ok(cartService.findUserCart(userId)));
     }
 
     @Operation(summary = "장바구니 비우기", description = "장바구니 항목들을 전체 삭제합니다.")

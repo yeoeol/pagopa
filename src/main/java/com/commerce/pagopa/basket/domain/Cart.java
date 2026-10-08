@@ -1,29 +1,21 @@
 package com.commerce.pagopa.basket.domain;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-
-import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.*;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(
-        name = "cart",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_cart_user_id",
-                        columnNames = {"user_id"}
-                )
-        }
-)
+@Table(name = "cart", uniqueConstraints = {@UniqueConstraint(name = "uq_cart_user_id", columnNames = {"user_id"})})
 public class Cart extends BaseTimeEntity {
 
     @Id
@@ -34,14 +26,7 @@ public class Cart extends BaseTimeEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @OneToMany(
-            mappedBy = "cart",
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.REMOVE
-            },
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "cart", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private final List<CartItem> cartItems = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)

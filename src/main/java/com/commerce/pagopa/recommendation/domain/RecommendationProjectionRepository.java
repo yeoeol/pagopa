@@ -5,19 +5,9 @@ import java.util.List;
 
 public interface RecommendationProjectionRepository {
 
-	boolean saveEventIfAbsent(RecommendationEvent event);
+    boolean saveEventIfAbsent(RecommendationEvent event);
 
-	void increaseInterest(
-			Long userId,
-			InterestType type,
-			String interestKey,
-			int weight,
-			LocalDateTime occurredAt
-	);
+    void increaseInterest(Long userId, InterestType type, String interestKey, int weight, LocalDateTime occurredAt);
 
-	List<RecommendationInterest> findTopInterests(
-			Long userId,
-			InterestType type,
-			int limit
-	);
+    List<RecommendationInterest> findTopInterests(Long userId, InterestType type, int limit);
 }

@@ -1,30 +1,22 @@
 package com.commerce.pagopa.ordering.domain.order;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
+
 import lombok.*;
+
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "orders",
-        indexes = {
-                @Index(
-                        name = "idx_orders_status_ordered_at",
-                        columnList = "status, ordered_at"
-                )
-        }
-)
+@Table(name = "orders", indexes = {@Index(name = "idx_orders_status_ordered_at", columnList = "status, ordered_at")})
 public class Order extends BaseTimeEntity {
 
     @Id
@@ -53,11 +45,7 @@ public class Order extends BaseTimeEntity {
     private final List<OrderItem> orderItems = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(
-            OrderStatus status,
-            LocalDateTime orderedAt,
-            Long userId
-    ) {
+    private Order(OrderStatus status, LocalDateTime orderedAt, Long userId) {
         this.status = status;
         this.orderedAt = orderedAt;
         this.userId = userId;

@@ -1,8 +1,8 @@
 package com.commerce.pagopa.global.exception;
 
-import com.commerce.pagopa.global.response.ErrorCode;
-
 import lombok.Getter;
+
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Getter
 public class BusinessException extends RuntimeException {

@@ -1,8 +1,7 @@
 package com.commerce.pagopa.identity.presentation.admin;
 
-import com.commerce.pagopa.identity.application.admin.AdminUserService;
-import com.commerce.pagopa.identity.application.admin.dto.request.AdminUserSearchRequestDto;
-import com.commerce.pagopa.identity.application.admin.dto.response.AdminUserPageResponseDto;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,10 +9,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.identity.application.admin.AdminUserService;
+import com.commerce.pagopa.identity.application.admin.dto.request.AdminUserSearchRequestDto;
+import com.commerce.pagopa.identity.application.admin.dto.response.AdminUserPageResponseDto;
 
 @Controller
 @RequiredArgsConstructor
@@ -34,15 +34,10 @@ public class AdminUserController {
         model.addAttribute("result", result);
         model.addAttribute("search", requestDto);
 
-        if (result.totalPages() > 0
-                && result.page() >= result.totalPages()) {
+        if (result.totalPages() > 0 && result.page() >= result.totalPages()) {
 
             int lastPage = result.totalPages() - 1;
-            String redirectUrl = createRedirectUrl(
-                    requestDto,
-                    lastPage,
-                    result.size()
-            );
+            String redirectUrl = createRedirectUrl(requestDto, lastPage, result.size());
 
             if ("true".equals(htmxRequest)) {
                 response.setHeader("HX-Redirect", redirectUrl);
@@ -59,58 +54,47 @@ public class AdminUserController {
     }
 
     @GetMapping("/{userId}")
-    public String detail(
-            @PathVariable("userId") Long userId,
-            Model model
-    ) {
+    public String detail(@PathVariable("userId") Long userId, Model model) {
         model.addAttribute("user", adminUserService.find(userId));
         return "admin/users/fragments/detail-modal :: detail";
     }
 
     @PostMapping("/{userId}/status/activate")
-    public String activate(
-            @PathVariable("userId") Long userId
-    ) {
+    public String activate(@PathVariable("userId") Long userId) {
         adminUserService.activate(userId);
         return "redirect:/admin/users/" + userId;
     }
 
     @PostMapping("/{userId}/status/suspend")
-    public String suspend(
-            @PathVariable("userId") Long userId
-    ) {
+    public String suspend(@PathVariable("userId") Long userId) {
         adminUserService.suspend(userId);
         return "redirect:/admin/users/" + userId;
     }
 
     @PostMapping("/{userId}/status/ban")
-    public String ban(
-            @PathVariable("userId") Long userId
-    ) {
+    public String ban(@PathVariable("userId") Long userId) {
         adminUserService.ban(userId);
         return "redirect:/admin/users/" + userId;
     }
 
-    private String createRedirectUrl(
-            AdminUserSearchRequestDto requestDto,
-            int page,
-            int size
-    ) {
-        UriComponentsBuilder builder = UriComponentsBuilder
-                .fromPath("/admin/users")
+    private String createRedirectUrl(AdminUserSearchRequestDto requestDto, int page, int size) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/admin/users")
                 .queryParam("page", page)
                 .queryParam("size", size);
 
         if (StringUtils.hasText(requestDto.keyword())) {
-            builder.queryParam("keyword", requestDto.keyword().trim());
+            builder.queryParam("keyword", requestDto.keyword()
+                    .trim());
         }
 
         if (requestDto.status() != null) {
-            builder.queryParam("status", requestDto.status().name());
+            builder.queryParam("status", requestDto.status()
+                    .name());
         }
 
         if (requestDto.roleCode() != null) {
-            builder.queryParam("roleCode", requestDto.roleCode().name());
+            builder.queryParam("roleCode", requestDto.roleCode()
+                    .name());
         }
 
         return builder.build()

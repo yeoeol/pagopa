@@ -1,17 +1,17 @@
 package com.commerce.pagopa.global.cookie;
 
-import com.commerce.pagopa.global.config.CookieSettings;
-import com.commerce.pagopa.global.util.CookieUtil;
+import java.util.UUID;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.global.config.CookieSettings;
+import com.commerce.pagopa.global.util.CookieUtil;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -31,7 +31,8 @@ public class GuestSessionCookieFactory {
             return sessionId;
         }
 
-        String newSessionId = UUID.randomUUID().toString();
+        String newSessionId = UUID.randomUUID()
+                .toString();
         response.addCookie(createGuestSessionCookie(newSessionId));
         return newSessionId;
     }

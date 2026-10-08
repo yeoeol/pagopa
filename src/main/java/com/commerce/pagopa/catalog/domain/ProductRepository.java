@@ -1,16 +1,16 @@
 package com.commerce.pagopa.catalog.domain;
 
-import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.global.exception.BusinessException;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import lombok.NonNull;
+
+import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.global.exception.BusinessException;
 
 import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 
@@ -44,22 +44,17 @@ public interface ProductRepository {
 
     Optional<Product> findByIdForUpdate(Long id);
 
-	List<Product> findRecommendationCandidatesByKeyword(
-			String keyword,
-			Collection<Long> excludedProductIds,
-			int limit
-	);
+    List<Product> findRecommendationCandidatesByKeyword(String keyword, Collection<Long> excludedProductIds, int limit);
 
-	List<Product> findDefaultRecommendationProducts(
-			Collection<Long> excludedProductIds,
-			int limit
-	);
+    List<Product> findDefaultRecommendationProducts(Collection<Long> excludedProductIds, int limit);
 
     default Product findByIdForUpdateOrThrow(Long id) {
-        return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
+        return findByIdForUpdate(id)
+                .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 
     default Product findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
+        return findById(id)
+                .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 }

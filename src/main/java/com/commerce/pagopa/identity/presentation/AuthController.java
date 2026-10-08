@@ -1,8 +1,8 @@
 package com.commerce.pagopa.identity.presentation;
 
-import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.identity.application.AuthService;
-import com.commerce.pagopa.identity.infrastructure.jwt.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.RequiredArgsConstructor;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.identity.application.AuthService;
+import com.commerce.pagopa.identity.infrastructure.jwt.*;
 
 @Tag(name = "AUTH API", description = "인증 관리 API")
 @RestController
@@ -45,23 +45,14 @@ public class AuthController {
 
     @Operation(summary = "JWT 토큰 재발급", description = "유효한 리프레쉬 토큰을 사용하여 액세스 토큰과 리프레쉬 토큰을 재발급합니다.")
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<Void>> refresh(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
+    public ResponseEntity<ApiResponse<Void>> refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = JwtCookieUtil.extractTokenFromCookies(JwtTokenType.REFRESH_TOKEN, request.getCookies());
         TokenResponseDto tokenResponseDto = authService.reissueToken(refreshToken);
 
-        Cookie accessTokenCookie = jwtCookieFactory.createJwtCookie(
-                JwtTokenType.ACCESS_TOKEN,
-                tokenResponseDto.accessToken(),
-                jwtTokenProvider.getAccessTokenExpiry() / 1000
-        );
-        Cookie refreshTokenCookie = jwtCookieFactory.createJwtCookie(
-                JwtTokenType.REFRESH_TOKEN,
-                tokenResponseDto.refreshToken(),
-                jwtTokenProvider.getRefreshTokenExpiry() / 1000
-        );
+        Cookie accessTokenCookie = jwtCookieFactory.createJwtCookie(JwtTokenType.ACCESS_TOKEN,
+                tokenResponseDto.accessToken(), jwtTokenProvider.getAccessTokenExpiry() / 1000);
+        Cookie refreshTokenCookie = jwtCookieFactory.createJwtCookie(JwtTokenType.REFRESH_TOKEN,
+                tokenResponseDto.refreshToken(), jwtTokenProvider.getRefreshTokenExpiry() / 1000);
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
 
@@ -85,7 +76,8 @@ public class AuthController {
         response.addCookie(jwtCookieFactory.deleteJwtCookie(JwtTokenType.REFRESH_TOKEN));
 
         if (request.getSession(false) != null) {
-            request.getSession(false).invalidate();
+            request.getSession(false)
+                    .invalidate();
         }
         SecurityContextHolder.clearContext();
     }

@@ -1,13 +1,13 @@
 package com.commerce.pagopa.support.testcontainers;
 
-import tools.jackson.databind.json.JsonMapper;
-
 import org.springframework.context.annotation.Bean;
+
+import tools.jackson.databind.json.JsonMapper;
 
 public class JacksonTestConfig {
 
-	@Bean
-	JsonMapper jsonMapper() {
-		return new JsonMapper();
-	}
+    @Bean
+    JsonMapper jsonMapper() {
+        return new JsonMapper();
+    }
 }

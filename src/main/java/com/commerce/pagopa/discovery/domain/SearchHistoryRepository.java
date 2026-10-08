@@ -22,15 +22,7 @@ public interface SearchHistoryRepository {
 
     void deleteBySessionId(String sessionId);
 
-    void upsertByUserId(
-            Long userId,
-            String keyword,
-            LocalDateTime lastSearchedAt
-    );
+    void upsertByUserId(Long userId, String keyword, LocalDateTime lastSearchedAt);
 
-    void upsertBySessionId(
-            String SessionId,
-            String keyword,
-            LocalDateTime lastSearchedAt
-    );
+    void upsertBySessionId(String SessionId, String keyword, LocalDateTime lastSearchedAt);
 }

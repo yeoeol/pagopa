@@ -1,12 +1,12 @@
 package com.commerce.pagopa.ordering.domain.delivery;
 
-import com.commerce.pagopa.global.entity.Address;
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.ordering.domain.order.Order;
-
 import jakarta.persistence.*;
 
 import lombok.*;
+
+import com.commerce.pagopa.global.entity.Address;
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.ordering.domain.order.Order;
 
 @Entity
 @Getter
@@ -38,21 +38,11 @@ public class Delivery extends BaseTimeEntity {
     private Address address; // 값 타입(주소, 상세주소, 우편번호)
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "order_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_delivery_orders")
-    )
+    @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(name = "fk_delivery_orders"))
     private Order order;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Delivery(
-            DeliveryStatus status,
-            String trackingNo,
-            Address address,
-            String requestMemo,
-            Order order
-    ) {
+    private Delivery(DeliveryStatus status, String trackingNo, Address address, String requestMemo, Order order) {
         this.status = status;
         this.trackingNo = trackingNo;
         this.address = address;
@@ -60,11 +50,7 @@ public class Delivery extends BaseTimeEntity {
         this.order = order;
     }
 
-    public static Delivery create(
-            Address address,
-            String requestMemo,
-            Order order
-    ) {
+    public static Delivery create(Address address, String requestMemo, Order order) {
         return Delivery.builder()
                 .address(address)
                 .status(DeliveryStatus.PREPARING)

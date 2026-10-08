@@ -1,41 +1,45 @@
 package com.commerce.pagopa.auth.handler;
 
-import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
-
-import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
+import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ApiAuthenticationEntryPointTest {
 
     private final JsonMapper jsonMapper = new JsonMapper();
-    private final ApiAuthenticationEntryPoint authenticationEntryPoint =
-            new ApiAuthenticationEntryPoint(jsonMapper);
+    private final ApiAuthenticationEntryPoint authenticationEntryPoint = new ApiAuthenticationEntryPoint(jsonMapper);
 
     @Test
     void commence_returnsUnauthorizedResponse_whenNoAuthenticationErrorAttributeExists() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/auth/me");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        authenticationEntryPoint.commence(
-                request,
-                response,
-                new InsufficientAuthenticationException("Full authentication is required")
-        );
+        authenticationEntryPoint.commence(request, response,
+                new InsufficientAuthenticationException("Full authentication is required"));
 
         JsonNode body = jsonMapper.readTree(response.getContentAsString());
 
-        assertThat(response.getStatus()).isEqualTo(ErrorCode.UNAUTHORIZED.getHttpStatus().value());
+        assertThat(response.getStatus()).isEqualTo(ErrorCode.UNAUTHORIZED.getHttpStatus()
+                .value());
         assertThat(response.getContentType()).isEqualTo("application/json;charset=UTF-8");
-        assertThat(body.get("success").asBoolean()).isFalse();
-        assertThat(body.get("error").get("code").asString()).isEqualTo(ErrorCode.UNAUTHORIZED.getCode());
-        assertThat(body.get("error").get("message").asString()).isEqualTo(ErrorCode.UNAUTHORIZED.getMessage());
+        assertThat(body.get("success")
+                .asBoolean()).isFalse();
+        assertThat(body.get("error")
+                .get("code")
+                .asString()).isEqualTo(ErrorCode.UNAUTHORIZED.getCode());
+        assertThat(body.get("error")
+                .get("message")
+                .asString()).isEqualTo(ErrorCode.UNAUTHORIZED.getMessage());
     }
 
     @Test
@@ -44,18 +48,20 @@ class ApiAuthenticationEntryPointTest {
         request.setAttribute(ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE, ErrorCode.INVALID_TOKEN);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        authenticationEntryPoint.commence(
-                request,
-                response,
-                new InsufficientAuthenticationException("Invalid token")
-        );
+        authenticationEntryPoint.commence(request, response, new InsufficientAuthenticationException("Invalid token"));
 
         JsonNode body = jsonMapper.readTree(response.getContentAsString());
 
-        assertThat(response.getStatus()).isEqualTo(ErrorCode.INVALID_TOKEN.getHttpStatus().value());
-        assertThat(body.get("success").asBoolean()).isFalse();
-        assertThat(body.get("error").get("code").asString()).isEqualTo(ErrorCode.INVALID_TOKEN.getCode());
-        assertThat(body.get("error").get("message").asString()).isEqualTo(ErrorCode.INVALID_TOKEN.getMessage());
+        assertThat(response.getStatus()).isEqualTo(ErrorCode.INVALID_TOKEN.getHttpStatus()
+                .value());
+        assertThat(body.get("success")
+                .asBoolean()).isFalse();
+        assertThat(body.get("error")
+                .get("code")
+                .asString()).isEqualTo(ErrorCode.INVALID_TOKEN.getCode());
+        assertThat(body.get("error")
+                .get("message")
+                .asString()).isEqualTo(ErrorCode.INVALID_TOKEN.getMessage());
     }
 
     @Test
@@ -64,17 +70,19 @@ class ApiAuthenticationEntryPointTest {
         request.setAttribute(ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE, ErrorCode.EXPIRED_TOKEN);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        authenticationEntryPoint.commence(
-                request,
-                response,
-                new InsufficientAuthenticationException("Expired token")
-        );
+        authenticationEntryPoint.commence(request, response, new InsufficientAuthenticationException("Expired token"));
 
         JsonNode body = jsonMapper.readTree(response.getContentAsString());
 
-        assertThat(response.getStatus()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getHttpStatus().value());
-        assertThat(body.get("success").asBoolean()).isFalse();
-        assertThat(body.get("error").get("code").asString()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getCode());
-        assertThat(body.get("error").get("message").asString()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getMessage());
+        assertThat(response.getStatus()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getHttpStatus()
+                .value());
+        assertThat(body.get("success")
+                .asBoolean()).isFalse();
+        assertThat(body.get("error")
+                .get("code")
+                .asString()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getCode());
+        assertThat(body.get("error")
+                .get("message")
+                .asString()).isEqualTo(ErrorCode.EXPIRED_TOKEN.getMessage());
     }
 }

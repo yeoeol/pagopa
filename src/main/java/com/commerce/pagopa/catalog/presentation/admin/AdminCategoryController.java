@@ -1,80 +1,64 @@
 package com.commerce.pagopa.catalog.presentation.admin;
 
+import jakarta.validation.Valid;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import lombok.RequiredArgsConstructor;
+
 import com.commerce.pagopa.catalog.application.admin.AdminCategoryService;
 import com.commerce.pagopa.catalog.application.admin.dto.request.AdminCategoryCreateRequestDto;
 import com.commerce.pagopa.catalog.application.admin.dto.request.AdminCategoryUpdateRequestDto;
 import com.commerce.pagopa.catalog.application.admin.dto.response.AdminCategoryPageResponseDto;
 import com.commerce.pagopa.catalog.application.dto.response.CategorySimpleResponseDto;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
-
-import lombok.RequiredArgsConstructor;
-
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/admin/categories")
 public class AdminCategoryController {
 
-	private final AdminCategoryService adminCategoryService;
+    private final AdminCategoryService adminCategoryService;
 
-	@GetMapping
-	public String list(
-			@RequestParam(name = "categoryId", required = false) Long categoryId,
-			Model model
-	) {
-		AdminCategoryPageResponseDto result = adminCategoryService.findPage(categoryId);
+    @GetMapping
+    public String list(@RequestParam(name = "categoryId", required = false) Long categoryId, Model model) {
+        AdminCategoryPageResponseDto result = adminCategoryService.findPage(categoryId);
 
-		model.addAttribute("categories", result.categories());
-		model.addAttribute("rootCount", result.rootCount());
-		model.addAttribute("detail", result.detail());
+        model.addAttribute("categories", result.categories());
+        model.addAttribute("rootCount", result.rootCount());
+        model.addAttribute("detail", result.detail());
 
-		return "admin/categories/list";
-	}
+        return "admin/categories/list";
+    }
 
-	@GetMapping("/root")
-	public String root(Model model) {
-		model.addAttribute(
-				"detail",
-				adminCategoryService.findDetail(null)
-		);
+    @GetMapping("/root")
+    public String root(Model model) {
+        model.addAttribute("detail", adminCategoryService.findDetail(null));
 
-		return "admin/categories/fragments/detail :: detail";
-	}
+        return "admin/categories/fragments/detail :: detail";
+    }
 
-	@GetMapping("/{categoryId}")
-	public String detail(
-			@PathVariable("categoryId") Long categoryId,
-			Model model
-	) {
-		model.addAttribute(
-				"detail",
-				adminCategoryService.findDetail(categoryId)
-		);
+    @GetMapping("/{categoryId}")
+    public String detail(@PathVariable("categoryId") Long categoryId, Model model) {
+        model.addAttribute("detail", adminCategoryService.findDetail(categoryId));
 
-		return "admin/categories/fragments/detail :: detail";
-	}
+        return "admin/categories/fragments/detail :: detail";
+    }
 
-	@PostMapping
-	public String create(
-			@Valid @ModelAttribute AdminCategoryCreateRequestDto requestDto
-	) {
-		CategorySimpleResponseDto created = adminCategoryService.create(requestDto);
+    @PostMapping
+    public String create(@Valid @ModelAttribute AdminCategoryCreateRequestDto requestDto) {
+        CategorySimpleResponseDto created = adminCategoryService.create(requestDto);
 
-		return "redirect:/admin/categories?categoryId="
-				+ created.categoryId();
-	}
+        return "redirect:/admin/categories?categoryId=" + created.categoryId();
+    }
 
-	@PostMapping("/{categoryId}/rename")
-	public String update(
-			@PathVariable("categoryId") Long categoryId,
-			@Valid @ModelAttribute AdminCategoryUpdateRequestDto requestDto
-	) {
-		adminCategoryService.update(categoryId, requestDto);
-		return "redirect:/admin/categories?categoryId="
-				+ categoryId;
-	}
+    @PostMapping("/{categoryId}/rename")
+    public String update(
+            @PathVariable("categoryId") Long categoryId,
+            @Valid @ModelAttribute AdminCategoryUpdateRequestDto requestDto
+    ) {
+        adminCategoryService.update(categoryId, requestDto);
+        return "redirect:/admin/categories?categoryId=" + categoryId;
+    }
 }

@@ -1,8 +1,8 @@
 package com.commerce.pagopa.discovery.domain;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
 
 import lombok.*;
 
@@ -10,19 +10,9 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "search_history",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_search_history_user_id_keyword",
-                        columnNames = {"user_id", "keyword"}
-                ),
-                @UniqueConstraint(
-                        name = "uq_search_history_session_id_keyword",
-                        columnNames = {"session_id", "keyword"}
-                ),
-        }
-)
+@Table(name = "search_history", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_search_history_user_id_keyword", columnNames = {"user_id", "keyword"}),
+        @UniqueConstraint(name = "uq_search_history_session_id_keyword", columnNames = {"session_id", "keyword"}),})
 public class SearchHistory {
 
     @Id
@@ -51,23 +41,14 @@ public class SearchHistory {
     private LocalDateTime lastSearchedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private SearchHistory(
-            Long userId,
-            String sessionId,
-            String keyword,
-            LocalDateTime lastSearchedAt
-    ) {
+    private SearchHistory(Long userId, String sessionId, String keyword, LocalDateTime lastSearchedAt) {
         this.userId = userId;
         this.sessionId = sessionId;
         this.keyword = keyword;
         this.lastSearchedAt = lastSearchedAt;
     }
 
-    public static SearchHistory createForUser(
-            Long userId,
-            String keyword,
-            LocalDateTime lastSearchedAt
-    ) {
+    public static SearchHistory createForUser(Long userId, String keyword, LocalDateTime lastSearchedAt) {
         return SearchHistory.builder()
                 .userId(userId)
                 .keyword(keyword)
@@ -75,11 +56,7 @@ public class SearchHistory {
                 .build();
     }
 
-    public static SearchHistory createForGuest(
-            String sessionId,
-            String keyword,
-            LocalDateTime lastSearchedAt
-    ) {
+    public static SearchHistory createForGuest(String sessionId, String keyword, LocalDateTime lastSearchedAt) {
         return SearchHistory.builder()
                 .sessionId(sessionId)
                 .keyword(keyword)

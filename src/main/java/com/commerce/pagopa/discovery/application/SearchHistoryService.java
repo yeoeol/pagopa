@@ -1,21 +1,21 @@
 package com.commerce.pagopa.discovery.application;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+
 import com.commerce.pagopa.discovery.application.dto.response.SearchHistoryResponseDto;
 import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
 import com.commerce.pagopa.discovery.event.UserSearchRecorded;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.identity.api.UserApi;
-
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import lombok.RequiredArgsConstructor;
 
 import static com.commerce.pagopa.global.util.StringUtil.normalize;
 import static org.springframework.util.StringUtils.hasText;
@@ -43,40 +43,25 @@ public class SearchHistoryService {
                 throw new BusinessException(ErrorCode.USER_NOT_FOUND);
             }
 
-            searchHistoryRepository.upsertByUserId(
-                    userId,
-                    normalizeKeyword,
-                    now
-            );
+            searchHistoryRepository.upsertByUserId(userId, normalizeKeyword, now);
 
-            events.publishEvent(new UserSearchRecorded(
-                    UUID.randomUUID(),
-                    userId,
-                    normalizeKeyword,
-                    now
-            ));
+            events.publishEvent(new UserSearchRecorded(UUID.randomUUID(), userId, normalizeKeyword, now));
         }
         // 비로그인 사용자 (세션 기반)
         else if (hasText(sessionId)) {
-            searchHistoryRepository.upsertBySessionId(
-                    sessionId,
-                    normalizeKeyword,
-                    now
-            );
+            searchHistoryRepository.upsertBySessionId(sessionId, normalizeKeyword, now);
         }
     }
 
     @Transactional(readOnly = true)
     public List<SearchHistoryResponseDto> getHistories(Long userId, String sessionId) {
         if (userId != null) {
-            return searchHistoryRepository
-                    .findByUserIdOrderByLastSearchedAtDesc(userId)
+            return searchHistoryRepository.findByUserIdOrderByLastSearchedAtDesc(userId)
                     .stream()
                     .map(SearchHistoryResponseDto::from)
                     .toList();
         } else if (hasText(sessionId)) {
-            return searchHistoryRepository
-                    .findBySessionIdOrderByLastSearchedAtDesc(sessionId)
+            return searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId)
                     .stream()
                     .map(SearchHistoryResponseDto::from)
                     .toList();

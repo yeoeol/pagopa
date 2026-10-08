@@ -1,12 +1,12 @@
 package com.commerce.pagopa.identity.infrastructure.jwt;
 
-import com.commerce.pagopa.global.config.CookieSettings;
+import jakarta.servlet.http.Cookie;
 
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.Cookie;
-
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.global.config.CookieSettings;
 
 // TODO: setSecure() -> HTTPS, setSameSite() -> CSRF 적용
 @Component

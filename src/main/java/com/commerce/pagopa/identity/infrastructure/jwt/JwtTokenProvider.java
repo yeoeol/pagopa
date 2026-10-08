@@ -1,13 +1,5 @@
 package com.commerce.pagopa.identity.infrastructure.jwt;
 
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
@@ -15,11 +7,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+
+import lombok.extern.slf4j.Slf4j;
+
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Slf4j
 @Component
@@ -79,9 +79,8 @@ public class JwtTokenProvider {
 
     public Set<String> getRoles(String token) {
         Object rolesClaim = parseClaims(token).get("roles");
-        if (!(rolesClaim instanceof Collection<?> roles)
-                || roles.stream().anyMatch(role -> !(role instanceof String))
-        ) {
+        if (!(rolesClaim instanceof Collection<?> roles) || roles.stream()
+                .anyMatch(role -> !(role instanceof String))) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 

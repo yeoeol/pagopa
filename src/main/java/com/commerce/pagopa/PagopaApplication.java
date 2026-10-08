@@ -4,14 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.modulith.Modulithic;
 
-@Modulithic(
-        sharedModules = "global"
-)
+@Modulithic(sharedModules = "global")
 @SpringBootApplication
 public class PagopaApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(PagopaApplication.class, args);
     }
-
 }

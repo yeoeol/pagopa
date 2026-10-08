@@ -1,16 +1,16 @@
 package com.commerce.pagopa.global.seeder;
 
-import net.datafaker.Faker;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import net.datafaker.Faker;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,15 +39,15 @@ class SearchHistorySeeder implements Seeder {
     @Override
     public void seed() {
         // user_id nullable - ACTIVE 사용자 풀 사용, 비로그인 분기는 NULL 채움
-        List<Long> userIds = jdbc.queryForList(
-                "SELECT user_id FROM user WHERE status = 'ACTIVE' ORDER BY user_id",
+        List<Long> userIds = jdbc.queryForList("SELECT user_id FROM user WHERE status = 'ACTIVE' ORDER BY user_id",
                 Long.class);
 
         if (userIds.isEmpty()) {
             throw new IllegalStateException("user 없음");
         }
 
-        int total = props.counts().searchHistories();
+        int total = props.counts()
+                .searchHistories();
         int userSize = userIds.size();
 
         String sql = """
@@ -70,8 +70,10 @@ class SearchHistorySeeder implements Seeder {
                 // 비로그인 세션을 5개씩 묶어 동일 세션 내 검색 흐름 모사
                 ps.setString(2, "sess_%d".formatted(i / 5));
             }
-            ps.setString(3, faker.commerce().productName());
-            ps.setTimestamp(4, Timestamp.from(faker.timeAndDate().past(30, TimeUnit.DAYS)));
+            ps.setString(3, faker.commerce()
+                    .productName());
+            ps.setTimestamp(4, Timestamp.from(faker.timeAndDate()
+                    .past(30, TimeUnit.DAYS)));
         });
     }
 }

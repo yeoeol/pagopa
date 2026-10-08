@@ -1,15 +1,16 @@
 package com.commerce.pagopa.global.seeder;
 
-import lombok.extern.slf4j.Slf4j;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -29,8 +30,8 @@ public class BatchInsertExecutor {
     }
 
     /**
-     * totalRows건을 batchSize 단위로 잘라 chunk마다 별도 트랜잭션으로 INSERT
-     * binder.bind(ps, globalIndex) - globalIndex는 0..totalRows-1 전역 인덱스
+     * totalRows건을 batchSize 단위로 잘라 chunk마다 별도 트랜잭션으로 INSERT binder.bind(ps,
+     * globalIndex) - globalIndex는 0..totalRows-1 전역 인덱스
      */
     public void batchInsert(String sql, int totalRows, int batchSize, RowBinder binder) {
         if (totalRows < 0) {
@@ -46,11 +47,12 @@ public class BatchInsertExecutor {
             int size = to - from;
             int chunkStart = from;
 
-            tx.executeWithoutResult(_ -> jdbc.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            tx.executeWithoutResult(ignoredStatus -> jdbc.batchUpdate(sql, new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     binder.bind(ps, chunkStart + i);
                 }
+
                 @Override
                 public int getBatchSize() {
                     return size;
@@ -65,9 +67,6 @@ public class BatchInsertExecutor {
 
     /** ID 컬럼 전체를 오름차순으로 로딩 - 시드 후 FK 참조용 ID 풀 확보 */
     public List<Long> loadIds(String table, String idColumn) {
-        return jdbc.queryForList(
-                "SELECT %s FROM %s ORDER BY %s".formatted(idColumn, table, idColumn),
-                Long.class
-        );
+        return jdbc.queryForList("SELECT %s FROM %s ORDER BY %s".formatted(idColumn, table, idColumn), Long.class);
     }
 }

@@ -1,29 +1,5 @@
 package com.commerce.pagopa.searchhistory.application;
 
-import com.commerce.pagopa.discovery.application.SearchHistoryService;
-import com.commerce.pagopa.discovery.domain.SearchHistory;
-import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
-import com.commerce.pagopa.global.config.QueryDSLConfig;
-import com.commerce.pagopa.identity.api.UserApi;
-import com.commerce.pagopa.identity.domain.User;
-import com.commerce.pagopa.identity.domain.UserRepository;
-import com.commerce.pagopa.support.fixture.UserFixture;
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.sql.DataSource;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -33,6 +9,31 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+
+import com.commerce.pagopa.discovery.application.SearchHistoryService;
+import com.commerce.pagopa.discovery.domain.SearchHistory;
+import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
+import com.commerce.pagopa.global.config.QueryDSLConfig;
+import com.commerce.pagopa.identity.api.UserApi;
+import com.commerce.pagopa.identity.domain.User;
+import com.commerce.pagopa.identity.domain.UserRepository;
+import com.commerce.pagopa.support.fixture.UserFixture;
+import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -67,8 +68,8 @@ class SearchHistoryServiceConcurrencyTest {
     @BeforeEach
     void verify_mysql_database() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            assertThat(connection.getMetaData().getDatabaseProductName())
-                    .isEqualToIgnoringCase("MySQL");
+            assertThat(connection.getMetaData()
+                    .getDatabaseProductName()).isEqualToIgnoringCase("MySQL");
         }
     }
 
@@ -82,8 +83,7 @@ class SearchHistoryServiceConcurrencyTest {
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    index -> searchHistoryService.saveHistory(null, sessionId, keywords.get(index))
-            );
+                    index -> searchHistoryService.saveHistory(null, sessionId, keywords.get(index)));
 
             assert_successful_execution(result);
             assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId))
@@ -101,22 +101,21 @@ class SearchHistoryServiceConcurrencyTest {
         String sessionId = unique_session_id("existing-history");
         String keyword = "keyword";
         LocalDateTime initialLastSearchedAt = LocalDateTime.parse("2000-01-01T00:00:00");
-        SearchHistory existingHistory = searchHistoryRepository.save(
-                SearchHistory.createForGuest(sessionId, keyword, initialLastSearchedAt)
-        );
+        SearchHistory existingHistory = searchHistoryRepository
+                .save(SearchHistory.createForGuest(sessionId, keyword, initialLastSearchedAt));
         Long initialId = existingHistory.getId();
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    ignored -> searchHistoryService.saveHistory(null, sessionId, keyword)
-            );
+                    ignored -> searchHistoryService.saveHistory(null, sessionId, keyword));
 
             assert_successful_execution(result);
-            List<SearchHistory> histories =
-                    searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId);
+            List<SearchHistory> histories = searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId);
             assertThat(histories).hasSize(1);
-            assertThat(histories.get(0).getId()).isEqualTo(initialId);
-            assertThat(histories.get(0).getLastSearchedAt()).isAfter(initialLastSearchedAt);
+            assertThat(histories.get(0)
+                    .getId()).isEqualTo(initialId);
+            assertThat(histories.get(0)
+                    .getLastSearchedAt()).isAfter(initialLastSearchedAt);
         } finally {
             searchHistoryService.deleteAll(null, sessionId);
         }
@@ -126,25 +125,15 @@ class SearchHistoryServiceConcurrencyTest {
     @Tag("boundary")
     void concurrent_whitespace_variants_are_deduplicated() throws InterruptedException {
         String sessionId = unique_session_id("whitespace-variants");
-        List<String> keywordVariants = List.of(
-                "keyword",
-                " keyword ",
-                "  keyword",
-                "keyword  ",
-                "keyword",
-                " keyword ",
-                "  keyword",
-                "keyword  "
-        );
+        List<String> keywordVariants = List.of("keyword", " keyword ", "  keyword", "keyword  ", "keyword", " keyword ",
+                "  keyword", "keyword  ");
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    index -> searchHistoryService.saveHistory(null, sessionId, keywordVariants.get(index))
-            );
+                    index -> searchHistoryService.saveHistory(null, sessionId, keywordVariants.get(index)));
 
             assert_successful_execution(result);
-            assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId))
-                    .singleElement()
+            assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId)).singleElement()
                     .extracting(SearchHistory::getKeyword)
                     .isEqualTo("keyword");
         } finally {
@@ -161,12 +150,10 @@ class SearchHistoryServiceConcurrencyTest {
         given(userApi.existsById(user.getId())).willReturn(true);
         try {
             ConcurrencyResult result = execute_concurrently(
-                    ignored -> searchHistoryService.saveHistory(user.getId(), null, keyword)
-            );
+                    ignored -> searchHistoryService.saveHistory(user.getId(), null, keyword));
 
             assert_successful_execution(result);
-            assertThat(searchHistoryRepository.findByUserIdOrderByLastSearchedAtDesc(user.getId()))
-                    .singleElement()
+            assertThat(searchHistoryRepository.findByUserIdOrderByLastSearchedAtDesc(user.getId())).singleElement()
                     .extracting(SearchHistory::getKeyword)
                     .isEqualTo(keyword);
         } finally {
@@ -182,12 +169,10 @@ class SearchHistoryServiceConcurrencyTest {
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    ignored -> searchHistoryService.saveHistory(null, sessionId, keyword)
-            );
+                    ignored -> searchHistoryService.saveHistory(null, sessionId, keyword));
 
             assert_successful_execution(result);
-            assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId))
-                    .singleElement()
+            assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId)).singleElement()
                     .extracting(SearchHistory::getKeyword)
                     .isEqualTo(keyword);
         } finally {
@@ -215,7 +200,8 @@ class SearchHistoryServiceConcurrencyTest {
                         successCount.incrementAndGet();
                     } catch (Throwable throwable) {
                         if (throwable instanceof InterruptedException) {
-                            Thread.currentThread().interrupt();
+                            Thread.currentThread()
+                                    .interrupt();
                         }
                         unexpectedFailures.add(throwable);
                     } finally {
@@ -231,14 +217,8 @@ class SearchHistoryServiceConcurrencyTest {
             executorTerminated = executor.awaitTermination(TERMINATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         }
 
-        return new ConcurrencyResult(
-                completedWithinTimeout,
-                unfinishedTaskCount,
-                executorTerminated,
-                successCount.get(),
-                0,
-                List.copyOf(unexpectedFailures)
-        );
+        return new ConcurrencyResult(completedWithinTimeout, unfinishedTaskCount, executorTerminated,
+                successCount.get(), 0, List.copyOf(unexpectedFailures));
     }
 
     private void assert_successful_execution(ConcurrencyResult result) {
@@ -256,17 +236,15 @@ class SearchHistoryServiceConcurrencyTest {
     }
 
     private String unique_suffix(String scenario) {
-        return scenario + "-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        return scenario + "-" + UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 12);
     }
 
-    private record ConcurrencyResult(
-            boolean completedWithinTimeout,
-            long unfinishedTaskCount,
-            boolean executorTerminated,
-            int successCount,
-            int expectedFailureCount,
-            List<Throwable> unexpectedFailures
-    ) {
+    private record ConcurrencyResult(boolean completedWithinTimeout, long unfinishedTaskCount,
+            boolean executorTerminated, int successCount, int expectedFailureCount,
+            List<Throwable> unexpectedFailures) {
 
         int outcomeCount() {
             return successCount + expectedFailureCount + unexpectedFailures.size();

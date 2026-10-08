@@ -1,19 +1,19 @@
 package com.commerce.pagopa.catalog.application;
 
-import com.commerce.pagopa.catalog.application.dto.response.CategorySimpleResponseDto;
-import com.commerce.pagopa.catalog.application.dto.response.CategoryTreeResponseDto;
-import com.commerce.pagopa.catalog.domain.Category;
-import com.commerce.pagopa.catalog.domain.CategoryRepository;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.catalog.application.dto.response.CategorySimpleResponseDto;
+import com.commerce.pagopa.catalog.application.dto.response.CategoryTreeResponseDto;
+import com.commerce.pagopa.catalog.domain.Category;
+import com.commerce.pagopa.catalog.domain.CategoryRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,8 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public List<CategorySimpleResponseDto> getChildren(Long categoryId) {
         Category parent = categoryRepository.findByIdOrThrow(categoryId);
-        return parent.getChildren().stream()
+        return parent.getChildren()
+                .stream()
                 .map(CategorySimpleResponseDto::from)
                 .toList();
     }
@@ -46,16 +47,14 @@ public class CategoryService {
     private List<CategoryTreeResponseDto> buildTree(List<Category> categories) {
         Map<Long, CategoryTreeResponseDto> categoriesById = new LinkedHashMap<>();
         for (Category category : categories) {
-            categoriesById.put(
-                    category.getId(),
-                    CategoryTreeResponseDto.init(category)
-            );
+            categoriesById.put(category.getId(), CategoryTreeResponseDto.init(category));
         }
 
         List<CategoryTreeResponseDto> roots = new ArrayList<>();
         for (Category category : categories) {
             CategoryTreeResponseDto current = categoriesById.get(category.getId());
-            CategoryTreeResponseDto parent = categoriesById.get(category.getParent().getId());
+            CategoryTreeResponseDto parent = categoriesById.get(category.getParent()
+                    .getId());
 
             if (parent == null) {
                 roots.add(current);
