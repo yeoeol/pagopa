@@ -24,13 +24,6 @@ public final class ProductFixture {
             Category category,
             Long sellerId
     ) {
-        return Product.create(
-                name,
-                description,
-                price,
-                stockQuantity,
-                category,
-                sellerId
-        );
+        return Product.create(name, description, price, stockQuantity, category, sellerId);
     }
 }

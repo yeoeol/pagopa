@@ -1,9 +1,9 @@
 package com.commerce.pagopa.identity.infrastructure.jwt;
 
+import jakarta.servlet.http.Cookie;
+
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-
-import jakarta.servlet.http.Cookie;
 
 public class JwtCookieUtil {
 
@@ -12,7 +12,8 @@ public class JwtCookieUtil {
     public static String extractTokenFromCookies(JwtTokenType tokenType, Cookie[] cookies) {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (tokenType.getCookieName().equals(cookie.getName())) {
+                if (tokenType.getCookieName()
+                        .equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

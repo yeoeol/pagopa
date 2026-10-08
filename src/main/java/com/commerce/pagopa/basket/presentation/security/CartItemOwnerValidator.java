@@ -1,14 +1,14 @@
 package com.commerce.pagopa.basket.presentation.security;
 
-import com.commerce.pagopa.basket.domain.CartItem;
-import com.commerce.pagopa.basket.domain.CartItemRepository;
-import com.commerce.pagopa.global.validator.OwnerValidator;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.basket.domain.CartItem;
+import com.commerce.pagopa.basket.domain.CartItemRepository;
+import com.commerce.pagopa.global.validator.OwnerValidator;
 
 @Component("cartItemOwnerValidator")
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ public class CartItemOwnerValidator extends OwnerValidator<CartItem, Long> {
 
     @Override
     protected Long extractOwnerId(CartItem cartItem) {
-        return cartItem.getCart().getUserId();
+        return cartItem.getCart()
+                .getUserId();
     }
 }

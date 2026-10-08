@@ -1,5 +1,15 @@
 package com.commerce.pagopa.review.application;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+
 import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.identity.api.ReviewAuthorQuery;
@@ -13,16 +23,6 @@ import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
 import com.commerce.pagopa.review.domain.Review;
 import com.commerce.pagopa.review.domain.ReviewImage;
 import com.commerce.pagopa.review.domain.ReviewRepository;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import lombok.RequiredArgsConstructor;
 
 import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 
@@ -39,20 +39,13 @@ public class ReviewService {
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
         OrderItemSummary summary = orderItemApi.getReviewableOrderItem(userId, requestDto.orderItemId());
 
-        Review review = Review.create(
-                requestDto.content(),
-                requestDto.rating(),
-                summary.productId(),
-                summary.orderItemId(),
-                userId
-        );
+        Review review = Review.create(requestDto.content(), requestDto.rating(), summary.productId(),
+                summary.orderItemId(), userId);
 
-        for (int i = 0; i < requestDto.imageUrls().size(); i++) {
-            ReviewImage reviewImage = ReviewImage.create(
-                    requestDto.imageUrls().get(i),
-                    i + 1,
-                    review
-            );
+        for (int i = 0; i < requestDto.imageUrls()
+                .size(); i++) {
+            ReviewImage reviewImage = ReviewImage.create(requestDto.imageUrls()
+                    .get(i), i + 1, review);
             review.addImage(reviewImage);
         }
 
@@ -93,10 +86,7 @@ public class ReviewService {
         Map<Long, ReviewAuthorSummary> authors = reviewAuthorQuery.findAllByIds(userIds);
 
         return reviews.stream()
-                .map(review -> ProductReviewResponseDto.from(
-                        review,
-                        authors.get(review.getUserId())
-                ))
+                .map(review -> ProductReviewResponseDto.from(review, authors.get(review.getUserId())))
                 .toList();
     }
 }

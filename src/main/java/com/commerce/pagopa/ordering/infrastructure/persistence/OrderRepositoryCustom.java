@@ -1,12 +1,12 @@
 package com.commerce.pagopa.ordering.infrastructure.persistence;
 
-import com.commerce.pagopa.ordering.domain.order.Order;
-import com.commerce.pagopa.ordering.domain.order.OrderStatus;
+import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import com.commerce.pagopa.ordering.domain.order.Order;
+import com.commerce.pagopa.ordering.domain.order.OrderStatus;
 
 public interface OrderRepositoryCustom {
 

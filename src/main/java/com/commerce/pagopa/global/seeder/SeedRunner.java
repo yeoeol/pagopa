@@ -1,13 +1,14 @@
 package com.commerce.pagopa.global.seeder;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Profile("local")
@@ -41,7 +42,6 @@ class SeedRunner implements ApplicationRunner {
                 log.error("[seed] failed {} after {}ms", seeder.name(), System.currentTimeMillis() - t, e);
                 throw new RuntimeException("Seeding failed for: " + seeder.name(), e);
             }
-
         }
         log.info("[seed] done ({}ms)", System.currentTimeMillis() - total);
     }

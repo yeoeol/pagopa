@@ -1,9 +1,9 @@
 package com.commerce.pagopa.payment.domain;
 
+import java.util.Optional;
+
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
-
-import java.util.Optional;
 
 public interface PaymentRepository {
 

@@ -4,9 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface ReviewAuthorQuery {
-	ReviewAuthorSummary findById(Long userId);
+    ReviewAuthorSummary findById(Long userId);
 
-	Map<Long, ReviewAuthorSummary> findAllByIds(
-			Collection<Long> userIds
-	);
+    Map<Long, ReviewAuthorSummary> findAllByIds(Collection<Long> userIds);
 }

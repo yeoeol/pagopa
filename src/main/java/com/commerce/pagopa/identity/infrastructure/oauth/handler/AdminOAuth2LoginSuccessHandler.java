@@ -1,17 +1,17 @@
 package com.commerce.pagopa.identity.infrastructure.oauth.handler;
 
-import com.commerce.pagopa.identity.domain.RoleCode;
+import java.io.IOException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
-import java.io.IOException;
+import com.commerce.pagopa.identity.domain.RoleCode;
 
 @Component
 public class AdminOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -22,10 +22,10 @@ public class AdminOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucce
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
-        boolean admin = authentication.getAuthorities().stream()
-                .anyMatch(authority ->
-                      RoleCode.ROLE_ADMIN.name().equals(authority.getAuthority())
-                );
+        boolean admin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority -> RoleCode.ROLE_ADMIN.name()
+                        .equals(authority.getAuthority()));
 
         if (!admin) {
             SecurityContextHolder.clearContext();

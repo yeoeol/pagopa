@@ -1,13 +1,13 @@
 package com.commerce.pagopa.global.seeder;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,8 +35,7 @@ class CartSeeder implements Seeder {
     @Override
     public void seed() {
         // buyer 후보 - ROLE_USER + ACTIVE
-        List<Long> buyerIds = jdbc.queryForList(
-                """
+        List<Long> buyerIds = jdbc.queryForList("""
                 SELECT u.user_id
                 FROM user u
                 JOIN user_role ur
@@ -46,14 +45,13 @@ class CartSeeder implements Seeder {
                 WHERE u.status = 'ACTIVE'
                     AND r.code = 'ROLE_USER'
                 ORDER BY u.user_id
-                """,
-                Long.class
-        );
+                """, Long.class);
         if (buyerIds.isEmpty()) {
             throw new IllegalStateException("buyer 부족");
         }
 
-        int total = props.counts().carts();
+        int total = props.counts()
+                .carts();
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         int buyerSize = buyerIds.size();
 

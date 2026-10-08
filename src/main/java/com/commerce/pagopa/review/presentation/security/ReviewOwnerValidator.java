@@ -1,14 +1,14 @@
 package com.commerce.pagopa.review.presentation.security;
 
-import com.commerce.pagopa.global.validator.OwnerValidator;
-import com.commerce.pagopa.review.domain.Review;
-import com.commerce.pagopa.review.domain.ReviewRepository;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.global.validator.OwnerValidator;
+import com.commerce.pagopa.review.domain.Review;
+import com.commerce.pagopa.review.domain.ReviewRepository;
 
 @Component("reviewOwnerValidator")
 @RequiredArgsConstructor

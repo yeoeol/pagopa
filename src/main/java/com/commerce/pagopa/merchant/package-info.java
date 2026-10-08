@@ -1,8 +1,8 @@
 @ApplicationModule(
-		allowedDependencies = {
-				"catalog :: api",
-				"identity :: api"
-		}
+        allowedDependencies = {
+                "catalog :: api",
+                "identity :: api"
+        }
 )
 package com.commerce.pagopa.merchant;
 

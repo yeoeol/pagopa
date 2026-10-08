@@ -1,29 +1,22 @@
 package com.commerce.pagopa.review.domain;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.*;
+
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "review",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_review_order_item_id",
-                        columnNames = {"order_item_id"}
-                )
-        }
-)
+@Table(name = "review", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_review_order_item_id", columnNames = {"order_item_id"})})
 public class Review extends BaseTimeEntity {
 
     @Id
@@ -36,11 +29,9 @@ public class Review extends BaseTimeEntity {
     @Column(name = "content", length = 100, nullable = false)
     private String content;
 
-    @Min(1)
-    @Max(5)
-    @ToString.Include
+    @Min(1) @Max(5) @ToString.Include
     @Column(name = "rating", nullable = false)
-    private Integer rating;     // 1 ~ 5
+    private Integer rating; // 1 ~ 5
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
@@ -51,24 +42,11 @@ public class Review extends BaseTimeEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @OneToMany(
-            mappedBy = "review",
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.REMOVE
-            },
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private final List<ReviewImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Review(
-            String content,
-            Integer rating,
-            Long productId,
-            Long orderItemId,
-            Long userId
-    ) {
+    private Review(String content, Integer rating, Long productId, Long orderItemId, Long userId) {
         this.content = content;
         this.rating = rating;
         this.productId = productId;
@@ -76,13 +54,7 @@ public class Review extends BaseTimeEntity {
         this.userId = userId;
     }
 
-    public static Review create(
-            String content,
-            Integer rating,
-            Long productId,
-            Long orderItemId,
-            Long userId
-    ) {
+    public static Review create(String content, Integer rating, Long productId, Long orderItemId, Long userId) {
         return Review.builder()
                 .content(content)
                 .rating(rating)

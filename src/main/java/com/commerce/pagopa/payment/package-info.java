@@ -1,7 +1,7 @@
 @ApplicationModule(
-		allowedDependencies = {
-				"ordering :: api"
-		}
+        allowedDependencies = {
+                "ordering :: api"
+        }
 )
 package com.commerce.pagopa.payment;
 

@@ -1,29 +1,21 @@
 package com.commerce.pagopa.catalog.domain;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-
-import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
+
 import lombok.*;
+
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "product",
-        indexes = {
-                @Index(
-                        name = "idx_product_name",
-                        columnList = "name"
-                )
-        }
-)
+@Table(name = "product", indexes = {@Index(name = "idx_product_name", columnList = "name")})
 public class Product extends BaseTimeEntity {
 
     @Id
@@ -54,36 +46,20 @@ public class Product extends BaseTimeEntity {
     private ProductStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "category_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_product_category")
-    )
+    @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
     private Category category;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @OneToMany(
-            mappedBy = "product",
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.REMOVE
-            },
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
     private final List<ProductImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
     private Product(
-            String name,
-            String description,
-            Integer price,
-            Integer stockQuantity,
-            ProductStatus status,
-            Category category,
-            Long userId
+            String name, String description, Integer price, Integer stockQuantity, ProductStatus status,
+            Category category, Long userId
     ) {
         this.name = name;
         this.description = description;
@@ -135,11 +111,8 @@ public class Product extends BaseTimeEntity {
 
     private void validateEnoughStock(int quantity) {
         if (this.stockQuantity < quantity) {
-            throw new BusinessException(
-                    ErrorCode.PRODUCT_OUT_OF_STOCK,
-                    "productId=%d, 현재 재고=%d, 요청 수량=%d"
-                            .formatted(this.id, this.stockQuantity, quantity)
-            );
+            throw new BusinessException(ErrorCode.PRODUCT_OUT_OF_STOCK,
+                    "productId=%d, 현재 재고=%d, 요청 수량=%d".formatted(this.id, this.stockQuantity, quantity));
         }
     }
 }

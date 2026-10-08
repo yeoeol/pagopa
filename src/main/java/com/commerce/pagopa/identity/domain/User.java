@@ -1,35 +1,24 @@
 package com.commerce.pagopa.identity.domain;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
 import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 
-import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
-import lombok.*;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "user",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_user_email",
-                        columnNames = "email"
-                ),
-                @UniqueConstraint(
-                        name = "uq_user_provider_provider_id",
-                        columnNames = {"provider", "provider_id"}
-                )
-        }
-)
+@Table(name = "user", uniqueConstraints = {@UniqueConstraint(name = "uq_user_email", columnNames = "email"),
+        @UniqueConstraint(name = "uq_user_provider_provider_id", columnNames = {"provider", "provider_id"})})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -81,15 +70,8 @@ public class User extends BaseTimeEntity {
 
     @Builder(access = AccessLevel.PRIVATE)
     private User(
-            Provider provider,
-            String providerId,
-            String name,
-            String email,
-            Address address,
-            String phoneNumber,
-            String profileImageUrl,
-            UserStatus status,
-            LocalDateTime statusChangedAt
+            Provider provider, String providerId, String name, String email, Address address, String phoneNumber,
+            String profileImageUrl, UserStatus status, LocalDateTime statusChangedAt
     ) {
         this.provider = provider;
         this.providerId = providerId;
@@ -148,9 +130,7 @@ public class User extends BaseTimeEntity {
     }
 
     public void suspend(LocalDateTime suspendedAt) {
-        if (this.status == UserStatus.WITHDRAWN
-                || this.status != UserStatus.ACTIVE
-        ) {
+        if (this.status == UserStatus.WITHDRAWN || this.status != UserStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         this.status = UserStatus.SUSPENDED;

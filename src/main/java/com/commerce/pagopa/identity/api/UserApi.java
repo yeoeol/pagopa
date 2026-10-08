@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface UserApi {
-	UserSummary get(Long userId);
+    UserSummary get(Long userId);
 
-	Map<Long, UserSummary> findAllByIdIn(Collection<Long> userIds);
+    Map<Long, UserSummary> findAllByIdIn(Collection<Long> userIds);
 
-	boolean existsById(Long userId);
+    boolean existsById(Long userId);
 
-	void grantSellerRole(Long userId);
+    void grantSellerRole(Long userId);
 }

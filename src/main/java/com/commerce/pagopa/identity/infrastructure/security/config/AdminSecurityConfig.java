@@ -1,8 +1,5 @@
 package com.commerce.pagopa.identity.infrastructure.security.config;
 
-import com.commerce.pagopa.identity.infrastructure.oauth.handler.AdminOAuth2LoginSuccessHandler;
-import com.commerce.pagopa.identity.infrastructure.oauth.service.CustomOAuth2UserService;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -12,6 +9,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.identity.infrastructure.oauth.handler.AdminOAuth2LoginSuccessHandler;
+import com.commerce.pagopa.identity.infrastructure.oauth.service.CustomOAuth2UserService;
 
 @Configuration
 @RequiredArgsConstructor
@@ -23,50 +23,27 @@ public class AdminSecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(Customizer.withDefaults())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                )
-                .exceptionHandling(exception -> exception
-                        .accessDeniedPage("/admin/access-denied")
-                )
-
-                .securityMatcher(
-                        "/admin",
-                        "/admin/**",
-                        "/admin-assets/**",
-                        "/oauth2/authorization/google-admin",
-                        "/login/oauth2/code/google-admin"
-                )
+        http.csrf(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .exceptionHandling(exception -> exception.accessDeniedPage("/admin/access-denied"))
+                .securityMatcher("/admin", "/admin/**", "/admin-assets/**", "/oauth2/authorization/google-admin",
+                        "/login/oauth2/code/google-admin")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/admin/login",
-                                "/admin/access-denied",
-                                "/admin-assets/**",
-                                "/oauth2/authorization/google-admin",
-                                "/login/oauth2/code/google-admin"
-                        ).permitAll()
-
-                        .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
-
-                        .anyRequest().hasRole("ADMIN")
-                )
-
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .loginPage("/admin/login")
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
+                        .requestMatchers("/admin/login", "/admin/access-denied", "/admin-assets/**",
+                                "/oauth2/authorization/google-admin", "/login/oauth2/code/google-admin")
+                        .permitAll()
+                        .requestMatchers("/admin", "/admin/**")
+                        .hasRole("ADMIN")
+                        .anyRequest()
+                        .hasRole("ADMIN"))
+                .oauth2Login(oauth2Login -> oauth2Login.loginPage("/admin/login")
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(adminOAuth2LoginSuccessHandler)
-                        .failureUrl("/admin/login?error")
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/admin/logout")
+                        .failureUrl("/admin/login?error"))
+                .logout(logout -> logout.logoutUrl("/admin/logout")
                         .logoutSuccessUrl("/admin/login?logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                );
+                        .deleteCookies("JSESSIONID"));
 
         return http.build();
     }

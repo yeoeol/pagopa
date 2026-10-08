@@ -1,5 +1,16 @@
 package com.commerce.pagopa.auth.controller;
 
+import jakarta.servlet.http.Cookie;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.commerce.pagopa.global.config.CookieSettings;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ApiResponse;
@@ -9,16 +20,6 @@ import com.commerce.pagopa.identity.infrastructure.jwt.JwtCookieUtil;
 import com.commerce.pagopa.identity.infrastructure.jwt.JwtTokenProvider;
 import com.commerce.pagopa.identity.infrastructure.jwt.TokenResponseDto;
 import com.commerce.pagopa.identity.presentation.AuthController;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.context.SecurityContextHolder;
-
-import jakarta.servlet.http.Cookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,11 +36,8 @@ class AuthControllerTest {
     void setUpBefore() {
         authService = mock(AuthService.class);
         jwtTokenProvider = mock(JwtTokenProvider.class);
-        authController = new AuthController(
-                authService,
-                jwtTokenProvider,
-                new JwtCookieFactory(new CookieSettings(true))
-        );
+        authController = new AuthController(authService, jwtTokenProvider,
+                new JwtCookieFactory(new CookieSettings(true)));
     }
 
     @AfterEach
@@ -56,16 +54,19 @@ class AuthControllerTest {
 
         Cookie cookie = response.getCookie(JwtCookieUtil.ACCESS_TOKEN_COOKIE_NAME);
 
-        assertThat(result.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(result.getStatusCode()
+                .is2xxSuccessful()).isTrue();
         assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().isSuccess()).isTrue();
+        assertThat(result.getBody()
+                .isSuccess()).isTrue();
         assertThat(cookie).isNotNull();
         assertThat(cookie.getValue()).isEmpty();
         assertThat(cookie.getMaxAge()).isZero();
         assertThat(cookie.getPath()).isEqualTo("/");
         assertThat(cookie.isHttpOnly()).isTrue();
         assertThat(request.getSession(false)).isNull();
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        assertThat(SecurityContextHolder.getContext()
+                .getAuthentication()).isNull();
         verify(authService).logout(1L);
     }
 
@@ -75,7 +76,7 @@ class AuthControllerTest {
         String refreshTokenValue = "valid-refresh-token";
         String newAccessToken = "new-access-token";
         String newRefreshToken = "new-refresh-token";
-        long accessTokenExpiryMs = 3_600_000L;   // 3600초 (ms 단위)
+        long accessTokenExpiryMs = 3_600_000L; // 3600초 (ms 단위)
         long refreshTokenExpiryMs = 86_400_000L; // 86400초 (ms 단위)
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -91,9 +92,11 @@ class AuthControllerTest {
         ResponseEntity<ApiResponse<Void>> result = authController.refresh(request, response);
 
         // then
-        assertThat(result.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(result.getStatusCode()
+                .is2xxSuccessful()).isTrue();
         assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().isSuccess()).isTrue();
+        assertThat(result.getBody()
+                .isSuccess()).isTrue();
 
         Cookie accessCookie = response.getCookie("accessToken");
         assertThat(accessCookie).isNotNull();
@@ -115,12 +118,12 @@ class AuthControllerTest {
     @Test
     void refresh_withNoCookies_throwsBusinessException() {
         // given
-        MockHttpServletRequest request = new MockHttpServletRequest(); // 쿠키 없음 → getCookies() == null
+        MockHttpServletRequest request = new MockHttpServletRequest(); // 쿠키 없음 → getCookies() ==
+                                                                       // null
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // when & then
-        assertThatThrownBy(() -> authController.refresh(request, response))
-                .isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> authController.refresh(request, response)).isInstanceOf(BusinessException.class);
     }
 
     @Test
@@ -131,7 +134,6 @@ class AuthControllerTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // when & then
-        assertThatThrownBy(() -> authController.refresh(request, response))
-                .isInstanceOf(BusinessException.class);
+        assertThatThrownBy(() -> authController.refresh(request, response)).isInstanceOf(BusinessException.class);
     }
 }

@@ -1,26 +1,27 @@
 package com.commerce.pagopa.media.infrastructure.azure;
 
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.models.BlobHttpHeaders;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.media.application.ImageService;
-import com.commerce.pagopa.media.application.response.ImageResponseDto;
-import com.commerce.pagopa.media.domain.ImageCategory;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
+
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobHttpHeaders;
+
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.media.application.ImageService;
+import com.commerce.pagopa.media.application.response.ImageResponseDto;
+import com.commerce.pagopa.media.domain.ImageCategory;
 
 @Slf4j
 @Service
@@ -55,8 +56,7 @@ public class AzureImageService implements ImageService {
         try {
             BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
 
-            BlobHttpHeaders headers = new BlobHttpHeaders()
-                    .setContentType(file.getContentType());
+            BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(file.getContentType());
 
             blobClient.upload(file.getInputStream(), file.getSize(), true);
             blobClient.setHttpHeaders(headers);
@@ -74,7 +74,8 @@ public class AzureImageService implements ImageService {
 
     @Override
     public void delete(String imageUrl) {
-        if (!StringUtils.hasText(imageUrl)) return;
+        if (!StringUtils.hasText(imageUrl))
+            return;
 
         String blobName = extractBlobName(imageUrl);
         try {
@@ -113,12 +114,7 @@ public class AzureImageService implements ImageService {
         }
 
         LocalDate now = LocalDate.now();
-        return String.format("%s/%d%02d/%s%s",
-                category.getDirectory(),
-                now.getYear(),
-                now.getMonthValue(),
-                UUID.randomUUID(),
-                extension
-        );
+        return String.format("%s/%d%02d/%s%s", category.getDirectory(), now.getYear(), now.getMonthValue(),
+                UUID.randomUUID(), extension);
     }
 }

@@ -8,15 +8,9 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "product_image",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_product_image_product_id_display_order",
-                        columnNames = {"product_id", "display_order"}
-                )
-        }
-)
+@Table(name = "product_image", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_product_image_product_id_display_order", columnNames = {"product_id",
+                "display_order"})})
 public class ProductImage {
 
     @Id
@@ -38,32 +32,18 @@ public class ProductImage {
     private boolean isThumbnail = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "product_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_product_image_product")
-    )
+    @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_image_product"))
     private Product product;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private ProductImage(
-            String imageUrl,
-            int displayOrder,
-            boolean isThumbnail,
-            Product product
-    ) {
+    private ProductImage(String imageUrl, int displayOrder, boolean isThumbnail, Product product) {
         this.imageUrl = imageUrl;
         this.displayOrder = displayOrder;
         this.isThumbnail = isThumbnail;
         this.product = product;
     }
 
-    public static ProductImage create(
-            String imageUrl,
-            int displayOrder,
-            boolean isThumbnail,
-            Product product
-    ) {
+    public static ProductImage create(String imageUrl, int displayOrder, boolean isThumbnail, Product product) {
         return ProductImage.builder()
                 .imageUrl(imageUrl)
                 .displayOrder(displayOrder)

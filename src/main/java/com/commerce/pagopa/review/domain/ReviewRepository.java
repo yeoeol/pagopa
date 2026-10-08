@@ -1,9 +1,9 @@
 package com.commerce.pagopa.review.domain;
 
-import com.commerce.pagopa.global.exception.BusinessException;
-
 import java.util.List;
 import java.util.Optional;
+
+import com.commerce.pagopa.global.exception.BusinessException;
 
 import static com.commerce.pagopa.global.response.ErrorCode.REVIEW_NOT_FOUND;
 
@@ -20,6 +20,7 @@ public interface ReviewRepository {
     List<Review> findAllWithDetailsByProductId(Long productId);
 
     default Review findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(() -> new BusinessException(REVIEW_NOT_FOUND));
+        return findById(id)
+                .orElseThrow(() -> new BusinessException(REVIEW_NOT_FOUND));
     }
 }

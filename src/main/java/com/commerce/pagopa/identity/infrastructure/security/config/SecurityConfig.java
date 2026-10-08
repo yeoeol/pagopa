@@ -1,10 +1,6 @@
 package com.commerce.pagopa.identity.infrastructure.security.config;
 
-import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
-import com.commerce.pagopa.identity.infrastructure.jwt.JwtAuthenticationFilter;
-import com.commerce.pagopa.identity.infrastructure.oauth.handler.OAuth2LoginFailureHandler;
-import com.commerce.pagopa.identity.infrastructure.oauth.handler.OAuth2LoginSuccessHandler;
-import com.commerce.pagopa.identity.infrastructure.oauth.service.CustomOAuth2UserService;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -22,9 +18,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
+import com.commerce.pagopa.identity.infrastructure.jwt.JwtAuthenticationFilter;
+import com.commerce.pagopa.identity.infrastructure.oauth.handler.OAuth2LoginFailureHandler;
+import com.commerce.pagopa.identity.infrastructure.oauth.handler.OAuth2LoginSuccessHandler;
+import com.commerce.pagopa.identity.infrastructure.oauth.service.CustomOAuth2UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -44,59 +44,54 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(apiAuthenticationEntryPoint)
-                )
-
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/actuator/health/**",
-                                "/actuator/prometheus"
-                        ).permitAll()
-
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
-
-                        .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
-
-                        .requestMatchers("/api/v1/sellers/**").hasRole("SELLER")
-
-                        .requestMatchers("/api/v1/local-test/**").permitAll()
-                        .requestMatchers("/api/v1/auth/refresh").permitAll()
-                        .requestMatchers("/api/v1/categories/**").permitAll()
-                        .requestMatchers("/api/v1/products/**").permitAll()
-                        .requestMatchers("/api/v1/search-histories/**").permitAll()
-
-                        .requestMatchers("/api/v1/auth/**").authenticated()
-                        .requestMatchers("/api/v1/users/**").authenticated()
-                        .requestMatchers("/api/v1/orders/**").authenticated()
-                        .requestMatchers("/api/v1/reviews/**").authenticated()
-                        .requestMatchers("/api/v1/cart/**").authenticated()
-                        .requestMatchers("/api/v1/cart-items/**").authenticated()
-                        .requestMatchers("/api/v1/images/**").authenticated()
-                        .requestMatchers("/api/v1/recommendations/**").authenticated()
-
-                        .anyRequest().authenticated()
-                )
-
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(apiAuthenticationEntryPoint))
+                .authorizeHttpRequests(
+                        auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                                .permitAll()
+                                .requestMatchers("/actuator/health/**", "/actuator/prometheus")
+                                .permitAll()
+                                .requestMatchers("/actuator/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/api/v1/roles/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/api/v1/sellers/**")
+                                .hasRole("SELLER")
+                                .requestMatchers("/api/v1/local-test/**")
+                                .permitAll()
+                                .requestMatchers("/api/v1/auth/refresh")
+                                .permitAll()
+                                .requestMatchers("/api/v1/categories/**")
+                                .permitAll()
+                                .requestMatchers("/api/v1/products/**")
+                                .permitAll()
+                                .requestMatchers("/api/v1/search-histories/**")
+                                .permitAll()
+                                .requestMatchers("/api/v1/auth/**")
+                                .authenticated()
+                                .requestMatchers("/api/v1/users/**")
+                                .authenticated()
+                                .requestMatchers("/api/v1/orders/**")
+                                .authenticated()
+                                .requestMatchers("/api/v1/reviews/**")
+                                .authenticated()
+                                .requestMatchers("/api/v1/cart/**")
+                                .authenticated()
+                                .requestMatchers("/api/v1/cart-items/**")
+                                .authenticated()
+                                .requestMatchers("/api/v1/images/**")
+                                .authenticated()
+                                .requestMatchers("/api/v1/recommendations/**")
+                                .authenticated()
+                                .anyRequest()
+                                .authenticated())
                 .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
-                )
+                        .failureHandler(oAuth2LoginFailureHandler))
                 .oauth2Client(Customizer.withDefaults())
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -1,14 +1,9 @@
 package com.commerce.pagopa.catalog.presentation;
 
-import com.commerce.pagopa.catalog.application.ProductService;
-import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.discovery.api.DiscoveryApi;
-import com.commerce.pagopa.global.response.ApiResponse;
-import com.commerce.pagopa.identity.api.CurrentUser;
-import com.commerce.pagopa.identity.api.UserIdentity;
+import java.util.List;
 
-import org.springdoc.core.annotations.ParameterObject;
+import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,15 +11,21 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.catalog.application.ProductService;
+import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
+import com.commerce.pagopa.discovery.api.DiscoveryApi;
+import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.identity.api.CurrentUser;
+import com.commerce.pagopa.identity.api.UserIdentity;
 
 @Tag(name = "PRODUCT API", description = "상품 관리 API")
 @RestController
@@ -40,19 +41,13 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getAll(
             @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(productService.findAllWithActiveAndSoldOut(pageable))
-        );
+        return ResponseEntity.ok(ApiResponse.ok(productService.findAllWithActiveAndSoldOut(pageable)));
     }
 
     @Operation(summary = "상품 상세 조회", description = "특정 상품을 조회합니다.")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponseDto>> getDetail(
-            @PathVariable("id") Long productId
-    ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(productService.find(productId))
-        );
+    public ResponseEntity<ApiResponse<ProductResponseDto>> getDetail(@PathVariable("id") Long productId) {
+        return ResponseEntity.ok(ApiResponse.ok(productService.find(productId)));
     }
 
     @Operation(summary = "상품 검색", description = "검색 조건에 맞는 상품을 조회합니다.")
@@ -61,15 +56,9 @@ public class ProductController {
             @Parameter(hidden = true) @CurrentUser UserIdentity user,
             @ParameterObject @Valid @ModelAttribute ProductSearchCondition productSearchCondition
     ) {
-        discoveryApi.saveHistory(
-                user.userId(),
-                user.sessionId(),
-				productSearchCondition.productName()
-        );
+        discoveryApi.saveHistory(user.userId(), user.sessionId(), productSearchCondition.productName());
 
-        return ResponseEntity.ok(
-                ApiResponse.ok(productService.search(productSearchCondition))
-        );
+        return ResponseEntity.ok(ApiResponse.ok(productService.search(productSearchCondition)));
     }
 
     @Operation(summary = "카테고리별 상품 목록 조회", description = "카테고리ID를 전달받고, 해당 카테고리 또는 하위 카테고리에 속한 모든 상품을 조회합니다.")
@@ -78,8 +67,6 @@ public class ProductController {
             @PathVariable("categoryId") Long categoryId,
             @ParameterObject @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(productService.findAllByCategory(categoryId, pageable))
-        );
+        return ResponseEntity.ok(ApiResponse.ok(productService.findAllByCategory(categoryId, pageable)));
     }
 }

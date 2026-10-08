@@ -1,9 +1,9 @@
 @ApplicationModule(
-		allowedDependencies = {
-				"identity :: api",
-				"catalog :: api",
-				"ordering :: api"
-		}
+        allowedDependencies = {
+                "identity :: api",
+                "catalog :: api",
+                "ordering :: api"
+        }
 )
 package com.commerce.pagopa.review;
 

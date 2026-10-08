@@ -1,6 +1,9 @@
 package com.commerce.pagopa.identity.infrastructure.persistence;
 
-import com.commerce.pagopa.identity.domain.*;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import jakarta.persistence.LockModeType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,10 +13,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import jakarta.persistence.LockModeType;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
+import com.commerce.pagopa.identity.domain.*;
 
 public interface UserJpaRepository extends JpaRepository<User, Long>, UserRepository {
 

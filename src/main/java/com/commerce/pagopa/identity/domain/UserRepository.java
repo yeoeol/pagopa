@@ -1,14 +1,14 @@
 package com.commerce.pagopa.identity.domain;
 
-import com.commerce.pagopa.global.exception.BusinessException;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.commerce.pagopa.global.exception.BusinessException;
 
 import static com.commerce.pagopa.global.response.ErrorCode.USER_NOT_FOUND;
 
@@ -24,24 +24,11 @@ public interface UserRepository {
 
     List<User> findByIdIn(Collection<Long> userIds);
 
-    Optional<User> findByProviderAndProviderId(
-            Provider provider,
-            String providerId
-    );
+    Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 
-    int bulkUnSuspend(
-            UserStatus activeStatus,
-            UserStatus suspendedStatus,
-            LocalDateTime now,
-            LocalDateTime threshold
-    );
+    int bulkUnSuspend(UserStatus activeStatus, UserStatus suspendedStatus, LocalDateTime now, LocalDateTime threshold);
 
-    Page<User> searchAdminUsers(
-            String keyword,
-            UserStatus status,
-            RoleCode roleCode,
-            Pageable pageable
-    );
+    Page<User> searchAdminUsers(String keyword, UserStatus status, RoleCode roleCode, Pageable pageable);
 
     boolean existsById(Long userId);
 

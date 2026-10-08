@@ -1,7 +1,7 @@
 @ApplicationModule(
-		allowedDependencies = {
-				"media :: api"
-		}
+        allowedDependencies = {
+                "media :: api"
+        }
 )
 package com.commerce.pagopa.identity;
 

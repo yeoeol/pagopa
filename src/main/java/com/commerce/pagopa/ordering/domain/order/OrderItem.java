@@ -1,26 +1,19 @@
 package com.commerce.pagopa.ordering.domain.order;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
-
 import jakarta.persistence.*;
 
 import lombok.*;
+
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "order_item",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_order_item_order_id_product_id",
-                        columnNames = {"order_id", "product_id"}
-                )
-        }
-)
+@Table(name = "order_item", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_order_item_order_id_product_id", columnNames = {"order_id", "product_id"})})
 public class OrderItem extends BaseTimeEntity {
 
     @Id
@@ -42,24 +35,14 @@ public class OrderItem extends BaseTimeEntity {
     private Integer orderQuantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "order_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_order_item_orders")
-    )
+    @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(name = "fk_order_item_orders"))
     private Order order;
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private OrderItem(
-            String productName,
-            Integer orderPrice,
-            Integer orderQuantity,
-            Order order,
-            Long productId
-    ) {
+    private OrderItem(String productName, Integer orderPrice, Integer orderQuantity, Order order, Long productId) {
         this.productName = productName;
         this.orderPrice = orderPrice;
         this.orderQuantity = orderQuantity;

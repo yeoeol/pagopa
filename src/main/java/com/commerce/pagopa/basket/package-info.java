@@ -1,7 +1,7 @@
 @ApplicationModule(
-		allowedDependencies = {
-				"catalog :: api"
-		}
+        allowedDependencies = {
+                "catalog :: api"
+        }
 )
 package com.commerce.pagopa.basket;
 

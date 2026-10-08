@@ -1,23 +1,27 @@
 package com.commerce.pagopa.discovery.presentation;
 
-import com.commerce.pagopa.discovery.application.SearchHistoryService;
-import com.commerce.pagopa.discovery.application.dto.response.SearchHistoryResponseDto;
-import com.commerce.pagopa.global.cookie.GuestSessionCookieFactory;
-import com.commerce.pagopa.global.response.ApiResponse;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.discovery.application.SearchHistoryService;
+import com.commerce.pagopa.discovery.application.dto.response.SearchHistoryResponseDto;
+import com.commerce.pagopa.global.cookie.GuestSessionCookieFactory;
+import com.commerce.pagopa.global.response.ApiResponse;
 
 @Tag(name = "SEARCH HISTORY API", description = "검색 기록 관리 API")
 @RestController
@@ -37,9 +41,7 @@ public class SearchHistoryController {
     ) {
         String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
 
-        return ResponseEntity.ok(
-                ApiResponse.ok(searchHistoryService.getHistories(userId, sessionId))
-        );
+        return ResponseEntity.ok(ApiResponse.ok(searchHistoryService.getHistories(userId, sessionId)));
     }
 
     @Operation(summary = "검색 기록 단건 삭제", description = "검색 기록을 단건 삭제합니다.")

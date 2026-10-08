@@ -1,32 +1,21 @@
 package com.commerce.pagopa.payment.domain;
 
-import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-
 import lombok.*;
+
+import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "payment",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_payment_order_id",
-                        columnNames = "order_id"
-                ),
-                @UniqueConstraint(
-                        name = "uq_payment_provider_transaction_id",
-                        columnNames = "provider_transaction_id"
-                )
-        }
-)
+@Table(name = "payment", uniqueConstraints = {@UniqueConstraint(name = "uq_payment_order_id", columnNames = "order_id"),
+        @UniqueConstraint(name = "uq_payment_provider_transaction_id", columnNames = "provider_transaction_id")})
 public class Payment extends BaseTimeEntity {
 
     @Id
@@ -64,12 +53,7 @@ public class Payment extends BaseTimeEntity {
     private Long orderId;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Payment(
-            String paymentMethod,
-            Integer amount,
-            PaymentStatus status,
-            Long orderId
-    ) {
+    private Payment(String paymentMethod, Integer amount, PaymentStatus status, Long orderId) {
         this.paymentMethod = paymentMethod;
         this.amount = amount;
         this.status = status;
@@ -85,11 +69,7 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
-    public boolean approve(
-            String providerTransactionId,
-            Integer approveAmount,
-            LocalDateTime approvedAt
-    ) {
+    public boolean approve(String providerTransactionId, Integer approveAmount, LocalDateTime approvedAt) {
         if (providerTransactionId == null || providerTransactionId.isBlank() || approvedAt == null) {
             throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAIL);
         }
@@ -111,11 +91,7 @@ public class Payment extends BaseTimeEntity {
         return true;
     }
 
-    public boolean cancel(
-            String providerTransactionId,
-            Integer canceledAmount,
-            LocalDateTime canceledAt
-    ) {
+    public boolean cancel(String providerTransactionId, Integer canceledAmount, LocalDateTime canceledAt) {
         if (canceledAt == null) {
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
         }

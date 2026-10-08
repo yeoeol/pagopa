@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ImageCategory {
-    PROFILE("profile"),
-    PRODUCT("product"),
-    REVIEW("review"),
-    ;
+    PROFILE("profile"), PRODUCT("product"), REVIEW("review"),;
 
     private final String directory;
 }

@@ -1,0 +1,29 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.java]
+indent_style = space
+indent_size = 4
+tab_width = 4
+ij_continuation_indent_size = 8
+ij_smart_tabs = false
+max_line_length = 120
+
+[src/main/java/com/commerce/pagopa/*/package-info.java]
+max_line_length = 40
+ij_java_align_multiline_annotation_parameters = false
+ij_java_annotation_parameter_wrap = normal
+ij_java_rparen_on_new_line_in_annotation = true
+ij_java_align_multiline_array_initializer_expression = false
+ij_java_array_initializer_new_line_after_left_brace = true
+ij_java_array_initializer_right_brace_on_new_line = true
+ij_java_array_initializer_wrap = on_every_item
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2

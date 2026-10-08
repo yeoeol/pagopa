@@ -1,14 +1,14 @@
 package com.commerce.pagopa.ordering.presentation.security;
 
-import com.commerce.pagopa.global.validator.OwnerValidator;
-import com.commerce.pagopa.ordering.domain.order.Order;
-import com.commerce.pagopa.ordering.domain.order.OrderRepository;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.global.validator.OwnerValidator;
+import com.commerce.pagopa.ordering.domain.order.Order;
+import com.commerce.pagopa.ordering.domain.order.OrderRepository;
 
 @Component("orderOwnerValidator")
 @RequiredArgsConstructor

@@ -6,8 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum RecommendationEventType {
-	USER_SEARCH_RECORDED("UserSearchRecorded"),
-	ORDER_CONFIRMED("OrderConfirmed");
+    USER_SEARCH_RECORDED("UserSearchRecorded"), ORDER_CONFIRMED("OrderConfirmed");
 
-	private final String value;
+    private final String value;
 }

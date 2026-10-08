@@ -3,10 +3,7 @@ package com.commerce.pagopa.basket.api;
 import java.util.List;
 
 public interface CartItemApi {
-	List<CartItemSummary> findAllByIdInAndUserIdForUpdate(
-			List<Long> cartItemIds,
-			Long userId
-	);
+    List<CartItemSummary> findAllByIdInAndUserIdForUpdate(List<Long> cartItemIds, Long userId);
 
-	void deleteAllByIdIn(List<Long> cartItemIds);
+    void deleteAllByIdIn(List<Long> cartItemIds);
 }

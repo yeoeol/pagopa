@@ -1,8 +1,8 @@
 package com.commerce.pagopa.global.validator;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
+
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class OwnerValidator<T, ID> {
 
@@ -11,11 +11,10 @@ public abstract class OwnerValidator<T, ID> {
         if (resourceId == null || userId == null) {
             return false;
         }
-        return findResource(resourceId)
-                .map(resource -> {
-                    Long ownerId = extractOwnerId(resource);
-                    return ownerId != null && ownerId.equals(userId);
-                })
+        return findResource(resourceId).map(resource -> {
+            Long ownerId = extractOwnerId(resource);
+            return ownerId != null && ownerId.equals(userId);
+        })
                 .orElse(false);
     }
 

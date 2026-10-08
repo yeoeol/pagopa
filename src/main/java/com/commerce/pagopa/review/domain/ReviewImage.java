@@ -8,15 +8,9 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(
-        name = "review_image",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uq_review_image_review_id_display_order",
-                        columnNames = {"review_id", "display_order"}
-                )
-        }
-)
+@Table(name = "review_image", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_review_image_review_id_display_order", columnNames = {"review_id",
+                "display_order"})})
 public class ReviewImage {
 
     @Id
@@ -34,11 +28,7 @@ public class ReviewImage {
     private int displayOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "review_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_review_image_review")
-    )
+    @JoinColumn(name = "review_id", nullable = false, foreignKey = @ForeignKey(name = "fk_review_image_review"))
     private Review review;
 
     @Builder(access = AccessLevel.PRIVATE)

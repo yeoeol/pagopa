@@ -1,12 +1,13 @@
 package com.commerce.pagopa.auth.service;
 
-import com.commerce.pagopa.identity.application.AuthService;
-import com.commerce.pagopa.identity.domain.RefreshTokenRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.commerce.pagopa.identity.application.AuthService;
+import com.commerce.pagopa.identity.domain.RefreshTokenRepository;
 
 import static org.mockito.Mockito.verify;
 

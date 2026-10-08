@@ -1,16 +1,16 @@
 package com.commerce.pagopa.merchant.presentation.security;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+
 import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.catalog.api.ProductSummary;
 import com.commerce.pagopa.global.validator.OwnerValidator;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
-
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-
-import lombok.RequiredArgsConstructor;
 
 @Component("sellerProductOwnerValidator")
 @RequiredArgsConstructor

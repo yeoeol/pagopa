@@ -1,15 +1,15 @@
 package com.commerce.pagopa.discovery.infrastructure.persistence;
 
-import com.commerce.pagopa.discovery.domain.SearchHistory;
-import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.commerce.pagopa.discovery.domain.SearchHistory;
+import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
 
 public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory, Long>, SearchHistoryRepository {
 
@@ -21,14 +21,12 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
 
     @Override
     @Modifying
-    @Query("DELETE FROM SearchHistory sh " +
-            "WHERE sh.userId = :userId")
+    @Query("DELETE FROM SearchHistory sh " + "WHERE sh.userId = :userId")
     void deleteByUserId(@Param("userId") Long userId);
 
     @Override
     @Modifying
-    @Query("DELETE FROM SearchHistory sh " +
-            "WHERE sh.sessionId = :sessionId")
+    @Query("DELETE FROM SearchHistory sh " + "WHERE sh.sessionId = :sessionId")
     void deleteBySessionId(@Param("sessionId") String sessionId);
 
     @Override

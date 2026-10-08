@@ -1,16 +1,16 @@
 package com.commerce.pagopa.ordering.infrastructure.persistence;
 
-import com.commerce.pagopa.ordering.domain.order.Order;
-import com.commerce.pagopa.ordering.domain.order.OrderRepository;
+import java.util.Optional;
+
+import jakarta.persistence.LockModeType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import jakarta.persistence.LockModeType;
-
-import java.util.Optional;
+import com.commerce.pagopa.ordering.domain.order.Order;
+import com.commerce.pagopa.ordering.domain.order.OrderRepository;
 
 public interface OrderJpaRepository extends JpaRepository<Order, Long>, OrderRepository, OrderRepositoryCustom {
 

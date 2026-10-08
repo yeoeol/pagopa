@@ -1,26 +1,27 @@
 package com.commerce.pagopa.catalog.infrastructure.persistence;
 
-import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.catalog.domain.Product;
-import com.commerce.pagopa.catalog.domain.ProductStatus;
-import com.commerce.pagopa.catalog.domain.QCategory;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.catalog.domain.Product;
+import com.commerce.pagopa.catalog.domain.ProductStatus;
+import com.commerce.pagopa.catalog.domain.QCategory;
 
 import static com.commerce.pagopa.catalog.domain.QCategory.category;
 import static com.commerce.pagopa.catalog.domain.QProduct.product;
@@ -34,20 +35,16 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     @Override
     public Page<Product> findAll(Pageable pageable) {
-        List<Product> products = queryFactory
-                .selectFrom(product)
-                .where(statusEq(ProductStatus.ACTIVE)
-                        .or(statusEq(ProductStatus.SOLD_OUT)))
+        List<Product> products = queryFactory.selectFrom(product)
+                .where(statusEq(ProductStatus.ACTIVE).or(statusEq(ProductStatus.SOLD_OUT)))
                 .orderBy(product.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        Long total = queryFactory
-                .select(product.count())
+        Long total = queryFactory.select(product.count())
                 .from(product)
-                .where(statusEq(ProductStatus.ACTIVE)
-                        .or(statusEq(ProductStatus.SOLD_OUT)))
+                .where(statusEq(ProductStatus.ACTIVE).or(statusEq(ProductStatus.SOLD_OUT)))
                 .fetchOne();
 
         return new PageImpl<>(products, pageable, total == null ? 0L : total);
@@ -62,30 +59,25 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         QCategory parentCategory = new QCategory("parentCategory");
         QCategory grandParentCategory = new QCategory("grandParentCategory");
 
-        List<Product> products = queryFactory
-                .selectFrom(product)
-                .leftJoin(product.category, category).fetchJoin()
+        List<Product> products = queryFactory.selectFrom(product)
+                .leftJoin(product.category, category)
+                .fetchJoin()
                 .leftJoin(category.parent, parentCategory)
                 .leftJoin(parentCategory.parent, grandParentCategory)
-                .where(
-                        categoryOrAncestorCategoryIdEq(categoryId, parentCategory, grandParentCategory),
-                        product.status.in(statuses)
-                )
+                .where(categoryOrAncestorCategoryIdEq(categoryId, parentCategory, grandParentCategory),
+                        product.status.in(statuses))
                 .orderBy(orderSpecifiers(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        Long total = queryFactory
-                .select(product.count())
+        Long total = queryFactory.select(product.count())
                 .from(product)
                 .leftJoin(product.category, category)
                 .leftJoin(category.parent, parentCategory)
                 .leftJoin(parentCategory.parent, grandParentCategory)
-                .where(
-                        categoryOrAncestorCategoryIdEq(categoryId, parentCategory, grandParentCategory),
-                        product.status.in(statuses)
-                )
+                .where(categoryOrAncestorCategoryIdEq(categoryId, parentCategory, grandParentCategory),
+                        product.status.in(statuses))
                 .fetchOne();
 
         return new PageImpl<>(products, pageable, total == null ? 0L : total);
@@ -93,10 +85,12 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     @Override
     public List<Product> searchProducts(@NonNull ProductSearchCondition condition) {
-        return queryFactory
-                .selectFrom(product).distinct()
-                .leftJoin(product.category, category).fetchJoin()
-                .leftJoin(product.images, productImage).fetchJoin()
+        return queryFactory.selectFrom(product)
+                .distinct()
+                .leftJoin(product.category, category)
+                .fetchJoin()
+                .leftJoin(product.images, productImage)
+                .fetchJoin()
                 .where(nameContains(condition.productName()))
                 .fetch();
     }
@@ -107,36 +101,18 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
             Collection<Long> excludedProductIds,
             int limit
     ) {
-        return queryFactory
-                .selectFrom(product)
-                .where(
-                        isSellable(),
-                        nameContains(keyword),
-                        productIdNotIn(excludedProductIds)
-                )
-                .orderBy(
-                        product.createdAt.desc(),
-                        product.id.desc()
-                )
+        return queryFactory.selectFrom(product)
+                .where(isSellable(), nameContains(keyword), productIdNotIn(excludedProductIds))
+                .orderBy(product.createdAt.desc(), product.id.desc())
                 .limit(limit)
                 .fetch();
     }
 
     @Override
-    public List<Product> findDefaultRecommendationProducts(
-            Collection<Long> excludedProductIds,
-            int limit
-    ) {
-        return queryFactory
-                .selectFrom(product)
-                .where(
-                        isSellable(),
-                        productIdNotIn(excludedProductIds)
-                )
-                .orderBy(
-                        product.createdAt.desc(),
-                        product.id.desc()
-                )
+    public List<Product> findDefaultRecommendationProducts(Collection<Long> excludedProductIds, int limit) {
+        return queryFactory.selectFrom(product)
+                .where(isSellable(), productIdNotIn(excludedProductIds))
+                .orderBy(product.createdAt.desc(), product.id.desc())
                 .limit(limit)
                 .fetch();
     }
@@ -147,7 +123,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         }
 
         return product.id.notIn(excludedProductIds);
-	}
+    }
 
     private BooleanExpression isSellable() {
         return product.status.eq(ProductStatus.ACTIVE)
@@ -169,7 +145,8 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     private OrderSpecifier<?>[] orderSpecifiers(Pageable pageable) {
-        List<OrderSpecifier<?>> orders = pageable.getSort().stream()
+        List<OrderSpecifier<?>> orders = pageable.getSort()
+                .stream()
                 .map(this::orderSpecifier)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(ArrayList::new));
