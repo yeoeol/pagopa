@@ -8,6 +8,7 @@ The Gradle build is the source of truth for formatting and import order.
 - Method chains: keep the first call on the current line and always put each following call on its own line
 - Intentional manual line breaks: preserved by both Eclipse JDT and the IntelliJ scheme
 - Wrapped method parameters: one parameter per line, including the first parameter, with the closing parenthesis on its own line
+- Application module dependency declarations: one dependency per line, with closing delimiters on their own lines; enforced by a dedicated Spotless step
 - New wildcard imports: avoided by the IntelliJ scheme; existing wildcard imports are left unchanged
 - Static imports: placed in the final import group
 - Generated QueryDSL sources: excluded from formatting

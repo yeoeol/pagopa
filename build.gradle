@@ -50,6 +50,22 @@ spotless {
                 '\\#')
         removeUnusedImports()
         formatAnnotations()
+        custom('application module dependencies') { source ->
+            source.replaceAll(
+                    /@ApplicationModule\(\s*allowedDependencies\s*=\s*\{([^}]*)\}\s*\)/
+            ) { _, dependencies ->
+                def entries = dependencies
+                        .split(',')
+                        .collect { it.trim() }
+                        .findAll { !it.isEmpty() }
+
+                '@ApplicationModule(\n' +
+                        '        allowedDependencies = {\n' +
+                        entries.collect { "                ${it}" }.join(',\n') +
+                        '\n        }\n' +
+                        ')'
+            }
+        }
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
