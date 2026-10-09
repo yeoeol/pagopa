@@ -67,15 +67,17 @@ public class ProductService {
                 .map(ProductResponseDto::from)
                 .toList();
 
-        events.publishEvent(
-                new ProductSearched(
-                        UUID.randomUUID(),
-                        userId,
-                        sessionId,
-                        condition.productName(),
-                        LocalDateTime.now()
-                )
-        );
+        if (userId != null && sessionId == null) {
+            events.publishEvent(
+                    new ProductSearched(
+                            UUID.randomUUID(),
+                            userId,
+                            sessionId,
+                            condition.productName(),
+                            LocalDateTime.now()
+                    )
+            );
+        }
 
         return products;
     }
