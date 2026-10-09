@@ -24,6 +24,10 @@ public class LocalTestAuthController {
 
     @PostMapping("/token")
     public ResponseEntity<ApiResponse<TokenResponseDto>> issueToken(@RequestBody LocalTestTokenRequestDto request) {
-        return ResponseEntity.ok(ApiResponse.ok(localTestAuthService.issueToken(request.userKey())));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        localTestAuthService.issueToken(request.userKey())
+                )
+        );
     }
 }

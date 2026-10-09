@@ -92,7 +92,11 @@ public class OrderController {
     @GetMapping("/{id}")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(@PathVariable("id") Long orderId) {
-        return ResponseEntity.ok(ApiResponse.ok(orderService.find(orderId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        orderService.find(orderId)
+                )
+        );
     }
 
     @Operation(
@@ -130,6 +134,10 @@ public class OrderController {
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("@orderOwnerValidator.isOwner(#orderId, principal.userId)")
     public ResponseEntity<ApiResponse<OrderStockResponseDto>> cancelOrder(@PathVariable("id") Long orderId) {
-        return ResponseEntity.ok(ApiResponse.ok(orderService.cancelOrder(orderId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        orderService.cancelOrder(orderId)
+                )
+        );
     }
 }

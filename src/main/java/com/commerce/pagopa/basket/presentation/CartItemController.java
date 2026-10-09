@@ -61,7 +61,11 @@ public class CartItemController {
             @PathVariable("cartItemId") Long cartItemId
     ) {
         CartItemResponseDto response = cartItemService.incrementQuantity(cartItemId);
-        return ResponseEntity.ok(ApiResponse.ok(response));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        response
+                )
+        );
     }
 
     @Operation(

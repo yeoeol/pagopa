@@ -73,7 +73,11 @@ public class SellerProductController {
     @GetMapping("/{productId}")
     @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
     public ResponseEntity<ApiResponse<ProductSummary>> getSellerProduct(@PathVariable("productId") Long productId) {
-        return ResponseEntity.ok(ApiResponse.ok(sellerProductService.find(productId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        sellerProductService.find(productId)
+                )
+        );
     }
 
     @Operation(

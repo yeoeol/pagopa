@@ -49,7 +49,11 @@ public class ProductController {
                     page = 0
             ) Pageable pageable
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(productService.findAllWithActiveAndSoldOut(pageable)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        productService.findAllWithActiveAndSoldOut(pageable)
+                )
+        );
     }
 
     @Operation(
@@ -58,7 +62,11 @@ public class ProductController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponseDto>> getDetail(@PathVariable("id") Long productId) {
-        return ResponseEntity.ok(ApiResponse.ok(productService.find(productId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        productService.find(productId)
+                )
+        );
     }
 
     @Operation(

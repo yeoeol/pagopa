@@ -35,7 +35,11 @@ public class CategoryController {
     )
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategorySimpleResponseDto>>> getRootCategories() {
-        return ResponseEntity.ok(ApiResponse.ok(categoryService.findRootCategories()));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        categoryService.findRootCategories()
+                )
+        );
     }
 
     @Operation(
@@ -46,7 +50,11 @@ public class CategoryController {
     public ResponseEntity<ApiResponse<List<CategorySimpleResponseDto>>> getChildCategories(
             @PathVariable("categoryId") Long categoryId
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(categoryService.getChildren(categoryId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        categoryService.getChildren(categoryId)
+                )
+        );
     }
 
     @Operation(
@@ -55,6 +63,10 @@ public class CategoryController {
     )
     @GetMapping("/{categoryId}/tree")
     public ResponseEntity<ApiResponse<List<CategoryTreeResponseDto>>> getCategoryTree(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(ApiResponse.ok(categoryService.getDescendants(categoryId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        categoryService.getDescendants(categoryId)
+                )
+        );
     }
 }
