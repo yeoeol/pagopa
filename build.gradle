@@ -157,33 +157,6 @@ spotless {
                 '\\#')
         removeUnusedImports()
         formatAnnotations()
-        custom('compact multiline if and while opening') { source ->
-            def compacted = source.replaceAll(
-                    /(?m)^([ \t]*(?:(?:} else )?if|(?:} )?while)) \(\r?\n[ \t]+(?!\/\/|\/\*)([^\r\n]+)/,
-                    '$1 ($2'
-            )
-
-            compacted.replaceAll(
-                    /(?m)^([ \t]*(?:(?:} else )?if|(?:} )?while) \((?![^\r\n]*\)\s*\{\r?$)[^\r\n]+)(\r?\n) {4}([ \t]+\.)/,
-                    '$1$2$3'
-            )
-        }
-        custom('application module dependencies') { source ->
-            source.replaceAll(
-                    /@ApplicationModule\(\s*allowedDependencies\s*=\s*\{([^}]*)\}\s*\)/
-            ) { _, dependencies ->
-                def entries = dependencies
-                        .split(',')
-                        .collect { it.trim() }
-                        .findAll { !it.isEmpty() }
-
-                '@ApplicationModule(\n' +
-                        '        allowedDependencies = {\n' +
-                        entries.collect { "                ${it}" }.join(',\n') +
-                        '\n        }\n' +
-                        ')'
-            }
-        }
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
