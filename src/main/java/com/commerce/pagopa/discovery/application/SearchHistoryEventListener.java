@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.commerce.pagopa.discovery.event.ProductSearched;
+import com.commerce.pagopa.catalog.event.ProductSearched;
+import com.commerce.pagopa.discovery.application.command.ProductSearchHistoryCommand;
 
 @Slf4j
 @Component
@@ -17,12 +18,21 @@ public class SearchHistoryEventListener {
 
     @ApplicationModuleListener
     void on(ProductSearched event) {
-        log.info("Received product search");
-        searchHistoryService.saveHistory(
-                event.userId(),
-                event.sessionId(),
-                event.keyword()
+        log.info(
+                "Received product search for {}",
+                event.eventId()
         );
-        log.info("Finished product search");
+        searchHistoryService.saveHistory(
+                new ProductSearchHistoryCommand(
+                        event.userId(),
+                        event.sessionId(),
+                        event.keyword(),
+                        event.searchedAt()
+                )
+        );
+        log.info(
+                "Finished product search for {}",
+                event.eventId()
+        );
     }
 }

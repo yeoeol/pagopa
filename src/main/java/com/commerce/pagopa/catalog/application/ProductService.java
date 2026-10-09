@@ -1,6 +1,8 @@
 package com.commerce.pagopa.catalog.application;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -16,7 +18,7 @@ import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.catalog.domain.ProductRepository;
 import com.commerce.pagopa.catalog.domain.ProductStatus;
-import com.commerce.pagopa.discovery.event.ProductSearched;
+import com.commerce.pagopa.catalog.event.ProductSearched;
 import com.commerce.pagopa.global.exception.BusinessException;
 
 import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
@@ -60,17 +62,21 @@ public class ProductService {
             String sessionId,
             @NonNull ProductSearchCondition condition
     ) {
-        events.publishEvent(
-                new ProductSearched(
-                        userId,
-                        sessionId,
-                        condition.productName()
-                )
-        );
-
-        return productRepository.searchProducts(condition)
+        List<ProductResponseDto> products = productRepository.searchProducts(condition)
                 .stream()
                 .map(ProductResponseDto::from)
                 .toList();
+
+        events.publishEvent(
+                new ProductSearched(
+                        UUID.randomUUID(),
+                        userId,
+                        sessionId,
+                        condition.productName(),
+                        LocalDateTime.now()
+                )
+        );
+
+        return products;
     }
 }
