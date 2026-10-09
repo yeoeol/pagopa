@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Test;
 
 import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.catalog.api.ProductSummary;
-import com.commerce.pagopa.discovery.event.UserSearchRecorded;
 import com.commerce.pagopa.ordering.event.OrderConfirmed;
 import com.commerce.pagopa.recommendation.application.RecommendationQueryService;
+import com.commerce.pagopa.recommendation.application.command.ProductSearchProjectionCommand;
 import com.commerce.pagopa.recommendation.domain.InterestType;
 import com.commerce.pagopa.recommendation.domain.RecommendationInterest;
 import com.commerce.pagopa.recommendation.domain.RecommendationProjectionRepository;
@@ -89,7 +89,7 @@ class RecommendationFlowIntegrationTest {
                 )
         ).willReturn(List.of(keyboard));
 
-        UserSearchRecorded event = new UserSearchRecorded(
+        ProductSearchProjectionCommand event = new ProductSearchProjectionCommand(
                 eventId,
                 userId,
                 keyword,

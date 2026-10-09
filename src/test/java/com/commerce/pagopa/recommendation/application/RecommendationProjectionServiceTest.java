@@ -24,8 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import com.commerce.pagopa.discovery.event.UserSearchRecorded;
 import com.commerce.pagopa.ordering.event.OrderConfirmed;
+import com.commerce.pagopa.recommendation.application.command.ProductSearchProjectionCommand;
 import com.commerce.pagopa.recommendation.domain.InterestType;
 import com.commerce.pagopa.recommendation.domain.RecommendationInterest;
 import com.commerce.pagopa.recommendation.infrastructure.RecommendationProjectionJdbcRepository;
@@ -81,7 +81,7 @@ class RecommendationProjectionServiceTest {
                 0
         );
 
-        UserSearchRecorded event = new UserSearchRecorded(
+        ProductSearchProjectionCommand event = new ProductSearchProjectionCommand(
                 eventId,
                 userId,
                 keyword,
@@ -198,7 +198,7 @@ class RecommendationProjectionServiceTest {
                 0
         );
 
-        UserSearchRecorded event = new UserSearchRecorded(
+        ProductSearchProjectionCommand event = new ProductSearchProjectionCommand(
                 eventId,
                 userId,
                 keyword,
@@ -270,7 +270,7 @@ class RecommendationProjectionServiceTest {
                 0
         );
 
-        UserSearchRecorded event = new UserSearchRecorded(
+        ProductSearchProjectionCommand event = new ProductSearchProjectionCommand(
                 eventId,
                 userId,
                 keyword,
