@@ -33,12 +33,10 @@ public interface UserRepository {
     boolean existsById(Long userId);
 
     default User findByIdOrThrow(Long userId) {
-        return findById(userId)
-                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        return findById(userId).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 
     default User findByIdForUpdateOrThrow(Long userId) {
-        return findByIdForUpdate(userId)
-                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        return findByIdForUpdate(userId).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 }

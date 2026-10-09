@@ -25,24 +25,48 @@ class SeedRunner implements ApplicationRunner {
             log.info("[seed] disabled (app.seed.enabled=false)");
             return;
         }
-        log.info("[seed] start - {} seeders registered", seeders.size());
+        log.info(
+                "[seed] start - {} seeders registered",
+                seeders.size()
+        );
         long total = System.currentTimeMillis();
 
         for (Seeder seeder : seeders) {
             if (!seeder.shouldRun()) {
-                log.info("[seed] skip {} (already seeded)", seeder.name());
+                log.info(
+                        "[seed] skip {} (already seeded)",
+                        seeder.name()
+                );
                 continue;
             }
             long t = System.currentTimeMillis();
-            log.info("[seed] >>> {}", seeder.name());
+            log.info(
+                    "[seed] >>> {}",
+                    seeder.name()
+            );
             try {
                 seeder.seed();
-                log.info("[seed] <<< {} ({}ms)", seeder.name(), System.currentTimeMillis() - t);
+                log.info(
+                        "[seed] <<< {} ({}ms)",
+                        seeder.name(),
+                        System.currentTimeMillis() - t
+                );
             } catch (Exception e) {
-                log.error("[seed] failed {} after {}ms", seeder.name(), System.currentTimeMillis() - t, e);
-                throw new RuntimeException("Seeding failed for: " + seeder.name(), e);
+                log.error(
+                        "[seed] failed {} after {}ms",
+                        seeder.name(),
+                        System.currentTimeMillis() - t,
+                        e
+                );
+                throw new RuntimeException(
+                        "Seeding failed for: " + seeder.name(),
+                        e
+                );
             }
         }
-        log.info("[seed] done ({}ms)", System.currentTimeMillis() - total);
+        log.info(
+                "[seed] done ({}ms)",
+                System.currentTimeMillis() - total
+        );
     }
 }

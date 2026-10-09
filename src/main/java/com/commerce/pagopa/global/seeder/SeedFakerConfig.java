@@ -17,6 +17,9 @@ class SeedFakerConfig {
 
     @Bean
     Faker faker() {
-        return new Faker(Locale.KOREAN, new Random(42));
+        return new Faker(
+                Locale.KOREAN,
+                new Random(42)
+        );
     }
 }

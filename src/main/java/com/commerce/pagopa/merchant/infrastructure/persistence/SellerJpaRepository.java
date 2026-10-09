@@ -22,14 +22,17 @@ public interface SellerJpaRepository extends JpaRepository<Seller, Long>, Seller
     Optional<Seller> findById(@Param("sellerId") Long sellerId);
 
     @Override
-    @Query(value = """
-            SELECT s
-            FROM Seller s
-            WHERE s.status = :status
-            """, countQuery = """
-            SELECT COUNT(*)
-            FROM Seller s
-            WHERE s.status = :status
-            """)
+    @Query(
+            value = """
+                    SELECT s
+                    FROM Seller s
+                    WHERE s.status = :status
+                    """,
+            countQuery = """
+                    SELECT COUNT(*)
+                    FROM Seller s
+                    WHERE s.status = :status
+                    """
+    )
     Page<Seller> findPendingRequests(@Param("status") SellerStatus status, Pageable pageable);
 }

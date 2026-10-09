@@ -20,12 +20,10 @@ public interface SellerRepository {
     Page<Seller> findPendingRequests(SellerStatus sellerStatus, Pageable pageable);
 
     default Seller findByIdOrThrow(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new BusinessException(SELLER_NOT_FOUND));
+        return findById(id).orElseThrow(() -> new BusinessException(SELLER_NOT_FOUND));
     }
 
     default Seller findByUserIdOrThrow(Long userId) {
-        return findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(SELLER_NOT_FOUND));
+        return findByUserId(userId).orElseThrow(() -> new BusinessException(SELLER_NOT_FOUND));
     }
 }

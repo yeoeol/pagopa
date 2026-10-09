@@ -28,24 +28,30 @@ class CartSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
         // buyer 후보 - ROLE_USER + ACTIVE
-        List<Long> buyerIds = jdbc.queryForList("""
-                SELECT u.user_id
-                FROM user u
-                JOIN user_role ur
-                    ON u.user_id = ur.user_id
-                JOIN role r
-                    ON ur.role_id = r.role_id
-                WHERE u.status = 'ACTIVE'
-                    AND r.code = 'ROLE_USER'
-                ORDER BY u.user_id
-                """, Long.class);
+        List<Long> buyerIds = jdbc.queryForList(
+                """
+                        SELECT u.user_id
+                        FROM user u
+                        JOIN user_role ur
+                            ON u.user_id = ur.user_id
+                        JOIN role r
+                            ON ur.role_id = r.role_id
+                        WHERE u.status = 'ACTIVE'
+                            AND r.code = 'ROLE_USER'
+                        ORDER BY u.user_id
+                        """,
+                Long.class
+        );
         if (buyerIds.isEmpty()) {
             throw new IllegalStateException("buyer 부족");
         }
@@ -60,10 +66,24 @@ class CartSeeder implements Seeder {
                 VALUES (?, ?, ?)
                 """;
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setLong(1, buyerIds.get(i % buyerSize));
-            ps.setTimestamp(2, now);
-            ps.setTimestamp(3, now);
-        });
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    ps.setLong(
+                            1,
+                            buyerIds.get(i % buyerSize)
+                    );
+                    ps.setTimestamp(
+                            2,
+                            now
+                    );
+                    ps.setTimestamp(
+                            3,
+                            now
+                    );
+                }
+        );
     }
 }

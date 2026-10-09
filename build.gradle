@@ -67,6 +67,9 @@ dependencies {
     // Azure Blob Storage
     implementation 'com.azure.spring:spring-cloud-azure-starter-storage-blob:7.1.0'
 
+    // AWS SDK S3
+    implementation 'software.amazon.awssdk:s3:2.55.11'
+
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
@@ -154,22 +157,6 @@ spotless {
                 '\\#')
         removeUnusedImports()
         formatAnnotations()
-        custom('application module dependencies') { source ->
-            source.replaceAll(
-                    /@ApplicationModule\(\s*allowedDependencies\s*=\s*\{([^}]*)\}\s*\)/
-            ) { _, dependencies ->
-                def entries = dependencies
-                        .split(',')
-                        .collect { it.trim() }
-                        .findAll { !it.isEmpty() }
-
-                '@ApplicationModule(\n' +
-                        '        allowedDependencies = {\n' +
-                        entries.collect { "                ${it}" }.join(',\n') +
-                        '\n        }\n' +
-                        ')'
-            }
-        }
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()

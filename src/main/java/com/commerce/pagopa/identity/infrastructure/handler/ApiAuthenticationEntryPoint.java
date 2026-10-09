@@ -38,11 +38,17 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         ErrorCode errorCode = resolveErrorCode(request);
 
-        log.warn("[AuthenticationEntryPoint] path={}, errorCode={}, message={}", request.getRequestURI(),
-                errorCode.getCode(), authException.getMessage());
+        log.warn(
+                "[AuthenticationEntryPoint] path={}, errorCode={}, message={}",
+                request.getRequestURI(),
+                errorCode.getCode(),
+                authException.getMessage()
+        );
 
-        response.setStatus(errorCode.getHttpStatus()
-                .value());
+        response.setStatus(
+                errorCode.getHttpStatus()
+                        .value()
+        );
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.getWriter()

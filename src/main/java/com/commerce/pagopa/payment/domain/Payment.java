@@ -14,42 +14,79 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "payment", uniqueConstraints = {@UniqueConstraint(name = "uq_payment_order_id", columnNames = "order_id"),
-        @UniqueConstraint(name = "uq_payment_provider_transaction_id", columnNames = "provider_transaction_id")})
+@Table(
+        name = "payment",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_payment_order_id",
+                        columnNames = "order_id"
+                ),
+                @UniqueConstraint(
+                        name = "uq_payment_provider_transaction_id",
+                        columnNames = "provider_transaction_id"
+                )}
+)
 public class Payment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "payment_id", nullable = false)
+    @Column(
+            name = "payment_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
-    @Column(name = "payment_method", length = 50, nullable = false)
+    @Column(
+            name = "payment_method",
+            length = 50,
+            nullable = false
+    )
     private String paymentMethod;
 
     @ToString.Include
-    @Column(name = "amount", nullable = false)
+    @Column(
+            name = "amount",
+            nullable = false
+    )
     private Integer amount; // 결제 금액
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(
+            name = "status",
+            length = 20,
+            nullable = false
+    )
     private PaymentStatus status; // 결제 상태
 
     @ToString.Include
-    @Column(name = "paid_at", nullable = true)
+    @Column(
+            name = "paid_at",
+            nullable = true
+    )
     private LocalDateTime paidAt;
 
     @ToString.Include
-    @Column(name = "canceled_at", nullable = true)
+    @Column(
+            name = "canceled_at",
+            nullable = true
+    )
     private LocalDateTime canceledAt;
 
     @ToString.Include
-    @Column(name = "provider_transaction_id", length = 255, nullable = true)
+    @Column(
+            name = "provider_transaction_id",
+            length = 255,
+            nullable = true
+    )
     private String providerTransactionId;
 
-    @Column(name = "order_id", nullable = false)
+    @Column(
+            name = "order_id",
+            nullable = false
+    )
     private Long orderId;
 
     @Builder(access = AccessLevel.PRIVATE)

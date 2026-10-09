@@ -47,14 +47,19 @@ public class CategoryService {
     private List<CategoryTreeResponseDto> buildTree(List<Category> categories) {
         Map<Long, CategoryTreeResponseDto> categoriesById = new LinkedHashMap<>();
         for (Category category : categories) {
-            categoriesById.put(category.getId(), CategoryTreeResponseDto.init(category));
+            categoriesById.put(
+                    category.getId(),
+                    CategoryTreeResponseDto.init(category)
+            );
         }
 
         List<CategoryTreeResponseDto> roots = new ArrayList<>();
         for (Category category : categories) {
             CategoryTreeResponseDto current = categoriesById.get(category.getId());
-            CategoryTreeResponseDto parent = categoriesById.get(category.getParent()
-                    .getId());
+            CategoryTreeResponseDto parent = categoriesById.get(
+                    category.getParent()
+                            .getId()
+            );
 
             if (parent == null) {
                 roots.add(current);

@@ -14,22 +14,42 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "role", uniqueConstraints = {@UniqueConstraint(name = "uq_role_code", columnNames = {"code"})})
+@Table(
+        name = "role",
+        uniqueConstraints = {@UniqueConstraint(
+                name = "uq_role_code",
+                columnNames = {"code"}
+        )}
+)
 public class Role extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id", nullable = false)
+    @Column(
+            name = "role_id",
+            nullable = false
+    )
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "code", length = 20, nullable = false)
+    @Column(
+            name = "code",
+            length = 20,
+            nullable = false
+    )
     private RoleCode code;
 
-    @Column(name = "description", length = 50, nullable = false)
+    @Column(
+            name = "description",
+            length = 50,
+            nullable = false
+    )
     private String description;
 
-    @Column(name = "enabled", nullable = false)
+    @Column(
+            name = "enabled",
+            nullable = false
+    )
     private boolean enabled = true;
 
     @Builder(access = AccessLevel.PRIVATE)

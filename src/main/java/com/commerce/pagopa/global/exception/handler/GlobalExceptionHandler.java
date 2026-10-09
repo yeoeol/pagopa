@@ -34,8 +34,12 @@ public class GlobalExceptionHandler {
     // 커스텀 예외 (BusinessException 하위 전체 처리)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
-        log.warn("[BusinessException] code={}, internalMessage={}", e.getErrorCode()
-                .getCode(), e.getMessage());
+        log.warn(
+                "[BusinessException] code={}, internalMessage={}",
+                e.getErrorCode()
+                        .getCode(),
+                e.getMessage()
+        );
 
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity.status(errorCode.getHttpStatus())
@@ -50,17 +54,31 @@ public class GlobalExceptionHandler {
                 .forEach(error -> {
                     String fieldName = error.getField();
                     String errorMessage = getInternationalizedMessage(error);
-                    errors.put(fieldName, errorMessage);
+                    errors.put(
+                            fieldName,
+                            errorMessage
+                    );
                 });
 
-        log.warn("[Validation failed] {}", errors);
+        log.warn(
+                "[Validation failed] {}",
+                errors
+        );
         return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
-                .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, errors));
+                .body(
+                        ApiResponse.error(
+                                ErrorCode.INVALID_INPUT_VALUE,
+                                errors
+                        )
+                );
     }
 
     private String getInternationalizedMessage(FieldError fieldError) {
         try {
-            return messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
+            return messageSource.getMessage(
+                    fieldError,
+                    LocaleContextHolder.getLocale()
+            );
         } catch (Exception e) {
             return fieldError.getDefaultMessage(); // 메시지 키를 찾지 못한 경우 원래 메시지 반환
         }
@@ -69,7 +87,10 @@ public class GlobalExceptionHandler {
     // @Valid 검증 실패 (@RequestParam, @PathVariable)
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleConstraintViolation(ConstraintViolationException e) {
-        log.warn("[ConstraintViolation] {}", e.getMessage());
+        log.warn(
+                "[ConstraintViolation] {}",
+                e.getMessage()
+        );
         return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE));
     }
@@ -77,7 +98,10 @@ public class GlobalExceptionHandler {
     // 지원하지 않는 HTTP 메서드
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e) {
-        log.warn("[MethodNotAllowed] {}", e.getMessage());
+        log.warn(
+                "[MethodNotAllowed] {}",
+                e.getMessage()
+        );
         return ResponseEntity.status(ErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.METHOD_NOT_ALLOWED));
     }
@@ -85,7 +109,10 @@ public class GlobalExceptionHandler {
     // JSON 타입 불일치
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        log.warn("[MessageNotReadable] {}", e.getMessage());
+        log.warn(
+                "[MessageNotReadable] {}",
+                e.getMessage()
+        );
         return ResponseEntity.status(ErrorCode.INVALID_TYPE_VALUE.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.INVALID_TYPE_VALUE));
     }
@@ -93,15 +120,22 @@ public class GlobalExceptionHandler {
     // 권한 거부
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException e) {
-        log.warn("[AccessDenied] {}", e.getMessage());
+        log.warn(
+                "[AccessDenied] {}",
+                e.getMessage()
+        );
         return ResponseEntity.status(ErrorCode.ACCESS_DENIED.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.ACCESS_DENIED));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException e) {
-        log.debug("[ResourceNotFound] method={}, path={}, message={}", e.getHttpMethod(), e.getResourcePath(),
-                e.getMessage());
+        log.debug(
+                "[ResourceNotFound] method={}, path={}, message={}",
+                e.getHttpMethod(),
+                e.getResourcePath(),
+                e.getMessage()
+        );
         return ResponseEntity.status(ErrorCode.RESOURCE_NOT_FOUND.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.RESOURCE_NOT_FOUND));
     }
@@ -109,7 +143,11 @@ public class GlobalExceptionHandler {
     // 나머지 모든 예외
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
-        log.error("[UnhandledException] {}", e.getMessage(), e);
+        log.error(
+                "[UnhandledException] {}",
+                e.getMessage(),
+                e
+        );
         return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));
     }

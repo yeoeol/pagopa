@@ -10,6 +10,9 @@ public final class SellerFixture {
     }
 
     public static Seller aSeller(Long userId) {
-        return Seller.create(userId, LocalDateTime.now());
+        return Seller.create(
+                userId,
+                LocalDateTime.now()
+        );
     }
 }

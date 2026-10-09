@@ -16,12 +16,10 @@ public interface PaymentRepository {
     Optional<Payment> findByOrderId(Long orderId);
 
     default Payment findByIdOrThrow(Long paymentId) {
-        return findById(paymentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+        return findById(paymentId).orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
     default Payment findByIdForUpdateOrThrow(Long paymentId) {
-        return findByIdForUpdate(paymentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+        return findByIdForUpdate(paymentId).orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 }

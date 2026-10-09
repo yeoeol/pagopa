@@ -10,25 +10,44 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "cart_item", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_cart_item_cart_id_product_id", columnNames = {"cart_id", "product_id"})})
+@Table(
+        name = "cart_item",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_cart_item_cart_id_product_id",
+                        columnNames = {"cart_id", "product_id"}
+                )}
+)
 public class CartItem extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "cart_item_id", nullable = false)
+    @Column(
+            name = "cart_item_id",
+            nullable = false
+    )
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id", nullable = false, foreignKey = @ForeignKey(name = "fk_cart_item_cart"))
+    @JoinColumn(
+            name = "cart_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_cart_item_cart")
+    )
     private Cart cart;
 
-    @Column(name = "product_id", nullable = false)
+    @Column(
+            name = "product_id",
+            nullable = false
+    )
     private Long productId;
 
     @ToString.Include
-    @Column(name = "cart_quantity", nullable = false)
+    @Column(
+            name = "cart_quantity",
+            nullable = false
+    )
     private Integer cartQuantity = 1;
 
     @Builder(access = AccessLevel.PRIVATE)

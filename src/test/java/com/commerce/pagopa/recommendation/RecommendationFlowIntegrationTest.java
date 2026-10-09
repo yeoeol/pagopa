@@ -50,11 +50,20 @@ class RecommendationFlowIntegrationTest {
 
     @AfterEach
     void deleteRecommendationData() {
-        jdbcTemplate.update("DELETE FROM recommendation_interest", Map.of());
+        jdbcTemplate.update(
+                "DELETE FROM recommendation_interest",
+                Map.of()
+        );
 
-        jdbcTemplate.update("DELETE FROM recommendation_event", Map.of());
+        jdbcTemplate.update(
+                "DELETE FROM recommendation_event",
+                Map.of()
+        );
 
-        jdbcTemplate.update("DELETE FROM EVENT_PUBLICATION", Map.of());
+        jdbcTemplate.update(
+                "DELETE FROM EVENT_PUBLICATION",
+                Map.of()
+        );
     }
 
     @Test
@@ -62,19 +71,41 @@ class RecommendationFlowIntegrationTest {
         UUID eventId = UUID.randomUUID();
         Long userId = 10_001L;
         String keyword = "keyboard";
-        LocalDateTime searchedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
         ProductSummary keyboard = activeProduct(100L);
 
-        given(productApi.findCandidatesByKeyword(keyword, List.of(), 1)).willReturn(List.of(keyboard));
+        given(
+                productApi.findCandidatesByKeyword(
+                        keyword,
+                        List.of(),
+                        1
+                )
+        ).willReturn(List.of(keyboard));
 
-        UserSearchRecorded event = new UserSearchRecorded(eventId, userId, keyword, searchedAt);
+        UserSearchRecorded event = new UserSearchRecorded(
+                eventId,
+                userId,
+                keyword,
+                searchedAt
+        );
 
         scenario.publish(event)
                 .andWaitAtMost(Duration.ofSeconds(5))
                 .andWaitForStateChange(
-                        () -> recommendationProjectionRepository.findTopInterests(userId, InterestType.KEYWORD, 10),
-                        interests -> interests.size() == 1)
+                        () -> recommendationProjectionRepository.findTopInterests(
+                                userId,
+                                InterestType.KEYWORD,
+                                10
+                        ),
+                        interests -> interests.size() == 1
+                )
                 .andVerify(interests -> {
                     assertThat(interests).singleElement()
                             .satisfies(interest -> {
@@ -82,7 +113,12 @@ class RecommendationFlowIntegrationTest {
                                 assertThat(interest.interestKey()).isEqualTo(keyword);
                                 assertThat(interest.score()).isEqualTo(1);
                             });
-                    assertThat(recommendationQueryService.getTopProducts(userId, 1)).containsExactly(keyboard);
+                    assertThat(
+                            recommendationQueryService.getTopProducts(
+                                    userId,
+                                    1
+                            )
+                    ).containsExactly(keyboard);
                 });
     }
 
@@ -91,30 +127,91 @@ class RecommendationFlowIntegrationTest {
         UUID eventId = UUID.randomUUID();
         Long orderId = 20_001L;
         Long userId = 10_002L;
-        LocalDateTime confirmedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        LocalDateTime confirmedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
         ProductSummary product10 = activeProduct(10L);
         ProductSummary product20 = activeProduct(20L);
 
-        given(productApi.findAllByIds(List.of(10L, 20L))).willReturn(Map.of(10L, product10, 20L, product20));
+        given(
+                productApi.findAllByIds(
+                        List.of(
+                                10L,
+                                20L
+                        )
+                )
+        ).willReturn(
+                Map.of(
+                        10L,
+                        product10,
+                        20L,
+                        product20
+                )
+        );
 
-        OrderConfirmed event = new OrderConfirmed(eventId, orderId, userId, List.of(10L, 20L), confirmedAt);
+        OrderConfirmed event = new OrderConfirmed(
+                eventId,
+                orderId,
+                userId,
+                List.of(
+                        10L,
+                        20L
+                ),
+                confirmedAt
+        );
 
         scenario.publish(event)
                 .andWaitAtMost(Duration.ofSeconds(5))
                 .andWaitForStateChange(
-                        () -> recommendationProjectionRepository.findTopInterests(userId, InterestType.PRODUCT, 10),
-                        interests -> interests.size() == 2)
+                        () -> recommendationProjectionRepository.findTopInterests(
+                                userId,
+                                InterestType.PRODUCT,
+                                10
+                        ),
+                        interests -> interests.size() == 2
+                )
                 .andVerify(interests -> {
-                    assertThat(interests).extracting(RecommendationInterest::interestKey, RecommendationInterest::score)
-                            .containsExactlyInAnyOrder(tuple("10", 5), tuple("20", 5));
+                    assertThat(interests).extracting(
+                            RecommendationInterest::interestKey,
+                            RecommendationInterest::score
+                    )
+                            .containsExactlyInAnyOrder(
+                                    tuple(
+                                            "10",
+                                            5
+                                    ),
+                                    tuple(
+                                            "20",
+                                            5
+                                    )
+                            );
 
-                    assertThat(recommendationQueryService.getTopProducts(userId, 2)).containsExactly(product10,
-                            product20);
+                    assertThat(
+                            recommendationQueryService.getTopProducts(
+                                    userId,
+                                    2
+                            )
+                    ).containsExactly(
+                            product10,
+                            product20
+                    );
                 });
     }
 
     private ProductSummary activeProduct(Long productId) {
-        return new ProductSummary(productId, "product-" + productId, "description", 10_000, 10, "ACTIVE", 100L);
+        return new ProductSummary(
+                productId,
+                "product-" + productId,
+                "description",
+                10_000,
+                10,
+                "ACTIVE",
+                100L
+        );
     }
 }

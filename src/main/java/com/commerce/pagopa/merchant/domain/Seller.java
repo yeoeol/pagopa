@@ -14,30 +14,53 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "seller", uniqueConstraints = {@UniqueConstraint(name = "uq_seller_user_id", columnNames = {"user_id"})})
+@Table(
+        name = "seller",
+        uniqueConstraints = {@UniqueConstraint(
+                name = "uq_seller_user_id",
+                columnNames = {"user_id"}
+        )}
+)
 public class Seller extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "seller_id", nullable = false)
+    @Column(
+            name = "seller_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(
+            name = "status",
+            length = 20,
+            nullable = false
+    )
     private SellerStatus status;
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "verification_status", length = 20, nullable = false)
+    @Column(
+            name = "verification_status",
+            length = 20,
+            nullable = false
+    )
     private VerificationStatus verificationStatus;
 
     @ToString.Include
-    @Column(name = "status_changed_at", nullable = false)
+    @Column(
+            name = "status_changed_at",
+            nullable = false
+    )
     private LocalDateTime statusChangedAt;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(
+            name = "user_id",
+            nullable = false
+    )
     private Long userId;
 
     @Builder(access = AccessLevel.PRIVATE)

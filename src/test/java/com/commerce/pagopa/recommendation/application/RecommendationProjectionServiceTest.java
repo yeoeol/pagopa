@@ -38,9 +38,14 @@ import static org.mockito.Mockito.doThrow;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({RecommendationProjectionService.class, RecommendationProjectionJdbcRepository.class,
-        TestcontainersConfig.class, JacksonTestConfig.class})
-@Timeout(value = 30, unit = TimeUnit.SECONDS)
+@Import(
+    {RecommendationProjectionService.class, RecommendationProjectionJdbcRepository.class,
+            TestcontainersConfig.class, JacksonTestConfig.class}
+)
+@Timeout(
+        value = 30,
+        unit = TimeUnit.SECONDS
+)
 class RecommendationProjectionServiceTest {
 
     @Autowired
@@ -55,8 +60,10 @@ class RecommendationProjectionServiceTest {
     @BeforeEach
     void verify_mysql_database() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            assertThat(connection.getMetaData()
-                    .getDatabaseProductName()).isEqualToIgnoringCase("MySQL");
+            assertThat(
+                    connection.getMetaData()
+                            .getDatabaseProductName()
+            ).isEqualToIgnoringCase("MySQL");
         }
     }
 
@@ -66,9 +73,20 @@ class RecommendationProjectionServiceTest {
         UUID eventId = UUID.randomUUID();
         Long userId = 1L;
         String keyword = "keyboard";
-        LocalDateTime searchedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
-        UserSearchRecorded event = new UserSearchRecorded(eventId, userId, keyword, searchedAt);
+        UserSearchRecorded event = new UserSearchRecorded(
+                eventId,
+                userId,
+                keyword,
+                searchedAt
+        );
         recommendationProjectionService.project(event);
 
         List<RecommendationInterest> interests = findInterests(userId);
@@ -89,10 +107,26 @@ class RecommendationProjectionServiceTest {
         UUID eventId = UUID.randomUUID();
         Long orderId = 100L;
         Long userId = 1L;
-        List<Long> productIds = List.of(10L, 20L, 30L);
-        LocalDateTime confirmedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        List<Long> productIds = List.of(
+                10L,
+                20L,
+                30L
+        );
+        LocalDateTime confirmedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
-        OrderConfirmed event = new OrderConfirmed(eventId, orderId, userId, productIds, confirmedAt);
+        OrderConfirmed event = new OrderConfirmed(
+                eventId,
+                orderId,
+                userId,
+                productIds,
+                confirmedAt
+        );
         recommendationProjectionService.project(event);
 
         List<RecommendationInterest> interests = findInterests(1L);
@@ -101,7 +135,11 @@ class RecommendationProjectionServiceTest {
         interests.forEach(interest -> {
             assertThat(interest.userId()).isEqualTo(1L);
             assertThat(interest.type()).isEqualTo(InterestType.PRODUCT);
-            assertThat(interest.interestKey()).containsAnyOf("10", "20", "30");
+            assertThat(interest.interestKey()).containsAnyOf(
+                    "10",
+                    "20",
+                    "30"
+            );
             assertThat(interest.score()).isEqualTo(5);
             assertThat(interest.lastEventAt()).isEqualTo(confirmedAt);
         });
@@ -113,10 +151,25 @@ class RecommendationProjectionServiceTest {
         UUID eventId = UUID.randomUUID();
         Long orderId = 100L;
         Long userId = 1L;
-        List<Long> productIds = List.of(10L, 10L);
-        LocalDateTime confirmedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        List<Long> productIds = List.of(
+                10L,
+                10L
+        );
+        LocalDateTime confirmedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
-        OrderConfirmed event = new OrderConfirmed(eventId, orderId, userId, productIds, confirmedAt);
+        OrderConfirmed event = new OrderConfirmed(
+                eventId,
+                orderId,
+                userId,
+                productIds,
+                confirmedAt
+        );
         recommendationProjectionService.project(event);
 
         List<RecommendationInterest> interests = findInterests(userId);
@@ -137,9 +190,20 @@ class RecommendationProjectionServiceTest {
         UUID eventId = UUID.randomUUID();
         Long userId = 1L;
         String keyword = "keyboard";
-        LocalDateTime searchedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
-        UserSearchRecorded event = new UserSearchRecorded(eventId, userId, keyword, searchedAt);
+        UserSearchRecorded event = new UserSearchRecorded(
+                eventId,
+                userId,
+                keyword,
+                searchedAt
+        );
         recommendationProjectionService.project(event);
         recommendationProjectionService.project(event);
 
@@ -161,9 +225,21 @@ class RecommendationProjectionServiceTest {
         Long orderId = 100L;
         Long userId = 1L;
         List<Long> productIds = List.of(10L);
-        LocalDateTime confirmedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        LocalDateTime confirmedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
-        OrderConfirmed event = new OrderConfirmed(eventId, orderId, userId, productIds, confirmedAt);
+        OrderConfirmed event = new OrderConfirmed(
+                eventId,
+                orderId,
+                userId,
+                productIds,
+                confirmedAt
+        );
         recommendationProjectionService.project(event);
         recommendationProjectionService.project(event);
 
@@ -186,13 +262,30 @@ class RecommendationProjectionServiceTest {
         UUID eventId = UUID.randomUUID();
         Long userId = 999L;
         String keyword = "keyboard";
-        LocalDateTime searchedAt = LocalDateTime.of(2026, 1, 1, 12, 0);
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
-        UserSearchRecorded event = new UserSearchRecorded(eventId, userId, keyword, searchedAt);
+        UserSearchRecorded event = new UserSearchRecorded(
+                eventId,
+                userId,
+                keyword,
+                searchedAt
+        );
 
         doThrow(new DataIntegrityViolationException("forced interest upsert failure"))
                 .when(recommendationProjectionRepository)
-                .increaseInterest(userId, InterestType.KEYWORD, keyword, 1, searchedAt);
+                .increaseInterest(
+                        userId,
+                        InterestType.KEYWORD,
+                        keyword,
+                        1,
+                        searchedAt
+                );
 
         assertThatThrownBy(() -> recommendationProjectionService.project(event))
                 .isInstanceOf(DataIntegrityViolationException.class)
@@ -203,27 +296,47 @@ class RecommendationProjectionServiceTest {
     }
 
     private Long countEvents(UUID eventId) {
-        Long count = jdbcTemplate.queryForObject("""
-                SELECT count(*)
-                FROM recommendation_event
-                WHERE event_id = :eventId
-                """, new MapSqlParameterSource().addValue("eventId", eventId.toString()), Long.class);
+        Long count = jdbcTemplate.queryForObject(
+                """
+                        SELECT count(*)
+                        FROM recommendation_event
+                        WHERE event_id = :eventId
+                        """,
+                new MapSqlParameterSource().addValue(
+                        "eventId",
+                        eventId.toString()
+                ),
+                Long.class
+        );
         return count == null ? 0L : count;
     }
 
     private List<RecommendationInterest> findInterests(Long userId) {
-        return jdbcTemplate.query("""
-                SELECT
-                    user_id,
-                    interest_type,
-                    interest_key,
-                    score,
-                    last_event_at
-                FROM recommendation_interest
-                WHERE user_id=:userId
-                """, new MapSqlParameterSource().addValue("userId", userId),
-                (rs, rowNum) -> new RecommendationInterest(rs.getLong("user_id"),
-                        InterestType.valueOf(rs.getString("interest_type")), rs.getString("interest_key"),
-                        rs.getInt("score"), rs.getObject("last_event_at", LocalDateTime.class)));
+        return jdbcTemplate.query(
+                """
+                        SELECT
+                            user_id,
+                            interest_type,
+                            interest_key,
+                            score,
+                            last_event_at
+                        FROM recommendation_interest
+                        WHERE user_id=:userId
+                        """,
+                new MapSqlParameterSource().addValue(
+                        "userId",
+                        userId
+                ),
+                (rs, rowNum) -> new RecommendationInterest(
+                        rs.getLong("user_id"),
+                        InterestType.valueOf(rs.getString("interest_type")),
+                        rs.getString("interest_key"),
+                        rs.getInt("score"),
+                        rs.getObject(
+                                "last_event_at",
+                                LocalDateTime.class
+                        )
+                )
+        );
     }
 }

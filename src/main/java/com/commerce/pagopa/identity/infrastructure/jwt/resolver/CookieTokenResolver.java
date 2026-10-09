@@ -16,8 +16,10 @@ public class CookieTokenResolver implements TokenResolver {
     public String resolveToken(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
-                if (JwtTokenType.ACCESS_TOKEN.getCookieName()
-                        .equals(cookie.getName())) {
+                if (
+                    JwtTokenType.ACCESS_TOKEN.getCookieName()
+                            .equals(cookie.getName())
+                ) {
                     return cookie.getValue();
                 }
             }

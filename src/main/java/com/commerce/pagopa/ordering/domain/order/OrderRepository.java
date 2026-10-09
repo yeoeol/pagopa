@@ -29,12 +29,10 @@ public interface OrderRepository {
     Optional<Order> findByIdForUpdate(Long id);
 
     default Order findByIdOrThrow(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new BusinessException(ORDER_NOT_FOUND));
+        return findById(id).orElseThrow(() -> new BusinessException(ORDER_NOT_FOUND));
     }
 
     default Order findByIdForUpdateOrThrow(Long id) {
-        return findByIdForUpdate(id)
-                .orElseThrow(() -> new BusinessException(ORDER_NOT_FOUND));
+        return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(ORDER_NOT_FOUND));
     }
 }

@@ -22,7 +22,10 @@ public class CartItemApiService implements CartItemApi {
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public List<CartItemSummary> findAllByIdInAndUserIdForUpdate(List<Long> cartItemIds, Long userId) {
-        return cartItemRepository.findAllByIdInAndUserIdForUpdate(cartItemIds, userId)
+        return cartItemRepository.findAllByIdInAndUserIdForUpdate(
+                cartItemIds,
+                userId
+        )
                 .stream()
                 .map(this::toSummary)
                 .toList();
@@ -35,6 +38,10 @@ public class CartItemApiService implements CartItemApi {
     }
 
     private CartItemSummary toSummary(CartItem cartItem) {
-        return new CartItemSummary(cartItem.getId(), cartItem.getProductId(), cartItem.getCartQuantity());
+        return new CartItemSummary(
+                cartItem.getId(),
+                cartItem.getProductId(),
+                cartItem.getCartQuantity()
+        );
     }
 }

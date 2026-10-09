@@ -27,7 +27,10 @@ import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.identity.api.CurrentUser;
 import com.commerce.pagopa.identity.api.UserIdentity;
 
-@Tag(name = "PRODUCT API", description = "상품 관리 API")
+@Tag(
+        name = "PRODUCT API",
+        description = "상품 관리 API"
+)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/products")
@@ -36,37 +39,72 @@ public class ProductController {
     private final ProductService productService;
     private final DiscoveryApi discoveryApi;
 
-    @Operation(summary = "상품 목록 조회", description = "전체 상품 목록을 조회합니다.")
+    @Operation(
+            summary = "상품 목록 조회",
+            description = "전체 상품 목록을 조회합니다."
+    )
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getAll(
-            @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable
+            @ParameterObject
+            @PageableDefault(
+                    size = 10,
+                    page = 0
+            ) Pageable pageable
     ) {
         return ResponseEntity.ok(ApiResponse.ok(productService.findAllWithActiveAndSoldOut(pageable)));
     }
 
-    @Operation(summary = "상품 상세 조회", description = "특정 상품을 조회합니다.")
+    @Operation(
+            summary = "상품 상세 조회",
+            description = "특정 상품을 조회합니다."
+    )
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponseDto>> getDetail(@PathVariable("id") Long productId) {
         return ResponseEntity.ok(ApiResponse.ok(productService.find(productId)));
     }
 
-    @Operation(summary = "상품 검색", description = "검색 조건에 맞는 상품을 조회합니다.")
+    @Operation(
+            summary = "상품 검색",
+            description = "검색 조건에 맞는 상품을 조회합니다."
+    )
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
-            @Parameter(hidden = true) @CurrentUser UserIdentity user,
-            @ParameterObject @Valid @ModelAttribute ProductSearchCondition productSearchCondition
+            @Parameter(hidden = true)
+            @CurrentUser UserIdentity user,
+            @ParameterObject
+            @Valid @ModelAttribute ProductSearchCondition productSearchCondition
     ) {
-        discoveryApi.saveHistory(user.userId(), user.sessionId(), productSearchCondition.productName());
+        discoveryApi.saveHistory(
+                user.userId(),
+                user.sessionId(),
+                productSearchCondition.productName()
+        );
 
         return ResponseEntity.ok(ApiResponse.ok(productService.search(productSearchCondition)));
     }
 
-    @Operation(summary = "카테고리별 상품 목록 조회", description = "카테고리ID를 전달받고, 해당 카테고리 또는 하위 카테고리에 속한 모든 상품을 조회합니다.")
+    @Operation(
+            summary = "카테고리별 상품 목록 조회",
+            description = "카테고리ID를 전달받고, 해당 카테고리 또는 하위 카테고리에 속한 모든 상품을 조회합니다."
+    )
     @GetMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getProductsByCategory(
             @PathVariable("categoryId") Long categoryId,
-            @ParameterObject @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+            @ParameterObject
+            @PageableDefault(
+                    size = 10,
+                    page = 0,
+                    sort = "id",
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(productService.findAllByCategory(categoryId, pageable)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        productService.findAllByCategory(
+                                categoryId,
+                                pageable
+                        )
+                )
+        );
     }
 }

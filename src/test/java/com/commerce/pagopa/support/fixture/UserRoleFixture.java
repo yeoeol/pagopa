@@ -9,6 +9,9 @@ public final class UserRoleFixture {
     }
 
     public static UserRole aUserRole(User user, Role role) {
-        return UserRole.create(user, role);
+        return UserRole.create(
+                user,
+                role
+        );
     }
 }

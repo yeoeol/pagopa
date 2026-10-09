@@ -15,6 +15,10 @@ public class DiscoveryApiService implements DiscoveryApi {
 
     @Transactional
     public void saveHistory(Long userId, String sessionId, String keyword) {
-        searchHistoryService.saveHistory(userId, sessionId, keyword);
+        searchHistoryService.saveHistory(
+                userId,
+                sessionId,
+                keyword
+        );
     }
 }

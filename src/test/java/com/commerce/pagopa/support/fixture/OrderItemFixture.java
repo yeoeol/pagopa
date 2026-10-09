@@ -9,10 +9,22 @@ public final class OrderItemFixture {
     }
 
     public static OrderItem anOrderItem(String productName, Integer price, Long productId, Order order) {
-        return anOrderItem(productName, productId, 1, price, order);
+        return anOrderItem(
+                productName,
+                productId,
+                1,
+                price,
+                order
+        );
     }
 
     private static OrderItem anOrderItem(String productName, Long productId, int quantity, Integer price, Order order) {
-        return OrderItem.create(productName, price, quantity, order, productId);
+        return OrderItem.create(
+                productName,
+                price,
+                quantity,
+                order,
+                productId
+        );
     }
 }

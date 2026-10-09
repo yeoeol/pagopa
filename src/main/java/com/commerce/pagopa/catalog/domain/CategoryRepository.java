@@ -20,8 +20,7 @@ public interface CategoryRepository {
     List<Category> findRootCategories();
 
     default Category findByIdOrThrow(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new BusinessException(CATEGORY_NOT_FOUND));
+        return findById(id).orElseThrow(() -> new BusinessException(CATEGORY_NOT_FOUND));
     }
 
     List<Category> findDescendantsByParent(Long categoryId);

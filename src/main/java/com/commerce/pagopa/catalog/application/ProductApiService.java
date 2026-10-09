@@ -47,7 +47,12 @@ public class ProductApiService implements ProductApi {
         Map<Long, ProductSummary> productSummary = new HashMap<>();
 
         List<Product> products = productRepository.findByIdIn(productIds);
-        products.forEach(product -> productSummary.put(product.getId(), toSummary(product)));
+        products.forEach(
+                product -> productSummary.put(
+                        product.getId(),
+                        toSummary(product)
+                )
+        );
 
         return productSummary;
     }
@@ -64,14 +69,27 @@ public class ProductApiService implements ProductApi {
     public ProductSummary register(ProductRegisterRequest request) {
         Category category = categoryRepository.findByIdOrThrow(request.categoryId());
 
-        Product product = Product.create(request.name(), request.description(), request.price(),
-                request.stockQuantity(), category, request.sellerId());
+        Product product = Product.create(
+                request.name(),
+                request.description(),
+                request.price(),
+                request.stockQuantity(),
+                category,
+                request.sellerId()
+        );
 
-        for (int i = 0; i < request.imageUrls()
-                .size(); i++) {
+        for (
+                int i = 0; i < request.imageUrls()
+                        .size(); i++
+        ) {
             boolean isThumbnail = (i == 0);
-            ProductImage productImage = ProductImage.create(request.imageUrls()
-                    .get(i), i + 1, isThumbnail, product);
+            ProductImage productImage = ProductImage.create(
+                    request.imageUrls()
+                            .get(i),
+                    i + 1,
+                    isThumbnail,
+                    product
+            );
             product.addImage(productImage);
         }
 
@@ -81,20 +99,47 @@ public class ProductApiService implements ProductApi {
     @Override
     @Transactional(readOnly = true)
     public ProductPageResponseDto findAllByUserId(Long userId, int pageSize, int pageNumber, String sort) {
-        Page<Product> products = productRepository.findAllByUserId(userId,
-                PageRequest.of(pageNumber, pageSize, Sort.by(sort)));
+        Page<Product> products = productRepository.findAllByUserId(
+                userId,
+                PageRequest.of(
+                        pageNumber,
+                        pageSize,
+                        Sort.by(sort)
+                )
+        );
 
         int totalPages = products.getTotalPages();
         int currentPage = products.getNumber();
-        int startPage = max(0, currentPage - PAGE_WINDOW_SIZE / 2);
-        int endPage = min(max(totalPages - 1, 0), startPage + PAGE_WINDOW_SIZE - 1);
-        startPage = max(0, endPage - PAGE_WINDOW_SIZE + 1);
+        int startPage = max(
+                0,
+                currentPage - PAGE_WINDOW_SIZE / 2
+        );
+        int endPage = min(
+                max(
+                        totalPages - 1,
+                        0
+                ),
+                startPage + PAGE_WINDOW_SIZE - 1
+        );
+        startPage = max(
+                0,
+                endPage - PAGE_WINDOW_SIZE + 1
+        );
 
-        return new ProductPageResponseDto(products.getContent()
-                .stream()
-                .map(this::toSummary)
-                .toList(), currentPage, products.getSize(), products.getTotalElements(), totalPages, products.isFirst(),
-                products.isLast(), startPage, endPage);
+        return new ProductPageResponseDto(
+                products.getContent()
+                        .stream()
+                        .map(this::toSummary)
+                        .toList(),
+                currentPage,
+                products.getSize(),
+                products.getTotalElements(),
+                totalPages,
+                products.isFirst(),
+                products.isLast(),
+                startPage,
+                endPage
+        );
     }
 
     @Override
@@ -106,7 +151,11 @@ public class ProductApiService implements ProductApi {
     ) {
         validateRecommendationLimit(limit);
 
-        return productRepository.findRecommendationCandidatesByKeyword(keyword, excludedProductIds, limit)
+        return productRepository.findRecommendationCandidatesByKeyword(
+                keyword,
+                excludedProductIds,
+                limit
+        )
                 .stream()
                 .map(this::toSummary)
                 .toList();
@@ -117,7 +166,10 @@ public class ProductApiService implements ProductApi {
     public List<ProductSummary> findDefaultProducts(Collection<Long> excludedProductIds, int limit) {
         validateRecommendationLimit(limit);
 
-        return productRepository.findDefaultRecommendationProducts(excludedProductIds, limit)
+        return productRepository.findDefaultRecommendationProducts(
+                excludedProductIds,
+                limit
+        )
                 .stream()
                 .map(this::toSummary)
                 .toList();
@@ -125,15 +177,23 @@ public class ProductApiService implements ProductApi {
 
     private void validateRecommendationLimit(int limit) {
         if (limit < MIN_RECOMMENDATION_LIMIT || limit > MAX_RECOMMENDATION_LIMIT) {
-            throw new BusinessException(ErrorCode.RECOMMENDATION_INVALID_LIMIT,
-                    "limit must be between 1 and 100: " + limit);
+            throw new BusinessException(
+                    ErrorCode.RECOMMENDATION_INVALID_LIMIT,
+                    "limit must be between 1 and 100: " + limit
+            );
         }
     }
 
     private ProductSummary toSummary(Product product) {
-        return new ProductSummary(product.getId(), product.getName(), product.getDescription(), product.getPrice(),
-                product.getStockQuantity(), product.getStatus()
+        return new ProductSummary(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStockQuantity(),
+                product.getStatus()
                         .name(),
-                product.getUserId());
+                product.getUserId()
+        );
     }
 }

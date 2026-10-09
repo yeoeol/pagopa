@@ -37,15 +37,29 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
-        OrderItemSummary summary = orderItemApi.getReviewableOrderItem(userId, requestDto.orderItemId());
+        OrderItemSummary summary = orderItemApi.getReviewableOrderItem(
+                userId,
+                requestDto.orderItemId()
+        );
 
-        Review review = Review.create(requestDto.content(), requestDto.rating(), summary.productId(),
-                summary.orderItemId(), userId);
+        Review review = Review.create(
+                requestDto.content(),
+                requestDto.rating(),
+                summary.productId(),
+                summary.orderItemId(),
+                userId
+        );
 
-        for (int i = 0; i < requestDto.imageUrls()
-                .size(); i++) {
-            ReviewImage reviewImage = ReviewImage.create(requestDto.imageUrls()
-                    .get(i), i + 1, review);
+        for (
+                int i = 0; i < requestDto.imageUrls()
+                        .size(); i++
+        ) {
+            ReviewImage reviewImage = ReviewImage.create(
+                    requestDto.imageUrls()
+                            .get(i),
+                    i + 1,
+                    review
+            );
             review.addImage(reviewImage);
         }
 
@@ -63,7 +77,10 @@ public class ReviewService {
     @Transactional
     public void update(Long reviewId, ReviewUpdateRequestDto requestDto) {
         Review review = reviewRepository.findByIdOrThrow(reviewId);
-        review.update(requestDto.content(), requestDto.rating());
+        review.update(
+                requestDto.content(),
+                requestDto.rating()
+        );
     }
 
     @Transactional
@@ -86,7 +103,12 @@ public class ReviewService {
         Map<Long, ReviewAuthorSummary> authors = reviewAuthorQuery.findAllByIds(userIds);
 
         return reviews.stream()
-                .map(review -> ProductReviewResponseDto.from(review, authors.get(review.getUserId())))
+                .map(
+                        review -> ProductReviewResponseDto.from(
+                                review,
+                                authors.get(review.getUserId())
+                        )
+                )
                 .toList();
     }
 }

@@ -32,15 +32,20 @@ class SearchHistorySeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
         // user_id nullable - ACTIVE 사용자 풀 사용, 비로그인 분기는 NULL 채움
-        List<Long> userIds = jdbc.queryForList("SELECT user_id FROM user WHERE status = 'ACTIVE' ORDER BY user_id",
-                Long.class);
+        List<Long> userIds = jdbc.queryForList(
+                "SELECT user_id FROM user WHERE status = 'ACTIVE' ORDER BY user_id",
+                Long.class
+        );
 
         if (userIds.isEmpty()) {
             throw new IllegalStateException("user 없음");
@@ -59,21 +64,49 @@ class SearchHistorySeeder implements Seeder {
                 ) VALUES (?, ?, ?, ?)
                 """;
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            // 70% 로그인 / 30% 비로그인
-            boolean loggedIn = i % 10 < 7;
-            if (loggedIn) {
-                ps.setLong(1, userIds.get(i % userSize));
-                ps.setNull(2, Types.VARCHAR);
-            } else {
-                ps.setNull(1, Types.BIGINT);
-                // 비로그인 세션을 5개씩 묶어 동일 세션 내 검색 흐름 모사
-                ps.setString(2, "sess_%d".formatted(i / 5));
-            }
-            ps.setString(3, faker.commerce()
-                    .productName());
-            ps.setTimestamp(4, Timestamp.from(faker.timeAndDate()
-                    .past(30, TimeUnit.DAYS)));
-        });
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    // 70% 로그인 / 30% 비로그인
+                    boolean loggedIn = i % 10 < 7;
+                    if (loggedIn) {
+                        ps.setLong(
+                                1,
+                                userIds.get(i % userSize)
+                        );
+                        ps.setNull(
+                                2,
+                                Types.VARCHAR
+                        );
+                    } else {
+                        ps.setNull(
+                                1,
+                                Types.BIGINT
+                        );
+                        // 비로그인 세션을 5개씩 묶어 동일 세션 내 검색 흐름 모사
+                        ps.setString(
+                                2,
+                                "sess_%d".formatted(i / 5)
+                        );
+                    }
+                    ps.setString(
+                            3,
+                            faker.commerce()
+                                    .productName()
+                    );
+                    ps.setTimestamp(
+                            4,
+                            Timestamp.from(
+                                    faker.timeAndDate()
+                                            .past(
+                                                    30,
+                                                    TimeUnit.DAYS
+                                            )
+                            )
+                    );
+                }
+        );
     }
 }

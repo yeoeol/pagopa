@@ -25,11 +25,20 @@ public class UserService {
 
     @Transactional
     public User register(UserCreateRequestDto requestDto) {
-        User user = User.create(requestDto.provider(), requestDto.providerId(), requestDto.name(), requestDto.email(),
-                requestDto.profileImageUrl(), LocalDateTime.now());
+        User user = User.create(
+                requestDto.provider(),
+                requestDto.providerId(),
+                requestDto.name(),
+                requestDto.email(),
+                requestDto.profileImageUrl(),
+                LocalDateTime.now()
+        );
         Role role = roleService.findUserRole();
 
-        UserRole userRole = UserRole.create(user, role);
+        UserRole userRole = UserRole.create(
+                user,
+                role
+        );
         user.addUserRole(userRole);
 
         return userRepository.save(user);
@@ -50,12 +59,18 @@ public class UserService {
             imageApi.delete(user.getProfileImageUrl());
         }
 
-        user.updateProfile(requestDto.name(), requestDto.profileImage());
+        user.updateProfile(
+                requestDto.name(),
+                requestDto.profileImage()
+        );
         return UserResponseDto.from(user);
     }
 
     @Transactional(readOnly = true)
     public Optional<User> findByProviderAndProviderId(Provider provider, String providerId) {
-        return userRepository.findByProviderAndProviderId(provider, providerId);
+        return userRepository.findByProviderAndProviderId(
+                provider,
+                providerId
+        );
     }
 }

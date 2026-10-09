@@ -42,7 +42,10 @@ import static org.mockito.BDDMockito.given;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({SearchHistoryService.class, TestcontainersConfig.class, QueryDSLConfig.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Timeout(value = 30, unit = TimeUnit.SECONDS)
+@Timeout(
+        value = 30,
+        unit = TimeUnit.SECONDS
+)
 class SearchHistoryServiceConcurrencyTest {
 
     private static final int PARTICIPANT_COUNT = 8;
@@ -68,8 +71,10 @@ class SearchHistoryServiceConcurrencyTest {
     @BeforeEach
     void verify_mysql_database() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            assertThat(connection.getMetaData()
-                    .getDatabaseProductName()).isEqualToIgnoringCase("MySQL");
+            assertThat(
+                    connection.getMetaData()
+                            .getDatabaseProductName()
+            ).isEqualToIgnoringCase("MySQL");
         }
     }
 
@@ -77,13 +82,21 @@ class SearchHistoryServiceConcurrencyTest {
     @Tag("normal")
     void concurrent_different_keywords_are_all_saved() throws InterruptedException {
         String sessionId = unique_session_id("different-keywords");
-        List<String> keywords = IntStream.range(0, PARTICIPANT_COUNT)
+        List<String> keywords = IntStream.range(
+                0,
+                PARTICIPANT_COUNT
+        )
                 .mapToObj(index -> "keyword-" + index)
                 .toList();
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    index -> searchHistoryService.saveHistory(null, sessionId, keywords.get(index)));
+                    index -> searchHistoryService.saveHistory(
+                            null,
+                            sessionId,
+                            keywords.get(index)
+                    )
+            );
 
             assert_successful_execution(result);
             assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId))
@@ -91,7 +104,10 @@ class SearchHistoryServiceConcurrencyTest {
                     .extracting(SearchHistory::getKeyword)
                     .containsExactlyInAnyOrderElementsOf(keywords);
         } finally {
-            searchHistoryService.deleteAll(null, sessionId);
+            searchHistoryService.deleteAll(
+                    null,
+                    sessionId
+            );
         }
     }
 
@@ -102,22 +118,40 @@ class SearchHistoryServiceConcurrencyTest {
         String keyword = "keyword";
         LocalDateTime initialLastSearchedAt = LocalDateTime.parse("2000-01-01T00:00:00");
         SearchHistory existingHistory = searchHistoryRepository
-                .save(SearchHistory.createForGuest(sessionId, keyword, initialLastSearchedAt));
+                .save(
+                        SearchHistory.createForGuest(
+                                sessionId,
+                                keyword,
+                                initialLastSearchedAt
+                        )
+                );
         Long initialId = existingHistory.getId();
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    ignored -> searchHistoryService.saveHistory(null, sessionId, keyword));
+                    ignored -> searchHistoryService.saveHistory(
+                            null,
+                            sessionId,
+                            keyword
+                    )
+            );
 
             assert_successful_execution(result);
             List<SearchHistory> histories = searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId);
             assertThat(histories).hasSize(1);
-            assertThat(histories.get(0)
-                    .getId()).isEqualTo(initialId);
-            assertThat(histories.get(0)
-                    .getLastSearchedAt()).isAfter(initialLastSearchedAt);
+            assertThat(
+                    histories.get(0)
+                            .getId()
+            ).isEqualTo(initialId);
+            assertThat(
+                    histories.get(0)
+                            .getLastSearchedAt()
+            ).isAfter(initialLastSearchedAt);
         } finally {
-            searchHistoryService.deleteAll(null, sessionId);
+            searchHistoryService.deleteAll(
+                    null,
+                    sessionId
+            );
         }
     }
 
@@ -125,19 +159,35 @@ class SearchHistoryServiceConcurrencyTest {
     @Tag("boundary")
     void concurrent_whitespace_variants_are_deduplicated() throws InterruptedException {
         String sessionId = unique_session_id("whitespace-variants");
-        List<String> keywordVariants = List.of("keyword", " keyword ", "  keyword", "keyword  ", "keyword", " keyword ",
-                "  keyword", "keyword  ");
+        List<String> keywordVariants = List.of(
+                "keyword",
+                " keyword ",
+                "  keyword",
+                "keyword  ",
+                "keyword",
+                " keyword ",
+                "  keyword",
+                "keyword  "
+        );
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    index -> searchHistoryService.saveHistory(null, sessionId, keywordVariants.get(index)));
+                    index -> searchHistoryService.saveHistory(
+                            null,
+                            sessionId,
+                            keywordVariants.get(index)
+                    )
+            );
 
             assert_successful_execution(result);
             assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId)).singleElement()
                     .extracting(SearchHistory::getKeyword)
                     .isEqualTo("keyword");
         } finally {
-            searchHistoryService.deleteAll(null, sessionId);
+            searchHistoryService.deleteAll(
+                    null,
+                    sessionId
+            );
         }
     }
 
@@ -150,14 +200,22 @@ class SearchHistoryServiceConcurrencyTest {
         given(userApi.existsById(user.getId())).willReturn(true);
         try {
             ConcurrencyResult result = execute_concurrently(
-                    ignored -> searchHistoryService.saveHistory(user.getId(), null, keyword));
+                    ignored -> searchHistoryService.saveHistory(
+                            user.getId(),
+                            null,
+                            keyword
+                    )
+            );
 
             assert_successful_execution(result);
             assertThat(searchHistoryRepository.findByUserIdOrderByLastSearchedAtDesc(user.getId())).singleElement()
                     .extracting(SearchHistory::getKeyword)
                     .isEqualTo(keyword);
         } finally {
-            searchHistoryService.deleteAll(user.getId(), null);
+            searchHistoryService.deleteAll(
+                    user.getId(),
+                    null
+            );
         }
     }
 
@@ -169,14 +227,22 @@ class SearchHistoryServiceConcurrencyTest {
 
         try {
             ConcurrencyResult result = execute_concurrently(
-                    ignored -> searchHistoryService.saveHistory(null, sessionId, keyword));
+                    ignored -> searchHistoryService.saveHistory(
+                            null,
+                            sessionId,
+                            keyword
+                    )
+            );
 
             assert_successful_execution(result);
             assertThat(searchHistoryRepository.findBySessionIdOrderByLastSearchedAtDesc(sessionId)).singleElement()
                     .extracting(SearchHistory::getKeyword)
                     .isEqualTo(keyword);
         } finally {
-            searchHistoryService.deleteAll(null, sessionId);
+            searchHistoryService.deleteAll(
+                    null,
+                    sessionId
+            );
         }
     }
 
@@ -195,7 +261,10 @@ class SearchHistoryServiceConcurrencyTest {
                 int taskIndex = index;
                 executor.submit(() -> {
                     try {
-                        startGate.await(GATE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                        startGate.await(
+                                GATE_TIMEOUT_SECONDS,
+                                TimeUnit.SECONDS
+                        );
                         operation.accept(taskIndex);
                         successCount.incrementAndGet();
                     } catch (Throwable throwable) {
@@ -210,15 +279,27 @@ class SearchHistoryServiceConcurrencyTest {
                 });
             }
 
-            completedWithinTimeout = completion.await(COMPLETION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            completedWithinTimeout = completion.await(
+                    COMPLETION_TIMEOUT_SECONDS,
+                    TimeUnit.SECONDS
+            );
             unfinishedTaskCount = completion.getCount();
         } finally {
             executor.shutdownNow();
-            executorTerminated = executor.awaitTermination(TERMINATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            executorTerminated = executor.awaitTermination(
+                    TERMINATION_TIMEOUT_SECONDS,
+                    TimeUnit.SECONDS
+            );
         }
 
-        return new ConcurrencyResult(completedWithinTimeout, unfinishedTaskCount, executorTerminated,
-                successCount.get(), 0, List.copyOf(unexpectedFailures));
+        return new ConcurrencyResult(
+                completedWithinTimeout,
+                unfinishedTaskCount,
+                executorTerminated,
+                successCount.get(),
+                0,
+                List.copyOf(unexpectedFailures)
+        );
     }
 
     private void assert_successful_execution(ConcurrencyResult result) {
@@ -238,13 +319,24 @@ class SearchHistoryServiceConcurrencyTest {
     private String unique_suffix(String scenario) {
         return scenario + "-" + UUID.randomUUID()
                 .toString()
-                .replace("-", "")
-                .substring(0, 12);
+                .replace(
+                        "-",
+                        ""
+                )
+                .substring(
+                        0,
+                        12
+                );
     }
 
-    private record ConcurrencyResult(boolean completedWithinTimeout, long unfinishedTaskCount,
-            boolean executorTerminated, int successCount, int expectedFailureCount,
-            List<Throwable> unexpectedFailures) {
+    private record ConcurrencyResult(
+            boolean completedWithinTimeout,
+            long unfinishedTaskCount,
+            boolean executorTerminated,
+            int successCount,
+            int expectedFailureCount,
+            List<Throwable> unexpectedFailures
+    ) {
 
         int outcomeCount() {
             return successCount + expectedFailureCount + unexpectedFailures.size();

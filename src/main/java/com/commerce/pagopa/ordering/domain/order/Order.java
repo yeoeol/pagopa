@@ -16,32 +16,57 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "orders", indexes = {@Index(name = "idx_orders_status_ordered_at", columnList = "status, ordered_at")})
+@Table(
+        name = "orders",
+        indexes = {@Index(
+                name = "idx_orders_status_ordered_at",
+                columnList = "status, ordered_at"
+        )}
+)
 public class Order extends BaseTimeEntity {
 
     @Id
     @ToString.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id", nullable = false)
+    @Column(
+            name = "order_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(
+            name = "status",
+            length = 20,
+            nullable = false
+    )
     private OrderStatus status;
 
     @ToString.Include
-    @Column(name = "ordered_at", nullable = false)
+    @Column(
+            name = "ordered_at",
+            nullable = false
+    )
     private LocalDateTime orderedAt;
 
     @ToString.Include
-    @Column(name = "canceled_at", nullable = true)
+    @Column(
+            name = "canceled_at",
+            nullable = true
+    )
     private LocalDateTime canceledAt;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(
+            name = "user_id",
+            nullable = false
+    )
     private Long userId;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+    @OneToMany(
+            mappedBy = "order",
+            cascade = CascadeType.PERSIST
+    )
     private final List<OrderItem> orderItems = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)

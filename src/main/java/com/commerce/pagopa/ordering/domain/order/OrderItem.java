@@ -12,33 +12,59 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "order_item", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_order_item_order_id_product_id", columnNames = {"order_id", "product_id"})})
+@Table(
+        name = "order_item",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_order_item_order_id_product_id",
+                        columnNames = {"order_id", "product_id"}
+                )}
+)
 public class OrderItem extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "order_item_id", nullable = false)
+    @Column(
+            name = "order_item_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
-    @Column(name = "product_name", length = 100, nullable = false)
+    @Column(
+            name = "product_name",
+            length = 100,
+            nullable = false
+    )
     private String productName;
 
     @ToString.Include
-    @Column(name = "order_price", nullable = false)
+    @Column(
+            name = "order_price",
+            nullable = false
+    )
     private Integer orderPrice;
 
     @ToString.Include
-    @Column(name = "order_quantity", nullable = false)
+    @Column(
+            name = "order_quantity",
+            nullable = false
+    )
     private Integer orderQuantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(name = "fk_order_item_orders"))
+    @JoinColumn(
+            name = "order_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_order_item_orders")
+    )
     private Order order;
 
-    @Column(name = "product_id", nullable = false)
+    @Column(
+            name = "product_id",
+            nullable = false
+    )
     private Long productId;
 
     @Builder(access = AccessLevel.PRIVATE)

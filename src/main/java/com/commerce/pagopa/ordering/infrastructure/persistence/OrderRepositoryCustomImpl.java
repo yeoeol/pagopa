@@ -38,7 +38,14 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     ) {
         List<Order> orders = queryFactory.selectFrom(order)
                 .distinct()
-                .where(userIdEq(userId), periodGoeAndLt(start, end), statusEq(status))
+                .where(
+                        userIdEq(userId),
+                        periodGoeAndLt(
+                                start,
+                                end
+                        ),
+                        statusEq(status)
+                )
                 .orderBy(orderSpecifiers(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -46,10 +53,21 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
         Long total = queryFactory.select(order.count())
                 .from(order)
-                .where(userIdEq(userId), periodGoeAndLt(start, end), statusEq(status))
+                .where(
+                        userIdEq(userId),
+                        periodGoeAndLt(
+                                start,
+                                end
+                        ),
+                        statusEq(status)
+                )
                 .fetchOne();
 
-        return new PageImpl<>(orders, pageable, total == null ? 0L : total);
+        return new PageImpl<>(
+                orders,
+                pageable,
+                total == null ? 0L : total
+        );
     }
 
     private BooleanExpression userIdEq(Long userId) {

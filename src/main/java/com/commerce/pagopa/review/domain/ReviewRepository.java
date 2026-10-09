@@ -20,7 +20,6 @@ public interface ReviewRepository {
     List<Review> findAllWithDetailsByProductId(Long productId);
 
     default Review findByIdOrThrow(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new BusinessException(REVIEW_NOT_FOUND));
+        return findById(id).orElseThrow(() -> new BusinessException(REVIEW_NOT_FOUND));
     }
 }

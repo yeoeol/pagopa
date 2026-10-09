@@ -36,8 +36,11 @@ class AuthControllerTest {
     void setUpBefore() {
         authService = mock(AuthService.class);
         jwtTokenProvider = mock(JwtTokenProvider.class);
-        authController = new AuthController(authService, jwtTokenProvider,
-                new JwtCookieFactory(new CookieSettings(true)));
+        authController = new AuthController(
+                authService,
+                jwtTokenProvider,
+                new JwtCookieFactory(new CookieSettings(true))
+        );
     }
 
     @AfterEach
@@ -50,23 +53,33 @@ class AuthControllerTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        ResponseEntity<ApiResponse<Void>> result = authController.logout(1L, request, response);
+        ResponseEntity<ApiResponse<Void>> result = authController.logout(
+                1L,
+                request,
+                response
+        );
 
         Cookie cookie = response.getCookie(JwtCookieUtil.ACCESS_TOKEN_COOKIE_NAME);
 
-        assertThat(result.getStatusCode()
-                .is2xxSuccessful()).isTrue();
+        assertThat(
+                result.getStatusCode()
+                        .is2xxSuccessful()
+        ).isTrue();
         assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody()
-                .isSuccess()).isTrue();
+        assertThat(
+                result.getBody()
+                        .isSuccess()
+        ).isTrue();
         assertThat(cookie).isNotNull();
         assertThat(cookie.getValue()).isEmpty();
         assertThat(cookie.getMaxAge()).isZero();
         assertThat(cookie.getPath()).isEqualTo("/");
         assertThat(cookie.isHttpOnly()).isTrue();
         assertThat(request.getSession(false)).isNull();
-        assertThat(SecurityContextHolder.getContext()
-                .getAuthentication()).isNull();
+        assertThat(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+        ).isNull();
         verify(authService).logout(1L);
     }
 
@@ -80,23 +93,40 @@ class AuthControllerTest {
         long refreshTokenExpiryMs = 86_400_000L; // 86400초 (ms 단위)
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setCookies(new Cookie("refreshToken", refreshTokenValue));
+        request.setCookies(
+                new Cookie(
+                        "refreshToken",
+                        refreshTokenValue
+                )
+        );
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        given(authService.reissueToken(refreshTokenValue))
-                .willReturn(TokenResponseDto.of(1L, newAccessToken, newRefreshToken));
+        given(authService.reissueToken(refreshTokenValue)).willReturn(
+                TokenResponseDto.of(
+                        1L,
+                        newAccessToken,
+                        newRefreshToken
+                )
+        );
         given(jwtTokenProvider.getAccessTokenExpiry()).willReturn(accessTokenExpiryMs);
         given(jwtTokenProvider.getRefreshTokenExpiry()).willReturn(refreshTokenExpiryMs);
 
         // when
-        ResponseEntity<ApiResponse<Void>> result = authController.refresh(request, response);
+        ResponseEntity<ApiResponse<Void>> result = authController.refresh(
+                request,
+                response
+        );
 
         // then
-        assertThat(result.getStatusCode()
-                .is2xxSuccessful()).isTrue();
+        assertThat(
+                result.getStatusCode()
+                        .is2xxSuccessful()
+        ).isTrue();
         assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody()
-                .isSuccess()).isTrue();
+        assertThat(
+                result.getBody()
+                        .isSuccess()
+        ).isTrue();
 
         Cookie accessCookie = response.getCookie("accessToken");
         assertThat(accessCookie).isNotNull();
@@ -112,7 +142,10 @@ class AuthControllerTest {
         assertThat(refreshCookie.isHttpOnly()).isTrue();
         assertThat(refreshCookie.getPath()).isEqualTo("/");
 
-        verify(authService, times(1)).reissueToken(refreshTokenValue);
+        verify(
+                authService,
+                times(1)
+        ).reissueToken(refreshTokenValue);
     }
 
     @Test
@@ -123,17 +156,32 @@ class AuthControllerTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // when & then
-        assertThatThrownBy(() -> authController.refresh(request, response)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(
+                () -> authController.refresh(
+                        request,
+                        response
+                )
+        ).isInstanceOf(BusinessException.class);
     }
 
     @Test
     void refresh_withOnlyAccessTokenCookie_throwsBusinessException() {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setCookies(new Cookie("accessToken", "some-access-token")); // refreshToken 쿠키 없음
+        request.setCookies(
+                new Cookie(
+                        "accessToken",
+                        "some-access-token"
+                )
+        ); // refreshToken 쿠키 없음
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // when & then
-        assertThatThrownBy(() -> authController.refresh(request, response)).isInstanceOf(BusinessException.class);
+        assertThatThrownBy(
+                () -> authController.refresh(
+                        request,
+                        response
+                )
+        ).isInstanceOf(BusinessException.class);
     }
 }

@@ -43,8 +43,14 @@ public class JwtTokenProvider {
         Date now = new Date();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
-                .claim("email", email)
-                .claim("roles", List.copyOf(roles))
+                .claim(
+                        "email",
+                        email
+                )
+                .claim(
+                        "roles",
+                        List.copyOf(roles)
+                )
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessTokenExpiry))
                 .signWith(secretKey)
@@ -79,8 +85,10 @@ public class JwtTokenProvider {
 
     public Set<String> getRoles(String token) {
         Object rolesClaim = parseClaims(token).get("roles");
-        if (!(rolesClaim instanceof Collection<?> roles) || roles.stream()
-                .anyMatch(role -> !(role instanceof String))) {
+        if (
+            !(rolesClaim instanceof Collection<?> roles) || roles.stream()
+                    .anyMatch(role -> !(role instanceof String))
+        ) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
@@ -94,16 +102,31 @@ public class JwtTokenProvider {
             parseClaims(token);
             return null;
         } catch (ExpiredJwtException e) {
-            log.warn("[JWT] expired token: {}", e.getMessage());
+            log.warn(
+                    "[JWT] expired token: {}",
+                    e.getMessage()
+            );
             return ErrorCode.EXPIRED_TOKEN;
         } catch (UnsupportedJwtException e) {
-            log.warn("[JWT] unsupported token: {}", e.getMessage());
+            log.warn(
+                    "[JWT] unsupported token: {}",
+                    e.getMessage()
+            );
         } catch (MalformedJwtException e) {
-            log.warn("[JWT] malformed token: {}", e.getMessage());
+            log.warn(
+                    "[JWT] malformed token: {}",
+                    e.getMessage()
+            );
         } catch (SignatureException e) {
-            log.warn("[JWT] signature mismatch: {}", e.getMessage());
+            log.warn(
+                    "[JWT] signature mismatch: {}",
+                    e.getMessage()
+            );
         } catch (IllegalArgumentException e) {
-            log.warn("[JWT] empty token: {}", e.getMessage());
+            log.warn(
+                    "[JWT] empty token: {}",
+                    e.getMessage()
+            );
         }
         return ErrorCode.INVALID_TOKEN;
     }

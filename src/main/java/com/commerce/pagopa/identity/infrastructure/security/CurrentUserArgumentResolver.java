@@ -42,14 +42,23 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                 .getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails user) {
-            return new UserIdentity(user.getUserId(), null);
+            return new UserIdentity(
+                    user.getUserId(),
+                    null
+            );
         }
 
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 
-        String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(request, response);
+        String sessionId = guestSessionCookieFactory.getOrCreateGuestSessionId(
+                request,
+                response
+        );
 
-        return new UserIdentity(null, sessionId);
+        return new UserIdentity(
+                null,
+                sessionId
+        );
     }
 }

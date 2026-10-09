@@ -15,44 +15,82 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "product", indexes = {@Index(name = "idx_product_name", columnList = "name")})
+@Table(
+        name = "product",
+        indexes = {@Index(
+                name = "idx_product_name",
+                columnList = "name"
+        )}
+)
 public class Product extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "product_id", nullable = false)
+    @Column(
+            name = "product_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
-    @Column(name = "name", length = 100, nullable = false)
+    @Column(
+            name = "name",
+            length = 100,
+            nullable = false
+    )
     private String name;
 
     @ToString.Include
-    @Column(name = "description", length = 255, nullable = true)
+    @Column(
+            name = "description",
+            length = 255,
+            nullable = true
+    )
     private String description;
 
     @ToString.Include
-    @Column(name = "price", nullable = false)
+    @Column(
+            name = "price",
+            nullable = false
+    )
     private Integer price;
 
     @ToString.Include
-    @Column(name = "stock_quantity", nullable = false)
+    @Column(
+            name = "stock_quantity",
+            nullable = false
+    )
     private int stockQuantity = 0;
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(
+            name = "status",
+            length = 20,
+            nullable = false
+    )
     private ProductStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
+    @JoinColumn(
+            name = "category_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_product_category")
+    )
     private Category category;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(
+            name = "user_id",
+            nullable = false
+    )
     private Long userId;
 
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "product",
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            orphanRemoval = true
+    )
     @OrderBy("displayOrder ASC")
     private final List<ProductImage> images = new ArrayList<>();
 
@@ -111,8 +149,14 @@ public class Product extends BaseTimeEntity {
 
     private void validateEnoughStock(int quantity) {
         if (this.stockQuantity < quantity) {
-            throw new BusinessException(ErrorCode.PRODUCT_OUT_OF_STOCK,
-                    "productId=%d, 현재 재고=%d, 요청 수량=%d".formatted(this.id, this.stockQuantity, quantity));
+            throw new BusinessException(
+                    ErrorCode.PRODUCT_OUT_OF_STOCK,
+                    "productId=%d, 현재 재고=%d, 요청 수량=%d".formatted(
+                            this.id,
+                            this.stockQuantity,
+                            quantity
+                    )
+            );
         }
     }
 }

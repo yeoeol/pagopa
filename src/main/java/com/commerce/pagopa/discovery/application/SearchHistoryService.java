@@ -43,13 +43,28 @@ public class SearchHistoryService {
                 throw new BusinessException(ErrorCode.USER_NOT_FOUND);
             }
 
-            searchHistoryRepository.upsertByUserId(userId, normalizeKeyword, now);
+            searchHistoryRepository.upsertByUserId(
+                    userId,
+                    normalizeKeyword,
+                    now
+            );
 
-            events.publishEvent(new UserSearchRecorded(UUID.randomUUID(), userId, normalizeKeyword, now));
+            events.publishEvent(
+                    new UserSearchRecorded(
+                            UUID.randomUUID(),
+                            userId,
+                            normalizeKeyword,
+                            now
+                    )
+            );
         }
         // 비로그인 사용자 (세션 기반)
         else if (hasText(sessionId)) {
-            searchHistoryRepository.upsertBySessionId(sessionId, normalizeKeyword, now);
+            searchHistoryRepository.upsertBySessionId(
+                    sessionId,
+                    normalizeKeyword,
+                    now
+            );
         }
     }
 
@@ -72,9 +87,15 @@ public class SearchHistoryService {
     @Transactional
     public void delete(Long searchHistoryId, Long userId, String sessionId) {
         if (userId != null) {
-            searchHistoryRepository.deleteByIdAndUserId(searchHistoryId, userId);
+            searchHistoryRepository.deleteByIdAndUserId(
+                    searchHistoryId,
+                    userId
+            );
         } else if (hasText(sessionId)) {
-            searchHistoryRepository.deleteByIdAndSessionId(searchHistoryId, sessionId);
+            searchHistoryRepository.deleteByIdAndSessionId(
+                    searchHistoryId,
+                    sessionId
+            );
         }
     }
 

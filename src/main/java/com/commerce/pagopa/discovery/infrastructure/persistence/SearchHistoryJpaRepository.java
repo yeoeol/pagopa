@@ -31,20 +31,23 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
 
     @Override
     @Modifying
-    @Query(value = """
-            INSERT INTO search_history (
-                user_id,
-                keyword,
-                last_searched_at
-            )
-            VALUES (
-                :userId,
-                :keyword,
-                :lastSearchedAt
-            )
-            ON DUPLICATE KEY UPDATE
-                last_searched_at = :lastSearchedAt
-            """, nativeQuery = true)
+    @Query(
+            value = """
+                    INSERT INTO search_history (
+                        user_id,
+                        keyword,
+                        last_searched_at
+                    )
+                    VALUES (
+                        :userId,
+                        :keyword,
+                        :lastSearchedAt
+                    )
+                    ON DUPLICATE KEY UPDATE
+                        last_searched_at = :lastSearchedAt
+                    """,
+            nativeQuery = true
+    )
     void upsertByUserId(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
@@ -53,20 +56,23 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
 
     @Override
     @Modifying
-    @Query(value = """
-            INSERT INTO search_history (
-                session_id,
-                keyword,
-                last_searched_at
-            )
-            VALUES (
-                :sessionId,
-                :keyword,
-                :lastSearchedAt
-            )
-            ON DUPLICATE KEY UPDATE
-                last_searched_at = :lastSearchedAt
-            """, nativeQuery = true)
+    @Query(
+            value = """
+                    INSERT INTO search_history (
+                        session_id,
+                        keyword,
+                        last_searched_at
+                    )
+                    VALUES (
+                        :sessionId,
+                        :keyword,
+                        :lastSearchedAt
+                    )
+                    ON DUPLICATE KEY UPDATE
+                        last_searched_at = :lastSearchedAt
+                    """,
+            nativeQuery = true
+    )
     void upsertBySessionId(
             @Param("sessionId") String sessionId,
             @Param("keyword") String keyword,

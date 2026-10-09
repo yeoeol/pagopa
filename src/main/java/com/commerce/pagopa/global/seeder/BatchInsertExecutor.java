@@ -43,30 +43,52 @@ public class BatchInsertExecutor {
         int chunks = (totalRows + batchSize - 1) / batchSize;
         for (int c = 0; c < chunks; c++) {
             int from = c * batchSize;
-            int to = Math.min(from + batchSize, totalRows);
+            int to = Math.min(
+                    from + batchSize,
+                    totalRows
+            );
             int size = to - from;
             int chunkStart = from;
 
-            tx.executeWithoutResult(ignoredStatus -> jdbc.batchUpdate(sql, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    binder.bind(ps, chunkStart + i);
-                }
+            tx.executeWithoutResult(
+                    ignoredStatus -> jdbc.batchUpdate(
+                            sql,
+                            new BatchPreparedStatementSetter() {
+                                @Override
+                                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                                    binder.bind(
+                                            ps,
+                                            chunkStart + i
+                                    );
+                                }
 
-                @Override
-                public int getBatchSize() {
-                    return size;
-                }
-            }));
+                                @Override
+                                public int getBatchSize() {
+                                    return size;
+                                }
+                            }
+                    )
+            );
 
             if ((c + 1) % 10 == 0 || c + 1 == chunks) {
-                log.info("  inserted {} / {}", to, totalRows);
+                log.info(
+                        "  inserted {} / {}",
+                        to,
+                        totalRows
+                );
             }
         }
     }
 
     /** ID 컬럼 전체를 오름차순으로 로딩 - 시드 후 FK 참조용 ID 풀 확보 */
     public List<Long> loadIds(String table, String idColumn) {
-        return jdbc.queryForList("SELECT %s FROM %s ORDER BY %s".formatted(idColumn, table, idColumn), Long.class);
+        return jdbc.queryForList(
+                "SELECT %s FROM %s ORDER BY %s".formatted(
+                        idColumn,
+                        table,
+                        idColumn
+                ),
+                Long.class
+        );
     }
 }

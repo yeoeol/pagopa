@@ -16,24 +16,27 @@ public interface CategoryJpaRepository extends JpaRepository<Category, Long>, Ca
     List<Category> findRootCategories();
 
     @Override
-    @Query(value = """
-                WITH RECURSIVE descendants AS (
-                    SELECT c.category_id, c.parent_id, c.name,
-                           c.created_at, c.updated_at, 1 AS depth
-                    FROM category c
-                    WHERE c.parent_id = :parentId
+    @Query(
+            value = """
+                        WITH RECURSIVE descendants AS (
+                            SELECT c.category_id, c.parent_id, c.name,
+                                   c.created_at, c.updated_at, 1 AS depth
+                            FROM category c
+                            WHERE c.parent_id = :parentId
 
-                    UNION ALL
+                            UNION ALL
 
-                    SELECT c.category_id, c.parent_id, c.name,
-                           c.created_at, c.updated_at, d.depth + 1
-                    FROM category c
-                    JOIN descendants d ON c.parent_id = d.category_id
-                )
-                SELECT d.category_id, d.parent_id, d.name,
-                       d.created_at, d.updated_at
-                FROM descendants d
-                ORDER BY d.depth, d.category_id
-            """, nativeQuery = true)
+                            SELECT c.category_id, c.parent_id, c.name,
+                                   c.created_at, c.updated_at, d.depth + 1
+                            FROM category c
+                            JOIN descendants d ON c.parent_id = d.category_id
+                        )
+                        SELECT d.category_id, d.parent_id, d.name,
+                               d.created_at, d.updated_at
+                        FROM descendants d
+                        ORDER BY d.depth, d.category_id
+                    """,
+            nativeQuery = true
+    )
     List<Category> findDescendantsByParent(@Param("parentId") Long parentId);
 }

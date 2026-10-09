@@ -11,13 +11,22 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Address {
 
-    @Column(name = "zipcode", length = 10)
+    @Column(
+            name = "zipcode",
+            length = 10
+    )
     private String zipcode; // 우편번호
 
-    @Column(name = "address", length = 100)
+    @Column(
+            name = "address",
+            length = 100
+    )
     private String address; // 주소
 
-    @Column(name = "detail_address", length = 100)
+    @Column(
+            name = "detail_address",
+            length = 100
+    )
     private String detailAddress; // 상세주소
 
     @Builder(access = AccessLevel.PRIVATE)

@@ -26,13 +26,19 @@ class ReviewImageSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
-        List<Long> reviewIds = batch.loadIds("review", "review_id");
+        List<Long> reviewIds = batch.loadIds(
+                "review",
+                "review_id"
+        );
         if (reviewIds.isEmpty()) {
             throw new IllegalStateException("review 없음");
         }
@@ -41,7 +47,11 @@ class ReviewImageSeeder implements Seeder {
                 .reviewImages();
         if (total > reviewIds.size()) {
             throw new IllegalStateException(
-                    "review_image(%d) > review(%d) - 처음 N개 Review에 1장씩 부여 전제".formatted(total, reviewIds.size()));
+                    "review_image(%d) > review(%d) - 처음 N개 Review에 1장씩 부여 전제".formatted(
+                            total,
+                            reviewIds.size()
+                    )
+            );
         }
 
         String sql = """
@@ -49,12 +59,26 @@ class ReviewImageSeeder implements Seeder {
                 VALUES (?, ?, ?)
                 """;
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setString(1, "https://picsum.photos/seed/r%d/400/400".formatted(i));
-            ps.setInt(2, 0); // review당 1장 가정 - 복수 이미지 시딩 시 (i / imagesPerReview) % reviewIds.size()
-                             // 형태로 변경
-                             // 필요
-            ps.setLong(3, reviewIds.get(i));
-        });
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    ps.setString(
+                            1,
+                            "https://picsum.photos/seed/r%d/400/400".formatted(i)
+                    );
+                    ps.setInt(
+                            2,
+                            0
+                    ); // review당 1장 가정 - 복수 이미지 시딩 시 (i / imagesPerReview) % reviewIds.size()
+                       // 형태로 변경
+                       // 필요
+                    ps.setLong(
+                            3,
+                            reviewIds.get(i)
+                    );
+                }
+        );
     }
 }

@@ -20,18 +20,27 @@ public class PaymentService {
     private final PaymentGateway paymentGateway;
 
     public PaymentResult request(Long userId, PaymentCommand command) {
-        return paymentTransactionService.request(userId, command);
+        return paymentTransactionService.request(
+                userId,
+                command
+        );
     }
 
     public PaymentResult approve(Long userId, PaymentApprovalCommand command) {
         Long paymentId = command.paymentId();
-        PaymentApprovalRequest request = paymentTransactionService.prepareApproval(userId, paymentId);
+        PaymentApprovalRequest request = paymentTransactionService.prepareApproval(
+                userId,
+                paymentId
+        );
 
         try {
             PaymentApprovalResponse approval = paymentGateway.findApprovalByIdempotencyKey(request.idempotencyKey())
                     .orElseGet(() -> paymentGateway.approve(request));
 
-            return paymentTransactionService.completeApproval(paymentId, approval);
+            return paymentTransactionService.completeApproval(
+                    paymentId,
+                    approval
+            );
         } catch (PaymentGatewayRejectedException e) {
             paymentTransactionService.markApprovalFailed(paymentId);
             throw e;
@@ -40,14 +49,20 @@ public class PaymentService {
 
     public PaymentResult cancel(Long userId, CancelPaymentCommand command) {
         Long paymentId = command.paymentId();
-        PaymentCancellationRequest request = paymentTransactionService.prepareCancellation(userId, paymentId);
+        PaymentCancellationRequest request = paymentTransactionService.prepareCancellation(
+                userId,
+                paymentId
+        );
 
         try {
             PaymentCancellationResponse cancellation = paymentGateway
                     .findCancellationByIdempotencyKey(request.idempotencyKey())
                     .orElseGet(() -> paymentGateway.cancel(request));
 
-            return paymentTransactionService.completeCancellation(paymentId, cancellation);
+            return paymentTransactionService.completeCancellation(
+                    paymentId,
+                    cancellation
+            );
         } catch (PaymentGatewayRejectedException e) {
             paymentTransactionService.revertCancellation(paymentId);
             throw e;

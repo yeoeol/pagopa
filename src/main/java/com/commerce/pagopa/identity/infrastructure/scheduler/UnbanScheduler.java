@@ -27,7 +27,15 @@ public class UnbanScheduler {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime threshold = now.minusDays(7);
 
-        int unSuspendCount = userRepository.bulkUnSuspend(UserStatus.ACTIVE, UserStatus.SUSPENDED, now, threshold);
-        log.info("[unSuspendSchedule] 임시 정지 해제 회원 수: {}", unSuspendCount);
+        int unSuspendCount = userRepository.bulkUnSuspend(
+                UserStatus.ACTIVE,
+                UserStatus.SUSPENDED,
+                now,
+                threshold
+        );
+        log.info(
+                "[unSuspendSchedule] 임시 정지 해제 회원 수: {}",
+                unSuspendCount
+        );
     }
 }

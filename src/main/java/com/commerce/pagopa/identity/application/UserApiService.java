@@ -35,7 +35,12 @@ public class UserApiService implements UserApi {
     public Map<Long, UserSummary> findAllByIdIn(Collection<Long> userIds) {
         List<User> users = userRepository.findByIdIn(userIds);
         return users.stream()
-                .collect(Collectors.toMap(User::getId, this::toSummary));
+                .collect(
+                        Collectors.toMap(
+                                User::getId,
+                                this::toSummary
+                        )
+                );
     }
 
     @Override
@@ -55,6 +60,10 @@ public class UserApiService implements UserApi {
     }
 
     private UserSummary toSummary(User user) {
-        return new UserSummary(user.getId(), user.getName(), user.getEmail());
+        return new UserSummary(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
     }
 }

@@ -27,7 +27,12 @@ public class TestcontainersConfig {
     @Bean
     GenericContainer<?> azuriteContainer() {
         return new GenericContainer<>(AZURITE_IMAGE).withExposedPorts(AZURITE_BLOB_PORT)
-                .withCommand("azurite-blob", "--blobHost", "0.0.0.0", "--skipApiVersionCheck");
+                .withCommand(
+                        "azurite-blob",
+                        "--blobHost",
+                        "0.0.0.0",
+                        "--skipApiVersionCheck"
+                );
     }
 
     @Bean
@@ -35,8 +40,14 @@ public class TestcontainersConfig {
         return registry -> {
             String endpoint = "http://" + azuriteContainer.getHost() + ":"
                     + azuriteContainer.getMappedPort(AZURITE_BLOB_PORT) + "/devstoreaccount1";
-            registry.add("spring.cloud.azure.storage.blob.endpoint", () -> endpoint);
-            registry.add("app.azure.base-url", () -> endpoint + "/test-container");
+            registry.add(
+                    "spring.cloud.azure.storage.blob.endpoint",
+                    () -> endpoint
+            );
+            registry.add(
+                    "app.storage.provider.azure.base-url",
+                    () -> endpoint + "/test-container"
+            );
         };
     }
 }

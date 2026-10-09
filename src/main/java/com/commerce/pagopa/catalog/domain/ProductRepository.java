@@ -49,12 +49,10 @@ public interface ProductRepository {
     List<Product> findDefaultRecommendationProducts(Collection<Long> excludedProductIds, int limit);
 
     default Product findByIdForUpdateOrThrow(Long id) {
-        return findByIdForUpdate(id)
-                .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
+        return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 
     default Product findByIdOrThrow(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
+        return findById(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 }

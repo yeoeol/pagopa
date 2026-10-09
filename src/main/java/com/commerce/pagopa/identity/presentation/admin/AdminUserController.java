@@ -25,22 +25,38 @@ public class AdminUserController {
     @GetMapping
     public String users(
             @Valid @ModelAttribute AdminUserSearchRequestDto requestDto,
-            @RequestHeader(value = "HX-Request", required = false) String htmxRequest,
+            @RequestHeader(
+                    value = "HX-Request",
+                    required = false
+            ) String htmxRequest,
             HttpServletResponse response,
             Model model
     ) {
         AdminUserPageResponseDto result = adminUserService.search(requestDto);
 
-        model.addAttribute("result", result);
-        model.addAttribute("search", requestDto);
+        model.addAttribute(
+                "result",
+                result
+        );
+        model.addAttribute(
+                "search",
+                requestDto
+        );
 
         if (result.totalPages() > 0 && result.page() >= result.totalPages()) {
 
             int lastPage = result.totalPages() - 1;
-            String redirectUrl = createRedirectUrl(requestDto, lastPage, result.size());
+            String redirectUrl = createRedirectUrl(
+                    requestDto,
+                    lastPage,
+                    result.size()
+            );
 
             if ("true".equals(htmxRequest)) {
-                response.setHeader("HX-Redirect", redirectUrl);
+                response.setHeader(
+                        "HX-Redirect",
+                        redirectUrl
+                );
                 return "admin/users/fragments/result :: result";
             }
 
@@ -55,7 +71,10 @@ public class AdminUserController {
 
     @GetMapping("/{userId}")
     public String detail(@PathVariable("userId") Long userId, Model model) {
-        model.addAttribute("user", adminUserService.find(userId));
+        model.addAttribute(
+                "user",
+                adminUserService.find(userId)
+        );
         return "admin/users/fragments/detail-modal :: detail";
     }
 
@@ -79,22 +98,37 @@ public class AdminUserController {
 
     private String createRedirectUrl(AdminUserSearchRequestDto requestDto, int page, int size) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/admin/users")
-                .queryParam("page", page)
-                .queryParam("size", size);
+                .queryParam(
+                        "page",
+                        page
+                )
+                .queryParam(
+                        "size",
+                        size
+                );
 
         if (StringUtils.hasText(requestDto.keyword())) {
-            builder.queryParam("keyword", requestDto.keyword()
-                    .trim());
+            builder.queryParam(
+                    "keyword",
+                    requestDto.keyword()
+                            .trim()
+            );
         }
 
         if (requestDto.status() != null) {
-            builder.queryParam("status", requestDto.status()
-                    .name());
+            builder.queryParam(
+                    "status",
+                    requestDto.status()
+                            .name()
+            );
         }
 
         if (requestDto.roleCode() != null) {
-            builder.queryParam("roleCode", requestDto.roleCode()
-                    .name());
+            builder.queryParam(
+                    "roleCode",
+                    requestDto.roleCode()
+                            .name()
+            );
         }
 
         return builder.build()

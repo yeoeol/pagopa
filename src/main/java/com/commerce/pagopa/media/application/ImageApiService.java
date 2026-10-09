@@ -1,11 +1,10 @@
-package com.commerce.pagopa.media.infrastructure.azure;
+package com.commerce.pagopa.media.application;
 
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.media.api.ImageApi;
-import com.commerce.pagopa.media.application.ImageService;
 
 @Service
 @RequiredArgsConstructor

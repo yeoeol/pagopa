@@ -32,7 +32,10 @@ class UserSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
@@ -54,29 +57,77 @@ class UserSeeder implements Seeder {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        Timestamp now = Timestamp.valueOf(LocalDateTime.of(2026, 1, 1, 0, 0));
+        Timestamp now = Timestamp.valueOf(
+                LocalDateTime.of(
+                        2026,
+                        1,
+                        1,
+                        0,
+                        0
+                )
+        );
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setString(1, "LOCAL_TEST");
-            ps.setString(2, UUID.nameUUIDFromBytes(("seed-provider-" + i).getBytes())
-                    .toString());
-            ps.setString(3, "%s_%d".formatted(faker.name()
-                    .firstName(), i));
-            ps.setString(4, faker.internet()
-                    .emailAddress("seed_user_%d".formatted(i)));
-            ps.setString(5, i % 4 == 0 ? null : "https://picsum.photos/seed/u%d/200".formatted(i));
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    ps.setString(
+                            1,
+                            "LOCAL_TEST"
+                    );
+                    ps.setString(
+                            2,
+                            UUID.nameUUIDFromBytes(("seed-provider-" + i).getBytes())
+                                    .toString()
+                    );
+                    ps.setString(
+                            3,
+                            "%s_%d".formatted(
+                                    faker.name()
+                                            .firstName(),
+                                    i
+                            )
+                    );
+                    ps.setString(
+                            4,
+                            faker.internet()
+                                    .emailAddress("seed_user_%d".formatted(i))
+                    );
+                    ps.setString(
+                            5,
+                            i % 4 == 0 ? null : "https://picsum.photos/seed/u%d/200".formatted(i)
+                    );
 
-            // 95% ACTIVE, 3% WITHDRAWN, 2% BANNED
-            int r = i % 100;
-            String status = r < 95 ? "ACTIVE" : (r < 98 ? "WITHDRAWN" : "BANNED");
-            ps.setString(6, status);
+                    // 95% ACTIVE, 3% WITHDRAWN, 2% BANNED
+                    int r = i % 100;
+                    String status = r < 95 ? "ACTIVE" : (r < 98 ? "WITHDRAWN" : "BANNED");
+                    ps.setString(
+                            6,
+                            status
+                    );
 
-            // 과거 1년 내 랜덤
-            ps.setTimestamp(7, Timestamp.from(faker.timeAndDate()
-                    .past(365, TimeUnit.DAYS)));
+                    // 과거 1년 내 랜덤
+                    ps.setTimestamp(
+                            7,
+                            Timestamp.from(
+                                    faker.timeAndDate()
+                                            .past(
+                                                    365,
+                                                    TimeUnit.DAYS
+                                            )
+                            )
+                    );
 
-            ps.setTimestamp(8, now);
-            ps.setTimestamp(9, now);
-        });
+                    ps.setTimestamp(
+                            8,
+                            now
+                    );
+                    ps.setTimestamp(
+                            9,
+                            now
+                    );
+                }
+        );
     }
 }

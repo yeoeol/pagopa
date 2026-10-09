@@ -27,13 +27,23 @@ public class CartItemService {
 
         ProductSummary product = productApi.get(requestDto.productId());
 
-        CartItem cartItem = cartItemRepository.findByCartAndProductId(cart, product.productId())
+        CartItem cartItem = cartItemRepository.findByCartAndProductId(
+                cart,
+                product.productId()
+        )
                 .map(existing -> {
                     existing.addQuantity(requestDto.quantity());
                     return existing;
                 })
-                .orElseGet(() -> cartItemRepository
-                        .save(CartItem.create(cart, product.productId(), requestDto.quantity())));
+                .orElseGet(
+                        () -> cartItemRepository.save(
+                                CartItem.create(
+                                        cart,
+                                        product.productId(),
+                                        requestDto.quantity()
+                                )
+                        )
+                );
 
         return CartItemResponseDto.from(cartItem);
     }

@@ -28,21 +28,37 @@ public class LocalTestAuthService {
 
         UserCreateRequestDto requestDto = getUserCreateRequestDto(providerId);
 
-        User user = userRepository.findByProviderAndProviderId(Provider.LOCAL_TEST, providerId)
+        User user = userRepository.findByProviderAndProviderId(
+                Provider.LOCAL_TEST,
+                providerId
+        )
                 .orElseGet(() -> userService.register(requestDto));
 
-        return authService.issueAccessTokenAndRefreshToken(user.getId(), user.getEmail(), user.getUserRoles()
-                .stream()
-                .map(UserRole::getRole)
-                .filter(Role::isEnabled)
-                .map(Role::getCode)
-                .map(RoleCode::name)
-                .collect(Collectors.toUnmodifiableSet()));
+        return authService.issueAccessTokenAndRefreshToken(
+                user.getId(),
+                user.getEmail(),
+                user.getUserRoles()
+                        .stream()
+                        .map(UserRole::getRole)
+                        .filter(Role::isEnabled)
+                        .map(Role::getCode)
+                        .map(RoleCode::name)
+                        .collect(Collectors.toUnmodifiableSet())
+        );
     }
 
     private static UserCreateRequestDto getUserCreateRequestDto(String providerId) {
-        return new UserCreateRequestDto(Provider.LOCAL_TEST, providerId, "test_user_" + UUID.randomUUID()
-                .toString()
-                .substring(0, 8), providerId + "@pagopa.local.test", "default.png");
+        return new UserCreateRequestDto(
+                Provider.LOCAL_TEST,
+                providerId,
+                "test_user_" + UUID.randomUUID()
+                        .toString()
+                        .substring(
+                                0,
+                                8
+                        ),
+                providerId + "@pagopa.local.test",
+                "default.png"
+        );
     }
 }

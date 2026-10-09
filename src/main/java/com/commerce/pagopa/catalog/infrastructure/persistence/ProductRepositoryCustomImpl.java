@@ -47,7 +47,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .where(statusEq(ProductStatus.ACTIVE).or(statusEq(ProductStatus.SOLD_OUT)))
                 .fetchOne();
 
-        return new PageImpl<>(products, pageable, total == null ? 0L : total);
+        return new PageImpl<>(
+                products,
+                pageable,
+                total == null ? 0L : total
+        );
     }
 
     @Override
@@ -60,12 +64,27 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         QCategory grandParentCategory = new QCategory("grandParentCategory");
 
         List<Product> products = queryFactory.selectFrom(product)
-                .leftJoin(product.category, category)
+                .leftJoin(
+                        product.category,
+                        category
+                )
                 .fetchJoin()
-                .leftJoin(category.parent, parentCategory)
-                .leftJoin(parentCategory.parent, grandParentCategory)
-                .where(categoryOrAncestorCategoryIdEq(categoryId, parentCategory, grandParentCategory),
-                        product.status.in(statuses))
+                .leftJoin(
+                        category.parent,
+                        parentCategory
+                )
+                .leftJoin(
+                        parentCategory.parent,
+                        grandParentCategory
+                )
+                .where(
+                        categoryOrAncestorCategoryIdEq(
+                                categoryId,
+                                parentCategory,
+                                grandParentCategory
+                        ),
+                        product.status.in(statuses)
+                )
                 .orderBy(orderSpecifiers(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -73,23 +92,48 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
         Long total = queryFactory.select(product.count())
                 .from(product)
-                .leftJoin(product.category, category)
-                .leftJoin(category.parent, parentCategory)
-                .leftJoin(parentCategory.parent, grandParentCategory)
-                .where(categoryOrAncestorCategoryIdEq(categoryId, parentCategory, grandParentCategory),
-                        product.status.in(statuses))
+                .leftJoin(
+                        product.category,
+                        category
+                )
+                .leftJoin(
+                        category.parent,
+                        parentCategory
+                )
+                .leftJoin(
+                        parentCategory.parent,
+                        grandParentCategory
+                )
+                .where(
+                        categoryOrAncestorCategoryIdEq(
+                                categoryId,
+                                parentCategory,
+                                grandParentCategory
+                        ),
+                        product.status.in(statuses)
+                )
                 .fetchOne();
 
-        return new PageImpl<>(products, pageable, total == null ? 0L : total);
+        return new PageImpl<>(
+                products,
+                pageable,
+                total == null ? 0L : total
+        );
     }
 
     @Override
     public List<Product> searchProducts(@NonNull ProductSearchCondition condition) {
         return queryFactory.selectFrom(product)
                 .distinct()
-                .leftJoin(product.category, category)
+                .leftJoin(
+                        product.category,
+                        category
+                )
                 .fetchJoin()
-                .leftJoin(product.images, productImage)
+                .leftJoin(
+                        product.images,
+                        productImage
+                )
                 .fetchJoin()
                 .where(nameContains(condition.productName()))
                 .fetch();
@@ -102,8 +146,15 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
             int limit
     ) {
         return queryFactory.selectFrom(product)
-                .where(isSellable(), nameContains(keyword), productIdNotIn(excludedProductIds))
-                .orderBy(product.createdAt.desc(), product.id.desc())
+                .where(
+                        isSellable(),
+                        nameContains(keyword),
+                        productIdNotIn(excludedProductIds)
+                )
+                .orderBy(
+                        product.createdAt.desc(),
+                        product.id.desc()
+                )
                 .limit(limit)
                 .fetch();
     }
@@ -111,8 +162,14 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     @Override
     public List<Product> findDefaultRecommendationProducts(Collection<Long> excludedProductIds, int limit) {
         return queryFactory.selectFrom(product)
-                .where(isSellable(), productIdNotIn(excludedProductIds))
-                .orderBy(product.createdAt.desc(), product.id.desc())
+                .where(
+                        isSellable(),
+                        productIdNotIn(excludedProductIds)
+                )
+                .orderBy(
+                        product.createdAt.desc(),
+                        product.id.desc()
+                )
                 .limit(limit)
                 .fetch();
     }

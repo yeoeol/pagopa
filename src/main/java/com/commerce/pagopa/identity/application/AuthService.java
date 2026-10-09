@@ -41,8 +41,10 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         // 기존에 저장되어 있던 토큰과 파라미터로 넘어온 토큰이 일치하는지 검증
-        if (!token.getToken()
-                .equals(refreshToken)) {
+        if (
+            !token.getToken()
+                    .equals(refreshToken)
+        ) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
@@ -51,24 +53,42 @@ public class AuthService {
         User user = userRepository.findByIdForUpdateOrThrow(userId);
         AuthenticatedUser authenticatedUser = jwtAuthenticationService.loadActiveUser(user.getId());
 
-        return issueAccessTokenAndRefreshToken(authenticatedUser.userId(), authenticatedUser.email(),
+        return issueAccessTokenAndRefreshToken(
+                authenticatedUser.userId(),
+                authenticatedUser.email(),
                 authenticatedUser.roleCodes()
                         .stream()
                         .map(RoleCode::name)
-                        .collect(Collectors.toUnmodifiableSet()));
+                        .collect(Collectors.toUnmodifiableSet())
+        );
     }
 
     @Transactional
     public TokenResponseDto issueAccessTokenAndRefreshToken(Long userId, String email, Set<String> roles) {
-        String accessToken = jwtTokenProvider.generateAccessToken(userId, email, roles);
+        String accessToken = jwtTokenProvider.generateAccessToken(
+                userId,
+                email,
+                roles
+        );
         String refreshToken = jwtTokenProvider.generateRefreshToken(userId);
 
         User user = userRepository.findByIdForUpdateOrThrow(userId);
         refreshTokenRepository.findByUserId(userId)
-                .ifPresentOrElse(rt -> rt.updateToken(refreshToken),
-                        () -> refreshTokenRepository.save(RefreshToken.create(user, refreshToken)));
+                .ifPresentOrElse(
+                        rt -> rt.updateToken(refreshToken),
+                        () -> refreshTokenRepository.save(
+                                RefreshToken.create(
+                                        user,
+                                        refreshToken
+                                )
+                        )
+                );
 
-        return TokenResponseDto.of(userId, accessToken, refreshToken);
+        return TokenResponseDto.of(
+                userId,
+                accessToken,
+                refreshToken
+        );
     }
 
     @Transactional

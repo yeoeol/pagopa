@@ -79,11 +79,22 @@ app:
   oauth2:
     redirect-url: http://localhost:3000/oauth2/redirect
 
-  azure:
-    container-name: test-container
-  image:
-    max-size: 5242880
-    allowed-types: image/jpeg, image/png, image/webp
+  storage:
+    image:
+      max-size: ${IMAGE_MAX_SIZE:5242880}
+      allowed-types: image/jpeg,image/png,image/webp
+    provider:
+      type: supabase
+      azure:
+        container-name: test-container
+        base-url: ${AZURE_STORAGE_BASE_URL:http://127.0.0.1:10000/devstoreaccount1/test-container}
+      supabase:
+        endpoint: ${SUPABASE_STORAGE_ENDPOINT:http://127.0.0.1:54321/storage/v1/s3}
+        region: ${SUPABASE_STORAGE_REGION:local}
+        access-key: ${SUPABASE_STORAGE_ACCESS_KEY:test-access-key}
+        secret-key: ${SUPABASE_STORAGE_SECRET_KEY:test-secret-key}
+        bucket: ${SUPABASE_STORAGE_BUCKET:test-bucket}
+        project-url: ${SUPABASE_PROJECT_URL:http://127.0.0.1:54321}
 
   cors:
     allowed-origins: http://localhost:3000

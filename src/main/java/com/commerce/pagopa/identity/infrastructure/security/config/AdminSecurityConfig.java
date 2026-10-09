@@ -26,24 +26,43 @@ public class AdminSecurityConfig {
         http.csrf(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .exceptionHandling(exception -> exception.accessDeniedPage("/admin/access-denied"))
-                .securityMatcher("/admin", "/admin/**", "/admin-assets/**", "/oauth2/authorization/google-admin",
-                        "/login/oauth2/code/google-admin")
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/login", "/admin/access-denied", "/admin-assets/**",
-                                "/oauth2/authorization/google-admin", "/login/oauth2/code/google-admin")
-                        .permitAll()
-                        .requestMatchers("/admin", "/admin/**")
-                        .hasRole("ADMIN")
-                        .anyRequest()
-                        .hasRole("ADMIN"))
-                .oauth2Login(oauth2Login -> oauth2Login.loginPage("/admin/login")
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(adminOAuth2LoginSuccessHandler)
-                        .failureUrl("/admin/login?error"))
-                .logout(logout -> logout.logoutUrl("/admin/logout")
-                        .logoutSuccessUrl("/admin/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"));
+                .securityMatcher(
+                        "/admin",
+                        "/admin/**",
+                        "/admin-assets/**",
+                        "/oauth2/authorization/google-admin",
+                        "/login/oauth2/code/google-admin"
+                )
+                .authorizeHttpRequests(
+                        auth -> auth
+                                .requestMatchers(
+                                        "/admin/login",
+                                        "/admin/access-denied",
+                                        "/admin-assets/**",
+                                        "/oauth2/authorization/google-admin",
+                                        "/login/oauth2/code/google-admin"
+                                )
+                                .permitAll()
+                                .requestMatchers(
+                                        "/admin",
+                                        "/admin/**"
+                                )
+                                .hasRole("ADMIN")
+                                .anyRequest()
+                                .hasRole("ADMIN")
+                )
+                .oauth2Login(
+                        oauth2Login -> oauth2Login.loginPage("/admin/login")
+                                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                                .successHandler(adminOAuth2LoginSuccessHandler)
+                                .failureUrl("/admin/login?error")
+                )
+                .logout(
+                        logout -> logout.logoutUrl("/admin/logout")
+                                .logoutSuccessUrl("/admin/login?logout")
+                                .invalidateHttpSession(true)
+                                .deleteCookies("JSESSIONID")
+                );
 
         return http.build();
     }

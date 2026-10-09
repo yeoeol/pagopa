@@ -10,10 +10,17 @@ public final class DeliveryFixture {
     }
 
     public static Delivery aDelivery(Long userId) {
-        return aDelivery(AddressFixture.anAddress(), OrderFixture.anOrder(userId));
+        return aDelivery(
+                AddressFixture.anAddress(),
+                OrderFixture.anOrder(userId)
+        );
     }
 
     public static Delivery aDelivery(Address address, Order order) {
-        return Delivery.create(address, "요청사항", order);
+        return Delivery.create(
+                address,
+                "요청사항",
+                order
+        );
     }
 }

@@ -16,7 +16,10 @@ import com.commerce.pagopa.basket.application.CartService;
 import com.commerce.pagopa.basket.application.dto.response.CartResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 
-@Tag(name = "CART API", description = "장바구니 전체 단위 기능 관리 API")
+@Tag(
+        name = "CART API",
+        description = "장바구니 전체 단위 기능 관리 API"
+)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/cart")
@@ -24,7 +27,10 @@ public class CartController {
 
     private final CartService cartService;
 
-    @Operation(summary = "장바구니 전체 조회", description = "장바구니 목록을 조회합니다.")
+    @Operation(
+            summary = "장바구니 전체 조회",
+            description = "장바구니 목록을 조회합니다."
+    )
     @GetMapping
     public ResponseEntity<ApiResponse<CartResponseDto>> getCart(
             @AuthenticationPrincipal(expression = "userId") Long userId
@@ -32,7 +38,10 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.ok(cartService.findUserCart(userId)));
     }
 
-    @Operation(summary = "장바구니 비우기", description = "장바구니 항목들을 전체 삭제합니다.")
+    @Operation(
+            summary = "장바구니 비우기",
+            description = "장바구니 항목들을 전체 삭제합니다."
+    )
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> deleteAllCart(
             @AuthenticationPrincipal(expression = "userId") Long userId

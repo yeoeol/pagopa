@@ -24,8 +24,10 @@ public class AdminOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucce
     ) throws IOException {
         boolean admin = authentication.getAuthorities()
                 .stream()
-                .anyMatch(authority -> RoleCode.ROLE_ADMIN.name()
-                        .equals(authority.getAuthority()));
+                .anyMatch(
+                        authority -> RoleCode.ROLE_ADMIN.name()
+                                .equals(authority.getAuthority())
+                );
 
         if (!admin) {
             SecurityContextHolder.clearContext();

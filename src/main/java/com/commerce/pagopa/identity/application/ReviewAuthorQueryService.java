@@ -33,12 +33,21 @@ public class ReviewAuthorQueryService implements ReviewAuthorQuery {
         Map<Long, ReviewAuthorSummary> reviewAuthorSummary = new HashMap<>();
 
         List<User> users = userRepository.findByIdIn(userIds);
-        users.forEach(user -> reviewAuthorSummary.put(user.getId(), toSummary(user)));
+        users.forEach(
+                user -> reviewAuthorSummary.put(
+                        user.getId(),
+                        toSummary(user)
+                )
+        );
 
         return reviewAuthorSummary;
     }
 
     private ReviewAuthorSummary toSummary(User user) {
-        return new ReviewAuthorSummary(user.getId(), user.getName(), user.getProfileImageUrl());
+        return new ReviewAuthorSummary(
+                user.getId(),
+                user.getName(),
+                user.getProfileImageUrl()
+        );
     }
 }

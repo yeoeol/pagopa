@@ -11,7 +11,6 @@ public interface OrderItemRepository {
     Optional<OrderItem> findById(Long id);
 
     default OrderItem findByIdOrThrow(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new BusinessException(ORDER_ITEM_NOT_FOUND));
+        return findById(id).orElseThrow(() -> new BusinessException(ORDER_ITEM_NOT_FOUND));
     }
 }

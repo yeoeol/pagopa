@@ -29,13 +29,19 @@ class ProductImageSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
-        List<Long> productIds = batch.loadIds("product", "product_id");
+        List<Long> productIds = batch.loadIds(
+                "product",
+                "product_id"
+        );
         if (productIds.isEmpty()) {
             throw new IllegalStateException("product 없음 - product 시드 먼저 필요");
         }
@@ -52,14 +58,34 @@ class ProductImageSeeder implements Seeder {
                 ) VALUES (?, ?, ?, ?)
                 """;
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            // 0..total-1을 (productIdx, order)로 분해 - 모든 상품이 정확히 IMAGES_PER_PRODUCT장
-            int productIdx = i / IMAGES_PER_PRODUCT;
-            int order = i % IMAGES_PER_PRODUCT;
-            ps.setString(1, "https://picsum.photos/seed/p%d_%d/600/600".formatted(productIdx, order));
-            ps.setInt(2, order);
-            ps.setBoolean(3, order == 0);
-            ps.setLong(4, productIds.get(productIdx));
-        });
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    // 0..total-1을 (productIdx, order)로 분해 - 모든 상품이 정확히 IMAGES_PER_PRODUCT장
+                    int productIdx = i / IMAGES_PER_PRODUCT;
+                    int order = i % IMAGES_PER_PRODUCT;
+                    ps.setString(
+                            1,
+                            "https://picsum.photos/seed/p%d_%d/600/600".formatted(
+                                    productIdx,
+                                    order
+                            )
+                    );
+                    ps.setInt(
+                            2,
+                            order
+                    );
+                    ps.setBoolean(
+                            3,
+                            order == 0
+                    );
+                    ps.setLong(
+                            4,
+                            productIds.get(productIdx)
+                    );
+                }
+        );
     }
 }
