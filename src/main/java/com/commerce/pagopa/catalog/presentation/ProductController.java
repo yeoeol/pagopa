@@ -22,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import com.commerce.pagopa.catalog.application.ProductService;
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
 import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
-import com.commerce.pagopa.discovery.api.DiscoveryApi;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.identity.api.CurrentUser;
 import com.commerce.pagopa.identity.api.UserIdentity;
@@ -37,7 +36,6 @@ import com.commerce.pagopa.identity.api.UserIdentity;
 public class ProductController {
 
     private final ProductService productService;
-    private final DiscoveryApi discoveryApi;
 
     @Operation(
             summary = "상품 목록 조회",
@@ -74,13 +72,15 @@ public class ProductController {
             @ParameterObject
             @Valid @ModelAttribute ProductSearchCondition productSearchCondition
     ) {
-        discoveryApi.saveHistory(
-                user.userId(),
-                user.sessionId(),
-                productSearchCondition.productName()
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        productService.search(
+                                user.userId(),
+                                user.sessionId(),
+                                productSearchCondition
+                        )
+                )
         );
-
-        return ResponseEntity.ok(ApiResponse.ok(productService.search(productSearchCondition)));
     }
 
     @Operation(
