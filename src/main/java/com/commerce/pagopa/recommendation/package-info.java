@@ -1,7 +1,7 @@
 @ApplicationModule(
         allowedDependencies = {
                 "catalog :: api",
-                "discovery :: event",
+                "catalog :: event",
                 "ordering :: event"
         }
 )

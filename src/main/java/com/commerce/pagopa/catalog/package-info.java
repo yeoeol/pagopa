@@ -1,7 +1,6 @@
 @ApplicationModule(
         allowedDependencies = {
-                "identity :: api",
-                "discovery :: event"
+                "identity :: api"
         }
 )
 package com.commerce.pagopa.catalog;
