@@ -36,7 +36,7 @@ public class TestcontainersConfig {
             String endpoint = "http://" + azuriteContainer.getHost() + ":"
                     + azuriteContainer.getMappedPort(AZURITE_BLOB_PORT) + "/devstoreaccount1";
             registry.add("spring.cloud.azure.storage.blob.endpoint", () -> endpoint);
-            registry.add("app.azure.base-url", () -> endpoint + "/test-container");
+            registry.add("app.storage.provider.azure.base-url", () -> endpoint + "/test-container");
         };
     }
 }

@@ -2,19 +2,17 @@ package com.commerce.pagopa.media.infrastructure.azure;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlobHttpHeaders;
 
 import com.commerce.pagopa.global.exception.BusinessException;
@@ -22,31 +20,16 @@ import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.media.application.ImageService;
 import com.commerce.pagopa.media.application.response.ImageResponseDto;
 import com.commerce.pagopa.media.domain.ImageCategory;
+import com.commerce.pagopa.media.infrastructure.ImageProperties;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AzureImageService implements ImageService {
 
-    @Value("${app.azure.base-url}")
-    private String baseUrl;
-
-    @Value("${app.image.max-size}")
-    private long maxSize;
-
-    @Value("${app.image.allowed-types}")
-    private List<String> allowedTypes;
-
+    private final ImageProperties imageProperties;
+    private final AzureStorageProperties azureStorageProperties;
     private final BlobContainerClient blobContainerClient;
-
-    public AzureImageService(
-            BlobServiceClient blobServiceClient,
-            @Value("${app.azure.container-name}") String containerName
-    ) {
-        this.blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);;
-        if (!this.blobContainerClient.exists()) {
-            this.blobContainerClient.create();
-        }
-    }
 
     @Override
     public ImageResponseDto upload(MultipartFile file, ImageCategory category) {
@@ -61,7 +44,7 @@ public class AzureImageService implements ImageService {
             blobClient.upload(file.getInputStream(), file.getSize(), true);
             blobClient.setHttpHeaders(headers);
 
-            String imageUrl = baseUrl + "/" + blobName;
+            String imageUrl = azureStorageProperties.baseUrl() + "/" + blobName;
             log.info("[Azure] 이미지 업로드 성공: blobName={}, size={}bytes", blobName, file.getSize());
 
             return ImageResponseDto.of(imageUrl);
@@ -93,10 +76,12 @@ public class AzureImageService implements ImageService {
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "파일이 비어있습니다.");
         }
-        if (file.getSize() > maxSize) {
+        if (file.getSize() > imageProperties.maxSize()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "파일 크기는 5MB 이하여야 합니다.");
         }
-        if (!allowedTypes.contains(file.getContentType())) {
+        if (!imageProperties.allowedTypes()
+                .contains(file.getContentType())
+        ) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "JPG, PNG, WEBP 파일만 업로드 가능합니다.");
         }
     }
@@ -114,7 +99,9 @@ public class AzureImageService implements ImageService {
         }
 
         LocalDate now = LocalDate.now();
-        return String.format("%s/%d%02d/%s%s", category.getDirectory(), now.getYear(), now.getMonthValue(),
-                UUID.randomUUID(), extension);
+        return String.format(
+                "%s/%d%02d/%s%s", category.getDirectory(), now.getYear(), now.getMonthValue(),
+                UUID.randomUUID(), extension
+        );
     }
 }
