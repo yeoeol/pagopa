@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.commerce.pagopa.catalog.event.ProductSearched;
 import com.commerce.pagopa.ordering.event.OrderConfirmed;
+import com.commerce.pagopa.recommendation.application.command.OrderConfirmedCommand;
 import com.commerce.pagopa.recommendation.application.command.ProductSearchProjectionCommand;
 
 @Slf4j
@@ -47,7 +48,15 @@ class RecommendationEventListener {
                 "Received order confirm for {}",
                 event.eventId()
         );
-        recommendationProjectionService.project(event);
+        recommendationProjectionService.project(
+                new OrderConfirmedCommand(
+                        event.eventId(),
+                        event.orderId(),
+                        event.userId(),
+                        event.productIds(),
+                        event.confirmedAt()
+                )
+        );
         log.info(
                 "Finished order confirm for {}",
                 event.eventId()

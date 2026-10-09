@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.commerce.pagopa.ordering.event.OrderConfirmed;
+import com.commerce.pagopa.recommendation.application.command.OrderConfirmedCommand;
 import com.commerce.pagopa.recommendation.application.command.ProductSearchProjectionCommand;
 import com.commerce.pagopa.recommendation.domain.InterestType;
 import com.commerce.pagopa.recommendation.domain.RecommendationEvent;
@@ -51,19 +51,19 @@ public class RecommendationProjectionService {
     }
 
     @Transactional
-    public void project(OrderConfirmed event) {
-        List<Long> productIds = event.productIds()
+    public void project(OrderConfirmedCommand command) {
+        List<Long> productIds = command.productIds()
                 .stream()
                 .distinct()
                 .toList();
 
         RecommendationEvent recommendationEvent = new RecommendationEvent(
-                event.eventId(),
+                command.eventId(),
                 RecommendationEventType.ORDER_CONFIRMED,
-                event.userId(),
-                event.orderId(),
+                command.userId(),
+                command.orderId(),
                 new OrderPayload(productIds),
-                event.confirmedAt()
+                command.confirmedAt()
         );
 
         if (!recommendationProjectionRepository.saveEventIfAbsent(recommendationEvent)) {
@@ -72,11 +72,11 @@ public class RecommendationProjectionService {
 
         productIds.forEach(
                 productId -> recommendationProjectionRepository.increaseInterest(
-                        event.userId(),
+                        command.userId(),
                         InterestType.PRODUCT,
                         String.valueOf(productId),
                         5,
-                        event.confirmedAt()
+                        command.confirmedAt()
                 )
         );
     }

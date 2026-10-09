@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import com.commerce.pagopa.ordering.event.OrderConfirmed;
+import com.commerce.pagopa.recommendation.application.command.OrderConfirmedCommand;
 import com.commerce.pagopa.recommendation.application.command.ProductSearchProjectionCommand;
 import com.commerce.pagopa.recommendation.domain.InterestType;
 import com.commerce.pagopa.recommendation.domain.RecommendationInterest;
@@ -120,14 +120,14 @@ class RecommendationProjectionServiceTest {
                 0
         );
 
-        OrderConfirmed event = new OrderConfirmed(
+        OrderConfirmedCommand command = new OrderConfirmedCommand(
                 eventId,
                 orderId,
                 userId,
                 productIds,
                 confirmedAt
         );
-        recommendationProjectionService.project(event);
+        recommendationProjectionService.project(command);
 
         List<RecommendationInterest> interests = findInterests(1L);
 
@@ -163,14 +163,14 @@ class RecommendationProjectionServiceTest {
                 0
         );
 
-        OrderConfirmed event = new OrderConfirmed(
+        OrderConfirmedCommand command = new OrderConfirmedCommand(
                 eventId,
                 orderId,
                 userId,
                 productIds,
                 confirmedAt
         );
-        recommendationProjectionService.project(event);
+        recommendationProjectionService.project(command);
 
         List<RecommendationInterest> interests = findInterests(userId);
 
@@ -233,15 +233,15 @@ class RecommendationProjectionServiceTest {
                 0
         );
 
-        OrderConfirmed event = new OrderConfirmed(
+        OrderConfirmedCommand command = new OrderConfirmedCommand(
                 eventId,
                 orderId,
                 userId,
                 productIds,
                 confirmedAt
         );
-        recommendationProjectionService.project(event);
-        recommendationProjectionService.project(event);
+        recommendationProjectionService.project(command);
+        recommendationProjectionService.project(command);
 
         List<RecommendationInterest> interests = findInterests(userId);
 
