@@ -30,7 +30,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private static final String ADMIN_SUFFIX = "-admin";
 
-    @Value("${app.azure.base-url}")
+    @Value("${app.storage.provider.azure.base-url}")
     private String azureBaseUrl;
 
     @Override
@@ -43,45 +43,88 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String providerRegistrationId = resolveProviderRegistrationId(registrationId);
 
-        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.of(providerRegistrationId, oAuth2User.getAttributes());
+        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.of(
+                providerRegistrationId,
+                oAuth2User.getAttributes()
+        );
         Provider provider = Provider.valueOf(providerRegistrationId.toUpperCase());
         User user = adminLogin
-                ? findExistingActiveUser(userInfo, provider)
-                : findOrRegisterActiveUser(userInfo, provider);
+                ? findExistingActiveUser(
+                        userInfo,
+                        provider
+                )
+                : findOrRegisterActiveUser(
+                        userInfo,
+                        provider
+                );
 
-        return new CustomOAuth2User(user, oAuth2User.getAttributes(), userInfo.getProviderId());
+        return new CustomOAuth2User(
+                user,
+                oAuth2User.getAttributes(),
+                userInfo.getProviderId()
+        );
     }
 
     private String resolveProviderRegistrationId(String registrationId) {
         if (registrationId.endsWith(ADMIN_SUFFIX)) {
-            return registrationId.substring(0, registrationId.length() - ADMIN_SUFFIX.length());
+            return registrationId.substring(
+                    0,
+                    registrationId.length() - ADMIN_SUFFIX.length()
+            );
         }
         return registrationId;
     }
 
     private User findExistingActiveUser(OAuth2UserInfo userInfo, Provider provider) {
-        return findActiveUser(userInfo, provider)
-                .orElseThrow(() -> {
-                    OAuth2Error error = new OAuth2Error(ErrorCode.USER_NOT_FOUND.name(),
-                            ErrorCode.USER_NOT_FOUND.getMessage(),
-                            null);
-                    return new OAuth2AuthenticationException(error, error.toString());
-                });
+        return findActiveUser(
+                userInfo,
+                provider
+        ).orElseThrow(() -> {
+            OAuth2Error error = new OAuth2Error(
+                    ErrorCode.USER_NOT_FOUND.name(),
+                    ErrorCode.USER_NOT_FOUND.getMessage(),
+                    null
+            );
+            return new OAuth2AuthenticationException(
+                    error,
+                    error.toString()
+            );
+        });
     }
 
     private User findOrRegisterActiveUser(OAuth2UserInfo userInfo, Provider provider) {
-        return findActiveUser(userInfo, provider)
-                .orElseGet(() -> userService.register(new UserCreateRequestDto(provider, userInfo.getProviderId(),
-                        userInfo.getName(), userInfo.getEmail(), azureBaseUrl + "/default.png")));
+        return findActiveUser(
+                userInfo,
+                provider
+        ).orElseGet(
+                () -> userService.register(
+                        new UserCreateRequestDto(
+                                provider,
+                                userInfo.getProviderId(),
+                                userInfo.getName(),
+                                userInfo.getEmail(),
+                                azureBaseUrl + "/default.png"
+                        )
+                )
+        );
     }
 
     private Optional<User> findActiveUser(OAuth2UserInfo userInfo, Provider provider) {
-        return userService.findByProviderAndProviderId(provider, userInfo.getProviderId())
+        return userService.findByProviderAndProviderId(
+                provider,
+                userInfo.getProviderId()
+        )
                 .map(user -> {
                     if (user.getStatus() != UserStatus.ACTIVE) {
-                        OAuth2Error error = new OAuth2Error(ErrorCode.USER_NOT_ACTIVE.name(),
-                                ErrorCode.USER_NOT_ACTIVE.getMessage(), null);
-                        throw new OAuth2AuthenticationException(error, error.toString());
+                        OAuth2Error error = new OAuth2Error(
+                                ErrorCode.USER_NOT_ACTIVE.name(),
+                                ErrorCode.USER_NOT_ACTIVE.getMessage(),
+                                null
+                        );
+                        throw new OAuth2AuthenticationException(
+                                error,
+                                error.toString()
+                        );
                     }
                     return user;
                 });

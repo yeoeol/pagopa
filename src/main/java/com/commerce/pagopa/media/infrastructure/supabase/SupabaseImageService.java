@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +28,10 @@ import com.commerce.pagopa.media.application.response.ImageResponseDto;
 import com.commerce.pagopa.media.domain.ImageCategory;
 import com.commerce.pagopa.media.infrastructure.ImageProperties;
 
-@Primary
+@ConditionalOnProperty(
+        name = "app.storage.provider.type",
+        havingValue = "supabase"
+)
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -46,7 +49,10 @@ public class SupabaseImageService implements ImageService {
         validateFile(file);
 
         String contentType = file.getContentType();
-        String objectKey = generateObjectKey(file.getOriginalFilename(), category);
+        String objectKey = generateObjectKey(
+                file.getOriginalFilename(),
+                category
+        );
 
         ContentStreamProvider streamProvider = ContentStreamProvider.fromInputStreamSupplier(() -> {
             try {
@@ -69,12 +75,17 @@ public class SupabaseImageService implements ImageService {
                 contentType
         );
 
-        s3Client.putObject(request, requestBody);
+        s3Client.putObject(
+                request,
+                requestBody
+        );
 
         String imageUrl = createPublicUrl(objectKey);
         log.info(
                 "[Supabase] 이미지 업로드 성공: 요청 imageUrl={}, objectKey={}, size={}bytes",
-                imageUrl, objectKey, file.getSize()
+                imageUrl,
+                objectKey,
+                file.getSize()
         );
         return ImageResponseDto.of(imageUrl);
     }
@@ -93,7 +104,11 @@ public class SupabaseImageService implements ImageService {
                 .build();
 
         s3Client.deleteObject(request);
-        log.info("[Supabase] 이미지 삭제 성공: 요청 imageUrl={}, objectKey={}", imageUrl, objectKey);
+        log.info(
+                "[Supabase] 이미지 삭제 성공: 요청 imageUrl={}, objectKey={}",
+                imageUrl,
+                objectKey
+        );
     }
 
     private String extractObjectKey(String imageUrl) {
@@ -109,7 +124,11 @@ public class SupabaseImageService implements ImageService {
 
             String imagePath = imageUri.getPath();
 
-            if (!hasSameOrigin(projectUri, imageUri)
+            if (
+                !hasSameOrigin(
+                        projectUri,
+                        imageUri
+                )
                         || imagePath == null
                         || !imagePath.startsWith(publicPathPrefix)
             ) {
@@ -131,8 +150,14 @@ public class SupabaseImageService implements ImageService {
     }
 
     private boolean hasSameOrigin(URI projectUri, URI imageUri) {
-        return equalsIgnoreCase(projectUri.getScheme(), imageUri.getScheme())
-                && equalsIgnoreCase(projectUri.getHost(), imageUri.getHost())
+        return equalsIgnoreCase(
+                projectUri.getScheme(),
+                imageUri.getScheme()
+        )
+                && equalsIgnoreCase(
+                        projectUri.getHost(),
+                        imageUri.getHost()
+                )
                 && projectUri.getPort() == imageUri.getPort()
                 && imageUri.getUserInfo() == null;
     }
@@ -152,20 +177,33 @@ public class SupabaseImageService implements ImageService {
     }
 
     private BusinessException invalidImageUrl() {
-        return new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Supabase 이미지 URL 형식이 올바르지 않습니다.");
+        return new BusinessException(
+                ErrorCode.INVALID_INPUT_VALUE,
+                "Supabase 이미지 URL 형식이 올바르지 않습니다."
+        );
     }
 
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "파일이 비어있습니다.");
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "파일이 비어있습니다."
+            );
         }
         if (file.getSize() > imageProperties.maxSize()) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "파일 크기는 5MB 이하여야 합니다.");
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "파일 크기는 5MB 이하여야 합니다."
+            );
         }
-        if (!imageProperties.allowedTypes()
-                .contains(file.getContentType())
+        if (
+            !imageProperties.allowedTypes()
+                    .contains(file.getContentType())
         ) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "JPG, PNG, WEBP 파일만 업로드 가능합니다.");
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "JPG, PNG, WEBP 파일만 업로드 가능합니다."
+            );
         }
     }
 
@@ -177,8 +215,12 @@ public class SupabaseImageService implements ImageService {
 
         LocalDate now = LocalDate.now();
         return String.format(
-                "%s/%d%02d/%s%s", category.getDirectory(), now.getYear(), now.getMonthValue(),
-                UUID.randomUUID(), extension
+                "%s/%d%02d/%s%s",
+                category.getDirectory(),
+                now.getYear(),
+                now.getMonthValue(),
+                UUID.randomUUID(),
+                extension
         );
     }
 }
