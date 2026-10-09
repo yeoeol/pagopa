@@ -31,29 +31,38 @@ class ProductSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
         // seller 후보 - ROLE_SELLER + ACTIVE 사용자만
-        List<Long> sellerIds = jdbc.queryForList("""
-                SELECT seller_id
-                FROM seller
-                WHERE status = 'ACTIVE'
-                ORDER BY seller_id
-                """, Long.class);
+        List<Long> sellerIds = jdbc.queryForList(
+                """
+                        SELECT seller_id
+                        FROM seller
+                        WHERE status = 'ACTIVE'
+                        ORDER BY seller_id
+                        """,
+                Long.class
+        );
 
-        List<Long> leafCategoryIds = jdbc.queryForList("""
-                SELECT c.category_id
-                FROM category c
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM category child
-                    WHERE child.parent_id = c.category_id
-                );
-                """, Long.class);
+        List<Long> leafCategoryIds = jdbc.queryForList(
+                """
+                        SELECT c.category_id
+                        FROM category c
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM category child
+                            WHERE child.parent_id = c.category_id
+                        );
+                        """,
+                Long.class
+        );
 
         if (sellerIds.isEmpty() || leafCategoryIds.isEmpty()) {
             throw new IllegalStateException("seller 또는 leaf category 부족 - user/category 시드 먼저 필요");
@@ -79,37 +88,78 @@ class ProductSeeder implements Seeder {
         int sellerSize = sellerIds.size();
         int categorySize = leafCategoryIds.size();
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            int price = faker.number()
-                    .numberBetween(1_000, 200_000);
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    int price = faker.number()
+                            .numberBetween(
+                                    1_000,
+                                    200_000
+                            );
 
-            // 재고 - 5% 품절(stockQuantity=0), 나머지 1~500
-            boolean soldOut = i % 20 == 0;
-            int stockQuantity = soldOut
-                    ? 0
-                    : faker.number()
-                            .numberBetween(1, 500);
+                    // 재고 - 5% 품절(stockQuantity=0), 나머지 1~500
+                    boolean soldOut = i % 20 == 0;
+                    int stockQuantity = soldOut
+                            ? 0
+                            : faker.number()
+                                    .numberBetween(
+                                            1,
+                                            500
+                                    );
 
-            // 상태 - stockQuantity=0이면 SOLD_OUT 고정, 그 외 ACTIVE/INACTIVE/HIDDEN 분배
-            String status;
-            if (soldOut) {
-                status = "SOLD_OUT";
-            } else {
-                int r = i % 17;
-                status = r < 14 ? "ACTIVE" : (r < 16 ? "INACTIVE" : "HIDDEN");
-            }
+                    // 상태 - stockQuantity=0이면 SOLD_OUT 고정, 그 외 ACTIVE/INACTIVE/HIDDEN 분배
+                    String status;
+                    if (soldOut) {
+                        status = "SOLD_OUT";
+                    } else {
+                        int r = i % 17;
+                        status = r < 14 ? "ACTIVE" : (r < 16 ? "INACTIVE" : "HIDDEN");
+                    }
 
-            ps.setString(1, "%s-%d".formatted(faker.commerce()
-                    .productName(), i));
-            ps.setString(2, faker.lorem()
-                    .sentence(20));
-            ps.setInt(3, price);
-            ps.setInt(4, stockQuantity);
-            ps.setString(5, status);
-            ps.setLong(6, leafCategoryIds.get(i % categorySize));
-            ps.setLong(7, sellerIds.get(i % sellerSize));
-            ps.setTimestamp(8, now);
-            ps.setTimestamp(9, now);
-        });
+                    ps.setString(
+                            1,
+                            "%s-%d".formatted(
+                                    faker.commerce()
+                                            .productName(),
+                                    i
+                            )
+                    );
+                    ps.setString(
+                            2,
+                            faker.lorem()
+                                    .sentence(20)
+                    );
+                    ps.setInt(
+                            3,
+                            price
+                    );
+                    ps.setInt(
+                            4,
+                            stockQuantity
+                    );
+                    ps.setString(
+                            5,
+                            status
+                    );
+                    ps.setLong(
+                            6,
+                            leafCategoryIds.get(i % categorySize)
+                    );
+                    ps.setLong(
+                            7,
+                            sellerIds.get(i % sellerSize)
+                    );
+                    ps.setTimestamp(
+                            8,
+                            now
+                    );
+                    ps.setTimestamp(
+                            9,
+                            now
+                    );
+                }
+        );
     }
 }

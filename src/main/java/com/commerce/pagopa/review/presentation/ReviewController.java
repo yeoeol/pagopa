@@ -29,7 +29,10 @@ import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto
 import com.commerce.pagopa.review.application.dto.response.ProductReviewResponseDto;
 import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
 
-@Tag(name = "REVIEW API", description = "리뷰 관리 API")
+@Tag(
+        name = "REVIEW API",
+        description = "리뷰 관리 API"
+)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reviews")
@@ -37,28 +40,47 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @Operation(summary = "리뷰 등록", description = "주문 물품에 대한 리뷰를 등록합니다.")
+    @Operation(
+            summary = "리뷰 등록",
+            description = "주문 물품에 대한 리뷰를 등록합니다."
+    )
     @PostMapping
     public ResponseEntity<ApiResponse<ReviewResponseDto>> review(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody ReviewCreateRequestDto requestDto
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(reviewService.create(userId, requestDto)));
+                .body(
+                        ApiResponse.ok(
+                                reviewService.create(
+                                        userId,
+                                        requestDto
+                                )
+                        )
+                );
     }
 
-    @Operation(summary = "리뷰 수정", description = "작성한 리뷰를 수정합니다.")
+    @Operation(
+            summary = "리뷰 수정",
+            description = "작성한 리뷰를 수정합니다."
+    )
     @PatchMapping("/{reviewId}")
     @PreAuthorize("@reviewOwnerValidator.isOwner(#reviewId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable("reviewId") Long reviewId,
             @Valid @RequestBody ReviewUpdateRequestDto requestDto
     ) {
-        reviewService.update(reviewId, requestDto);
+        reviewService.update(
+                reviewId,
+                requestDto
+        );
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @Operation(summary = "리뷰 삭제", description = "작성한 리뷰를 삭제합니다.")
+    @Operation(
+            summary = "리뷰 삭제",
+            description = "작성한 리뷰를 삭제합니다."
+    )
     @DeleteMapping("/{reviewId}")
     @PreAuthorize("@reviewOwnerValidator.isOwner(#reviewId, principal.userId)")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("reviewId") Long reviewId) {
@@ -66,7 +88,10 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @Operation(summary = "상품별 리뷰 목록 조회", description = "특정 상품에 대한 리뷰 목록을 조회합니다.")
+    @Operation(
+            summary = "상품별 리뷰 목록 조회",
+            description = "특정 상품에 대한 리뷰 목록을 조회합니다."
+    )
     @GetMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<List<ProductReviewResponseDto>>> getAllByProduct(
             @PathVariable("productId") Long productId

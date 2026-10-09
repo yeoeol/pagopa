@@ -46,20 +46,32 @@ public class OrderService {
     public OrderStockResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
         List<ProductStockRequest> stockRequests = requestDto.products()
                 .stream()
-                .map(item -> new ProductStockRequest(item.productId(), item.quantity()))
+                .map(
+                        item -> new ProductStockRequest(
+                                item.productId(),
+                                item.quantity()
+                        )
+                )
                 .toList();
 
         List<ProductStockResult> products = productStockApi.decreaseStocks(stockRequests);
-        Map<Long, ProductSummary> summary = productApi.findAllByIds(products.stream()
-                .map(ProductStockResult::productId)
-                .toList());
+        Map<Long, ProductSummary> summary = productApi.findAllByIds(
+                products.stream()
+                        .map(ProductStockResult::productId)
+                        .toList()
+        );
 
         // OrderItem 목록 생성 및 총액 계산
         Order order = Order.init(userId);
 
         for (ProductStockResult result : products) {
-            OrderItem orderItem = OrderItem.create(result.productName(), result.unitPrice(), result.requestedQuantity(),
-                    order, result.productId());
+            OrderItem orderItem = OrderItem.create(
+                    result.productName(),
+                    result.unitPrice(),
+                    result.requestedQuantity(),
+                    order,
+                    result.productId()
+            );
             order.addOrderItem(orderItem);
         }
 
@@ -67,11 +79,21 @@ public class OrderService {
 
         // 배송 정보 생성
         DeliveryRequestDto deliveryRequestDto = requestDto.delivery();
-        Delivery delivery = Delivery.create(Address.create(deliveryRequestDto.zipcode(), deliveryRequestDto.address(),
-                deliveryRequestDto.detailAddress()), deliveryRequestDto.requestMemo(), savedOrder);
+        Delivery delivery = Delivery.create(
+                Address.create(
+                        deliveryRequestDto.zipcode(),
+                        deliveryRequestDto.address(),
+                        deliveryRequestDto.detailAddress()
+                ),
+                deliveryRequestDto.requestMemo(),
+                savedOrder
+        );
         deliveryRepository.save(delivery);
 
-        return OrderStockResponseDto.from(savedOrder, summary);
+        return OrderStockResponseDto.from(
+                savedOrder,
+                summary
+        );
     }
 
     /** 장바구니 목록 주문을 생성합니다. */
@@ -79,15 +101,26 @@ public class OrderService {
     @Transactional
     public OrderStockResponseDto orderFromCart(Long userId, CartItemOrderRequestDto requestDto) {
         // 선택된 장바구니 항목 조회
-        List<CartItemSummary> cartItems = cartItemApi.findAllByIdInAndUserIdForUpdate(requestDto.cartItemIds(), userId);
+        List<CartItemSummary> cartItems = cartItemApi.findAllByIdInAndUserIdForUpdate(
+                requestDto.cartItemIds(),
+                userId
+        );
 
-        OrderCreateRequestDto orderCreateRequestDto = getOrderCreateRequestDto(requestDto, cartItems);
-        OrderStockResponseDto response = order(userId, orderCreateRequestDto);
+        OrderCreateRequestDto orderCreateRequestDto = getOrderCreateRequestDto(
+                requestDto,
+                cartItems
+        );
+        OrderStockResponseDto response = order(
+                userId,
+                orderCreateRequestDto
+        );
 
         // 장바구니 목록 삭제
-        cartItemApi.deleteAllByIdIn(cartItems.stream()
-                .map(CartItemSummary::cartItemId)
-                .toList());
+        cartItemApi.deleteAllByIdIn(
+                cartItems.stream()
+                        .map(CartItemSummary::cartItemId)
+                        .toList()
+        );
         return response;
     }
 
@@ -99,15 +132,27 @@ public class OrderService {
         Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
         order.cancel(LocalDateTime.now());
 
-        List<ProductStockResult> products = productStockApi.restoreStocks(order.getOrderItems()
-                .stream()
-                .map(oi -> new ProductStockRequest(oi.getProductId(), oi.getOrderQuantity()))
-                .toList());
-        Map<Long, ProductSummary> summary = productApi.findAllByIds(products.stream()
-                .map(ProductStockResult::productId)
-                .toList());
+        List<ProductStockResult> products = productStockApi.restoreStocks(
+                order.getOrderItems()
+                        .stream()
+                        .map(
+                                oi -> new ProductStockRequest(
+                                        oi.getProductId(),
+                                        oi.getOrderQuantity()
+                                )
+                        )
+                        .toList()
+        );
+        Map<Long, ProductSummary> summary = productApi.findAllByIds(
+                products.stream()
+                        .map(ProductStockResult::productId)
+                        .toList()
+        );
 
-        return OrderStockResponseDto.from(order, summary);
+        return OrderStockResponseDto.from(
+                order,
+                summary
+        );
     }
 
     @Transactional(readOnly = true)
@@ -118,11 +163,21 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
-        OrderSearch search = orderSearch == null ? new OrderSearch(null, null) : orderSearch;
+        OrderSearch search = orderSearch == null
+                ? new OrderSearch(
+                        null,
+                        null
+                )
+                : orderSearch;
         LocalDateTime now = LocalDateTime.now();
 
-        Page<Order> pageOrder = orderRepository.findAllByPeriod(userId, search.status(), search.start(now),
-                search.end(now), pageable);
+        Page<Order> pageOrder = orderRepository.findAllByPeriod(
+                userId,
+                search.status(),
+                search.start(now),
+                search.end(now),
+                pageable
+        );
         return pageOrder.map(OrderResponseDto::from);
     }
 
@@ -137,10 +192,16 @@ public class OrderService {
         // order() 메서드에 보내기 위한 재료 만들기
         List<OrderItemRequestDto> orderItemRequestDtos = new ArrayList<>();
         for (CartItemSummary cartItem : cartItems) {
-            OrderItemRequestDto dto = new OrderItemRequestDto(cartItem.productId(), cartItem.quantity());
+            OrderItemRequestDto dto = new OrderItemRequestDto(
+                    cartItem.productId(),
+                    cartItem.quantity()
+            );
             orderItemRequestDtos.add(dto);
         }
 
-        return new OrderCreateRequestDto(requestDto.delivery(), orderItemRequestDtos);
+        return new OrderCreateRequestDto(
+                requestDto.delivery(),
+                orderItemRequestDtos
+        );
     }
 }

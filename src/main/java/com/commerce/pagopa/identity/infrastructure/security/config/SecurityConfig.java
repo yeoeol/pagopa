@@ -49,9 +49,16 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(apiAuthenticationEntryPoint))
                 .authorizeHttpRequests(
-                        auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        auth -> auth.requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        )
                                 .permitAll()
-                                .requestMatchers("/actuator/health/**", "/actuator/prometheus")
+                                .requestMatchers(
+                                        "/actuator/health/**",
+                                        "/actuator/prometheus"
+                                )
                                 .permitAll()
                                 .requestMatchers("/actuator/**")
                                 .hasRole("ADMIN")
@@ -86,13 +93,19 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/recommendations/**")
                                 .authenticated()
                                 .anyRequest()
-                                .authenticated())
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler))
+                                .authenticated()
+                )
+                .oauth2Login(
+                        oauth2Login -> oauth2Login
+                                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                                .successHandler(oAuth2LoginSuccessHandler)
+                                .failureHandler(oAuth2LoginFailureHandler)
+                )
                 .oauth2Client(Customizer.withDefaults())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
@@ -101,12 +114,28 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration conf = new CorsConfiguration();
         conf.setAllowedOrigins(allowedOrigins);
-        conf.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
-        conf.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        conf.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE"
+                )
+        );
+        conf.setAllowedHeaders(
+                List.of(
+                        "Authorization",
+                        "Content-Type"
+                )
+        );
         conf.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", conf);
+        source.registerCorsConfiguration(
+                "/**",
+                conf
+        );
 
         return source;
     }

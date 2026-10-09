@@ -15,34 +15,63 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "review", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_review_order_item_id", columnNames = {"order_item_id"})})
+@Table(
+        name = "review",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_review_order_item_id",
+                        columnNames = {"order_item_id"}
+                )}
+)
 public class Review extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "review_id", nullable = false)
+    @Column(
+            name = "review_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
-    @Column(name = "content", length = 100, nullable = false)
+    @Column(
+            name = "content",
+            length = 100,
+            nullable = false
+    )
     private String content;
 
     @Min(1) @Max(5) @ToString.Include
-    @Column(name = "rating", nullable = false)
+    @Column(
+            name = "rating",
+            nullable = false
+    )
     private Integer rating; // 1 ~ 5
 
-    @Column(name = "product_id", nullable = false)
+    @Column(
+            name = "product_id",
+            nullable = false
+    )
     private Long productId;
 
-    @Column(name = "order_item_id", nullable = false)
+    @Column(
+            name = "order_item_id",
+            nullable = false
+    )
     private Long orderItemId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(
+            name = "user_id",
+            nullable = false
+    )
     private Long userId;
 
-    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "review",
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            orphanRemoval = true
+    )
     private final List<ReviewImage> images = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)

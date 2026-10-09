@@ -26,16 +26,25 @@ public class OrderPaymentApiService implements OrderPaymentApi {
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public OrderPaymentSummary validateConfirmPayment(Long userId, Long orderId) {
-        Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, orderId);
+        Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(
+                userId,
+                orderId
+        );
         order.validateConfirmPayment();
 
-        return new OrderPaymentSummary(order.getId(), order.getTotalAmount());
+        return new OrderPaymentSummary(
+                order.getId(),
+                order.getTotalAmount()
+        );
     }
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void validateCancelAfterPayment(Long userId, Long orderId) {
-        Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(userId, orderId);
+        Order order = orderPaymentService.getOrderForUpdateWithValidateOrdererId(
+                userId,
+                orderId
+        );
         order.validateCancelAfterPayment();
     }
 
@@ -45,13 +54,19 @@ public class OrderPaymentApiService implements OrderPaymentApi {
         Order order = orderPaymentService.getOrderForUpdate(orderId);
         order.confirmPayment(approvedAmount);
 
-        events.publishEvent(new OrderConfirmed(UUID.randomUUID(), order.getId(), order.getUserId(),
-                order.getOrderItems()
-                        .stream()
-                        .map(OrderItem::getProductId)
-                        .distinct()
-                        .toList(),
-                LocalDateTime.now()));
+        events.publishEvent(
+                new OrderConfirmed(
+                        UUID.randomUUID(),
+                        order.getId(),
+                        order.getUserId(),
+                        order.getOrderItems()
+                                .stream()
+                                .map(OrderItem::getProductId)
+                                .distinct()
+                                .toList(),
+                        LocalDateTime.now()
+                )
+        );
     }
 
     @Override

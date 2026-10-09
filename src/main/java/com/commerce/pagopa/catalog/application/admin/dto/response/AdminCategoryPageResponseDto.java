@@ -2,13 +2,20 @@ package com.commerce.pagopa.catalog.application.admin.dto.response;
 
 import java.util.List;
 
-public record AdminCategoryPageResponseDto(List<AdminCategoryTreeItemResponseDto> categories, int rootCount,
-        AdminCategoryDetailResponseDto detail) {
+public record AdminCategoryPageResponseDto(
+        List<AdminCategoryTreeItemResponseDto> categories,
+        int rootCount,
+        AdminCategoryDetailResponseDto detail
+) {
     public static AdminCategoryPageResponseDto of(
             List<AdminCategoryTreeItemResponseDto> categories,
             int rootCount,
             AdminCategoryDetailResponseDto detail
     ) {
-        return new AdminCategoryPageResponseDto(categories, rootCount, detail);
+        return new AdminCategoryPageResponseDto(
+                categories,
+                rootCount,
+                detail
+        );
     }
 }

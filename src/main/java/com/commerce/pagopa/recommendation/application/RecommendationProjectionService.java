@@ -28,16 +28,26 @@ public class RecommendationProjectionService {
     public void project(UserSearchRecorded event) {
         String keyword = normalize(event.keyword());
 
-        RecommendationEvent recommendationEvent = new RecommendationEvent(event.eventId(),
-                RecommendationEventType.USER_SEARCH_RECORDED, event.userId(), null, new SearchPayload(keyword),
-                event.searchedAt());
+        RecommendationEvent recommendationEvent = new RecommendationEvent(
+                event.eventId(),
+                RecommendationEventType.USER_SEARCH_RECORDED,
+                event.userId(),
+                null,
+                new SearchPayload(keyword),
+                event.searchedAt()
+        );
 
         if (!recommendationProjectionRepository.saveEventIfAbsent(recommendationEvent)) {
             return;
         }
 
-        recommendationProjectionRepository.increaseInterest(event.userId(), InterestType.KEYWORD, keyword, 1,
-                event.searchedAt());
+        recommendationProjectionRepository.increaseInterest(
+                event.userId(),
+                InterestType.KEYWORD,
+                keyword,
+                1,
+                event.searchedAt()
+        );
     }
 
     @Transactional
@@ -47,15 +57,27 @@ public class RecommendationProjectionService {
                 .distinct()
                 .toList();
 
-        RecommendationEvent recommendationEvent = new RecommendationEvent(event.eventId(),
-                RecommendationEventType.ORDER_CONFIRMED, event.userId(), event.orderId(), new OrderPayload(productIds),
-                event.confirmedAt());
+        RecommendationEvent recommendationEvent = new RecommendationEvent(
+                event.eventId(),
+                RecommendationEventType.ORDER_CONFIRMED,
+                event.userId(),
+                event.orderId(),
+                new OrderPayload(productIds),
+                event.confirmedAt()
+        );
 
         if (!recommendationProjectionRepository.saveEventIfAbsent(recommendationEvent)) {
             return;
         }
 
-        productIds.forEach(productId -> recommendationProjectionRepository.increaseInterest(event.userId(),
-                InterestType.PRODUCT, String.valueOf(productId), 5, event.confirmedAt()));
+        productIds.forEach(
+                productId -> recommendationProjectionRepository.increaseInterest(
+                        event.userId(),
+                        InterestType.PRODUCT,
+                        String.valueOf(productId),
+                        5,
+                        event.confirmedAt()
+                )
+        );
     }
 }

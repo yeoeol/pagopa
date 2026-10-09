@@ -53,28 +53,66 @@ class OrderRepositoryTest {
     void setUp() {
         Role userRole = roleRepository.save(RoleFixture.aRoleUser());
         user = UserFixture.aUser("order-period-test");
-        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        userRole
+                )
+        );
         user = userRepository.save(user);
     }
 
     @Test
     void findAllByPeriod_includesStartBoundaryAndExcludesEndBoundary() {
         // given: 경계 규칙 [start, end) 검증용 데이터
-        Order atStart = persistOrder(user, START, OrderStatus.CONFIRMED); // 포함 (>= start)
-        Order inMiddle = persistOrder(user, LocalDateTime.parse("2024-06-15T15:10:00"), OrderStatus.CONFIRMED); // 포함
-        Order lastInstant = persistOrder(user, LocalDateTime.parse("2024-12-31T23:59:59"), OrderStatus.CONFIRMED); // 포함
-        persistOrder(user, LocalDateTime.parse("2023-12-31T23:59:59"), OrderStatus.CONFIRMED); // 제외
-                                                                                               // (<
-                                                                                               // start)
-        persistOrder(user, END, OrderStatus.CONFIRMED); // 제외 (== end)
+        Order atStart = persistOrder(
+                user,
+                START,
+                OrderStatus.CONFIRMED
+        ); // 포함 (>= start)
+        Order inMiddle = persistOrder(
+                user,
+                LocalDateTime.parse("2024-06-15T15:10:00"),
+                OrderStatus.CONFIRMED
+        ); // 포함
+        Order lastInstant = persistOrder(
+                user,
+                LocalDateTime.parse("2024-12-31T23:59:59"),
+                OrderStatus.CONFIRMED
+        ); // 포함
+        persistOrder(
+                user,
+                LocalDateTime.parse("2023-12-31T23:59:59"),
+                OrderStatus.CONFIRMED
+        ); // 제외
+           // (<
+           // start)
+        persistOrder(
+                user,
+                END,
+                OrderStatus.CONFIRMED
+        ); // 제외 (== end)
         flushAndClear();
 
         // when
-        Page<Order> result = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
+        Page<Order> result = orderRepository.findAllByPeriod(
+                user.getId(),
+                null,
+                START,
+                END,
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
 
         // then
         assertThat(result.getContent()).extracting(Order::getId)
-                .containsExactlyInAnyOrder(atStart.getId(), inMiddle.getId(), lastInstant.getId());
+                .containsExactlyInAnyOrder(
+                        atStart.getId(),
+                        inMiddle.getId(),
+                        lastInstant.getId()
+                );
         assertThat(result.getTotalElements()).isEqualTo(3);
     }
 
@@ -82,12 +120,29 @@ class OrderRepositoryTest {
     void findAllByPeriod_excludesOtherUsersOrders() {
         // given
         User other = userRepository.save(UserFixture.aUser("other-user"));
-        Order mine = persistOrder(user, LocalDateTime.parse("2024-05-01T00:00:00"), OrderStatus.CONFIRMED);
-        persistOrder(other, LocalDateTime.parse("2024-05-01T00:00:00"), OrderStatus.CONFIRMED);
+        Order mine = persistOrder(
+                user,
+                LocalDateTime.parse("2024-05-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        );
+        persistOrder(
+                other,
+                LocalDateTime.parse("2024-05-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        );
         flushAndClear();
 
         // when
-        Page<Order> result = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
+        Page<Order> result = orderRepository.findAllByPeriod(
+                user.getId(),
+                null,
+                START,
+                END,
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
 
         // then
         assertThat(result.getContent()).extracting(Order::getId)
@@ -97,37 +152,94 @@ class OrderRepositoryTest {
     @Test
     void findAllByPeriod_filtersByStatusWhenProvided() {
         // given
-        Order ordered = persistOrder(user, LocalDateTime.parse("2024-03-01T00:00:00"), OrderStatus.CONFIRMED);
-        Order cancelled = persistOrder(user, LocalDateTime.parse("2024-04-01T00:00:00"), OrderStatus.CANCELED);
+        Order ordered = persistOrder(
+                user,
+                LocalDateTime.parse("2024-03-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        );
+        Order cancelled = persistOrder(
+                user,
+                LocalDateTime.parse("2024-04-01T00:00:00"),
+                OrderStatus.CANCELED
+        );
         flushAndClear();
 
         // when: status 지정 시 해당 상태만, null이면 전체
-        Page<Order> onlyCancelled = orderRepository.findAllByPeriod(user.getId(), OrderStatus.CANCELED, START, END,
-                PageRequest.of(0, 10));
-        Page<Order> all = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 10));
+        Page<Order> onlyCancelled = orderRepository.findAllByPeriod(
+                user.getId(),
+                OrderStatus.CANCELED,
+                START,
+                END,
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
+        Page<Order> all = orderRepository.findAllByPeriod(
+                user.getId(),
+                null,
+                START,
+                END,
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
 
         // then
         assertThat(onlyCancelled.getContent()).extracting(Order::getId)
                 .containsExactly(cancelled.getId());
         assertThat(all.getContent()).extracting(Order::getId)
-                .containsExactlyInAnyOrder(ordered.getId(), cancelled.getId());
+                .containsExactlyInAnyOrder(
+                        ordered.getId(),
+                        cancelled.getId()
+                );
     }
 
     @Test
     void findAllByPeriod_totalCountReflectsFilterNotAllRows() {
         // given: 대상 3건 + 잡음 2건(타 유저 / 기간 밖) → count가 필터를 반영하는지(페이징 정확성)
-        persistOrder(user, LocalDateTime.parse("2024-02-01T00:00:00"), OrderStatus.CONFIRMED);
-        persistOrder(user, LocalDateTime.parse("2024-03-01T00:00:00"), OrderStatus.CONFIRMED);
-        persistOrder(user, LocalDateTime.parse("2024-04-01T00:00:00"), OrderStatus.CONFIRMED);
+        persistOrder(
+                user,
+                LocalDateTime.parse("2024-02-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        );
+        persistOrder(
+                user,
+                LocalDateTime.parse("2024-03-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        );
+        persistOrder(
+                user,
+                LocalDateTime.parse("2024-04-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        );
         User other = userRepository.save(UserFixture.aUser("noise-user"));
-        persistOrder(other, LocalDateTime.parse("2024-03-01T00:00:00"), OrderStatus.CONFIRMED); // 타
-                                                                                                // 유저
-        persistOrder(user, LocalDateTime.parse("2023-03-01T00:00:00"), OrderStatus.CONFIRMED); // 기간
-                                                                                               // 밖
+        persistOrder(
+                other,
+                LocalDateTime.parse("2024-03-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        ); // 타
+           // 유저
+        persistOrder(
+                user,
+                LocalDateTime.parse("2023-03-01T00:00:00"),
+                OrderStatus.CONFIRMED
+        ); // 기간
+           // 밖
         flushAndClear();
 
         // when: 페이지 크기 2
-        Page<Order> firstPage = orderRepository.findAllByPeriod(user.getId(), null, START, END, PageRequest.of(0, 2));
+        Page<Order> firstPage = orderRepository.findAllByPeriod(
+                user.getId(),
+                null,
+                START,
+                END,
+                PageRequest.of(
+                        0,
+                        2
+                )
+        );
 
         // then: 전체 5건이 아니라 필터된 3건 기준 count
         assertThat(firstPage.getContent()).hasSize(2);
@@ -143,9 +255,18 @@ class OrderRepositoryTest {
                 set o.orderedAt = :orderedAt, o.status = :status
                 where o.id = :id
                 """)
-                .setParameter("orderedAt", orderedAt)
-                .setParameter("status", status)
-                .setParameter("id", order.getId())
+                .setParameter(
+                        "orderedAt",
+                        orderedAt
+                )
+                .setParameter(
+                        "status",
+                        status
+                )
+                .setParameter(
+                        "id",
+                        order.getId()
+                )
                 .executeUpdate();
         return order;
     }

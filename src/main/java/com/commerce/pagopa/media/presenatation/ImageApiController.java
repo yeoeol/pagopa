@@ -51,9 +51,17 @@ public class ImageApiController {
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
                     )
-            ) @RequestPart("file") MultipartFile file
+            )
+            @RequestPart("file") MultipartFile file
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(imageService.upload(file, category)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        imageService.upload(
+                                file,
+                                category
+                        )
+                )
+        );
     }
 
     @Operation(
@@ -65,7 +73,8 @@ public class ImageApiController {
             @Parameter(
                     description = "삭제할 이미지의 전체 URL",
                     example = "https://yeoeol.blob.core.windows.net/pagopa/product/202605/f31dc2d8-2c23.jpg"
-            ) @RequestParam("imageUrl") String imageUrl
+            )
+            @RequestParam("imageUrl") String imageUrl
     ) {
         imageService.delete(imageUrl);
         return ResponseEntity.ok(ApiResponse.ok());

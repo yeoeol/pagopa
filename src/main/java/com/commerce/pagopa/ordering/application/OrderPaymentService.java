@@ -22,7 +22,10 @@ public class OrderPaymentService {
     @Transactional
     public Order getOrderForUpdateWithValidateOrdererId(Long userId, Long orderId) {
         Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
-        validateOrdererId(userId, order);
+        validateOrdererId(
+                userId,
+                order
+        );
         return order;
     }
 
@@ -47,8 +50,10 @@ public class OrderPaymentService {
     }
 
     public void validateOrdererId(Long userId, Order order) {
-        if (!order.getUserId()
-                .equals(userId)) {
+        if (
+            !order.getUserId()
+                    .equals(userId)
+        ) {
             throw new BusinessException(ErrorCode.ORDER_NOT_MINE);
         }
     }

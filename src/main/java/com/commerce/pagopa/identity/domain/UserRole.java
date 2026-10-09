@@ -12,21 +12,38 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user_role", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_user_role_user_id_role_id", columnNames = {"user_id", "role_id"})})
+@Table(
+        name = "user_role",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_user_role_user_id_role_id",
+                        columnNames = {"user_id", "role_id"}
+                )}
+)
 public class UserRole extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_role_id", nullable = false)
+    @Column(
+            name = "user_role_id",
+            nullable = false
+    )
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_role_user"))
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_user_role_user")
+    )
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_role_role"))
+    @JoinColumn(
+            name = "role_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_user_role_role")
+    )
     private Role role;
 
     @Builder(access = AccessLevel.PRIVATE)

@@ -16,7 +16,10 @@ public class JwtCookieFactory {
     private final CookieSettings cookieSettings;
 
     public Cookie createJwtCookie(JwtTokenType tokenType, String jwt, long tokenExpirySeconds) {
-        Cookie cookie = new Cookie(tokenType.getCookieName(), jwt);
+        Cookie cookie = new Cookie(
+                tokenType.getCookieName(),
+                jwt
+        );
         cookie.setPath("/");
         cookie.setHttpOnly(cookieSettings.isHttpOnly());
         cookie.setMaxAge((int) tokenExpirySeconds);
@@ -24,7 +27,10 @@ public class JwtCookieFactory {
     }
 
     public Cookie deleteJwtCookie(JwtTokenType tokenType) {
-        Cookie cookie = new Cookie(tokenType.getCookieName(), "");
+        Cookie cookie = new Cookie(
+                tokenType.getCookieName(),
+                ""
+        );
         cookie.setPath("/");
         cookie.setHttpOnly(cookieSettings.isHttpOnly());
         cookie.setMaxAge(0);

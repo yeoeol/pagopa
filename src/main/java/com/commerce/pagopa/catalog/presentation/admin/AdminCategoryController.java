@@ -22,32 +22,55 @@ public class AdminCategoryController {
     private final AdminCategoryService adminCategoryService;
 
     @GetMapping
-    public String list(@RequestParam(name = "categoryId", required = false) Long categoryId, Model model) {
+    public String list(
+            @RequestParam(
+                    name = "categoryId",
+                    required = false
+            ) Long categoryId,
+            Model model
+    ) {
         AdminCategoryPageResponseDto result = adminCategoryService.findPage(categoryId);
 
-        model.addAttribute("categories", result.categories());
-        model.addAttribute("rootCount", result.rootCount());
-        model.addAttribute("detail", result.detail());
+        model.addAttribute(
+                "categories",
+                result.categories()
+        );
+        model.addAttribute(
+                "rootCount",
+                result.rootCount()
+        );
+        model.addAttribute(
+                "detail",
+                result.detail()
+        );
 
         return "admin/categories/list";
     }
 
     @GetMapping("/root")
     public String root(Model model) {
-        model.addAttribute("detail", adminCategoryService.findDetail(null));
+        model.addAttribute(
+                "detail",
+                adminCategoryService.findDetail(null)
+        );
 
         return "admin/categories/fragments/detail :: detail";
     }
 
     @GetMapping("/{categoryId}")
     public String detail(@PathVariable("categoryId") Long categoryId, Model model) {
-        model.addAttribute("detail", adminCategoryService.findDetail(categoryId));
+        model.addAttribute(
+                "detail",
+                adminCategoryService.findDetail(categoryId)
+        );
 
         return "admin/categories/fragments/detail :: detail";
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute AdminCategoryCreateRequestDto requestDto) {
+    public String create(
+            @Valid @ModelAttribute AdminCategoryCreateRequestDto requestDto
+    ) {
         CategorySimpleResponseDto created = adminCategoryService.create(requestDto);
 
         return "redirect:/admin/categories?categoryId=" + created.categoryId();
@@ -58,7 +81,10 @@ public class AdminCategoryController {
             @PathVariable("categoryId") Long categoryId,
             @Valid @ModelAttribute AdminCategoryUpdateRequestDto requestDto
     ) {
-        adminCategoryService.update(categoryId, requestDto);
+        adminCategoryService.update(
+                categoryId,
+                requestDto
+        );
         return "redirect:/admin/categories?categoryId=" + categoryId;
     }
 }

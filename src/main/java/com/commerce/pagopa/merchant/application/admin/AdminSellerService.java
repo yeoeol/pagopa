@@ -28,15 +28,34 @@ public class AdminSellerService {
 
     @Transactional(readOnly = true)
     public AdminSellerPageResponseDto getPendingSellers(Pageable pageable) {
-        Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "statusChangedAt")
-                        .and(Sort.by(Sort.Direction.DESC, "id")));
-        Page<Seller> sellers = sellerRepository.findPendingRequests(SellerStatus.PENDING, pageRequest);
+        Pageable pageRequest = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(
+                        Sort.Direction.DESC,
+                        "statusChangedAt"
+                )
+                        .and(
+                                Sort.by(
+                                        Sort.Direction.DESC,
+                                        "id"
+                                )
+                        )
+        );
+        Page<Seller> sellers = sellerRepository.findPendingRequests(
+                SellerStatus.PENDING,
+                pageRequest
+        );
 
-        Map<Long, UserSummary> summary = userApi.findAllByIdIn(sellers.stream()
-                .map(Seller::getUserId)
-                .toList());
-        return AdminSellerPageResponseDto.from(sellers, summary);
+        Map<Long, UserSummary> summary = userApi.findAllByIdIn(
+                sellers.stream()
+                        .map(Seller::getUserId)
+                        .toList()
+        );
+        return AdminSellerPageResponseDto.from(
+                sellers,
+                summary
+        );
     }
 
     @Transactional

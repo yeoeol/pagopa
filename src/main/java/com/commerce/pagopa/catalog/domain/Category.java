@@ -19,18 +19,31 @@ public class Category extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "category_id", nullable = false)
+    @Column(
+            name = "category_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
-    @Column(name = "name", length = 50, nullable = false)
+    @Column(
+            name = "name",
+            length = 50,
+            nullable = false
+    )
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_category_parent"))
+    @JoinColumn(
+            name = "parent_id",
+            foreignKey = @ForeignKey(name = "fk_category_parent")
+    )
     private Category parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)
+    @OneToMany(
+            mappedBy = "parent",
+            cascade = CascadeType.PERSIST
+    )
     private final List<Category> children = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)

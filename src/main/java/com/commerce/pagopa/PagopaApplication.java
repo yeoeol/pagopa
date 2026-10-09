@@ -9,6 +9,9 @@ import org.springframework.modulith.Modulithic;
 public class PagopaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PagopaApplication.class, args);
+        SpringApplication.run(
+                PagopaApplication.class,
+                args
+        );
     }
 }

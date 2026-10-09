@@ -11,7 +11,13 @@ public final class UserFixture {
     }
 
     public static User aUser(String suffix) {
-        return User.create(Provider.LOCAL_TEST, "provider-" + suffix, "nick-" + suffix,
-                "user-" + suffix + "@example.com", "http://default.img", LocalDateTime.now());
+        return User.create(
+                Provider.LOCAL_TEST,
+                "provider-" + suffix,
+                "nick-" + suffix,
+                "user-" + suffix + "@example.com",
+                "http://default.img",
+                LocalDateTime.now()
+        );
     }
 }

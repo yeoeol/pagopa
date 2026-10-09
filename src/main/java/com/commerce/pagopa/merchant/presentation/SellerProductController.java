@@ -31,7 +31,10 @@ import com.commerce.pagopa.merchant.application.dto.product.request.ProductAddSt
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductRegisterRequestDto;
 import com.commerce.pagopa.merchant.application.dto.seller.response.SellerProductPageResponseDto;
 
-@Tag(name = "SELLER PRODUCT API", description = "판매자 - 상품 관리 API")
+@Tag(
+        name = "SELLER PRODUCT API",
+        description = "판매자 - 상품 관리 API"
+)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/sellers/products")
@@ -39,39 +42,77 @@ public class SellerProductController {
 
     private final SellerProductService sellerProductService;
 
-    @Operation(summary = "판매자 상품 목록 조회", description = "판매자 본인 상품 목록을 조회합니다.")
+    @Operation(
+            summary = "판매자 상품 목록 조회",
+            description = "판매자 본인 상품 목록을 조회합니다."
+    )
     @GetMapping
     public ResponseEntity<ApiResponse<SellerProductPageResponseDto>> getSellerProducts(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @ParameterObject @PageableDefault(size = 10, page = 0, sort = "createdAt") Pageable pageable
+            @ParameterObject
+            @PageableDefault(
+                    size = 10,
+                    page = 0,
+                    sort = "createdAt"
+            ) Pageable pageable
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(sellerProductService.findAll(userId, pageable)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        sellerProductService.findAll(
+                                userId,
+                                pageable
+                        )
+                )
+        );
     }
 
-    @Operation(summary = "판매자 상품 상세 조회", description = "판매자 본인의 특정 상품을 조회합니다.")
+    @Operation(
+            summary = "판매자 상품 상세 조회",
+            description = "판매자 본인의 특정 상품을 조회합니다."
+    )
     @GetMapping("/{productId}")
     @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
     public ResponseEntity<ApiResponse<ProductSummary>> getSellerProduct(@PathVariable("productId") Long productId) {
         return ResponseEntity.ok(ApiResponse.ok(sellerProductService.find(productId)));
     }
 
-    @Operation(summary = "판매자 상품 등록", description = "판매자 상품을 등록합니다.")
+    @Operation(
+            summary = "판매자 상품 등록",
+            description = "판매자 상품을 등록합니다."
+    )
     @PostMapping
     public ResponseEntity<ApiResponse<ProductSummary>> register(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody ProductRegisterRequestDto requestDto
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(sellerProductService.register(userId, requestDto)));
+                .body(
+                        ApiResponse.ok(
+                                sellerProductService.register(
+                                        userId,
+                                        requestDto
+                                )
+                        )
+                );
     }
 
-    @Operation(summary = "판매자 상품 재고 추가", description = "특정 판매자 상품의 재고를 추가합니다.")
+    @Operation(
+            summary = "판매자 상품 재고 추가",
+            description = "특정 판매자 상품의 재고를 추가합니다."
+    )
     @PatchMapping("/{productId}/stock")
     @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
     public ResponseEntity<ApiResponse<ProductStockResult>> addStock(
             @PathVariable("productId") Long productId,
             @Valid @RequestBody ProductAddStockRequestDto requestDto
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(sellerProductService.addStock(productId, requestDto)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        sellerProductService.addStock(
+                                productId,
+                                requestDto
+                        )
+                )
+        );
     }
 }

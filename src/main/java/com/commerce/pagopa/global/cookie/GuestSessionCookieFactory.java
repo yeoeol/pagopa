@@ -38,7 +38,10 @@ public class GuestSessionCookieFactory {
     }
 
     private Cookie createGuestSessionCookie(String sessionId) {
-        Cookie cookie = new Cookie(CookieUtil.GUEST_SESSION_COOKIE, sessionId);
+        Cookie cookie = new Cookie(
+                CookieUtil.GUEST_SESSION_COOKIE,
+                sessionId
+        );
         cookie.setPath("/");
         cookie.setHttpOnly(cookieSettings.isHttpOnly());
         cookie.setMaxAge(COOKIE_MAX_AGE);

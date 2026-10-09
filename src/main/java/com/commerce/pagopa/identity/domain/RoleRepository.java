@@ -16,8 +16,7 @@ public interface RoleRepository {
     Optional<Role> findById(Long roleId);
 
     default Role findByIdOrThrow(Long roleId) {
-        return findById(roleId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
+        return findById(roleId).orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
     }
 
     Optional<Role> findByCode(RoleCode code);

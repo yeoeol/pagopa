@@ -36,7 +36,11 @@ class SupabaseImageServiceTest {
     void setUp() {
         ImageProperties imageProperties = new ImageProperties(
                 5_242_880,
-                List.of("image/jpeg", "image/png", "image/webp")
+                List.of(
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp"
+                )
         );
         SupabaseStorageProperties storageProperties = new SupabaseStorageProperties(
                 URI.create("https://project-ref.storage.supabase.co/storage/v1/s3"),
@@ -46,7 +50,11 @@ class SupabaseImageServiceTest {
                 BUCKET,
                 PROJECT_URL
         );
-        supabaseImageService = new SupabaseImageService(imageProperties, storageProperties, s3Client);
+        supabaseImageService = new SupabaseImageService(
+                imageProperties,
+                storageProperties,
+                s3Client
+        );
     }
 
     @Test
@@ -62,10 +70,8 @@ class SupabaseImageServiceTest {
         verify(s3Client).deleteObject(requestCaptor.capture());
         DeleteObjectRequest request = requestCaptor.getValue();
 
-        assertThat(request.bucket())
-                .isEqualTo(BUCKET);
-        assertThat(request.key())
-                .isEqualTo("product/202610/550e8400-e29b-41d4-a716-446655440000.jpg");
+        assertThat(request.bucket()).isEqualTo(BUCKET);
+        assertThat(request.key()).isEqualTo("product/202610/550e8400-e29b-41d4-a716-446655440000.jpg");
     }
 
     @Test
@@ -74,8 +80,7 @@ class SupabaseImageServiceTest {
                 + BUCKET
                 + "/product/202610/image.jpg";
 
-        assertThatThrownBy(() -> supabaseImageService.delete(imageUrl))
-                .isInstanceOf(BusinessException.class)
+        assertThatThrownBy(() -> supabaseImageService.delete(imageUrl)).isInstanceOf(BusinessException.class)
                 .hasMessage("Supabase 이미지 URL 형식이 올바르지 않습니다.");
         verifyNoInteractions(s3Client);
     }

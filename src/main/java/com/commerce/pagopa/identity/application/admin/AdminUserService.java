@@ -40,10 +40,26 @@ public class AdminUserService {
         int size = requestDto.size() == null ? DEFAULT_PAGE_SIZE : requestDto.size();
         String keyword = normalize(requestDto.keyword());
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "statusChangedAt")
-                .and(Sort.by(Sort.Direction.DESC, "id")));
-        Page<User> users = userRepository.searchAdminUsers(keyword, requestDto.status(), requestDto.roleCode(),
-                pageable);
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(
+                        Sort.Direction.DESC,
+                        "statusChangedAt"
+                )
+                        .and(
+                                Sort.by(
+                                        Sort.Direction.DESC,
+                                        "id"
+                                )
+                        )
+        );
+        Page<User> users = userRepository.searchAdminUsers(
+                keyword,
+                requestDto.status(),
+                requestDto.roleCode(),
+                pageable
+        );
 
         List<Long> userIds = users.getContent()
                 .stream()
@@ -52,7 +68,10 @@ public class AdminUserService {
 
         Map<Long, List<AdminUserRoleResponseDto>> rolesByUserId = findRolesByUserIds(userIds);
 
-        return AdminUserPageResponseDto.from(users, rolesByUserId);
+        return AdminUserPageResponseDto.from(
+                users,
+                rolesByUserId
+        );
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +80,13 @@ public class AdminUserService {
 
         Map<Long, List<AdminUserRoleResponseDto>> rolesByUserId = findRolesByUserIds(List.of(userId));
 
-        return AdminUserDetailResponseDto.from(user, rolesByUserId.getOrDefault(user.getId(), List.of()));
+        return AdminUserDetailResponseDto.from(
+                user,
+                rolesByUserId.getOrDefault(
+                        user.getId(),
+                        List.of()
+                )
+        );
     }
 
     @Transactional
@@ -89,7 +114,15 @@ public class AdminUserService {
 
         List<UserRole> userRoles = userRoleRepository.findAllWithRoleByUserIds(userIds);
         return userRoles.stream()
-                .collect(Collectors.groupingBy(userRole -> userRole.getUser()
-                        .getId(), Collectors.mapping(AdminUserRoleResponseDto::from, Collectors.toList())));
+                .collect(
+                        Collectors.groupingBy(
+                                userRole -> userRole.getUser()
+                                        .getId(),
+                                Collectors.mapping(
+                                        AdminUserRoleResponseDto::from,
+                                        Collectors.toList()
+                                )
+                        )
+                );
     }
 }

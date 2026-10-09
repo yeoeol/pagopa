@@ -49,16 +49,26 @@ public class AdminCategoryService {
                 .filter(category -> category.parentId() == null)
                 .count();
 
-        AdminCategoryDetailResponseDto detail = buildDetail(categoryId, categories);
+        AdminCategoryDetailResponseDto detail = buildDetail(
+                categoryId,
+                categories
+        );
 
-        return AdminCategoryPageResponseDto.of(categories, rootCount, detail);
+        return AdminCategoryPageResponseDto.of(
+                categories,
+                rootCount,
+                detail
+        );
     }
 
     @Transactional(readOnly = true)
     public AdminCategoryDetailResponseDto findDetail(Long categoryId) {
         List<AdminCategoryTreeItemResponseDto> categories = buildTreeItems(categoryRepository.findAll());
 
-        return buildDetail(categoryId, categories);
+        return buildDetail(
+                categoryId,
+                categories
+        );
     }
 
     @Transactional
@@ -76,7 +86,10 @@ public class AdminCategoryService {
                     : category.getParent()
                             .getId();
 
-            childrenByParentId.computeIfAbsent(parentId, ignored -> new ArrayList<>())
+            childrenByParentId.computeIfAbsent(
+                    parentId,
+                    ignored -> new ArrayList<>()
+            )
                     .add(category);
         }
 
@@ -85,7 +98,13 @@ public class AdminCategoryService {
 
         List<AdminCategoryTreeItemResponseDto> result = new ArrayList<>();
 
-        appendTreeItems(null, 0, null, childrenByParentId, result);
+        appendTreeItems(
+                null,
+                0,
+                null,
+                childrenByParentId,
+                result
+        );
 
         return List.copyOf(result);
     }
@@ -97,15 +116,31 @@ public class AdminCategoryService {
             Map<Long, List<Category>> childrenByParentId,
             List<AdminCategoryTreeItemResponseDto> result
     ) {
-        List<Category> children = childrenByParentId.getOrDefault(parentId, List.of());
+        List<Category> children = childrenByParentId.getOrDefault(
+                parentId,
+                List.of()
+        );
 
         for (Category category : children) {
             String path = parentPath == null ? category.getName() : parentPath + " > " + category.getName();
 
             result.add(
-                    AdminCategoryTreeItemResponseDto.of(category.getId(), parentId, category.getName(), depth, path));
+                    AdminCategoryTreeItemResponseDto.of(
+                            category.getId(),
+                            parentId,
+                            category.getName(),
+                            depth,
+                            path
+                    )
+            );
 
-            appendTreeItems(category.getId(), depth + 1, path, childrenByParentId, result);
+            appendTreeItems(
+                    category.getId(),
+                    depth + 1,
+                    path,
+                    childrenByParentId,
+                    result
+            );
         }
     }
 
@@ -118,13 +153,24 @@ public class AdminCategoryService {
                     .filter(category -> category.parentId() == null)
                     .toList();
 
-            return AdminCategoryDetailResponseDto.of(null, null, -1, null, null, List.of(), rootCategories);
+            return AdminCategoryDetailResponseDto.of(
+                    null,
+                    null,
+                    -1,
+                    null,
+                    null,
+                    List.of(),
+                    rootCategories
+            );
         }
 
         Map<Long, AdminCategoryTreeItemResponseDto> categoryById = new HashMap<>();
 
         for (AdminCategoryTreeItemResponseDto category : categories) {
-            categoryById.put(category.categoryId(), category);
+            categoryById.put(
+                    category.categoryId(),
+                    category
+            );
         }
 
         AdminCategoryTreeItemResponseDto selected = categoryById.get(categoryId);
@@ -133,7 +179,10 @@ public class AdminCategoryService {
             throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
         }
 
-        List<AdminCategoryTreeItemResponseDto> breadcrumbs = buildBreadcrumbs(selected, categoryById);
+        List<AdminCategoryTreeItemResponseDto> breadcrumbs = buildBreadcrumbs(
+                selected,
+                categoryById
+        );
 
         List<AdminCategoryTreeItemResponseDto> children = categories.stream()
                 .filter(category -> categoryId.equals(category.parentId()))
@@ -143,8 +192,15 @@ public class AdminCategoryService {
                 ? null
                 : categoryById.get(selected.parentId());
 
-        return AdminCategoryDetailResponseDto.of(selected.categoryId(), selected.name(), selected.depth(),
-                selected.path(), parent == null ? null : parent.name(), breadcrumbs, children);
+        return AdminCategoryDetailResponseDto.of(
+                selected.categoryId(),
+                selected.name(),
+                selected.depth(),
+                selected.path(),
+                parent == null ? null : parent.name(),
+                breadcrumbs,
+                children
+        );
     }
 
     private List<AdminCategoryTreeItemResponseDto> buildBreadcrumbs(

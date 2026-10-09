@@ -28,7 +28,13 @@ public class ProductStockApiService implements ProductStockApi {
     @Transactional(propagation = Propagation.MANDATORY)
     public List<ProductStockResult> decreaseStocks(List<ProductStockRequest> requests) {
         Map<Long, Integer> totalQuantityByProductId = requests.stream()
-                .collect(Collectors.toMap(ProductStockRequest::productId, ProductStockRequest::quantity, Integer::sum));
+                .collect(
+                        Collectors.toMap(
+                                ProductStockRequest::productId,
+                                ProductStockRequest::quantity,
+                                Integer::sum
+                        )
+                );
 
         // 데드락 방지
         List<Long> productIds = totalQuantityByProductId.keySet()
@@ -43,8 +49,14 @@ public class ProductStockApiService implements ProductStockApi {
 
             product.decreaseStock(totalQuantityByProductId.get(productId));
 
-            results.add(new ProductStockResult(product.getId(), product.getName(), product.getPrice(),
-                    totalQuantityByProductId.get(productId)));
+            results.add(
+                    new ProductStockResult(
+                            product.getId(),
+                            product.getName(),
+                            product.getPrice(),
+                            totalQuantityByProductId.get(productId)
+                    )
+            );
         }
 
         return results;
@@ -64,7 +76,10 @@ public class ProductStockApiService implements ProductStockApi {
 
         for (Long productId : productIds) {
             Product product = productRepository.findByIdForUpdateOrThrow(productId);
-            productMap.put(productId, product);
+            productMap.put(
+                    productId,
+                    product
+            );
         }
 
         List<ProductStockResult> results = new ArrayList<>();
@@ -75,7 +90,13 @@ public class ProductStockApiService implements ProductStockApi {
             product.increaseStock(request.quantity());
 
             results.add(
-                    new ProductStockResult(product.getId(), product.getName(), product.getPrice(), request.quantity()));
+                    new ProductStockResult(
+                            product.getId(),
+                            product.getName(),
+                            product.getPrice(),
+                            request.quantity()
+                    )
+            );
         }
 
         return results;

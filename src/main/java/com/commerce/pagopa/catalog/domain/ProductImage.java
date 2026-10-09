@@ -8,31 +8,54 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "product_image", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_product_image_product_id_display_order", columnNames = {"product_id",
-                "display_order"})})
+@Table(
+        name = "product_image",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_product_image_product_id_display_order",
+                        columnNames = {"product_id",
+                                "display_order"}
+                )}
+)
 public class ProductImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "product_image_id", nullable = false)
+    @Column(
+            name = "product_image_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
-    @Column(name = "image_url", length = 512, nullable = false)
+    @Column(
+            name = "image_url",
+            length = 512,
+            nullable = false
+    )
     private String imageUrl;
 
     @ToString.Include
-    @Column(name = "display_order", nullable = false)
+    @Column(
+            name = "display_order",
+            nullable = false
+    )
     private int displayOrder;
 
     @ToString.Include
-    @Column(name = "is_thumbnail", nullable = false)
+    @Column(
+            name = "is_thumbnail",
+            nullable = false
+    )
     private boolean isThumbnail = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_image_product"))
+    @JoinColumn(
+            name = "product_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_product_image_product")
+    )
     private Product product;
 
     @Builder(access = AccessLevel.PRIVATE)

@@ -23,14 +23,26 @@ public class InternalPaymentGateway implements PaymentGateway {
 
     @Override
     public PaymentApprovalResponse approve(PaymentApprovalRequest request) {
-        return approvals.computeIfAbsent(request.idempotencyKey(),
-                key -> PaymentApprovalResponse.of("INTERNAL-" + key, request.amount(), LocalDateTime.now()));
+        return approvals.computeIfAbsent(
+                request.idempotencyKey(),
+                key -> PaymentApprovalResponse.of(
+                        "INTERNAL-" + key,
+                        request.amount(),
+                        LocalDateTime.now()
+                )
+        );
     }
 
     @Override
     public PaymentCancellationResponse cancel(PaymentCancellationRequest request) {
-        return cancellations.computeIfAbsent(request.idempotencyKey(),
-                key -> PaymentCancellationResponse.of(request.transactionId(), request.amount(), LocalDateTime.now()));
+        return cancellations.computeIfAbsent(
+                request.idempotencyKey(),
+                key -> PaymentCancellationResponse.of(
+                        request.transactionId(),
+                        request.amount(),
+                        LocalDateTime.now()
+                )
+        );
     }
 
     @Override

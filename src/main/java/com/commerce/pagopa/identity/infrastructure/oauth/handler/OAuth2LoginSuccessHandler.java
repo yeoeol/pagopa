@@ -39,13 +39,22 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     ) throws IOException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        TokenResponseDto tokenResponseDto = authService.issueAccessTokenAndRefreshToken(oAuth2User.getUserId(),
-                oAuth2User.getEmail(), oAuth2User.getRoles());
+        TokenResponseDto tokenResponseDto = authService.issueAccessTokenAndRefreshToken(
+                oAuth2User.getUserId(),
+                oAuth2User.getEmail(),
+                oAuth2User.getRoles()
+        );
 
-        Cookie accessTokenCookie = jwtCookieFactory.createJwtCookie(JwtTokenType.ACCESS_TOKEN,
-                tokenResponseDto.accessToken(), jwtTokenProvider.getAccessTokenExpiry() / 1000);
-        Cookie refreshTokenCookie = jwtCookieFactory.createJwtCookie(JwtTokenType.REFRESH_TOKEN,
-                tokenResponseDto.refreshToken(), jwtTokenProvider.getRefreshTokenExpiry() / 1000);
+        Cookie accessTokenCookie = jwtCookieFactory.createJwtCookie(
+                JwtTokenType.ACCESS_TOKEN,
+                tokenResponseDto.accessToken(),
+                jwtTokenProvider.getAccessTokenExpiry() / 1000
+        );
+        Cookie refreshTokenCookie = jwtCookieFactory.createJwtCookie(
+                JwtTokenType.REFRESH_TOKEN,
+                tokenResponseDto.refreshToken(),
+                jwtTokenProvider.getRefreshTokenExpiry() / 1000
+        );
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
 

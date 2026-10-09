@@ -43,10 +43,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 try {
                     AuthenticatedUser user = jwtAuthenticationService.loadActiveUser(userId);
 
-                    CustomUserDetails principal = new CustomUserDetails(user.userId(), user.email(), user.roleCodes());
+                    CustomUserDetails principal = new CustomUserDetails(
+                            user.userId(),
+                            user.email(),
+                            user.roleCodes()
+                    );
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            principal, "", principal.getAuthorities());
+                            principal,
+                            "",
+                            principal.getAuthorities()
+                    );
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext()
@@ -55,15 +62,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     tokenValidationErrorCode = ErrorCode.USER_NOT_ACTIVE;
 
                     SecurityContextHolder.clearContext();
-                    request.setAttribute(ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE,
-                            tokenValidationErrorCode);
+                    request.setAttribute(
+                            ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE,
+                            tokenValidationErrorCode
+                    );
                 }
             } else {
                 SecurityContextHolder.clearContext();
-                request.setAttribute(ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE, tokenValidationErrorCode);
+                request.setAttribute(
+                        ApiAuthenticationEntryPoint.AUTH_ERROR_CODE_ATTRIBUTE,
+                        tokenValidationErrorCode
+                );
             }
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(
+                request,
+                response
+        );
     }
 }

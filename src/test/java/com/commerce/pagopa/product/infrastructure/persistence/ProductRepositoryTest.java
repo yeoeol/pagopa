@@ -62,16 +62,47 @@ class ProductRepositoryTest {
         middleCategory = category.getParent();
 
         user = UserFixture.aUser("product-repo-test");
-        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
-        user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        userRole
+                )
+        );
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        sellerRole
+                )
+        );
         userRepository.save(user);
 
         Seller seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         // 검색 테스트가 productA/B/C name으로 매칭하므로 fixture 디폴트 대신 명시 생성
-        Product product1 = ProductFixture.aProduct("productA", "descA", 1000, 10, category, seller.getId());
-        Product product2 = ProductFixture.aProduct("productB", "descB", 2000, 20, category, seller.getId());
-        Product product3 = ProductFixture.aProduct("productC", "descC", 3000, 30, category, seller.getId());
+        Product product1 = ProductFixture.aProduct(
+                "productA",
+                "descA",
+                1000,
+                10,
+                category,
+                seller.getId()
+        );
+        Product product2 = ProductFixture.aProduct(
+                "productB",
+                "descB",
+                2000,
+                20,
+                category,
+                seller.getId()
+        );
+        Product product3 = ProductFixture.aProduct(
+                "productC",
+                "descC",
+                3000,
+                30,
+                category,
+                seller.getId()
+        );
         products.add(productRepository.save(product1));
         products.add(productRepository.save(product2));
         products.add(productRepository.save(product3));
@@ -92,8 +123,17 @@ class ProductRepositoryTest {
 
     @Test
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_rootCategory() {
-        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(rootCategory.getId(),
-                List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT), PageRequest.of(0, 10));
+        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
+                rootCategory.getId(),
+                List.of(
+                        ProductStatus.ACTIVE,
+                        ProductStatus.SOLD_OUT
+                ),
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
 
         assertThat(results.getContent()).extracting(Product::getId)
                 .containsExactlyInAnyOrderElementsOf(productIds());
@@ -102,7 +142,16 @@ class ProductRepositoryTest {
     @Test
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_middleCategory() {
         Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
-                middleCategory.getId(), List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT), PageRequest.of(0, 10));
+                middleCategory.getId(),
+                List.of(
+                        ProductStatus.ACTIVE,
+                        ProductStatus.SOLD_OUT
+                ),
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
 
         assertThat(results.getContent()).extracting(Product::getId)
                 .containsExactlyInAnyOrderElementsOf(productIds());
@@ -110,8 +159,17 @@ class ProductRepositoryTest {
 
     @Test
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_leafCategory() {
-        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(category.getId(),
-                List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT), PageRequest.of(0, 10));
+        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
+                category.getId(),
+                List.of(
+                        ProductStatus.ACTIVE,
+                        ProductStatus.SOLD_OUT
+                ),
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
 
         assertThat(results.getContent()).extracting(Product::getId)
                 .containsExactlyInAnyOrderElementsOf(productIds());
@@ -119,8 +177,17 @@ class ProductRepositoryTest {
 
     @Test
     void findAllByCategoryOrAncestorCategoryIdAndStatusIn_notFoundCategory_returnsEmptyPage() {
-        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(-1L,
-                List.of(ProductStatus.ACTIVE, ProductStatus.SOLD_OUT), PageRequest.of(0, 10));
+        Page<Product> results = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
+                -1L,
+                List.of(
+                        ProductStatus.ACTIVE,
+                        ProductStatus.SOLD_OUT
+                ),
+                PageRequest.of(
+                        0,
+                        10
+                )
+        );
 
         assertThat(results).isEmpty();
     }

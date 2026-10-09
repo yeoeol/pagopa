@@ -10,6 +10,9 @@ public class PaymentGatewayIndeterminateException extends BusinessException {
     }
 
     public PaymentGatewayIndeterminateException(ErrorCode errorCode, String internalMessage) {
-        super(errorCode, internalMessage);
+        super(
+                errorCode,
+                internalMessage
+        );
     }
 }

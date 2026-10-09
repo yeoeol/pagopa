@@ -31,14 +31,23 @@ class CartItemSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
-        List<Long> cartIds = batch.loadIds("cart", "cart_id");
-        List<Long> productIds = batch.loadIds("product", "product_id");
+        List<Long> cartIds = batch.loadIds(
+                "cart",
+                "cart_id"
+        );
+        List<Long> productIds = batch.loadIds(
+                "product",
+                "product_id"
+        );
 
         if (cartIds.isEmpty() || productIds.isEmpty()) {
             throw new IllegalStateException("cart 또는 product 부족");
@@ -59,13 +68,36 @@ class CartItemSeeder implements Seeder {
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setLong(1, cartIds.get(i % cartSize));
-            ps.setLong(2, productIds.get((i / cartSize) % productSize));
-            ps.setInt(3, faker.number()
-                    .numberBetween(1, 10));
-            ps.setTimestamp(4, now);
-            ps.setTimestamp(5, now);
-        });
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    ps.setLong(
+                            1,
+                            cartIds.get(i % cartSize)
+                    );
+                    ps.setLong(
+                            2,
+                            productIds.get((i / cartSize) % productSize)
+                    );
+                    ps.setInt(
+                            3,
+                            faker.number()
+                                    .numberBetween(
+                                            1,
+                                            10
+                                    )
+                    );
+                    ps.setTimestamp(
+                            4,
+                            now
+                    );
+                    ps.setTimestamp(
+                            5,
+                            now
+                    );
+                }
+        );
     }
 }

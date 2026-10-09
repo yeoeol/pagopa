@@ -8,9 +8,18 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "refresh_token", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_refresh_token_user_id", columnNames = {"user_id"}),
-        @UniqueConstraint(name = "uq_refresh_token_token", columnNames = {"token"})})
+@Table(
+        name = "refresh_token",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_refresh_token_user_id",
+                        columnNames = {"user_id"}
+                ),
+                @UniqueConstraint(
+                        name = "uq_refresh_token_token",
+                        columnNames = {"token"}
+                )}
+)
 public class RefreshToken {
 
     @Id
@@ -20,11 +29,19 @@ public class RefreshToken {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_refresh_token_user"))
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_refresh_token_user")
+    )
     private User user;
 
     @ToString.Include
-    @Column(name = "token", length = 255, nullable = false)
+    @Column(
+            name = "token",
+            length = 255,
+            nullable = false
+    )
     private String token;
 
     @Builder

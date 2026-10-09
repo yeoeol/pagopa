@@ -31,14 +31,20 @@ class ReviewSeeder implements Seeder {
 
     @Override
     public boolean shouldRun() {
-        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM " + name(), Integer.class);
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + name(),
+                Integer.class
+        );
         return n != null && n == 0;
     }
 
     @Override
     public void seed() {
         // OrderProduct와 1:1 매핑 - @OneToOne 제약 충족
-        List<Long> orderItemIds = batch.loadIds("order_item", "order_item_id");
+        List<Long> orderItemIds = batch.loadIds(
+                "order_item",
+                "order_item_id"
+        );
 
         if (orderItemIds.isEmpty()) {
             throw new IllegalStateException("order_item 부족");
@@ -48,7 +54,11 @@ class ReviewSeeder implements Seeder {
                 .reviews();
         if (total > orderItemIds.size()) {
             throw new IllegalStateException(
-                    "review(%d) > order_item(%d) - 1:1 매핑 불가".formatted(total, orderItemIds.size()));
+                    "review(%d) > order_item(%d) - 1:1 매핑 불가".formatted(
+                            total,
+                            orderItemIds.size()
+                    )
+            );
         }
 
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
@@ -58,13 +68,33 @@ class ReviewSeeder implements Seeder {
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
-        batch.batchInsert(sql, total, props.batchSize(), (ps, i) -> {
-            ps.setString(1, faker.lorem()
-                    .sentence(15));
-            ps.setInt(2, i % 5 + 1); // 1~5 균등
-            ps.setLong(3, orderItemIds.get(i)); // 처음 total개 OrderItem에 부여
-            ps.setTimestamp(4, now);
-            ps.setTimestamp(5, now);
-        });
+        batch.batchInsert(
+                sql,
+                total,
+                props.batchSize(),
+                (ps, i) -> {
+                    ps.setString(
+                            1,
+                            faker.lorem()
+                                    .sentence(15)
+                    );
+                    ps.setInt(
+                            2,
+                            i % 5 + 1
+                    ); // 1~5 균등
+                    ps.setLong(
+                            3,
+                            orderItemIds.get(i)
+                    ); // 처음 total개 OrderItem에 부여
+                    ps.setTimestamp(
+                            4,
+                            now
+                    );
+                    ps.setTimestamp(
+                            5,
+                            now
+                    );
+                }
+        );
     }
 }

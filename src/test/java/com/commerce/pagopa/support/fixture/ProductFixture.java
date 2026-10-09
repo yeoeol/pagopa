@@ -9,11 +9,25 @@ public final class ProductFixture {
     }
 
     public static Product aProduct(Category category, Long sellerId) {
-        return aProduct("test-product", "test-description", 1, 10, category, sellerId);
+        return aProduct(
+                "test-product",
+                "test-description",
+                1,
+                10,
+                category,
+                sellerId
+        );
     }
 
     public static Product aProduct(Category category, Long sellerId, Integer stockQuantity) {
-        return aProduct("test-product", "test-description", 1000, stockQuantity, category, sellerId);
+        return aProduct(
+                "test-product",
+                "test-description",
+                1000,
+                stockQuantity,
+                category,
+                sellerId
+        );
     }
 
     public static Product aProduct(
@@ -24,6 +38,13 @@ public final class ProductFixture {
             Category category,
             Long sellerId
     ) {
-        return Product.create(name, description, price, stockQuantity, category, sellerId);
+        return Product.create(
+                name,
+                description,
+                price,
+                stockQuantity,
+                category,
+                sellerId
+        );
     }
 }

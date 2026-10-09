@@ -16,9 +16,15 @@ public final class CategoryFixture {
         Category root = Category.createRoot("root");
         Category mid = root.addChild("mid");
         Category leaf = mid.addChild("leaf");
-        return new CategoryTree(root, leaf);
+        return new CategoryTree(
+                root,
+                leaf
+        );
     }
 
-    public record CategoryTree(Category root, Category leaf) {
+    public record CategoryTree(
+            Category root,
+            Category leaf
+    ) {
     }
 }

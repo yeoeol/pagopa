@@ -22,12 +22,10 @@ public interface CartItemRepository {
     void deleteAllByIdIn(List<Long> cartItemIds);
 
     default CartItem findByIdOrThrow(Long cartItemId) {
-        return findById(cartItemId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
+        return findById(cartItemId).orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
     }
 
     default CartItem findByIdForUpdateOrThrow(Long cartItemId) {
-        return findByIdForUpdate(cartItemId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
+        return findByIdForUpdate(cartItemId).orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
     }
 }

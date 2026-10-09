@@ -1,6 +1,12 @@
 package com.commerce.pagopa.catalog.application.admin.dto.response;
 
-public record AdminCategoryTreeItemResponseDto(Long categoryId, Long parentId, String name, int depth, String path) {
+public record AdminCategoryTreeItemResponseDto(
+        Long categoryId,
+        Long parentId,
+        String name,
+        int depth,
+        String path
+) {
     public static AdminCategoryTreeItemResponseDto of(
             Long categoryId,
             Long parentId,
@@ -8,6 +14,12 @@ public record AdminCategoryTreeItemResponseDto(Long categoryId, Long parentId, S
             int depth,
             String path
     ) {
-        return new AdminCategoryTreeItemResponseDto(categoryId, parentId, name, depth, path);
+        return new AdminCategoryTreeItemResponseDto(
+                categoryId,
+                parentId,
+                name,
+                depth,
+                path
+        );
     }
 }

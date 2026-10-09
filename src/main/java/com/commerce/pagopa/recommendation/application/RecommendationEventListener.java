@@ -18,15 +18,27 @@ class RecommendationEventListener {
 
     @ApplicationModuleListener
     void on(UserSearchRecorded event) {
-        log.info("Received user search for {}", event.eventId());
+        log.info(
+                "Received user search for {}",
+                event.eventId()
+        );
         recommendationProjectionService.project(event);
-        log.info("Finished user search for {}", event.eventId());
+        log.info(
+                "Finished user search for {}",
+                event.eventId()
+        );
     }
 
     @ApplicationModuleListener
     void on(OrderConfirmed event) {
-        log.info("Received order confirm for {}", event.eventId());
+        log.info(
+                "Received order confirm for {}",
+                event.eventId()
+        );
         recommendationProjectionService.project(event);
-        log.info("Finished order confirm for {}", event.eventId());
+        log.info(
+                "Finished order confirm for {}",
+                event.eventId()
+        );
     }
 }

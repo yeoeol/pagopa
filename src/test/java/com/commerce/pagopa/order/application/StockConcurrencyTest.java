@@ -50,7 +50,10 @@ class StockConcurrencyTest {
     @DynamicPropertySource
     static void hikariProps(DynamicPropertyRegistry registry) {
         // 대용량 동시성 테스트 한정: HikariCP 기본 풀(10) 으론 N=10000 풀 고갈 발생
-        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "50");
+        registry.add(
+                "spring.datasource.hikari.maximum-pool-size",
+                () -> "50"
+        );
     }
 
     @Autowired
@@ -95,20 +98,40 @@ class StockConcurrencyTest {
     @ValueSource(ints = {50, 200, 1000})
     void stock_10_으로_N명이_동시_주문하면_정확히_10명만_성공(int N) throws Exception {
         user = UserFixture.aUser("order-stock-contention-seller-" + N);
-        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
-        user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        userRole
+                )
+        );
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        sellerRole
+                )
+        );
         userRepository.save(user);
         seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("order-stock-contention-buyer-" + N);
-        buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
+        buyer.addUserRole(
+                UserRoleFixture.aUserRole(
+                        buyer,
+                        userRole
+                )
+        );
         userRepository.save(buyer);
 
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
         // 상품 등록
-        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId()));
+        Product product = productRepository.save(
+                ProductFixture.aProduct(
+                        tree.leaf(),
+                        seller.getId()
+                )
+        );
 
         // 스레드풀 생성
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -126,34 +149,71 @@ class StockConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.order(buyer.getId(),
-                            new OrderCreateRequestDto(new DeliveryRequestDto("메모", "01010", "집주소", "101동"),
-                                    List.of(new OrderItemRequestDto(product.getId(), 1))));
+                    orderService.order(
+                            buyer.getId(),
+                            new OrderCreateRequestDto(
+                                    new DeliveryRequestDto(
+                                            "메모",
+                                            "01010",
+                                            "집주소",
+                                            "101동"
+                                    ),
+                                    List.of(
+                                            new OrderItemRequestDto(
+                                                    product.getId(),
+                                                    1
+                                            )
+                                    )
+                            )
+                    );
                     success.incrementAndGet();
                 } catch (BusinessException e) {
-                    if (e.getErrorCode()
-                            .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)) {
+                    if (
+                        e.getErrorCode()
+                                .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)
+                    ) {
                         soldOut.incrementAndGet();
                     }
                 } catch (Exception e) {
                     other.incrementAndGet();
-                    errorCounts.merge(e.getClass()
-                            .getSimpleName(), 1, Integer::sum);
+                    errorCounts.merge(
+                            e.getClass()
+                                    .getSimpleName(),
+                            1,
+                            Integer::sum
+                    );
                 } finally {
                     done.countDown();
                 }
             });
         }
 
-        boolean finished = done.await(120, TimeUnit.SECONDS);
+        boolean finished = done.await(
+                120,
+                TimeUnit.SECONDS
+        );
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.close();
 
         int finalStock = productRepository.findByIdOrThrow(product.getId())
                 .getStockQuantity();
-        log.info("[contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}, finalStock={}", N,
-                finished, elapsedMs, success.get(), soldOut.get(), other.get(), finalStock);
-        errorCounts.forEach((k, v) -> log.warn("  [other] {} x{}", k, v));
+        log.info(
+                "[contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}, finalStock={}",
+                N,
+                finished,
+                elapsedMs,
+                success.get(),
+                soldOut.get(),
+                other.get(),
+                finalStock
+        );
+        errorCounts.forEach(
+                (k, v) -> log.warn(
+                        "  [other] {} x{}",
+                        k,
+                        v
+                )
+        );
 
         assertThat(success.get()).isEqualTo(10);
         assertThat(soldOut.get()).isEqualTo(N - 10);
@@ -165,13 +225,28 @@ class StockConcurrencyTest {
     @ValueSource(ints = {50, 200, 1000})
     void 서로_다른_N개_상품에_각각_1명씩_주문하면_경합없이_모두_성공(int N) throws Exception {
         user = UserFixture.aUser("order-stock-no-contention-seller-" + N);
-        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
-        user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        userRole
+                )
+        );
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        sellerRole
+                )
+        );
         userRepository.save(user);
         seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("order-stock-no-contention-buyer-" + N);
-        buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
+        buyer.addUserRole(
+                UserRoleFixture.aUserRole(
+                        buyer,
+                        userRole
+                )
+        );
         userRepository.save(buyer);
 
         CategoryTree tree = CategoryFixture.aTree();
@@ -180,7 +255,15 @@ class StockConcurrencyTest {
         // N개 상품 미리 생성, 각 stockQuantity=1 → 동시 주문 시 row 경합 0
         List<Product> products = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
-            products.add(productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 10 + (i * 5))));
+            products.add(
+                    productRepository.save(
+                            ProductFixture.aProduct(
+                                    tree.leaf(),
+                                    seller.getId(),
+                                    10 + (i * 5)
+                            )
+                    )
+            );
         }
 
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -200,32 +283,68 @@ class StockConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.order(buyer.getId(),
-                            new OrderCreateRequestDto(new DeliveryRequestDto("메모", "01010", "집주소", "101동"),
-                                    List.of(new OrderItemRequestDto(productId, 1))));
+                    orderService.order(
+                            buyer.getId(),
+                            new OrderCreateRequestDto(
+                                    new DeliveryRequestDto(
+                                            "메모",
+                                            "01010",
+                                            "집주소",
+                                            "101동"
+                                    ),
+                                    List.of(
+                                            new OrderItemRequestDto(
+                                                    productId,
+                                                    1
+                                            )
+                                    )
+                            )
+                    );
                     success.incrementAndGet();
                 } catch (BusinessException e) {
-                    if (e.getErrorCode()
-                            .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)) {
+                    if (
+                        e.getErrorCode()
+                                .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)
+                    ) {
                         soldOut.incrementAndGet();
                     }
                 } catch (Exception e) {
                     other.incrementAndGet();
-                    errorCounts.merge(e.getClass()
-                            .getSimpleName(), 1, Integer::sum);
+                    errorCounts.merge(
+                            e.getClass()
+                                    .getSimpleName(),
+                            1,
+                            Integer::sum
+                    );
                 } finally {
                     done.countDown();
                 }
             });
         }
 
-        boolean finished = done.await(120, TimeUnit.SECONDS);
+        boolean finished = done.await(
+                120,
+                TimeUnit.SECONDS
+        );
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.close();
 
-        log.info("[no-contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}", N, finished, elapsedMs,
-                success.get(), soldOut.get(), other.get());
-        errorCounts.forEach((k, v) -> log.warn("  [other] {} x{}", k, v));
+        log.info(
+                "[no-contention] N={} finished={} elapsed={}ms success={} soldOut={} other={}",
+                N,
+                finished,
+                elapsedMs,
+                success.get(),
+                soldOut.get(),
+                other.get()
+        );
+        errorCounts.forEach(
+                (k, v) -> log.warn(
+                        "  [other] {} x{}",
+                        k,
+                        v
+                )
+        );
 
         assertThat(success.get()).isEqualTo(N);
         assertThat(soldOut.get()).isZero();
@@ -236,29 +355,82 @@ class StockConcurrencyTest {
     @ValueSource(ints = {50, 200, 1000})
     void 동시_주문취소하면_정확히_1번만_성공(int N) throws Exception {
         user = UserFixture.aUser("cancel-idem-seller-" + N);
-        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
-        user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        userRole
+                )
+        );
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        sellerRole
+                )
+        );
         userRepository.save(user);
         seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("cancel-idem-buyer-" + N);
-        buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
+        buyer.addUserRole(
+                UserRoleFixture.aUserRole(
+                        buyer,
+                        userRole
+                )
+        );
         userRepository.save(buyer);
 
         // 상품 등록
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        Product product1 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 10));
-        Product product2 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 20));
-        Product product3 = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), 30));
+        Product product1 = productRepository.save(
+                ProductFixture.aProduct(
+                        tree.leaf(),
+                        seller.getId(),
+                        10
+                )
+        );
+        Product product2 = productRepository.save(
+                ProductFixture.aProduct(
+                        tree.leaf(),
+                        seller.getId(),
+                        20
+                )
+        );
+        Product product3 = productRepository.save(
+                ProductFixture.aProduct(
+                        tree.leaf(),
+                        seller.getId(),
+                        30
+                )
+        );
 
         // 상품 주문
-        OrderStockResponseDto created = orderService.order(buyer.getId(),
-                new OrderCreateRequestDto(new DeliveryRequestDto("메모", "01010", "집주소", "101동"),
-                        List.of(new OrderItemRequestDto(product1.getId(), 1),
-                                new OrderItemRequestDto(product2.getId(), 2),
-                                new OrderItemRequestDto(product3.getId(), 3))));
+        OrderStockResponseDto created = orderService.order(
+                buyer.getId(),
+                new OrderCreateRequestDto(
+                        new DeliveryRequestDto(
+                                "메모",
+                                "01010",
+                                "집주소",
+                                "101동"
+                        ),
+                        List.of(
+                                new OrderItemRequestDto(
+                                        product1.getId(),
+                                        1
+                                ),
+                                new OrderItemRequestDto(
+                                        product2.getId(),
+                                        2
+                                ),
+                                new OrderItemRequestDto(
+                                        product3.getId(),
+                                        3
+                                )
+                        )
+                )
+        );
         Long orderId = created.orderId();
 
         // 스레드 풀 생성
@@ -281,19 +453,30 @@ class StockConcurrencyTest {
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
-                    errorCounts.merge(e.getErrorCode()
-                            .name(), 1, Integer::sum);
+                    errorCounts.merge(
+                            e.getErrorCode()
+                                    .name(),
+                            1,
+                            Integer::sum
+                    );
                 } catch (Exception e) {
                     other.incrementAndGet();
-                    errorCounts.merge(e.getClass()
-                            .getSimpleName(), 1, Integer::sum);
+                    errorCounts.merge(
+                            e.getClass()
+                                    .getSimpleName(),
+                            1,
+                            Integer::sum
+                    );
                 } finally {
                     done.countDown();
                 }
             });
         }
 
-        boolean finished = done.await(120, TimeUnit.SECONDS);
+        boolean finished = done.await(
+                120,
+                TimeUnit.SECONDS
+        );
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.close();
 
@@ -305,18 +488,36 @@ class StockConcurrencyTest {
         int finalStock3 = productRepository.findByIdOrThrow(product3.getId())
                 .getStockQuantity();
 
-        log.info("[same-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} orderStatus={}",
-                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), response.status());
-        errorCounts.forEach((k, v) -> log.warn("  [error] {} x{}", k, v));
+        log.info(
+                "[same-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} orderStatus={}",
+                N,
+                finished,
+                elapsedMs,
+                success.get(),
+                businessFail.get(),
+                other.get(),
+                response.status()
+        );
+        errorCounts.forEach(
+                (k, v) -> log.warn(
+                        "  [error] {} x{}",
+                        k,
+                        v
+                )
+        );
 
         assertThat(finished).isTrue();
         assertThat(success.get()).isEqualTo(1);
         assertThat(businessFail.get()).isEqualTo(N - 1);
         assertThat(other.get()).isZero();
-        assertThat(response.status()
-                .status()).isEqualTo(OrderStatus.CANCELED);
-        assertThat(response.status()
-                .description()).isEqualTo("주문취소");
+        assertThat(
+                response.status()
+                        .status()
+        ).isEqualTo(OrderStatus.CANCELED);
+        assertThat(
+                response.status()
+                        .description()
+        ).isEqualTo("주문취소");
         assertThat(finalStock1).isEqualTo(10);
         assertThat(finalStock2).isEqualTo(20);
         assertThat(finalStock3).isEqualTo(30);
@@ -326,33 +527,70 @@ class StockConcurrencyTest {
     @ValueSource(ints = {50, 200, 1000})
     void 서로_다른_N개_상품에_각각_1명씩_주문취소하면_경합없이_재고_복구_성공(int N) throws Exception {
         user = UserFixture.aUser("cross-order-seller-" + N);
-        user.addUserRole(UserRoleFixture.aUserRole(user, userRole));
-        user.addUserRole(UserRoleFixture.aUserRole(user, sellerRole));
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        userRole
+                )
+        );
+        user.addUserRole(
+                UserRoleFixture.aUserRole(
+                        user,
+                        sellerRole
+                )
+        );
         userRepository.save(user);
         seller = sellerRepository.save(SellerFixture.aSeller(user.getId()));
 
         User buyer = UserFixture.aUser("cross-order-buyer-" + N);
-        buyer.addUserRole(UserRoleFixture.aUserRole(buyer, userRole));
+        buyer.addUserRole(
+                UserRoleFixture.aUserRole(
+                        buyer,
+                        userRole
+                )
+        );
         userRepository.save(buyer);
 
         // 상품 등록
         CategoryTree tree = CategoryFixture.aTree();
         categoryRepository.save(tree.root());
 
-        Product product = productRepository.save(ProductFixture.aProduct(tree.leaf(), seller.getId(), N));
+        Product product = productRepository.save(
+                ProductFixture.aProduct(
+                        tree.leaf(),
+                        seller.getId(),
+                        N
+                )
+        );
 
         // 상품 주문
         List<Long> orderIds = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
-            OrderStockResponseDto created = orderService.order(buyer.getId(),
-                    new OrderCreateRequestDto(new DeliveryRequestDto("메모", "01010", "집주소", "101동"),
-                            List.of(new OrderItemRequestDto(product.getId(), 1))));
+            OrderStockResponseDto created = orderService.order(
+                    buyer.getId(),
+                    new OrderCreateRequestDto(
+                            new DeliveryRequestDto(
+                                    "메모",
+                                    "01010",
+                                    "집주소",
+                                    "101동"
+                            ),
+                            List.of(
+                                    new OrderItemRequestDto(
+                                            product.getId(),
+                                            1
+                                    )
+                            )
+                    )
+            );
             orderIds.add(created.orderId());
         }
 
         // 주문 성공 검증
-        assertThat(productRepository.findByIdOrThrow(product.getId())
-                .getStockQuantity()).isZero();
+        assertThat(
+                productRepository.findByIdOrThrow(product.getId())
+                        .getStockQuantity()
+        ).isZero();
 
         // 스레드 풀 생성
         ExecutorService pool = Executors.newFixedThreadPool(N);
@@ -374,19 +612,30 @@ class StockConcurrencyTest {
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
-                    errorCounts.merge(e.getErrorCode()
-                            .name(), 1, Integer::sum);
+                    errorCounts.merge(
+                            e.getErrorCode()
+                                    .name(),
+                            1,
+                            Integer::sum
+                    );
                 } catch (Exception e) {
                     other.incrementAndGet();
-                    errorCounts.merge(e.getClass()
-                            .getSimpleName(), 1, Integer::sum);
+                    errorCounts.merge(
+                            e.getClass()
+                                    .getSimpleName(),
+                            1,
+                            Integer::sum
+                    );
                 } finally {
                     done.countDown();
                 }
             });
         }
 
-        boolean finished = done.await(120, TimeUnit.SECONDS);
+        boolean finished = done.await(
+                120,
+                TimeUnit.SECONDS
+        );
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         pool.close();
 
@@ -395,8 +644,21 @@ class StockConcurrencyTest {
 
         log.info(
                 "[different-order-cancel] N={} finished={} elapsed={}ms success={} businessFail={} other={} finalStock={}",
-                N, finished, elapsedMs, success.get(), businessFail.get(), other.get(), finalStock);
-        errorCounts.forEach((k, v) -> log.warn("  [error] {} x{}", k, v));
+                N,
+                finished,
+                elapsedMs,
+                success.get(),
+                businessFail.get(),
+                other.get(),
+                finalStock
+        );
+        errorCounts.forEach(
+                (k, v) -> log.warn(
+                        "  [error] {} x{}",
+                        k,
+                        v
+                )
+        );
 
         assertThat(finished).isTrue();
         assertThat(success.get()).isEqualTo(N);

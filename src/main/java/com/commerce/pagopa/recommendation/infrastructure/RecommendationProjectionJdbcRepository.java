@@ -83,17 +83,40 @@ public class RecommendationProjectionJdbcRepository implements RecommendationPro
 
     @Override
     public boolean saveEventIfAbsent(RecommendationEvent event) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue("eventId", event.eventId()
-                .toString())
-                .addValue("eventType", event.eventType()
-                        .getValue())
-                .addValue("userId", event.userId())
-                .addValue("aggregateId", event.aggregateId(), Types.BIGINT)
-                .addValue("payload", jsonMapper.writeValueAsString(event.payload()), Types.VARCHAR)
-                .addValue("occurredAt", event.occurredAt());
+        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue(
+                "eventId",
+                event.eventId()
+                        .toString()
+        )
+                .addValue(
+                        "eventType",
+                        event.eventType()
+                                .getValue()
+                )
+                .addValue(
+                        "userId",
+                        event.userId()
+                )
+                .addValue(
+                        "aggregateId",
+                        event.aggregateId(),
+                        Types.BIGINT
+                )
+                .addValue(
+                        "payload",
+                        jsonMapper.writeValueAsString(event.payload()),
+                        Types.VARCHAR
+                )
+                .addValue(
+                        "occurredAt",
+                        event.occurredAt()
+                );
 
         try {
-            return jdbcTemplate.update(INSERT_EVENT, parameters) == 1;
+            return jdbcTemplate.update(
+                    INSERT_EVENT,
+                    parameters
+            ) == 1;
         } catch (DuplicateKeyException ignored) {
             return false;
         }
@@ -107,24 +130,61 @@ public class RecommendationProjectionJdbcRepository implements RecommendationPro
             int weight,
             LocalDateTime occurredAt
     ) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue("userId", userId)
-                .addValue("interestType", type.name())
-                .addValue("interestKey", interestKey)
-                .addValue("weight", weight)
-                .addValue("occurredAt", occurredAt);
+        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue(
+                "userId",
+                userId
+        )
+                .addValue(
+                        "interestType",
+                        type.name()
+                )
+                .addValue(
+                        "interestKey",
+                        interestKey
+                )
+                .addValue(
+                        "weight",
+                        weight
+                )
+                .addValue(
+                        "occurredAt",
+                        occurredAt
+                );
 
-        jdbcTemplate.update(UPSERT_INTEREST, parameters);
+        jdbcTemplate.update(
+                UPSERT_INTEREST,
+                parameters
+        );
     }
 
     @Override
     public List<RecommendationInterest> findTopInterests(Long userId, InterestType type, int limit) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue("userId", userId)
-                .addValue("interestType", type.name())
-                .addValue("limit", limit);
+        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue(
+                "userId",
+                userId
+        )
+                .addValue(
+                        "interestType",
+                        type.name()
+                )
+                .addValue(
+                        "limit",
+                        limit
+                );
 
-        return jdbcTemplate.query(SELECT_TOP_INTERESTS, parameters,
-                (rs, rowNum) -> new RecommendationInterest(rs.getLong("user_id"),
-                        InterestType.valueOf(rs.getString("interest_type")), rs.getString("interest_key"),
-                        rs.getInt("score"), rs.getObject("last_event_at", LocalDateTime.class)));
+        return jdbcTemplate.query(
+                SELECT_TOP_INTERESTS,
+                parameters,
+                (rs, rowNum) -> new RecommendationInterest(
+                        rs.getLong("user_id"),
+                        InterestType.valueOf(rs.getString("interest_type")),
+                        rs.getString("interest_key"),
+                        rs.getInt("score"),
+                        rs.getObject(
+                                "last_event_at",
+                                LocalDateTime.class
+                        )
+                )
+        );
     }
 }

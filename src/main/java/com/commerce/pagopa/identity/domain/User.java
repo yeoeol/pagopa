@@ -17,31 +17,59 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "user", uniqueConstraints = {@UniqueConstraint(name = "uq_user_email", columnNames = "email"),
-        @UniqueConstraint(name = "uq_user_provider_provider_id", columnNames = {"provider", "provider_id"})})
+@Table(
+        name = "user",
+        uniqueConstraints = {@UniqueConstraint(
+                name = "uq_user_email",
+                columnNames = "email"
+        ),
+                @UniqueConstraint(
+                        name = "uq_user_provider_provider_id",
+                        columnNames = {"provider", "provider_id"}
+                )}
+)
 public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "user_id", nullable = false)
+    @Column(
+            name = "user_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "provider", length = 50, nullable = false)
+    @Column(
+            name = "provider",
+            length = 50,
+            nullable = false
+    )
     private Provider provider;
 
     @ToString.Include
-    @Column(name = "provider_id", length = 255, nullable = false)
+    @Column(
+            name = "provider_id",
+            length = 255,
+            nullable = false
+    )
     private String providerId;
 
     @ToString.Include
-    @Column(name = "name", length = 50, nullable = false)
+    @Column(
+            name = "name",
+            length = 50,
+            nullable = false
+    )
     private String name;
 
     @ToString.Include
-    @Column(name = "email", length = 100, nullable = false)
+    @Column(
+            name = "email",
+            length = 100,
+            nullable = false
+    )
     private String email;
 
     @ToString.Include
@@ -49,23 +77,41 @@ public class User extends BaseTimeEntity {
     private Address address;
 
     @ToString.Include
-    @Column(name = "phone_number", length = 20, nullable = true)
+    @Column(
+            name = "phone_number",
+            length = 20,
+            nullable = true
+    )
     private String phoneNumber;
 
     @ToString.Include
-    @Column(name = "profile_image_url", length = 512, nullable = false)
+    @Column(
+            name = "profile_image_url",
+            length = 512,
+            nullable = false
+    )
     private String profileImageUrl;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.PERSIST
+    )
     private final Set<UserRole> userRoles = new HashSet<>();
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(
+            name = "status",
+            length = 20,
+            nullable = false
+    )
     private UserStatus status;
 
     @ToString.Include
-    @Column(name = "status_changed_at", nullable = false)
+    @Column(
+            name = "status_changed_at",
+            nullable = false
+    )
     private LocalDateTime statusChangedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
@@ -118,7 +164,12 @@ public class User extends BaseTimeEntity {
     }
 
     public void grantRole(Role role) {
-        userRoles.add(UserRole.create(this, role));
+        userRoles.add(
+                UserRole.create(
+                        this,
+                        role
+                )
+        );
     }
 
     public void activate(LocalDateTime activatedAt) {

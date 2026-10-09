@@ -29,7 +29,12 @@ public class SellerUserService {
                     existingSeller.requestAgain(requestedAt);
                     return existingSeller;
                 })
-                .orElseGet(() -> Seller.create(userId, requestedAt));
+                .orElseGet(
+                        () -> Seller.create(
+                                userId,
+                                requestedAt
+                        )
+                );
 
         sellerRepository.save(seller);
     }

@@ -18,27 +18,46 @@ public class Delivery extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
-    @Column(name = "delivery_id", nullable = false)
+    @Column(
+            name = "delivery_id",
+            nullable = false
+    )
     private Long id;
 
     @ToString.Include
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(
+            name = "status",
+            length = 20,
+            nullable = false
+    )
     private DeliveryStatus status;
 
     @ToString.Include
-    @Column(name = "tracking_no", length = 50, nullable = true)
+    @Column(
+            name = "tracking_no",
+            length = 50,
+            nullable = true
+    )
     private String trackingNo;
 
     @ToString.Include
-    @Column(name = "request_memo", length = 100, nullable = true)
+    @Column(
+            name = "request_memo",
+            length = 100,
+            nullable = true
+    )
     private String requestMemo;
 
     @Embedded
     private Address address; // 값 타입(주소, 상세주소, 우편번호)
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(name = "fk_delivery_orders"))
+    @JoinColumn(
+            name = "order_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_delivery_orders")
+    )
     private Order order;
 
     @Builder(access = AccessLevel.PRIVATE)

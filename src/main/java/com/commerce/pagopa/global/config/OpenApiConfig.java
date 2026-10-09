@@ -31,7 +31,10 @@ public class OpenApiConfig {
 
     private Components getComponents() {
         SecurityScheme securityScheme = getSecurityScheme();
-        return new Components().addSecuritySchemes(JWT_SCHEME_NAME, securityScheme);
+        return new Components().addSecuritySchemes(
+                JWT_SCHEME_NAME,
+                securityScheme
+        );
     }
 
     private SecurityScheme getSecurityScheme() {
@@ -105,7 +108,10 @@ public class OpenApiConfig {
     public GroupedOpenApi cartApi() {
         return GroupedOpenApi.builder()
                 .group("장바구니 관리")
-                .pathsToMatch("/api/v1/cart/**", "/api/v1/cart-items/**")
+                .pathsToMatch(
+                        "/api/v1/cart/**",
+                        "/api/v1/cart-items/**"
+                )
                 .build();
     }
 
