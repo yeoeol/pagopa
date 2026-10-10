@@ -44,7 +44,7 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
                         :lastSearchedAt
                     )
                     ON DUPLICATE KEY UPDATE
-                        last_searched_at = :lastSearchedAt
+                        last_searched_at = GREATEST(last_searched_at, :lastSearchedAt)
                     """,
             nativeQuery = true
     )
@@ -69,7 +69,7 @@ public interface SearchHistoryJpaRepository extends JpaRepository<SearchHistory,
                         :lastSearchedAt
                     )
                     ON DUPLICATE KEY UPDATE
-                        last_searched_at = :lastSearchedAt
+                        last_searched_at = GREATEST(last_searched_at, :lastSearchedAt)
                     """,
             nativeQuery = true
     )

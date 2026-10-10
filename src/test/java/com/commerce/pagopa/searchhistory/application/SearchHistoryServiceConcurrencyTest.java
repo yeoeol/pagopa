@@ -140,7 +140,7 @@ class SearchHistoryServiceConcurrencyTest {
                         SearchHistory.createForGuest(
                                 sessionId,
                                 keyword,
-                                searchedAt
+                                initialLastSearchedAt
                         )
                 );
         Long initialId = existingHistory.getId();
