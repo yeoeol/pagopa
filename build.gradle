@@ -56,7 +56,7 @@ dependencies {
     // Infra
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
+    implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
 
     // Spring Modulith
     implementation 'org.springframework.modulith:spring-modulith-starter-jdbc'
