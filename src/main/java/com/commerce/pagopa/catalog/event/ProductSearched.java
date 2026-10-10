@@ -1,11 +1,12 @@
-package com.commerce.pagopa.discovery.event;
+package com.commerce.pagopa.catalog.event;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record UserSearchRecorded(
+public record ProductSearched(
         UUID eventId,
         Long userId,
+        String sessionId,
         String keyword,
         LocalDateTime searchedAt
 ) {

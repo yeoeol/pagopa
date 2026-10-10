@@ -35,7 +35,11 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponseDto>> getCart(
             @AuthenticationPrincipal(expression = "userId") Long userId
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(cartService.findUserCart(userId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        cartService.findUserCart(userId)
+                )
+        );
     }
 
     @Operation(

@@ -66,7 +66,7 @@ class RecommendationProjectionJdbcRepositoryTest {
                 .saveEventIfAbsent(
                         new RecommendationEvent(
                                 eventId,
-                                RecommendationEventType.USER_SEARCH_RECORDED,
+                                RecommendationEventType.PRODUCT_SEARCHED,
                                 1L,
                                 null,
                                 new SearchPayload("TEST"),
@@ -77,7 +77,7 @@ class RecommendationProjectionJdbcRepositoryTest {
                 .saveEventIfAbsent(
                         new RecommendationEvent(
                                 eventId,
-                                RecommendationEventType.USER_SEARCH_RECORDED,
+                                RecommendationEventType.PRODUCT_SEARCHED,
                                 1L,
                                 null,
                                 new SearchPayload("TEST"),
@@ -148,7 +148,7 @@ class RecommendationProjectionJdbcRepositoryTest {
 
         RecommendationEvent firstEvent = new RecommendationEvent(
                 UUID.randomUUID(),
-                RecommendationEventType.USER_SEARCH_RECORDED,
+                RecommendationEventType.PRODUCT_SEARCHED,
                 1L,
                 null,
                 new RecommendationEvent.SearchPayload("keyboard"),
@@ -157,7 +157,7 @@ class RecommendationProjectionJdbcRepositoryTest {
 
         RecommendationEvent secondEvent = new RecommendationEvent(
                 UUID.randomUUID(),
-                RecommendationEventType.USER_SEARCH_RECORDED,
+                RecommendationEventType.PRODUCT_SEARCHED,
                 1L,
                 null,
                 new RecommendationEvent.SearchPayload("mouse"),

@@ -96,6 +96,10 @@ public class ReviewController {
     public ResponseEntity<ApiResponse<List<ProductReviewResponseDto>>> getAllByProduct(
             @PathVariable("productId") Long productId
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(reviewService.findAllByProduct(productId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        reviewService.findAllByProduct(productId)
+                )
+        );
     }
 }

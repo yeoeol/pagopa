@@ -36,7 +36,11 @@ public class RoleController {
     )
     @GetMapping
     public ResponseEntity<ApiResponse<List<RoleResponseDto>>> getAll(@RequestParam(required = false) Boolean enabled) {
-        return ResponseEntity.ok(ApiResponse.ok(roleService.findAll(enabled)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        roleService.findAll(enabled)
+                )
+        );
     }
 
     @Operation(
@@ -45,7 +49,11 @@ public class RoleController {
     )
     @GetMapping("/{roleId}")
     public ResponseEntity<ApiResponse<RoleResponseDto>> getDetail(@PathVariable("roleId") Long roleId) {
-        return ResponseEntity.ok(ApiResponse.ok(roleService.find(roleId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        roleService.find(roleId)
+                )
+        );
     }
 
     @Operation(

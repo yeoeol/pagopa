@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import com.commerce.pagopa.discovery.application.SearchHistoryService;
+import com.commerce.pagopa.discovery.application.command.ProductSearchHistoryCommand;
 import com.commerce.pagopa.discovery.domain.SearchHistory;
 import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
 import com.commerce.pagopa.global.config.QueryDSLConfig;
@@ -82,6 +83,13 @@ class SearchHistoryServiceConcurrencyTest {
     @Tag("normal")
     void concurrent_different_keywords_are_all_saved() throws InterruptedException {
         String sessionId = unique_session_id("different-keywords");
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
         List<String> keywords = IntStream.range(
                 0,
                 PARTICIPANT_COUNT
@@ -92,9 +100,12 @@ class SearchHistoryServiceConcurrencyTest {
         try {
             ConcurrencyResult result = execute_concurrently(
                     index -> searchHistoryService.saveHistory(
-                            null,
-                            sessionId,
-                            keywords.get(index)
+                            new ProductSearchHistoryCommand(
+                                    null,
+                                    sessionId,
+                                    keywords.get(index),
+                                    searchedAt
+                            )
                     )
             );
 
@@ -116,6 +127,13 @@ class SearchHistoryServiceConcurrencyTest {
     void concurrent_updates_of_existing_history_complete_without_errors() throws InterruptedException {
         String sessionId = unique_session_id("existing-history");
         String keyword = "keyword";
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
         LocalDateTime initialLastSearchedAt = LocalDateTime.parse("2000-01-01T00:00:00");
         SearchHistory existingHistory = searchHistoryRepository
                 .save(
@@ -130,9 +148,12 @@ class SearchHistoryServiceConcurrencyTest {
         try {
             ConcurrencyResult result = execute_concurrently(
                     ignored -> searchHistoryService.saveHistory(
-                            null,
-                            sessionId,
-                            keyword
+                            new ProductSearchHistoryCommand(
+                                    null,
+                                    sessionId,
+                                    keyword,
+                                    searchedAt
+                            )
                     )
             );
 
@@ -159,6 +180,13 @@ class SearchHistoryServiceConcurrencyTest {
     @Tag("boundary")
     void concurrent_whitespace_variants_are_deduplicated() throws InterruptedException {
         String sessionId = unique_session_id("whitespace-variants");
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
         List<String> keywordVariants = List.of(
                 "keyword",
                 " keyword ",
@@ -173,9 +201,12 @@ class SearchHistoryServiceConcurrencyTest {
         try {
             ConcurrencyResult result = execute_concurrently(
                     index -> searchHistoryService.saveHistory(
-                            null,
-                            sessionId,
-                            keywordVariants.get(index)
+                            new ProductSearchHistoryCommand(
+                                    null,
+                                    sessionId,
+                                    keywordVariants.get(index),
+                                    searchedAt
+                            )
                     )
             );
 
@@ -196,14 +227,24 @@ class SearchHistoryServiceConcurrencyTest {
     void concurrent_same_user_keyword_results_in_one_history() throws InterruptedException {
         User user = userRepository.save(UserFixture.aUser(unique_suffix("same-user-keyword")));
         String keyword = "keyword";
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
         given(userApi.existsById(user.getId())).willReturn(true);
         try {
             ConcurrencyResult result = execute_concurrently(
                     ignored -> searchHistoryService.saveHistory(
-                            user.getId(),
-                            null,
-                            keyword
+                            new ProductSearchHistoryCommand(
+                                    user.getId(),
+                                    null,
+                                    keyword,
+                                    searchedAt
+                            )
                     )
             );
 
@@ -224,13 +265,23 @@ class SearchHistoryServiceConcurrencyTest {
     void concurrent_same_session_keyword_results_in_one_history() throws InterruptedException {
         String sessionId = unique_session_id("same-session-keyword");
         String keyword = "keyword";
+        LocalDateTime searchedAt = LocalDateTime.of(
+                2026,
+                1,
+                1,
+                12,
+                0
+        );
 
         try {
             ConcurrencyResult result = execute_concurrently(
                     ignored -> searchHistoryService.saveHistory(
-                            null,
-                            sessionId,
-                            keyword
+                            new ProductSearchHistoryCommand(
+                                    null,
+                                    sessionId,
+                                    keyword,
+                                    searchedAt
+                            )
                     )
             );
 

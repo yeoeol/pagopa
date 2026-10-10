@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.commerce.pagopa.discovery.event.UserSearchRecorded;
-import com.commerce.pagopa.ordering.event.OrderConfirmed;
+import com.commerce.pagopa.recommendation.application.command.OrderConfirmedCommand;
+import com.commerce.pagopa.recommendation.application.command.ProductSearchProjectionCommand;
 import com.commerce.pagopa.recommendation.domain.InterestType;
 import com.commerce.pagopa.recommendation.domain.RecommendationEvent;
 import com.commerce.pagopa.recommendation.domain.RecommendationEvent.OrderPayload;
@@ -25,16 +25,16 @@ public class RecommendationProjectionService {
     private final RecommendationProjectionRepository recommendationProjectionRepository;
 
     @Transactional
-    public void project(UserSearchRecorded event) {
-        String keyword = normalize(event.keyword());
+    public void project(ProductSearchProjectionCommand command) {
+        String keyword = normalize(command.keyword());
 
         RecommendationEvent recommendationEvent = new RecommendationEvent(
-                event.eventId(),
-                RecommendationEventType.USER_SEARCH_RECORDED,
-                event.userId(),
+                command.eventId(),
+                RecommendationEventType.PRODUCT_SEARCHED,
+                command.userId(),
                 null,
                 new SearchPayload(keyword),
-                event.searchedAt()
+                command.searchedAt()
         );
 
         if (!recommendationProjectionRepository.saveEventIfAbsent(recommendationEvent)) {
@@ -42,28 +42,28 @@ public class RecommendationProjectionService {
         }
 
         recommendationProjectionRepository.increaseInterest(
-                event.userId(),
+                command.userId(),
                 InterestType.KEYWORD,
                 keyword,
                 1,
-                event.searchedAt()
+                command.searchedAt()
         );
     }
 
     @Transactional
-    public void project(OrderConfirmed event) {
-        List<Long> productIds = event.productIds()
+    public void project(OrderConfirmedCommand command) {
+        List<Long> productIds = command.productIds()
                 .stream()
                 .distinct()
                 .toList();
 
         RecommendationEvent recommendationEvent = new RecommendationEvent(
-                event.eventId(),
+                command.eventId(),
                 RecommendationEventType.ORDER_CONFIRMED,
-                event.userId(),
-                event.orderId(),
+                command.userId(),
+                command.orderId(),
                 new OrderPayload(productIds),
-                event.confirmedAt()
+                command.confirmedAt()
         );
 
         if (!recommendationProjectionRepository.saveEventIfAbsent(recommendationEvent)) {
@@ -72,11 +72,11 @@ public class RecommendationProjectionService {
 
         productIds.forEach(
                 productId -> recommendationProjectionRepository.increaseInterest(
-                        event.userId(),
+                        command.userId(),
                         InterestType.PRODUCT,
                         String.valueOf(productId),
                         5,
-                        event.confirmedAt()
+                        command.confirmedAt()
                 )
         );
     }

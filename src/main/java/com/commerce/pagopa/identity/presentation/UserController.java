@@ -37,7 +37,11 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDto>> getInfo(
             @AuthenticationPrincipal(expression = "userId") Long userId
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(userService.find(userId)));
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        userService.find(userId)
+                )
+        );
     }
 
     @Operation(

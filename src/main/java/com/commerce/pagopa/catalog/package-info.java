@@ -1,6 +1,5 @@
 @ApplicationModule(
         allowedDependencies = {
-                "discovery :: api",
                 "identity :: api"
         }
 )

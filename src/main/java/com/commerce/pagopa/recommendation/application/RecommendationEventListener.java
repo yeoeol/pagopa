@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.commerce.pagopa.discovery.event.UserSearchRecorded;
+import com.commerce.pagopa.catalog.event.ProductSearched;
 import com.commerce.pagopa.ordering.event.OrderConfirmed;
+import com.commerce.pagopa.recommendation.application.command.OrderConfirmedCommand;
+import com.commerce.pagopa.recommendation.application.command.ProductSearchProjectionCommand;
 
 @Slf4j
 @Component
@@ -17,14 +19,25 @@ class RecommendationEventListener {
     private final RecommendationProjectionService recommendationProjectionService;
 
     @ApplicationModuleListener
-    void on(UserSearchRecorded event) {
+    void on(ProductSearched event) {
+        if (event.userId() == null) {
+            return;
+        }
+
         log.info(
-                "Received user search for {}",
+                "Received product search for {}",
                 event.eventId()
         );
-        recommendationProjectionService.project(event);
+        recommendationProjectionService.project(
+                new ProductSearchProjectionCommand(
+                        event.eventId(),
+                        event.userId(),
+                        event.keyword(),
+                        event.searchedAt()
+                )
+        );
         log.info(
-                "Finished user search for {}",
+                "Finished product search for {}",
                 event.eventId()
         );
     }
@@ -35,7 +48,15 @@ class RecommendationEventListener {
                 "Received order confirm for {}",
                 event.eventId()
         );
-        recommendationProjectionService.project(event);
+        recommendationProjectionService.project(
+                new OrderConfirmedCommand(
+                        event.eventId(),
+                        event.orderId(),
+                        event.userId(),
+                        event.productIds(),
+                        event.confirmedAt()
+                )
+        );
         log.info(
                 "Finished order confirm for {}",
                 event.eventId()

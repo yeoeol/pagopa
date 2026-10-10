@@ -7,6 +7,7 @@ build/
 CLAUDE.md
 GEMINI.md
 .todo
+docs/**
 
 ### STS ###
 .apt_generated
