@@ -82,4 +82,9 @@ public class SellerProductService {
                 );
         return results.getFirst();
     }
+
+    @Transactional(readOnly = true)
+    public List<CategoryOption> findCategoryOptions() {
+        return categoryQueryApi.findProductCategoryOptions();
+    }
 }
