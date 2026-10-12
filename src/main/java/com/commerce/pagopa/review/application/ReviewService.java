@@ -55,10 +55,8 @@ public class ReviewService {
                 userId
         );
 
-        for (
-                int i = 0; i < requestDto.imageUrls()
-                        .size(); i++
-        ) {
+        for (int i = 0; i < requestDto.imageUrls()
+                .size(); i++) {
             ReviewImage reviewImage = ReviewImage.create(
                     requestDto.imageUrls()
                             .get(i),

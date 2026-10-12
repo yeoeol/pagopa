@@ -12,10 +12,8 @@ public class JwtCookieUtil {
     public static String extractTokenFromCookies(JwtTokenType tokenType, Cookie[] cookies) {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (
-                    tokenType.getCookieName()
-                            .equals(cookie.getName())
-                ) {
+                if (tokenType.getCookieName()
+                        .equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

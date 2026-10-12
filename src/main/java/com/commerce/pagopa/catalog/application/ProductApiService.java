@@ -78,10 +78,7 @@ public class ProductApiService implements ProductApi {
                 request.sellerId()
         );
 
-        for (
-                int i = 0; i < request.imageUrls()
-                        .size(); i++
-        ) {
+        for (int i = 0; i < request.imageUrls().size(); i++) {
             boolean isThumbnail = (i == 0);
             ProductImage productImage = ProductImage.create(
                     request.imageUrls()

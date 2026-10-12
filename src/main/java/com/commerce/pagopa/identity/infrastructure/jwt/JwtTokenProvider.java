@@ -85,10 +85,8 @@ public class JwtTokenProvider {
 
     public Set<String> getRoles(String token) {
         Object rolesClaim = parseClaims(token).get("roles");
-        if (
-            !(rolesClaim instanceof Collection<?> roles) || roles.stream()
-                    .anyMatch(role -> !(role instanceof String))
-        ) {
+        if (!(rolesClaim instanceof Collection<?> roles) || roles.stream()
+                .anyMatch(role -> !(role instanceof String))) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 

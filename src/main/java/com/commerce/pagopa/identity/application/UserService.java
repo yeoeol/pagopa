@@ -65,12 +65,10 @@ public class UserService {
                 newProfileImageUrl
         );
 
-        if (
-            imageChanged(
-                    newProfileImageUrl,
-                    oldProfileImageUrl
-            )
-        ) {
+        if (imageChanged(
+                newProfileImageUrl,
+                oldProfileImageUrl
+        )) {
             events.publishEvent(
                     new UserProfileUpdated(
                             UUID.randomUUID(),

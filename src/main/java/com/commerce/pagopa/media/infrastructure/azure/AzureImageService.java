@@ -112,10 +112,8 @@ public class AzureImageService implements ImageService {
                     "파일 크기는 5MB 이하여야 합니다."
             );
         }
-        if (
-            !imageProperties.allowedTypes()
-                    .contains(uploadRequest.contentType())
-        ) {
+        if (!imageProperties.allowedTypes()
+                .contains(uploadRequest.contentType())) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
                     "JPG, PNG, WEBP 파일만 업로드 가능합니다."

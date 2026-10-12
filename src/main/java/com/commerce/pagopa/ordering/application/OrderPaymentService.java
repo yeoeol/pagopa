@@ -50,10 +50,8 @@ public class OrderPaymentService {
     }
 
     public void validateOrdererId(Long userId, Order order) {
-        if (
-            !order.getUserId()
-                    .equals(userId)
-        ) {
+        if (!order.getUserId()
+                .equals(userId)) {
             throw new BusinessException(ErrorCode.ORDER_NOT_MINE);
         }
     }
