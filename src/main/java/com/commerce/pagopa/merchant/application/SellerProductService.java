@@ -22,6 +22,7 @@ public class SellerProductService {
     private final SellerRepository sellerRepository;
     private final ProductApi productApi;
     private final ProductStockApi productStockApi;
+    private final CategoryQueryApi categoryQueryApi;
 
     @Transactional(readOnly = true)
     public SellerProductPageResponseDto findAll(Long userId, Pageable pageable) {
@@ -30,9 +31,7 @@ public class SellerProductService {
         ProductPageResponseDto response = productApi.findAllByUserId(
                 seller.getId(),
                 pageable.getPageSize(),
-                pageable.getPageNumber(),
-                pageable.getSort()
-                        .toString()
+                pageable.getPageNumber()
         );
 
         return new SellerProductPageResponseDto(
@@ -82,5 +81,10 @@ public class SellerProductService {
                         )
                 );
         return results.getFirst();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryOption> findCategoryOptions() {
+        return categoryQueryApi.findProductCategoryOptions();
     }
 }

@@ -7,6 +7,7 @@ public record ProductSummary(
         Integer price,
         int stockQuantity,
         String status,
+        Long categoryId,
         Long sellerId
 ) {
 }

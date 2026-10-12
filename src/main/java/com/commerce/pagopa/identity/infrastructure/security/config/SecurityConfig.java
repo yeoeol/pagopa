@@ -64,7 +64,14 @@ public class SecurityConfig {
                                 .hasRole("ADMIN")
                                 .requestMatchers("/api/v1/roles/**")
                                 .hasRole("ADMIN")
+                                .requestMatchers("/seller-assets/**")
+                                .permitAll()
                                 .requestMatchers("/api/v1/sellers/**")
+                                .hasRole("SELLER")
+                                .requestMatchers(
+                                        "/seller",
+                                        "/seller/**"
+                                )
                                 .hasRole("SELLER")
                                 .requestMatchers("/api/v1/local-test/**")
                                 .permitAll()

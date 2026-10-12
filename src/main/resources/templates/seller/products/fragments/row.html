@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<tr th:fragment="row(product)" th:id="|product-${product.productId}|">
+    <td>
+        <div class="d-flex align-items-center gap-3">
+            <span class="avatar avatar-sm seller-product-avatar"
+                  th:text="${#strings.substring(product.productName, 0, 1)}">P</span>
+            <div class="min-w-0">
+                <div class="fw-semibold" th:text="${product.productName}">상품명</div>
+                <div class="text-secondary small seller-product-description"
+                     th:text="${#strings.isEmpty(product.description) ? '상품 설명이 없습니다.' : product.description}"
+                     th:title="${product.description}">상품 설명</div>
+            </div>
+        </div>
+    </td>
+    <td>
+        <span class="badge"
+              th:classappend="${product.status == 'ACTIVE'
+                  ? 'text-bg-success'
+                  : (product.status == 'SOLD_OUT'
+                      ? 'text-bg-danger'
+                      : (product.status == 'INACTIVE'
+                          ? 'text-bg-secondary'
+                          : 'text-bg-dark'))}"
+              th:text="${product.status == 'ACTIVE'
+                  ? '판매중'
+                  : (product.status == 'SOLD_OUT'
+                      ? '품절'
+                      : (product.status == 'INACTIVE'
+                          ? '판매중지'
+                          : '숨김'))}">판매중</span>
+    </td>
+    <td class="text-end fw-semibold">
+        <span th:text="${#numbers.formatInteger(product.price, 1, 'COMMA')}">10,000</span>원
+    </td>
+    <td class="text-end"
+        th:classappend="${product.stockQuantity == 0
+            ? 'seller-stock-empty'
+            : (product.stockQuantity <= 5 ? 'seller-stock-low' : '')}">
+        <span th:text="${#numbers.formatInteger(product.stockQuantity, 1, 'COMMA')}">10</span>개
+    </td>
+    <td><span class="font-monospace" th:text="${product.productId}">1</span></td>
+    <td>
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-outline-secondary btn-sm" type="button"
+                    th:attr="hx-get=@{/seller/products/{productId}(productId=${product.productId})}"
+                    hx-target="#product-detail-content"
+                    hx-swap="innerHTML"
+                    data-bs-toggle="modal"
+                    data-bs-target="#product-detail-modal">상세 · 재고</button>
+        </div>
+    </td>
+</tr>
+</body>
+</html>

@@ -13,7 +13,7 @@ public interface ProductApi {
 
     ProductSummary register(ProductRegisterRequest request);
 
-    ProductPageResponseDto findAllByUserId(Long sellerId, int pageSize, int pageNumber, String sort);
+    ProductPageResponseDto findAllByUserId(Long sellerId, int pageSize, int pageNumber);
 
     List<ProductSummary> findCandidatesByKeyword(String keyword, Collection<Long> excludedProductIds, int limit);
 

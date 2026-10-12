@@ -20,4 +20,14 @@ public record ProductRegisterRequestDto(
                 message = "{validation.size}"
         ) String> imageUrls
 ) {
+    public static ProductRegisterRequestDto emptyForm() {
+        return new ProductRegisterRequestDto(
+                "",
+                "",
+                null,
+                null,
+                null,
+                List.of("")
+        );
+    }
 }

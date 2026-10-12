@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="detail">
+    <div class="modal-header">
+        <div>
+            <div class="text-secondary small">
+                상품 번호 <span th:text="${product.productId}">1</span>
+            </div>
+            <h3 class="modal-title" id="product-detail-title">상품 상세</h3>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+    </div>
+
+    <div class="modal-body">
+        <div class="d-flex align-items-start gap-3 mb-4">
+            <span class="avatar avatar-lg seller-product-avatar"
+                  th:text="${#strings.substring(product.productName, 0, 1)}">P</span>
+            <div class="min-w-0">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h3 class="mb-0" th:text="${product.productName}">상품명</h3>
+                    <span class="badge"
+                          th:classappend="${product.status == 'ACTIVE'
+                              ? 'text-bg-success'
+                              : (product.status == 'SOLD_OUT'
+                                  ? 'text-bg-danger'
+                                  : (product.status == 'INACTIVE'
+                                      ? 'text-bg-secondary'
+                                      : 'text-bg-dark'))}"
+                          th:text="${product.status == 'ACTIVE'
+                              ? '판매중'
+                              : (product.status == 'SOLD_OUT'
+                                  ? '품절'
+                                  : (product.status == 'INACTIVE'
+                                      ? '판매중지'
+                                      : '숨김'))}">판매중</span>
+                </div>
+                <p class="text-secondary mt-2 mb-0"
+                   th:text="${#strings.isEmpty(product.description) ? '상품 설명이 없습니다.' : product.description}">
+                    상품 설명
+                </p>
+            </div>
+        </div>
+
+        <dl class="row seller-detail-list mb-0">
+            <dt class="col-4 text-secondary">판매가</dt>
+            <dd class="col-8 text-end fw-semibold">
+                <span th:text="${#numbers.formatInteger(product.price, 1, 'COMMA')}">10,000</span>원
+            </dd>
+            <dt class="col-4 text-secondary">현재 재고</dt>
+            <dd class="col-8 text-end fw-semibold">
+                <span th:text="${#numbers.formatInteger(product.stockQuantity, 1, 'COMMA')}">10</span>개
+            </dd>
+            <dt class="col-4 text-secondary d-flex align-items-center">카테고리</dt>
+            <dd class="col-8">
+                <select class="form-select form-select-sm" disabled aria-label="상품 카테고리">
+                    <option value="" th:selected="${selectedCategoryId == null}">카테고리 정보 없음</option>
+                    <option th:each="category : ${categoryOptions}"
+                            th:value="${category.categoryId}"
+                            th:text="${category.path}"
+                            th:selected="${category.categoryId == selectedCategoryId}">
+                        상위 &gt; 하위
+                    </option>
+                </select>
+            </dd>
+            <dt class="col-4 text-secondary">판매자 번호</dt>
+            <dd class="col-8 text-end font-monospace" th:text="${product.sellerId}">1</dd>
+        </dl>
+
+        <hr class="my-4">
+
+        <form method="post"
+              th:action="@{/seller/products/{productId}/stock(productId=${product.productId})}"
+              th:object="${stockForm}">
+            <label class="form-label required" for="product-stock-quantity">재고 추가</label>
+            <div class="row g-2">
+                <div class="col">
+                    <div class="input-group">
+                        <input id="product-stock-quantity" class="form-control" type="number"
+                               min="1" step="1" required inputmode="numeric" placeholder="추가 수량"
+                               th:field="*{quantity}">
+                        <span class="input-group-text">개</span>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary seller-primary" type="submit">재고 반영</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</th:block>
+</body>
+</html>
