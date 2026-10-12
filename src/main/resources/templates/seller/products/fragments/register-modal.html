@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="modal modal-blur fade"
+     id="product-register-modal"
+     tabindex="-1"
+     aria-labelledby="product-register-title"
+     aria-hidden="true"
+     th:fragment="register"
+     th:attr="data-open-on-load=${openRegisterModal == true}">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <form class="modal-content"
+              id="product-register-form"
+              method="post"
+              th:action="@{/seller/products}"
+              th:object="${registerForm}">
+            <div class="modal-header">
+                <div>
+                    <div class="text-secondary small">NEW PRODUCT</div>
+                    <h3 class="modal-title" id="product-register-title">새 상품 등록</h3>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
+                    <div class="fw-semibold mb-1">입력 내용을 확인해 주세요.</div>
+                    <ul class="mb-0 ps-3">
+                        <li th:each="error : ${#fields.allErrors()}" th:text="${error}">입력 오류</li>
+                    </ul>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-8">
+                        <label class="form-label required" for="register-product-name">상품명</label>
+                        <input id="register-product-name" class="form-control" type="text"
+                               maxlength="100" required placeholder="상품명을 입력하세요"
+                               th:field="*{name}" th:errorclass="is-invalid">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label required" for="register-product-category">카테고리</label>
+                        <select id="register-product-category" class="form-select" required
+                                th:field="*{categoryId}" th:errorclass="is-invalid">
+                            <option value="">카테고리를 선택하세요</option>
+                            <option th:each="category : ${categoryOptions}"
+                                    th:value="${category.categoryId}"
+                                    th:text="${category.path}">상위 &gt; 하위</option>
+                        </select>
+                    </div>F
+                    <div class="col-12">
+                        <label class="form-label" for="register-product-description">상품 설명</label>
+                        <textarea id="register-product-description" class="form-control"
+                                  maxlength="255" rows="4" placeholder="상품의 특징을 간단히 설명하세요"
+                                  th:field="*{description}"></textarea>
+                        <div class="form-hint">최대 255자까지 입력할 수 있습니다.</div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label required" for="register-product-price">판매가</label>
+                        <div class="input-group">
+                            <input id="register-product-price" class="form-control" type="number"
+                                   min="0" step="1" required inputmode="numeric"
+                                   th:field="*{price}" th:errorclass="is-invalid">
+                            <span class="input-group-text">원</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label required" for="register-product-stock">초기 재고</label>
+                        <div class="input-group">
+                            <input id="register-product-stock" class="form-control" type="number"
+                                   min="0" step="1" required inputmode="numeric"
+                                   th:field="*{stockQuantity}" th:errorclass="is-invalid">
+                            <span class="input-group-text">개</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+                            <div>
+                                <label class="form-label required mb-0">상품 이미지 URL</label>
+                                <div class="form-hint">첫 번째 이미지가 대표 이미지로 사용됩니다.</div>
+                            </div>
+                            <button id="add-image-url" class="btn btn-outline-secondary btn-sm" type="button">URL 추가</button>
+                        </div>
+                        <div id="image-url-list" class="d-grid gap-2">
+                            <div class="seller-image-url-row"
+                                 th:each="imageUrl, imageStat : *{imageUrls}">
+                                <input class="form-control" type="url" maxlength="512" required
+                                       data-image-url placeholder="https://example.com/product.jpg"
+                                       aria-label="상품 이미지 URL"
+                                       th:field="*{imageUrls[__${imageStat.index}__]}">
+                                <button class="btn btn-icon btn-outline-danger seller-image-url-remove"
+                                        type="button" data-remove-image-url aria-label="이미지 URL 삭제">×</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">취소</button>
+                <button type="submit" class="btn btn-primary seller-primary">상품 등록</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

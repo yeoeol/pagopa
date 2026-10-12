@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="navbar navbar-vertical navbar-expand-lg seller-sidebar"
+       data-bs-theme="dark"
+       th:fragment="sidebar(activeMenu)">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#seller-sidebar"
+                aria-controls="seller-sidebar" aria-expanded="false"
+                aria-label="메뉴 열기">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <h1 class="navbar-brand navbar-brand-autodark">
+            <a th:href="@{/seller}">
+                <span class="seller-brand-mark">P</span>
+                <span>Pagopa Seller</span>
+            </a>
+        </h1>
+
+        <div class="collapse navbar-collapse" id="seller-sidebar">
+            <ul class="navbar-nav pt-lg-3">
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${activeMenu == 'products'} ? 'active'"
+                       th:href="@{/seller/products}">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 3l8 4.5v9l-8 4.5l-8 -4.5v-9z"/>
+                                <path d="M12 12l8 -4.5"/>
+                                <path d="M12 12v9"/>
+                                <path d="M12 12l-8 -4.5"/>
+                                <path d="M16 5.25l-8 4.5"/>
+                            </svg>
+                        </span>
+                        <span class="nav-link-title">상품 관리</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</aside>
+</body>
+</html>

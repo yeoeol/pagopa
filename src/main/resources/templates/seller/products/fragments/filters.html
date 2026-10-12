@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="card mb-3" th:fragment="filters">
+    <div class="card-body">
+        <form method="get"
+              th:action="@{/seller/products}"
+              th:attr="hx-get=@{/seller/products}"
+              hx-target="#product-results"
+              hx-push-url="true"
+              hx-indicator="#product-search-indicator">
+            <input type="hidden" name="page" value="0">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <label class="form-label">정렬</label>
+                    <div class="form-control bg-secondary-lt" aria-label="현재 정렬 기준">최근 등록순</div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label" for="product-page-size">페이지당 표시 수</label>
+                    <select id="product-page-size" class="form-select" name="size">
+                        <option value="10" th:selected="${result.size == 10}">10개씩</option>
+                        <option value="20" th:selected="${result.size == 20}">20개씩</option>
+                        <option value="50" th:selected="${result.size == 50}">50개씩</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary seller-primary flex-fill" type="submit">
+                            <span id="product-search-indicator"
+                                  class="spinner-border spinner-border-sm htmx-indicator"
+                                  aria-hidden="true"></span>
+                            적용
+                        </button>
+                        <a class="btn btn-outline-secondary"
+                           th:href="@{/seller/products}"
+                           th:attr="hx-get=@{/seller/products}"
+                           hx-target="#product-results"
+                           hx-push-url="true">초기화</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

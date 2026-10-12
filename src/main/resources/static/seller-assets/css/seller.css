@@ -1,0 +1,112 @@
+:root {
+    --seller-brand: #0f766e;
+    --seller-brand-rgb: 15, 118, 110;
+}
+
+.seller-sidebar {
+    --tblr-navbar-bg: #102a2a;
+}
+
+.seller-brand-mark {
+    align-items: center;
+    background: linear-gradient(135deg, #14b8a6, var(--seller-brand));
+    border-radius: .5rem;
+    box-shadow: 0 .25rem .75rem rgba(20, 184, 166, .24);
+    color: #fff;
+    display: inline-flex;
+    font-size: 1rem;
+    font-weight: 700;
+    height: 2rem;
+    justify-content: center;
+    margin-right: .625rem;
+    width: 2rem;
+}
+
+.seller-primary {
+    --tblr-btn-bg: var(--seller-brand);
+    --tblr-btn-border-color: var(--seller-brand);
+    --tblr-btn-hover-bg: #0b5f59;
+    --tblr-btn-hover-border-color: #0b5f59;
+    --tblr-btn-active-bg: #094f4a;
+    --tblr-btn-active-border-color: #094f4a;
+}
+
+.seller-product-table {
+    min-width: 760px;
+}
+
+.seller-product-table tbody tr {
+    transition: background-color .15s ease;
+}
+
+.seller-product-avatar,
+.seller-empty-icon {
+    background: rgba(var(--seller-brand-rgb), .12);
+    color: var(--seller-brand);
+}
+
+.seller-product-description {
+    max-width: 26rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.seller-stock-low {
+    color: var(--tblr-warning);
+    font-weight: 600;
+}
+
+.seller-stock-empty {
+    color: var(--tblr-danger);
+    font-weight: 600;
+}
+
+.seller-notice {
+    bottom: 1.5rem;
+    max-width: min(24rem, calc(100vw - 2rem));
+    position: fixed;
+    right: 1.5rem;
+    z-index: 1090;
+}
+
+.seller-detail-list dt,
+.seller-detail-list dd {
+    border-bottom: 1px solid var(--tblr-border-color);
+    margin-bottom: 0;
+    padding-bottom: .85rem;
+    padding-top: .85rem;
+}
+
+.seller-image-url-row {
+    align-items: center;
+    display: grid;
+    gap: .5rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.seller-image-url-row:first-child .seller-image-url-remove {
+    visibility: hidden;
+}
+
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    display: inline-block;
+}
+
+#product-results.htmx-swapping {
+    opacity: .55;
+    transition: opacity .15s ease;
+}
+
+@media (max-width: 767.98px) {
+    .seller-notice {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+    }
+}
