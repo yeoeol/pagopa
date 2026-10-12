@@ -98,13 +98,14 @@ public class ProductApiService implements ProductApi {
 
     @Override
     @Transactional(readOnly = true)
-    public ProductPageResponseDto findAllByUserId(Long userId, int pageSize, int pageNumber, String sort) {
+    public ProductPageResponseDto findAllByUserId(Long sellerId, int pageSize, int pageNumber) {
         Page<Product> products = productRepository.findAllByUserId(
-                userId,
+                sellerId,
                 PageRequest.of(
                         pageNumber,
                         pageSize,
-                        Sort.by(sort)
+                        Sort.Direction.DESC,
+                        "createdAt"
                 )
         );
 
@@ -193,6 +194,8 @@ public class ProductApiService implements ProductApi {
                 product.getStockQuantity(),
                 product.getStatus()
                         .name(),
+                product.getCategory()
+                        .getId(),
                 product.getUserId()
         );
     }
