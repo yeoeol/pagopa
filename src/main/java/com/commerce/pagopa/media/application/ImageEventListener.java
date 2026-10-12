@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.identity.event.UserProfileUpdated;
+import com.commerce.pagopa.review.event.ReviewDeleted;
 
 @Component
 @RequiredArgsConstructor
@@ -16,5 +17,11 @@ public class ImageEventListener {
     @ApplicationModuleListener
     void on(UserProfileUpdated event) {
         imageService.delete(event.oldProfileImageUrl());
+    }
+
+    @ApplicationModuleListener
+    void on(ReviewDeleted event) {
+        event.imageUrls()
+                .forEach(imageService::delete);
     }
 }

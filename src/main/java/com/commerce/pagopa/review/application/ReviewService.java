@@ -1,10 +1,13 @@
 package com.commerce.pagopa.review.application;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ import com.commerce.pagopa.review.application.dto.response.ReviewResponseDto;
 import com.commerce.pagopa.review.domain.Review;
 import com.commerce.pagopa.review.domain.ReviewImage;
 import com.commerce.pagopa.review.domain.ReviewRepository;
+import com.commerce.pagopa.review.event.ReviewDeleted;
 
 import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 
@@ -34,6 +38,7 @@ public class ReviewService {
     private final ReviewAuthorQuery reviewAuthorQuery;
     private final ProductApi productApi;
     private final OrderItemApi orderItemApi;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public ReviewResponseDto create(Long userId, ReviewCreateRequestDto requestDto) {
@@ -85,7 +90,23 @@ public class ReviewService {
 
     @Transactional
     public void delete(Long reviewId) {
-        reviewRepository.deleteById(reviewId);
+        Review review = reviewRepository.findByIdOrThrow(reviewId);
+
+        List<String> imageUrls = review.getImages()
+                .stream()
+                .map(ReviewImage::getImageUrl)
+                .toList();
+
+        reviewRepository.deleteById(review.getId());
+
+        events.publishEvent(
+                new ReviewDeleted(
+                        UUID.randomUUID(),
+                        review.getId(),
+                        imageUrls,
+                        LocalDateTime.now()
+                )
+        );
     }
 
     @Transactional(readOnly = true)

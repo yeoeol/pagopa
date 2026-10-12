@@ -1,6 +1,7 @@
 @ApplicationModule(
         allowedDependencies = {
-                "identity :: event"
+                "identity :: event",
+                "review :: event"
         }
 )
 package com.commerce.pagopa.media;
