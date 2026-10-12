@@ -21,7 +21,20 @@ public class ImageEventListener {
 
     @ApplicationModuleListener
     void on(ReviewDeleted event) {
-        event.imageUrls()
-                .forEach(imageService::delete);
+        RuntimeException failure = null;
+        for (String imageUrl : event.imageUrls()) {
+            try {
+                imageService.delete(imageUrl);
+            } catch (RuntimeException e) {
+                if (failure == null) {
+                    failure = e;
+                } else {
+                    failure.addSuppressed(failure);
+                }
+            }
+        }
+        if (failure != null) {
+            throw failure;
+        }
     }
 }
