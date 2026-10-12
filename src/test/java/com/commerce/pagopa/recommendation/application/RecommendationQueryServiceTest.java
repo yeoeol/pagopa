@@ -780,6 +780,7 @@ class RecommendationQueryServiceTest {
                 10_000,
                 10,
                 "ACTIVE",
+                999L,
                 100L
         );
     }
@@ -792,6 +793,7 @@ class RecommendationQueryServiceTest {
                 10_000,
                 10,
                 "INACTIVE",
+                999L,
                 100L
         );
     }
