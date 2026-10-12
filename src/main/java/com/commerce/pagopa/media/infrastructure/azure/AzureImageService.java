@@ -106,6 +106,12 @@ public class AzureImageService implements ImageService {
                     "파일이 비어있습니다."
             );
         }
+        if (uploadRequest.size() <= 0) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "파일의 크기가 0보다 커야 합니다."
+            );
+        }
         if (uploadRequest.size() > imageProperties.maxSize()) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
