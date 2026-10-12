@@ -15,7 +15,7 @@
 
             <div class="d-none d-sm-block text-end lh-sm">
                 <div class="fw-semibold">판매자</div>
-                <div class="text-secondary small" th:text="${#authentication}">seller@example.com</div>
+                <div class="text-secondary small" th:text="${#authentication.principal.email}">seller@example.com</div>
             </div>
 
             <button id="seller-logout" class="btn btn-outline-secondary btn-sm" type="button">로그아웃</button>

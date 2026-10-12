@@ -127,7 +127,7 @@ public class SellerProductPageController {
     @PostMapping
     public String register(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @Valid @ModelAttribute ProductRegisterRequestDto requestDto,
+            @Valid @ModelAttribute("registerForm") ProductRegisterRequestDto requestDto,
             BindingResult bindingResult,
             Model model
 
@@ -166,7 +166,7 @@ public class SellerProductPageController {
     @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
     public String addStock(
             @PathVariable("productId") Long productId,
-            @Valid @ModelAttribute ProductAddStockRequestDto requestDto,
+            @Valid @ModelAttribute("stockForm") ProductAddStockRequestDto requestDto,
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
