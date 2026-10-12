@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +22,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.media.api.ImageUploadRequest;
 import com.commerce.pagopa.media.application.ImageService;
 import com.commerce.pagopa.media.application.response.ImageResponseDto;
 import com.commerce.pagopa.media.domain.ImageCategory;
@@ -43,20 +43,20 @@ public class SupabaseImageService implements ImageService {
 
     @Override
     public ImageResponseDto upload(
-            MultipartFile file,
-            ImageCategory category
+            ImageUploadRequest uploadRequest
     ) {
-        validateFile(file);
+        validateFile(uploadRequest);
 
-        String contentType = file.getContentType();
+        String contentType = uploadRequest.contentType();
         String objectKey = generateObjectKey(
-                file.getOriginalFilename(),
-                category
+                uploadRequest.originalFilename(),
+                uploadRequest.imageCategory()
         );
 
         ContentStreamProvider streamProvider = ContentStreamProvider.fromInputStreamSupplier(() -> {
             try {
-                return file.getInputStream();
+                return uploadRequest.content()
+                        .openStream();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -71,7 +71,7 @@ public class SupabaseImageService implements ImageService {
 
         RequestBody requestBody = RequestBody.fromContentProvider(
                 streamProvider,
-                file.getSize(),
+                uploadRequest.size(),
                 contentType
         );
 
@@ -85,7 +85,7 @@ public class SupabaseImageService implements ImageService {
                 "[Supabase] 이미지 업로드 성공: 요청 imageUrl={}, objectKey={}, size={}bytes",
                 imageUrl,
                 objectKey,
-                file.getSize()
+                uploadRequest.size()
         );
         return ImageResponseDto.of(imageUrl);
     }
@@ -97,6 +97,9 @@ public class SupabaseImageService implements ImageService {
         }
 
         String objectKey = extractObjectKey(imageUrl);
+        if (objectKey == null) {
+            return;
+        }
 
         DeleteObjectRequest request = DeleteObjectRequest.builder()
                 .bucket(supabaseStorageProperties.bucket())
@@ -132,7 +135,7 @@ public class SupabaseImageService implements ImageService {
                         || imagePath == null
                         || !imagePath.startsWith(publicPathPrefix)
             ) {
-                throw invalidImageUrl();
+                return null;
             }
 
             String objectKey = imagePath.substring(publicPathPrefix.length());
@@ -183,14 +186,14 @@ public class SupabaseImageService implements ImageService {
         );
     }
 
-    private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
+    private void validateFile(ImageUploadRequest uploadRequest) {
+        if (uploadRequest == null) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
                     "파일이 비어있습니다."
             );
         }
-        if (file.getSize() > imageProperties.maxSize()) {
+        if (uploadRequest.size() > imageProperties.maxSize()) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
                     "파일 크기는 5MB 이하여야 합니다."
@@ -198,7 +201,7 @@ public class SupabaseImageService implements ImageService {
         }
         if (
             !imageProperties.allowedTypes()
-                    .contains(file.getContentType())
+                    .contains(uploadRequest.contentType())
         ) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,

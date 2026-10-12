@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +17,7 @@ import com.azure.storage.blob.models.BlobHttpHeaders;
 
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.media.api.ImageUploadRequest;
 import com.commerce.pagopa.media.application.ImageService;
 import com.commerce.pagopa.media.application.response.ImageResponseDto;
 import com.commerce.pagopa.media.domain.ImageCategory;
@@ -37,21 +37,22 @@ public class AzureImageService implements ImageService {
     private final BlobContainerClient blobContainerClient;
 
     @Override
-    public ImageResponseDto upload(MultipartFile file, ImageCategory category) {
-        validateFile(file);
+    public ImageResponseDto upload(ImageUploadRequest uploadRequest) {
+        validateFile(uploadRequest);
 
         String blobName = generateBlobName(
-                file.getOriginalFilename(),
-                category
+                uploadRequest.originalFilename(),
+                uploadRequest.imageCategory()
         );
         try {
             BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
 
-            BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(file.getContentType());
+            BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(uploadRequest.contentType());
 
             blobClient.upload(
-                    file.getInputStream(),
-                    file.getSize(),
+                    uploadRequest.content()
+                            .openStream(),
+                    uploadRequest.size(),
                     true
             );
             blobClient.setHttpHeaders(headers);
@@ -60,7 +61,7 @@ public class AzureImageService implements ImageService {
             log.info(
                     "[Azure] 이미지 업로드 성공: blobName={}, size={}bytes",
                     blobName,
-                    file.getSize()
+                    uploadRequest.size()
             );
 
             return ImageResponseDto.of(imageUrl);
@@ -98,14 +99,14 @@ public class AzureImageService implements ImageService {
         }
     }
 
-    private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
+    private void validateFile(ImageUploadRequest uploadRequest) {
+        if (uploadRequest == null) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
                     "파일이 비어있습니다."
             );
         }
-        if (file.getSize() > imageProperties.maxSize()) {
+        if (uploadRequest.size() > imageProperties.maxSize()) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
                     "파일 크기는 5MB 이하여야 합니다."
@@ -113,7 +114,7 @@ public class AzureImageService implements ImageService {
         }
         if (
             !imageProperties.allowedTypes()
-                    .contains(file.getContentType())
+                    .contains(uploadRequest.contentType())
         ) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
