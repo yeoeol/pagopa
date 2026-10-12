@@ -168,10 +168,8 @@ class StockConcurrencyTest {
                     );
                     success.incrementAndGet();
                 } catch (BusinessException e) {
-                    if (
-                        e.getErrorCode()
-                                .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)
-                    ) {
+                    if (e.getErrorCode()
+                            .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)) {
                         soldOut.incrementAndGet();
                     }
                 } catch (Exception e) {
@@ -302,10 +300,8 @@ class StockConcurrencyTest {
                     );
                     success.incrementAndGet();
                 } catch (BusinessException e) {
-                    if (
-                        e.getErrorCode()
-                                .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)
-                    ) {
+                    if (e.getErrorCode()
+                            .equals(ErrorCode.PRODUCT_OUT_OF_STOCK)) {
                         soldOut.incrementAndGet();
                     }
                 } catch (Exception e) {

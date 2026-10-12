@@ -1,13 +1,11 @@
 package com.commerce.pagopa.media.application;
 
-import org.springframework.web.multipart.MultipartFile;
-
+import com.commerce.pagopa.media.api.ImageUploadRequest;
 import com.commerce.pagopa.media.application.response.ImageResponseDto;
-import com.commerce.pagopa.media.domain.ImageCategory;
 
 public interface ImageService {
     /** 이미지 업로드 */
-    ImageResponseDto upload(MultipartFile file, ImageCategory category);
+    ImageResponseDto upload(ImageUploadRequest uploadRequest);
 
     /** 이미지 삭제 */
     void delete(String imageUrl);

@@ -41,10 +41,8 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         // 기존에 저장되어 있던 토큰과 파라미터로 넘어온 토큰이 일치하는지 검증
-        if (
-            !token.getToken()
-                    .equals(refreshToken)
-        ) {
+        if (!token.getToken()
+                .equals(refreshToken)) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 

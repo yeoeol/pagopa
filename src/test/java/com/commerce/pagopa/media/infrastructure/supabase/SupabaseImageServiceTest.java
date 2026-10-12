@@ -13,11 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
-import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.media.infrastructure.ImageProperties;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -75,21 +73,24 @@ class SupabaseImageServiceTest {
     }
 
     @Test
-    void delete_rejectsUrlFromDifferentOrigin() {
+    void delete_ignoresUrlFromDifferentOrigin() {
         String imageUrl = "https://attacker.example/storage/v1/object/public/"
                 + BUCKET
                 + "/product/202610/image.jpg";
 
-        assertThatThrownBy(() -> supabaseImageService.delete(imageUrl)).isInstanceOf(BusinessException.class)
-                .hasMessage("Supabase 이미지 URL 형식이 올바르지 않습니다.");
+        assertThatCode(
+                () -> supabaseImageService.delete(imageUrl)
+        ).doesNotThrowAnyException();
+
         verifyNoInteractions(s3Client);
     }
 
     @Test
-    void delete_rejectsRelativeUrl() {
-        assertThatThrownBy(() -> supabaseImageService.delete("product/202610/image.jpg"))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage("Supabase 이미지 URL 형식이 올바르지 않습니다.");
+    void delete_ignoresRelativeUrl() {
+        assertThatCode(
+                () -> supabaseImageService.delete("product/202610/image.jpg")
+        ).doesNotThrowAnyException();
+
         verifyNoInteractions(s3Client);
     }
 }
