@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.media.api.ImageUploadRequest;
 import com.commerce.pagopa.media.application.ImageService;
 import com.commerce.pagopa.media.application.response.ImageResponseDto;
 import com.commerce.pagopa.media.domain.ImageCategory;
@@ -28,7 +29,6 @@ import com.commerce.pagopa.media.domain.ImageCategory;
         name = "IMAGE API",
         description = "이미지 관리 API"
 )
-@Profile({"local"})
 @RestController
 @RequestMapping("/api/v1/images")
 @RequiredArgsConstructor
@@ -57,13 +57,19 @@ public class ImageApiController {
         return ResponseEntity.ok(
                 ApiResponse.ok(
                         imageService.upload(
-                                file,
-                                category
+                                new ImageUploadRequest(
+                                        category,
+                                        file.getOriginalFilename(),
+                                        file.getContentType(),
+                                        file.getSize(),
+                                        file::getInputStream
+                                )
                         )
                 )
         );
     }
 
+    @Profile("local")
     @Operation(
             summary = "이미지 삭제",
             description = "이미지 url을 기반으로 클라우드 저장소에서 이미지를 삭제합니다."

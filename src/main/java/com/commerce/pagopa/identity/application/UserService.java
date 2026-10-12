@@ -1,8 +1,11 @@
 package com.commerce.pagopa.identity.application;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -13,15 +16,15 @@ import com.commerce.pagopa.identity.application.dto.request.UserCreateRequestDto
 import com.commerce.pagopa.identity.application.dto.request.UserUpdateRequestDto;
 import com.commerce.pagopa.identity.application.dto.response.UserResponseDto;
 import com.commerce.pagopa.identity.domain.*;
-import com.commerce.pagopa.media.api.ImageApi;
+import com.commerce.pagopa.identity.event.UserProfileUpdated;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ImageApi imageApi;
     private final RoleService roleService;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public User register(UserCreateRequestDto requestDto) {
@@ -54,15 +57,31 @@ public class UserService {
     public UserResponseDto update(Long userId, UserUpdateRequestDto requestDto) {
         User user = userRepository.findByIdOrThrow(userId);
 
-        // 기존 이미지 삭제
-        if (StringUtils.hasText(requestDto.profileImage())) {
-            imageApi.delete(user.getProfileImageUrl());
-        }
+        String oldProfileImageUrl = user.getProfileImageUrl();
+        String newProfileImageUrl = requestDto.profileImageUrl();
 
         user.updateProfile(
                 requestDto.name(),
-                requestDto.profileImage()
+                newProfileImageUrl
         );
+
+        if (
+            imageChanged(
+                    newProfileImageUrl,
+                    oldProfileImageUrl
+            )
+        ) {
+            events.publishEvent(
+                    new UserProfileUpdated(
+                            UUID.randomUUID(),
+                            requestDto.name(),
+                            oldProfileImageUrl,
+                            newProfileImageUrl,
+                            user.getUpdatedAt()
+                    )
+            );
+        }
+
         return UserResponseDto.from(user);
     }
 
@@ -72,5 +91,16 @@ public class UserService {
                 provider,
                 providerId
         );
+    }
+
+    private static boolean imageChanged(
+            String newProfileImageUrl,
+            String oldProfileImageUrl
+    ) {
+        return StringUtils.hasText(newProfileImageUrl)
+                && !Objects.equals(
+                        oldProfileImageUrl,
+                        newProfileImageUrl
+                );
     }
 }
