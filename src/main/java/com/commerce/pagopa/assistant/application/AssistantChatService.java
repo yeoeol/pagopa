@@ -30,31 +30,31 @@ public class AssistantChatService {
                 requestDto.message()
         );
 
-        GeneratedAnswer answer;
         try {
-            answer = answerGenerator.generate(
+            GeneratedAnswer answer = answerGenerator.generate(
                     conversationId,
                     requestDto.message()
             );
+
+            AssistantHistoryMessageResponseDto assistantMessage = historyService.saveAssistantMessage(
+                    conversationId,
+                    answer
+            );
+
+            return new AssistantMessageResponseDto(
+                    conversationId,
+                    userMessage.messageId(),
+                    assistantMessage.messageId(),
+                    answer.content(),
+                    answer.inputTokens(),
+                    answer.outputTokens()
+            );
         } catch (AssistantModelException exception) {
+            historyService.markGenerationFailed(userMessage.messageId());
             throw new BusinessException(
                     ErrorCode.ASSISTANT_MODEL_UNAVAILABLE,
                     exception.getMessage()
             );
         }
-
-        AssistantHistoryMessageResponseDto assistantMessage = historyService.saveAssistantMessage(
-                conversationId,
-                answer
-        );
-
-        return new AssistantMessageResponseDto(
-                conversationId,
-                userMessage.messageId(),
-                assistantMessage.messageId(),
-                answer.content(),
-                answer.inputTokens(),
-                answer.outputTokens()
-        );
     }
 }

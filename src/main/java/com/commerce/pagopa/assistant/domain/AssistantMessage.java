@@ -38,6 +38,14 @@ public class AssistantMessage extends BaseTimeEntity {
     )
     private AssistantMessageRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(
+            name = "status",
+            length = 20,
+            nullable = false
+    )
+    private AssistantMessageStatus status;
+
     @Lob
     @Column(
             name = "content",
@@ -55,12 +63,14 @@ public class AssistantMessage extends BaseTimeEntity {
     private AssistantMessage(
             AssistantConversation conversation,
             AssistantMessageRole role,
+            AssistantMessageStatus status,
             String content,
             Long inputTokens,
             Long outputTokens
     ) {
         this.conversation = conversation;
         this.role = role;
+        this.status = status;
         this.content = content;
         this.inputTokens = inputTokens;
         this.outputTokens = outputTokens;
@@ -73,6 +83,7 @@ public class AssistantMessage extends BaseTimeEntity {
         return AssistantMessage.builder()
                 .conversation(conversation)
                 .role(AssistantMessageRole.USER)
+                .status(AssistantMessageStatus.SUCCESS)
                 .content(content)
                 .inputTokens(null)
                 .outputTokens(null)
@@ -88,9 +99,17 @@ public class AssistantMessage extends BaseTimeEntity {
         return AssistantMessage.builder()
                 .conversation(conversation)
                 .role(AssistantMessageRole.ASSISTANT)
+                .status(AssistantMessageStatus.SUCCESS)
                 .content(content)
                 .inputTokens(inputTokens)
                 .outputTokens(outputTokens)
                 .build();
+    }
+
+    public void fail() {
+        if (this.status == AssistantMessageStatus.FAILED) {
+            throw new RuntimeException("Already Failed");
+        }
+        this.status = AssistantMessageStatus.FAILED;
     }
 }

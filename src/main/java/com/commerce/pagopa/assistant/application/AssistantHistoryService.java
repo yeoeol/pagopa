@@ -55,7 +55,8 @@ public class AssistantHistoryService {
         return new AssistantHistoryMessageResponseDto(
                 conversation.getId(),
                 savedMessage.getId(),
-                savedMessage.getRole().name(),
+                savedMessage.getRole()
+                        .name(),
                 savedMessage.getContent(),
                 savedMessage.getInputTokens(),
                 savedMessage.getOutputTokens(),
@@ -87,7 +88,8 @@ public class AssistantHistoryService {
         return new AssistantHistoryMessageResponseDto(
                 conversation.getId(),
                 savedMessage.getId(),
-                savedMessage.getRole().name(),
+                savedMessage.getRole()
+                        .name(),
                 savedMessage.getContent(),
                 savedMessage.getInputTokens(),
                 savedMessage.getOutputTokens(),
@@ -121,7 +123,8 @@ public class AssistantHistoryService {
                         new AssistantHistoryMessageResponseDto(
                                 conversation.getId(),
                                 message.getId(),
-                                message.getRole().name(),
+                                message.getRole()
+                                        .name(),
                                 message.getContent(),
                                 message.getInputTokens(),
                                 message.getOutputTokens(),
@@ -130,5 +133,11 @@ public class AssistantHistoryService {
                 )
         );
         return result;
+    }
+
+    @Transactional
+    public void markGenerationFailed(Long messageId) {
+        AssistantMessage message = messageRepository.findByIdOrThrow(messageId);
+        message.fail();
     }
 }
