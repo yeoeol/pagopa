@@ -79,6 +79,18 @@ spring:
         schema-initialization:
           enabled: false
 
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        model: qwen3:4b
+        temperature: ${OLLAMA_TEMPERATURE:0.2}
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: never
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiry: ${JWT_ACCESS_TOKEN_EXPIRY:1800000}

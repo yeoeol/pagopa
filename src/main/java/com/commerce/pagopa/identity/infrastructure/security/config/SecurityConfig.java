@@ -99,6 +99,8 @@ public class SecurityConfig {
                                 .authenticated()
                                 .requestMatchers("/api/v1/recommendations/**")
                                 .authenticated()
+                                .requestMatchers("/api/v1/assistant/**")
+                                .authenticated()
                                 .anyRequest()
                                 .authenticated()
                 )
