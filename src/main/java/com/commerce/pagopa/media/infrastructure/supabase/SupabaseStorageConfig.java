@@ -2,6 +2,7 @@ package com.commerce.pagopa.media.infrastructure.supabase;
 
 import java.time.Duration;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,10 @@ import software.amazon.awssdk.services.s3.S3Client;
 import com.commerce.pagopa.media.infrastructure.ImageProperties;
 
 @Configuration
+@ConditionalOnProperty(
+        name = "app.storage.provider.type",
+        havingValue = "supabase"
+)
 @EnableConfigurationProperties(
     {
             ImageProperties.class,
