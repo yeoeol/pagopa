@@ -17,6 +17,7 @@ def querydslSrcDir = layout.buildDirectory.dir("generated/querydsl").get().asFil
 
 ext {
     set('springModulithVersion', "2.0.8")
+    set('springAiVersion', '2.0.1')
 }
 
 java {
@@ -38,6 +39,7 @@ configurations {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
     }
 }
 
@@ -85,6 +87,10 @@ dependencies {
     implementation("io.github.openfeign.querydsl:querydsl-core:${queryDslVersion}")
     implementation("io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion")
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
+
+    // Spring AI
+    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+    implementation 'org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc'
 
     // Flyway
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
