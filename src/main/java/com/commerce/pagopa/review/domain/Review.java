@@ -7,6 +7,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import lombok.*;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
@@ -43,6 +46,7 @@ public class Review extends BaseTimeEntity {
     private String content;
 
     @Min(1) @Max(5) @ToString.Include
+    @JdbcTypeCode(SqlTypes.TINYINT)
     @Column(
             name = "rating",
             nullable = false

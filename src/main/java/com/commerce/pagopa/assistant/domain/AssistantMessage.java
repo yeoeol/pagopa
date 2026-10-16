@@ -2,21 +2,23 @@ package com.commerce.pagopa.assistant.domain;
 
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import lombok.*;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "assistant_message")
 public class AssistantMessage extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(
             name = "message_id",
             nullable = false
@@ -30,6 +32,7 @@ public class AssistantMessage extends BaseTimeEntity {
     )
     private AssistantConversation conversation;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(
             name = "role",
@@ -38,6 +41,7 @@ public class AssistantMessage extends BaseTimeEntity {
     )
     private AssistantMessageRole role;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(
             name = "status",
@@ -46,16 +50,18 @@ public class AssistantMessage extends BaseTimeEntity {
     )
     private AssistantMessageStatus status;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(
             name = "content",
             nullable = false
     )
     private String content;
 
+    @ToString.Include
     @Column(name = "input_tokens")
     private Long inputTokens;
 
+    @ToString.Include
     @Column(name = "output_tokens")
     private Long outputTokens;
 

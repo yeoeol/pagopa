@@ -4,10 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
 
@@ -19,18 +16,21 @@ public class AssistantConversation extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     @Column(
             name = "conversation_id",
             nullable = false
     )
     private Long id;
 
+    @ToString.Include
     @Column(
             name = "user_id",
             nullable = false
     )
     private Long userId;
 
+    @ToString.Include
     @Column(
             name = "title",
             length = 100,
@@ -38,6 +38,7 @@ public class AssistantConversation extends BaseTimeEntity {
     )
     private String title;
 
+    @ToString.Include
     @Enumerated(EnumType.STRING)
     @Column(
             name = "status",
