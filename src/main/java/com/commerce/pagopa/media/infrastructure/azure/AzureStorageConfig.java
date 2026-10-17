@@ -1,5 +1,6 @@
 package com.commerce.pagopa.media.infrastructure.azure;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,10 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.commerce.pagopa.media.infrastructure.ImageProperties;
 
 @Configuration
+@ConditionalOnProperty(
+        name = "app.storage.provider.type",
+        havingValue = "azure"
+)
 @EnableConfigurationProperties(
     {
             ImageProperties.class,

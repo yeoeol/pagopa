@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
@@ -18,7 +17,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 
 import com.commerce.pagopa.recommendation.domain.InterestType;
 import com.commerce.pagopa.recommendation.domain.RecommendationEvent;
@@ -27,17 +25,14 @@ import com.commerce.pagopa.recommendation.domain.RecommendationEvent.SearchPaylo
 import com.commerce.pagopa.recommendation.domain.RecommendationEventType;
 import com.commerce.pagopa.recommendation.domain.RecommendationInterest;
 import com.commerce.pagopa.support.testcontainers.JacksonTestConfig;
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
+import com.commerce.pagopa.support.testcontainers.MySqlIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({RecommendationProjectionJdbcRepository.class, TestcontainersConfig.class, JacksonTestConfig.class})
-@Timeout(
-        value = 30,
-        unit = TimeUnit.SECONDS
-)
+@Import({RecommendationProjectionJdbcRepository.class, JacksonTestConfig.class})
+@MySqlIntegrationTest
 class RecommendationProjectionJdbcRepositoryTest {
 
     @Autowired

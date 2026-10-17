@@ -7,7 +7,6 @@ import jakarta.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,13 +25,13 @@ import com.commerce.pagopa.support.fixture.OrderFixture;
 import com.commerce.pagopa.support.fixture.RoleFixture;
 import com.commerce.pagopa.support.fixture.UserFixture;
 import com.commerce.pagopa.support.fixture.UserRoleFixture;
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
+import com.commerce.pagopa.support.testcontainers.MySqlIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @SpringBootTest
-@Import(TestcontainersConfig.class)
+@MySqlIntegrationTest
 class OrderRepositoryTest {
 
     private static final LocalDateTime START = LocalDateTime.parse("2024-01-01T00:00:00");

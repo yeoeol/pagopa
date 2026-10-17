@@ -1,5 +1,6 @@
 package com.commerce.pagopa.order.application;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -18,8 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import lombok.extern.slf4j.Slf4j;
 
-import com.commerce.pagopa.basket.api.CartItemApi;
-import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.catalog.domain.CategoryRepository;
 import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.catalog.domain.ProductRepository;
@@ -28,7 +26,6 @@ import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.identity.domain.*;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
-import com.commerce.pagopa.ordering.api.OrderPaymentApi;
 import com.commerce.pagopa.ordering.application.OrderService;
 import com.commerce.pagopa.ordering.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
@@ -38,13 +35,14 @@ import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseD
 import com.commerce.pagopa.ordering.domain.order.OrderStatus;
 import com.commerce.pagopa.support.fixture.*;
 import com.commerce.pagopa.support.fixture.CategoryFixture.CategoryTree;
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
+import com.commerce.pagopa.support.testcontainers.DatabaseCleaner;
+import com.commerce.pagopa.support.testcontainers.MySqlIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @SpringBootTest
-@Import(TestcontainersConfig.class)
+@MySqlIntegrationTest
 class StockConcurrencyTest {
 
     @DynamicPropertySource
@@ -68,12 +66,9 @@ class StockConcurrencyTest {
     UserRepository userRepository;
     @Autowired
     SellerRepository sellerRepository;
+
     @Autowired
-    ProductApi productApi;
-    @Autowired
-    CartItemApi cartItemApi;
-    @Autowired
-    OrderPaymentApi orderPaymentApi;
+    DatabaseCleaner databaseCleaner;
 
     private User user;
     private Seller seller;
@@ -81,17 +76,11 @@ class StockConcurrencyTest {
     private Role userRole;
 
     @BeforeEach
-    void beforeEach() {
-        try {
-            roleRepository.save(RoleFixture.aRoleAdmin());
-            sellerRole = roleRepository.save(RoleFixture.aRoleSeller());
-            userRole = roleRepository.save(RoleFixture.aRoleUser());
-        } catch (Exception e) {
-            sellerRole = roleRepository.findByCode(RoleCode.ROLE_SELLER)
-                    .orElseThrow();
-            userRole = roleRepository.findByCode(RoleCode.ROLE_USER)
-                    .orElseThrow();
-        }
+    void beforeEach() throws SQLException {
+        databaseCleaner.clean();
+
+        sellerRole = roleRepository.save(RoleFixture.aRoleSeller());
+        userRole = roleRepository.save(RoleFixture.aRoleUser());
     }
 
     @ParameterizedTest(name = "N={0}")
@@ -521,7 +510,7 @@ class StockConcurrencyTest {
 
     @ParameterizedTest(name = "N={0}")
     @ValueSource(ints = {50, 200, 1000})
-    void 서로_다른_N개_상품에_각각_1명씩_주문취소하면_경합없이_재고_복구_성공(int N) throws Exception {
+    void 서로_다른_주문을_동일_상품에_동시_취소하면_재고가_정확히_복구(int N) throws Exception {
         user = UserFixture.aUser("cross-order-seller-" + N);
         user.addUserRole(
                 UserRoleFixture.aUserRole(

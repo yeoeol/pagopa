@@ -18,6 +18,12 @@ spring:
         default_batch_fetch_size: 100
     show-sql: false
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE:false}
+    validate-on-migrate: true
+
   cloud:
     azure:
       storage:
@@ -78,6 +84,18 @@ spring:
       jdbc:
         schema-initialization:
           enabled: false
+
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        model: qwen3:4b
+        temperature: ${OLLAMA_TEMPERATURE:0.2}
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: never
 
 jwt:
   secret: ${JWT_SECRET}

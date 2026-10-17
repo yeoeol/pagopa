@@ -204,7 +204,22 @@ public enum ErrorCode {
     ), ROLE_ALREADY_ENABLED(HttpStatus.CONFLICT, "ROLE_004", "이미 활성화된 역할(권한)입니다."),
 
     // RECOMMENDATION
-    RECOMMENDATION_INVALID_LIMIT(HttpStatus.BAD_REQUEST, "RECOMMENDATION_001", "유효하지 않은 limit입니다."),;
+    RECOMMENDATION_INVALID_LIMIT(HttpStatus.BAD_REQUEST, "RECOMMENDATION_001", "유효하지 않은 limit입니다."),
+
+    // ASSISTANT
+    ASSISTANT_CONVERSATION_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "ASSISTANT_001", "존재하지 않는 어시스턴트 대화입니다."
+    ), ASSISTANT_MESSAGE_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "ASSISTANT_002", "존재하지 않는 어시스턴트 메시지입니다."
+    ), ASSISTANT_MODEL_UNAVAILABLE(
+            HttpStatus.SERVICE_UNAVAILABLE, "ASSISTANT_003", "챗봇 서비스에 일시적으로 연결할 수 없습니다.."
+    ), ASSISTANT_CONVERSATION_CLOSED(
+            HttpStatus.CONFLICT,
+            "ASSISTANT_004",
+            "종료된 대화입니다."
+    ),
+    ;
+
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

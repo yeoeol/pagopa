@@ -1,5 +1,6 @@
 package com.commerce.pagopa.recommendation;
 
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,13 +9,11 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.Scenario;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.commerce.pagopa.catalog.api.ProductApi;
@@ -25,15 +24,16 @@ import com.commerce.pagopa.recommendation.application.RecommendationQueryService
 import com.commerce.pagopa.recommendation.domain.InterestType;
 import com.commerce.pagopa.recommendation.domain.RecommendationInterest;
 import com.commerce.pagopa.recommendation.domain.RecommendationProjectionRepository;
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
+import com.commerce.pagopa.support.testcontainers.DatabaseCleaner;
+import com.commerce.pagopa.support.testcontainers.MySqlIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 
 @ApplicationModuleTest
+@MySqlIntegrationTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestcontainersConfig.class)
 class RecommendationFlowIntegrationTest {
 
     @Autowired
@@ -43,27 +43,14 @@ class RecommendationFlowIntegrationTest {
     RecommendationQueryService recommendationQueryService;
 
     @Autowired
-    NamedParameterJdbcTemplate jdbcTemplate;
+    DatabaseCleaner databaseCleaner;
 
     @MockitoBean
     ProductApi productApi;
 
-    @AfterEach
-    void deleteRecommendationData() {
-        jdbcTemplate.update(
-                "DELETE FROM recommendation_interest",
-                Map.of()
-        );
-
-        jdbcTemplate.update(
-                "DELETE FROM recommendation_event",
-                Map.of()
-        );
-
-        jdbcTemplate.update(
-                "DELETE FROM EVENT_PUBLICATION",
-                Map.of()
-        );
+    @BeforeEach
+    void beforeEach() throws SQLException {
+        databaseCleaner.clean();
     }
 
     @Test
