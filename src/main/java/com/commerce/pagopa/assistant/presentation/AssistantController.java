@@ -7,7 +7,9 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,15 +17,14 @@ import org.springdoc.core.annotations.ParameterObject;
 
 import lombok.RequiredArgsConstructor;
 
+import reactor.core.publisher.Flux;
+
 import com.commerce.pagopa.assistant.application.AssistantChatService;
 import com.commerce.pagopa.assistant.application.AssistantConversationService;
 import com.commerce.pagopa.assistant.application.AssistantHistoryService;
 import com.commerce.pagopa.assistant.application.dto.request.AssistantConversationRequestDto;
 import com.commerce.pagopa.assistant.application.dto.request.AssistantMessageRequestDto;
-import com.commerce.pagopa.assistant.application.dto.response.AssistantConversationPageResponseDto;
-import com.commerce.pagopa.assistant.application.dto.response.AssistantConversationResponseDto;
-import com.commerce.pagopa.assistant.application.dto.response.AssistantHistoryMessageResponseDto;
-import com.commerce.pagopa.assistant.application.dto.response.AssistantMessageResponseDto;
+import com.commerce.pagopa.assistant.application.dto.response.*;
 import com.commerce.pagopa.global.response.ApiResponse;
 
 @RestController
@@ -109,6 +110,29 @@ public class AssistantController {
                         )
                 )
         );
+    }
+
+    @PostMapping(
+            value = "/{conversationId}/messages/stream",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
+    public Flux<ServerSentEvent<AssistantStreamEventResponseDto>> chatStream(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @PathVariable Long conversationId,
+            @Valid @RequestBody AssistantMessageRequestDto requestDto
+    ) {
+        return assistantChatService.chatStream(
+                userId,
+                conversationId,
+                requestDto
+        )
+                .map(
+                        event -> ServerSentEvent.<AssistantStreamEventResponseDto>builder()
+                                .event(event.type())
+                                .data(event)
+                                .build()
+                );
     }
 
     // @DeleteMapping("/{conversationId}")
