@@ -2,6 +2,8 @@ package com.commerce.pagopa.identity.infrastructure.security.config;
 
 import java.util.List;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,11 +51,17 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(apiAuthenticationEntryPoint))
                 .authorizeHttpRequests(
-                        auth -> auth.requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        )
+                        auth -> auth
+                                .dispatcherTypeMatchers(
+                                        DispatcherType.ASYNC,
+                                        DispatcherType.ERROR
+                                )
+                                .permitAll()
+                                .requestMatchers(
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html"
+                                )
                                 .permitAll()
                                 .requestMatchers(
                                         "/actuator/health/**",

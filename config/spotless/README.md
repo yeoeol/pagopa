@@ -1,17 +1,15 @@
-# Java formatting
+# Java source hygiene
 
-The Gradle build is the source of truth for formatting and import order.
+Spotless intentionally does not run a Java code-layout formatter. Indentation, wrapping, braces,
+method chains, parameters, and other style choices remain under developer control.
 
-- Indentation: 4 spaces
-- Continuation indentation: 8 spaces
-- Maximum line length: 120
-- Method chains: keep the first call on the current line and always put each following call on its own line
-- Intentional manual line breaks: preserved by both Eclipse JDT and the IntelliJ scheme
-- Wrapped method parameters: one parameter per line, including the first parameter, with the closing parenthesis on its own line
-- Application module dependency declarations: one dependency per line, with closing delimiters on their own lines; enforced by a dedicated Spotless step
-- New wildcard imports: avoided by the IntelliJ scheme; existing wildcard imports are left unchanged
-- Static imports: placed in the final import group
-- Generated QueryDSL sources: excluded from formatting
+Spotless only:
+
+- targets maintained Java sources under `src/main/java` and `src/test/java`;
+- groups and sorts imports using `config/spotless/java.importorder`;
+- removes unused imports;
+- removes trailing whitespace;
+- ensures that every file ends with a newline.
 
 Run the formatter with:
 
@@ -25,11 +23,5 @@ Validate without modifying files with:
 .\gradlew.bat spotlessCheck
 ```
 
-## IntelliJ IDEA
-
-Import `config/spotless/intellij-java-code-style.xml` from **Settings > Editor > Code Style > Java**,
-then copy the imported scheme to the project. Enable **Optimize imports** under
-**Settings > Tools > Actions on Save** if imports should be reorganized whenever a file is saved.
-
-The checked import order separates JDK, Jakarta, Spring, other external libraries, project code,
-and static imports with blank lines. `spotlessApply` enforces the same order in local builds and CI.
+IDE code-style settings are intentionally not checked into this directory. Each developer can use
+their preferred layout while Spotless enforces only the shared source-hygiene rules above.

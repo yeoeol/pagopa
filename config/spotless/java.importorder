@@ -1,0 +1,15 @@
+#Organize Import Order
+0=java
+1=javax
+2=jakarta
+3=org.springframework
+4=org
+5=net
+6=io
+7=com.fasterxml
+8=com.querydsl
+9=lombok
+10=com
+11=
+12=com.commerce.pagopa
+13=\#
