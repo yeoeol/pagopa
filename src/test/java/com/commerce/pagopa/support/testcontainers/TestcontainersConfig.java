@@ -15,6 +15,9 @@ public class TestcontainersConfig {
     @Bean
     @ServiceConnection
     MySQLContainer mysqlContainer() {
-        return new MySQLContainer(MYSQL_IMAGE);
+        return new MySQLContainer(MYSQL_IMAGE)
+                .withDatabaseName("pagopa_test")
+                .withUsername("test")
+                .withPassword("test");
     }
 }

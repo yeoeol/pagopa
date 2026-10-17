@@ -23,30 +23,28 @@ import org.springframework.transaction.annotation.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 
 import com.commerce.pagopa.discovery.application.SearchHistoryService;
 import com.commerce.pagopa.discovery.application.command.ProductSearchHistoryCommand;
 import com.commerce.pagopa.discovery.domain.SearchHistory;
 import com.commerce.pagopa.discovery.domain.SearchHistoryRepository;
+import com.commerce.pagopa.global.config.JpaConfig;
 import com.commerce.pagopa.global.config.QueryDSLConfig;
 import com.commerce.pagopa.identity.api.UserApi;
 import com.commerce.pagopa.identity.domain.User;
 import com.commerce.pagopa.identity.domain.UserRepository;
 import com.commerce.pagopa.support.fixture.UserFixture;
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
+import com.commerce.pagopa.support.testcontainers.DatabaseCleaner;
+import com.commerce.pagopa.support.testcontainers.MySqlIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
+@DataJpaTest
+@MySqlIntegrationTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({SearchHistoryService.class, TestcontainersConfig.class, QueryDSLConfig.class})
+@Import({SearchHistoryService.class, QueryDSLConfig.class, JpaConfig.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Timeout(
-        value = 30,
-        unit = TimeUnit.SECONDS
-)
 class SearchHistoryServiceConcurrencyTest {
 
     private static final int PARTICIPANT_COUNT = 8;
@@ -69,6 +67,9 @@ class SearchHistoryServiceConcurrencyTest {
     @Autowired
     DataSource dataSource;
 
+    @Autowired
+    DatabaseCleaner databaseCleaner;
+
     @BeforeEach
     void verify_mysql_database() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
@@ -77,6 +78,11 @@ class SearchHistoryServiceConcurrencyTest {
                             .getDatabaseProductName()
             ).isEqualToIgnoringCase("MySQL");
         }
+    }
+
+    @BeforeEach
+    void beforeEach() throws SQLException {
+        databaseCleaner.clean();
     }
 
     @Test

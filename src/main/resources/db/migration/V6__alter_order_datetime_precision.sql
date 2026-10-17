@@ -1,0 +1,3 @@
+ALTER TABLE orders
+    MODIFY COLUMN ordered_at DATETIME(6) NOT NULL,
+    MODIFY COLUMN canceled_at DATETIME(6) NULL;
