@@ -6,6 +6,7 @@ method chains, parameters, and other style choices remain under developer contro
 Spotless only:
 
 - targets maintained Java sources under `src/main/java` and `src/test/java`;
+- groups and sorts imports using `config/spotless/java.importorder`;
 - removes unused imports;
 - removes trailing whitespace;
 - ensures that every file ends with a newline.
