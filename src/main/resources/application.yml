@@ -86,11 +86,23 @@ spring:
           enabled: false
 
   ai:
+    model:
+      embedding: ollama
     ollama:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       chat:
-        model: qwen3:4b
+        model: ${OLLAMA_CHAT_MODEL:qwen3:4b}
         temperature: ${OLLAMA_TEMPERATURE:0.2}
+      embedding:
+        model: ${OLLAMA_EMBEDDING_MODEL:qwen3-embedding:0.6b-q8_0}
+        keep-alive: ${OLLAMA_EMBEDDING_KEEP_ALIVE:10m}
+        truncate: true
+    vectorstore:
+      elasticsearch:
+        initialize-schema: ${RAG_INDEX_INITIALIZE:false}
+        index-name: ${RAG_INDEX_NAME:assistant-knowledge-v1}
+        dimensions: 1024
+        similarity: cosine
     chat:
       memory:
         repository:
@@ -127,6 +139,11 @@ app:
         bucket: ${SUPABASE_STORAGE_BUCKET:pagopa-images}
         project-url: ${SUPABASE_PROJECT_URL}
 
+  assistant:
+    rag:
+      enabled: true
+      top-k: ${ASSISTANT_RAG_TOP_K:5}
+      similarity-threshold: ${ASSISTANT_RAG_THRESHOLD:0.65}
 
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}

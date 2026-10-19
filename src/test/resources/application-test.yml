@@ -81,6 +81,12 @@ spring:
     async:
       request-timeout: 5m
 
+  ai:
+    model:
+      embedding: none
+    vectorstore:
+      type: none
+
 jwt:
   secret: test-only-jwt-secret-key-must-be-at-least-32-bytes-long
   access-token-expiry: 1800000
@@ -106,6 +112,10 @@ app:
         secret-key: ${SUPABASE_STORAGE_SECRET_KEY:test-secret-key}
         bucket: ${SUPABASE_STORAGE_BUCKET:test-bucket}
         project-url: ${SUPABASE_PROJECT_URL:http://127.0.0.1:54321}
+
+  assistant:
+    rag:
+      enabled: false
 
   cors:
     allowed-origins: http://localhost:3000
