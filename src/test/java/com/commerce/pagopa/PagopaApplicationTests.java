@@ -5,10 +5,10 @@ import org.springframework.context.annotation.Import;
 
 import org.junit.jupiter.api.Test;
 
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
+import com.commerce.pagopa.support.testcontainers.MySqlTestcontainersConfig;
 
 @SpringBootTest
-@Import(TestcontainersConfig.class)
+@Import(MySqlTestcontainersConfig.class)
 class PagopaApplicationTests {
 
     @Test

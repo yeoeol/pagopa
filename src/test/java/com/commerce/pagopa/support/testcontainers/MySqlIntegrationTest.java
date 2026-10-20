@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @Import(
     {
-            TestcontainersConfig.class,
+            MySqlTestcontainersConfig.class,
             DatabaseCleanupConfig.class
     }
 )
