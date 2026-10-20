@@ -2,9 +2,11 @@ package com.commerce.pagopa.assistant.ai.infrastructure.config;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,13 +24,18 @@ public class AssistantAiConfig {
     @Bean
     ChatClient chatClient(
             ChatClient.Builder builder,
-            ChatMemory chatMemory
+            ChatMemory chatMemory,
+            ObjectProvider<QuestionAnswerAdvisor> advisorProvider
     ) {
         ChatClient.Builder configured = builder
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         MessageChatMemoryAdvisor.builder(chatMemory).build()
                 );
+
+        advisorProvider.ifAvailable(
+                configured::defaultAdvisors
+        );
 
         return configured.build();
     }
