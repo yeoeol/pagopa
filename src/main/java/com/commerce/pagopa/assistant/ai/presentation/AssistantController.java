@@ -25,7 +25,6 @@ import com.commerce.pagopa.assistant.ai.application.AssistantHistoryService;
 import com.commerce.pagopa.assistant.ai.application.dto.request.AssistantConversationRequestDto;
 import com.commerce.pagopa.assistant.ai.application.dto.request.AssistantMessageRequestDto;
 import com.commerce.pagopa.assistant.ai.application.dto.response.*;
-import com.commerce.pagopa.assistant.application.dto.response.*;
 import com.commerce.pagopa.global.response.ApiResponse;
 
 @RestController

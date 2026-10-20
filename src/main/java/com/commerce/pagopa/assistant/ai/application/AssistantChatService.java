@@ -16,7 +16,6 @@ import com.commerce.pagopa.assistant.ai.application.dto.response.AssistantMessag
 import com.commerce.pagopa.assistant.ai.application.dto.response.AssistantStreamEventResponseDto;
 import com.commerce.pagopa.assistant.ai.application.dto.response.GeneratedAnswer;
 import com.commerce.pagopa.assistant.ai.application.exception.AssistantModelException;
-import com.commerce.pagopa.assistant.application.dto.response.*;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
 
