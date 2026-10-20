@@ -29,6 +29,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserService userService;
 
     private static final String ADMIN_SUFFIX = "-admin";
+    private static final String SELLER_SUFFIX = "-seller";
 
     @Value("${app.storage.provider.azure.base-url}")
     private String azureBaseUrl;
@@ -39,7 +40,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = userRequest.getClientRegistration()
                 .getRegistrationId();
-        boolean adminLogin = registrationId.endsWith(ADMIN_SUFFIX);
+        boolean existingUserOnlyLogin = isExistingUserOnlyLogin(registrationId);
 
         String providerRegistrationId = resolveProviderRegistrationId(registrationId);
 
@@ -48,7 +49,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 oAuth2User.getAttributes()
         );
         Provider provider = Provider.valueOf(providerRegistrationId.toUpperCase());
-        User user = adminLogin
+        User user = existingUserOnlyLogin
                 ? findExistingActiveUser(
                         userInfo,
                         provider
@@ -65,11 +66,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         );
     }
 
+    private boolean isExistingUserOnlyLogin(String registrationId) {
+        return registrationId.endsWith(ADMIN_SUFFIX) || registrationId.endsWith(SELLER_SUFFIX);
+    }
+
     private String resolveProviderRegistrationId(String registrationId) {
-        if (registrationId.endsWith(ADMIN_SUFFIX)) {
+        if (registrationId.endsWith(ADMIN_SUFFIX) || registrationId.endsWith(SELLER_SUFFIX)) {
             return registrationId.substring(
                     0,
-                    registrationId.length() - ADMIN_SUFFIX.length()
+                    registrationId.lastIndexOf('-')
             );
         }
         return registrationId;
