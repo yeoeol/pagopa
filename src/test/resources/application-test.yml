@@ -138,6 +138,8 @@ app:
   assistant:
     rag:
       enabled: false
+    knowledge:
+      source: ${ASSISTANT_KNOWLEDGE_SOURCE:classpath}
 
   cors:
     allowed-origins: http://localhost:3000
