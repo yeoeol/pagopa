@@ -1,4 +1,4 @@
-package com.commerce.pagopa.support.testcontainers;
+package com.commerce.pagopa.media.infrastructure.azure;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
