@@ -1,5 +1,7 @@
 package com.commerce.pagopa.assistant.knowledge.application;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -15,8 +17,12 @@ public class AssistantKnowledgeSyncService {
     private final AssistantKnowledgeDocumentReader documentReader;
 
     public void syncAll() {
-        documentReader.readAll()
-                .forEach(this::replace);
+        List<AssistantKnowledgeSource> sources = documentReader.readAll();
+        sources.forEach(this::replace);
+
+        assistantKnowledgeService.deleteExcept(
+                sources.stream().map(AssistantKnowledgeSource::sourceId).toList()
+        );
     }
 
     public void sync(String sourceId) {
