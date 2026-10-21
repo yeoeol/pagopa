@@ -1,5 +1,6 @@
 package com.commerce.pagopa.assistant.knowledge.application;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -23,8 +24,6 @@ public class AssistantKnowledgeService {
             String type,
             String content
     ) {
-        delete(sourceId);
-
         Document source = Document.builder()
                 .id(sourceId)
                 .text(content)
@@ -53,12 +52,26 @@ public class AssistantKnowledgeService {
                 .toList();
 
         vectorStore.add(indexedDocuments);
+        deleteStableChunks(sourceId, indexedDocuments.size());
     }
 
-    private void delete(String sourceId) {
+    public void deleteExcept(List<String> sourceIds) {
+        if (sourceIds.isEmpty()) {
+            return;
+        }
         FilterExpressionBuilder builder = new FilterExpressionBuilder();
         vectorStore.delete(
-                builder.eq("sourceId", sourceId).build()
+                builder.nin("sourceId", new ArrayList<>(sourceIds)).build()
+        );
+    }
+
+    private void deleteStableChunks(String sourceId, int chunkCount) {
+        FilterExpressionBuilder builder = new FilterExpressionBuilder();
+        vectorStore.delete(
+                builder.and(
+                        builder.eq("sourceId", sourceId),
+                        builder.gte("chunkNo", chunkCount)
+                ).build()
         );
     }
 }
