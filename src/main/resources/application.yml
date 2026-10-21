@@ -102,7 +102,7 @@ spring:
         truncate: true
     vectorstore:
       elasticsearch:
-        initialize-schema: ${RAG_INDEX_INITIALIZE:false}
+        initialize-schema: ${RAG_INDEX_INITIALIZE:true}
         index-name: ${RAG_INDEX_NAME:assistant-knowledge-v1}
         dimensions: 1024
         similarity: cosine
@@ -144,7 +144,7 @@ app:
 
   assistant:
     rag:
-      enabled: true
+      enabled: ${ASSISTANT_RAG_ENABLED:true}
       top-k: ${ASSISTANT_RAG_TOP_K:5}
       similarity-threshold: ${ASSISTANT_RAG_THRESHOLD:0.50}
     knowledge:
