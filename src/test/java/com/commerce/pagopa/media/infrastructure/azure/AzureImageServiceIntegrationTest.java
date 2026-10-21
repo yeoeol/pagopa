@@ -1,6 +1,7 @@
 package com.commerce.pagopa.media.infrastructure.azure;
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -10,6 +11,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import com.commerce.pagopa.support.testcontainers.MockVectorStoreTestConfig;
+
 @Testcontainers
 @SpringBootTest(
         properties = {
@@ -17,6 +20,7 @@ import org.testcontainers.utility.DockerImageName;
                 "spring.cloud.azure.storage.blob.enabled=true"
         }
 )
+@Import(MockVectorStoreTestConfig.class)
 @ActiveProfiles("test")
 public class AzureImageServiceIntegrationTest {
 
