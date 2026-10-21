@@ -123,7 +123,7 @@
                 if (!response.ok) {
                     throw new Error();
                 }
-                window.location.assign("/");
+                window.location.assign("/seller/login?logout");
             } catch (error) {
                 showNotice("로그아웃하지 못했습니다. 잠시 후 다시 시도해 주세요.", "danger");
                 button.disabled = false;

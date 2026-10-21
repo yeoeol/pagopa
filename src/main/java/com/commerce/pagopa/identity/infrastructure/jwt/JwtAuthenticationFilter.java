@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,6 +24,8 @@ import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntr
 import com.commerce.pagopa.identity.infrastructure.jwt.resolver.TokenResolver;
 import com.commerce.pagopa.identity.infrastructure.security.CustomUserDetails;
 
+import static org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.*;
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -29,6 +33,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenResolver tokenResolver;
     private final JwtAuthenticationService jwtAuthenticationService;
+
+    private static final RequestMatcher STATIC_RESOURCE_REQUEST_MATCHER =
+            new OrRequestMatcher(
+                    pathPattern("/admin-assets/**"),
+                    pathPattern("/seller-assets/**"),
+                    pathPattern("/images/**")
+            );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return STATIC_RESOURCE_REQUEST_MATCHER.matches(request);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
