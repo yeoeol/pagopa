@@ -218,6 +218,8 @@ public enum ErrorCode {
             "ASSISTANT_004",
             "종료된 대화입니다."
     ),
+    ASSISTANT_MESSAGE_ALREADY_FAILED(HttpStatus.BAD_REQUEST, "ASSISTANT_004", "이미 메시지 생성에 실패했습니다."),
+
     // ASSISTANT RAG
     KNOWLEDGE_DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "KNOWLEDGE_001", "지식 문서를 찾을 수 없습니다."),
     KNOWLEDGE_DOCUMENT_NOT_READABLE(HttpStatus.SERVICE_UNAVAILABLE, "KNOWLEDGE_002", "지식 문서를 읽을 수 없습니다."),

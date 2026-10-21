@@ -8,6 +8,8 @@ import org.hibernate.type.SqlTypes;
 import lombok.*;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
@@ -114,7 +116,7 @@ public class AssistantMessage extends BaseTimeEntity {
 
     public void fail() {
         if (this.status == AssistantMessageStatus.FAILED) {
-            throw new RuntimeException("Already Failed");
+            throw new BusinessException(ErrorCode.ASSISTANT_MESSAGE_ALREADY_FAILED);
         }
         this.status = AssistantMessageStatus.FAILED;
     }
