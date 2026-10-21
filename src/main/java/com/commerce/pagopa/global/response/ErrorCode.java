@@ -206,7 +206,7 @@ public enum ErrorCode {
     // RECOMMENDATION
     RECOMMENDATION_INVALID_LIMIT(HttpStatus.BAD_REQUEST, "RECOMMENDATION_001", "유효하지 않은 limit입니다."),
 
-    // ASSISTANT
+    // ASSISTANT CHAT
     ASSISTANT_CONVERSATION_NOT_FOUND(
             HttpStatus.NOT_FOUND, "ASSISTANT_001", "존재하지 않는 어시스턴트 대화입니다."
     ), ASSISTANT_MESSAGE_NOT_FOUND(
@@ -218,6 +218,10 @@ public enum ErrorCode {
             "ASSISTANT_004",
             "종료된 대화입니다."
     ),
+    // ASSISTANT RAG
+    KNOWLEDGE_DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "KNOWLEDGE_001", "지식 문서를 찾을 수 없습니다."),
+    KNOWLEDGE_DOCUMENT_NOT_READABLE(HttpStatus.SERVICE_UNAVAILABLE, "KNOWLEDGE_002", "지식 문서를 읽을 수 없습니다."),
+    DUPLICATE_KNOWLEDGE_DOCUMENT(HttpStatus.BAD_REQUEST, "KNOWLEDGE_003", "중복된 지식 문서입니다."),
     ;
 
     private final HttpStatus httpStatus;

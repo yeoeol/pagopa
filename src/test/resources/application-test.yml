@@ -20,6 +20,9 @@ spring:
     baseline-on-migrate: false
     validate-on-migrate: true
 
+  elasticsearch:
+    uris: http://127.0.0.1:1
+
   cloud:
     azure:
       storage:
@@ -89,6 +92,31 @@ spring:
     async:
       request-timeout: 5m
 
+  ai:
+    model:
+      embedding: ollama
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        model: ${OLLAMA_CHAT_MODEL:qwen3:4b}
+        temperature: ${OLLAMA_TEMPERATURE:0.2}
+      embedding:
+        model: ${OLLAMA_EMBEDDING_MODEL:qwen3-embedding:0.6b-q8_0}
+        keep-alive: ${OLLAMA_EMBEDDING_KEEP_ALIVE:10m}
+        truncate: true
+    vectorstore:
+      type: none
+      elasticsearch:
+        initialize-schema: ${RAG_INDEX_INITIALIZE:true}
+        index-name: ${RAG_INDEX_NAME:assistant-knowledge-test}
+        dimensions: 1024
+        similarity: cosine
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: never
+
 jwt:
   secret: test-only-jwt-secret-key-must-be-at-least-32-bytes-long
   access-token-expiry: 1800000
@@ -114,6 +142,12 @@ app:
         secret-key: ${SUPABASE_STORAGE_SECRET_KEY:test-secret-key}
         bucket: ${SUPABASE_STORAGE_BUCKET:test-bucket}
         project-url: ${SUPABASE_PROJECT_URL:http://127.0.0.1:54321}
+
+  assistant:
+    rag:
+      enabled: false
+    knowledge:
+      source: ${ASSISTANT_KNOWLEDGE_SOURCE:classpath}
 
   cors:
     allowed-origins: http://localhost:3000

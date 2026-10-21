@@ -31,7 +31,8 @@ public class AdminSecurityConfig {
                         "/admin/**",
                         "/admin-assets/**",
                         "/oauth2/authorization/google-admin",
-                        "/login/oauth2/code/google-admin"
+                        "/login/oauth2/code/google-admin",
+                        "/api/v1/admin/**"
                 )
                 .authorizeHttpRequests(
                         auth -> auth
@@ -47,6 +48,8 @@ public class AdminSecurityConfig {
                                         "/admin",
                                         "/admin/**"
                                 )
+                                .hasRole("ADMIN")
+                                .requestMatchers("/api/v1/admin/**")
                                 .hasRole("ADMIN")
                                 .anyRequest()
                                 .hasRole("ADMIN")

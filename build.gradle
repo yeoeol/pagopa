@@ -80,6 +80,7 @@ dependencies {
 
     // DB
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-elasticsearch'
     implementation 'net.datafaker:datafaker:2.5.4'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
@@ -91,6 +92,8 @@ dependencies {
     // Spring AI
     implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
     implementation 'org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-elasticsearch'
+    implementation 'org.springframework.ai:spring-ai-vector-store-advisor'
 
     // Flyway
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
@@ -113,6 +116,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
     testImplementation 'org.testcontainers:testcontainers-mysql'
+    testImplementation 'org.testcontainers:testcontainers-elasticsearch'
+    testImplementation 'org.springframework.boot:spring-boot-starter-elasticsearch-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
