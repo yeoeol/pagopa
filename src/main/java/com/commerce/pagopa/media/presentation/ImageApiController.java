@@ -1,4 +1,4 @@
-package com.commerce.pagopa.media.presenatation;
+package com.commerce.pagopa.media.presentation;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
