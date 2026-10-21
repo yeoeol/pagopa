@@ -1,14 +1,13 @@
 package com.commerce.pagopa;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import org.junit.jupiter.api.Test;
 
-import com.commerce.pagopa.support.testcontainers.TestcontainersConfig;
+import com.commerce.pagopa.support.testcontainers.MySqlIntegrationTest;
 
 @SpringBootTest
-@Import(TestcontainersConfig.class)
+@MySqlIntegrationTest
 class PagopaApplicationTests {
 
     @Test

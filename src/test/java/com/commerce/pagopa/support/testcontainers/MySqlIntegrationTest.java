@@ -12,8 +12,9 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @Import(
     {
-            TestcontainersConfig.class,
-            DatabaseCleanupConfig.class
+            MySqlTestcontainersConfig.class,
+            DatabaseCleanupConfig.class,
+            MockVectorStoreTestConfig.class
     }
 )
 public @interface MySqlIntegrationTest {
