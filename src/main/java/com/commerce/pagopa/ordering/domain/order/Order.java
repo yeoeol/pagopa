@@ -97,20 +97,14 @@ public class Order extends BaseTimeEntity {
         this.status = OrderStatus.CONFIRMED;
     }
 
-    public void cancel(LocalDateTime canceledAt) {
+    public void cancelBeforePayment(LocalDateTime canceledAt) {
         validateCancelable();
-        validateCanceledAt(canceledAt);
-
-        this.status = OrderStatus.CANCELED;
-        this.canceledAt = canceledAt;
+        changeToCanceled(canceledAt);
     }
 
     public void cancelAfterPayment(LocalDateTime canceledAt) {
         validateCancelAfterPayment();
-        validateCanceledAt(canceledAt);
-
-        this.status = OrderStatus.CANCELED;
-        this.canceledAt = canceledAt;
+        changeToCanceled(canceledAt);
     }
 
     public Integer getTotalAmount() {
@@ -146,5 +140,12 @@ public class Order extends BaseTimeEntity {
         if (canceledAt == null || canceledAt.isBefore(this.orderedAt)) {
             throw new BusinessException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
+    }
+
+    private void changeToCanceled(LocalDateTime canceledAt) {
+        validateCanceledAt(canceledAt);
+
+        this.status = OrderStatus.CANCELED;
+        this.canceledAt = canceledAt;
     }
 }
