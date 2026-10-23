@@ -1,6 +1,7 @@
 package com.commerce.pagopa.payment.application.dto.toss;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public record TossPaymentResponse(
         String paymentKey,
@@ -9,12 +10,12 @@ public record TossPaymentResponse(
         String status,
         OffsetDateTime requestedAt,
         OffsetDateTime approvedAt,
-        Cancels cancels,
+        List<Cancel> cancels,
         Integer totalAmount,
         Integer balanceAmount,
         String method
 ) {
-    public record Cancels(
+    public record Cancel(
         String transactionKey,
         String cancelReason,
         OffsetDateTime canceledAt,

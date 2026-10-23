@@ -99,7 +99,10 @@ public class TossPaymentGateway implements PaymentGateway {
                     response.status(),
                     response.method(),
                     response.totalAmount(),
-                    response.cancels().canceledAt().toLocalDateTime()
+                    response.cancels()
+                            .getLast()
+                            .canceledAt()
+                            .toLocalDateTime()
             );
         } catch (ResourceAccessException e) {
             throw new PaymentGatewayIndeterminateException(
