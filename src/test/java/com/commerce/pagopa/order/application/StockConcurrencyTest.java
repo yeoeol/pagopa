@@ -434,7 +434,7 @@ class StockConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.cancelOrder(orderId);
+                    orderService.cancelPendingOrder(orderId);
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
@@ -593,7 +593,7 @@ class StockConcurrencyTest {
             pool.submit(() -> {
                 try {
                     barrier.await();
-                    orderService.cancelOrder(orderId);
+                    orderService.cancelPendingOrder(orderId);
                     success.incrementAndGet();
                 } catch (BusinessException e) {
                     businessFail.incrementAndGet();
