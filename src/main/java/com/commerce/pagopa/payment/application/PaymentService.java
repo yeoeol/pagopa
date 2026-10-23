@@ -32,7 +32,7 @@ public class PaymentService {
         PaymentApprovalRequest request = paymentTransactionService
                 .prepareApproval(
                         userId,
-                        paymentId
+                        command
                 );
 
         try {

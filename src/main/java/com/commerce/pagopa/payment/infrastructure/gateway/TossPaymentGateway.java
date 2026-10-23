@@ -1,6 +1,5 @@
 package com.commerce.pagopa.payment.infrastructure.gateway;
 
-import java.util.UUID;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
@@ -46,19 +45,12 @@ public class TossPaymentGateway implements PaymentGateway {
     @Override
     public PaymentResult approve(PaymentApprovalRequest request) {
         try {
-            String paymentKey = UUID.randomUUID()
-                    .toString()
-                    .substring(0, 64);
-            String orderId = UUID.randomUUID()
-                    .toString()
-                    .substring(0, 32);
-
             TossPaymentResponse response = restClient.post()
                     .uri("/v1/payments/confirm")
                     .header("Idempotency-Key", request.idempotencyKey())
                     .body(new TossConfirmRequest(
-                            paymentKey,
-                            orderId,
+                            request.providerPaymentId(),
+                            request.providerOrderId(),
                             request.amount()
                     ))
                     .exchange(responseMapper::readApproval);
@@ -67,6 +59,7 @@ public class TossPaymentGateway implements PaymentGateway {
                     request.paymentId(),
                     PaymentProvider.TOSS_PAYMENTS,
                     response.paymentKey(),
+                    response.orderId(),
                     response.status(),
                     response.method(),
                     response.totalAmount(),
@@ -96,6 +89,7 @@ public class TossPaymentGateway implements PaymentGateway {
                     request.paymentId(),
                     PaymentProvider.TOSS_PAYMENTS,
                     response.paymentKey(),
+                    response.orderId(),
                     response.status(),
                     response.method(),
                     response.totalAmount(),

@@ -1,5 +1,7 @@
 package com.commerce.pagopa.payment.application;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.ordering.api.OrderPaymentApi;
 import com.commerce.pagopa.ordering.api.OrderPaymentSummary;
+import com.commerce.pagopa.payment.application.dto.command.PaymentApprovalCommand;
 import com.commerce.pagopa.payment.application.dto.command.PaymentCancelCommand;
 import com.commerce.pagopa.payment.application.dto.command.PaymentRequestCommand;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
@@ -33,8 +36,13 @@ public class PaymentTransactionService {
                 command.orderId()
         );
 
+        String providerOrderId = UUID.randomUUID().toString().substring(0, 20);
         return paymentRepository.findByOrderId(summary.orderId())
-                .map(PaymentResult::from)
+                .map(payment -> PaymentResult.request(
+                        payment.getId(),
+                        providerOrderId,
+                        payment.getAmount()
+                ))
                 .orElseGet(() -> PaymentResult.from(
                         paymentRepository.save(
                                 Payment.create(
@@ -43,23 +51,26 @@ public class PaymentTransactionService {
                                         summary.orderId(),
                                         command.provider()
                                 )
-                        ))
-                );
+                        ),
+                        providerOrderId
+                ));
     }
 
     @Transactional
-    public PaymentApprovalRequest prepareApproval(Long userId, Long paymentId) {
-        Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
+    public PaymentApprovalRequest prepareApproval(Long userId, PaymentApprovalCommand command) {
+        Payment payment = paymentRepository.findByIdForUpdateOrThrow(command.paymentId());
 
         OrderPaymentSummary summary = orderPaymentApi.validateConfirmPayment(
                 userId,
                 payment.getOrderId()
         );
 
-        payment.startApproval();
+        payment.startApproval(command.amount());
         return PaymentApprovalRequest.of(
                 payment.getId(),
                 summary.orderId(),
+                command.providerPaymentId(),
+                command.providerOrderId(),
                 payment.getAmount(),
                 payment.getPaymentMethod(),
                 APPROVAL_IDEMPOTENCY_KEY_PREFIX + payment.getId()
@@ -81,7 +92,7 @@ public class PaymentTransactionService {
                     approval.amount()
             );
         }
-        return PaymentResult.from(payment);
+        return PaymentResult.from(payment, approval.providerOrderId());
     }
 
     @Transactional
@@ -119,7 +130,7 @@ public class PaymentTransactionService {
         if (canceled) {
             orderPaymentApi.cancelAfterPayment(payment.getOrderId());
         }
-        return PaymentResult.from(payment);
+        return PaymentResult.from(payment, cancellation.providerOrderId());
     }
 
     @Transactional

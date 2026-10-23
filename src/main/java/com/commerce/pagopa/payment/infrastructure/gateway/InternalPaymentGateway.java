@@ -2,6 +2,7 @@ package com.commerce.pagopa.payment.infrastructure.gateway;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.annotation.Profile;
@@ -24,12 +25,14 @@ public class InternalPaymentGateway implements PaymentGateway {
 
     @Override
     public PaymentResult approve(PaymentApprovalRequest request) {
+        String providerOrderId = UUID.randomUUID().toString().substring(0, 20);
         return repository.computeIfAbsent(
                 request.paymentId().toString(),
                 key -> PaymentResult.approve(
                         request.paymentId(),
                         PaymentProvider.INTERNAL,
                         "INTERNAL-" + key,
+                        providerOrderId,
                         "DONE",
                         request.paymentMethod(),
                         request.amount(),

@@ -9,6 +9,7 @@ public record PaymentResult(
         Long paymentId,
         String provider,
         String providerPaymentId,
+        String providerOrderId,
         Long orderId,
         String status,
         String paymentMethod,
@@ -16,11 +17,12 @@ public record PaymentResult(
         LocalDateTime approvedAt,
         LocalDateTime canceledAt
 ) {
-    public static PaymentResult from(Payment payment) {
+    public static PaymentResult from(Payment payment, String providerOrderId) {
         return new PaymentResult(
                 payment.getId(),
                 payment.getProvider().name(),
                 payment.getProviderPaymentId(),
+                providerOrderId,
                 payment.getOrderId(),
                 payment.getStatus().name(),
                 payment.getPaymentMethod(),
@@ -30,10 +32,30 @@ public record PaymentResult(
         );
     }
 
+    public static PaymentResult request(
+            Long paymentId,
+            String providerOrderId,
+            Integer amount
+    ) {
+        return new PaymentResult(
+                paymentId,
+                null,
+                null,
+                providerOrderId,
+                null,
+                null,
+                null,
+                amount,
+                null,
+                null
+        );
+    }
+
     public static PaymentResult approve(
             Long paymentId,
             PaymentProvider provider,
             String providerPaymentId,
+            String providerOrderId,
             String status,
             String paymentMethod,
             Integer amount,
@@ -43,6 +65,7 @@ public record PaymentResult(
                 paymentId,
                 provider.name(),
                 providerPaymentId,
+                providerOrderId,
                 null,
                 status,
                 paymentMethod,
@@ -56,6 +79,7 @@ public record PaymentResult(
             Long paymentId,
             PaymentProvider provider,
             String providerPaymentId,
+            String providerOrderId,
             String status,
             String paymentMethod,
             Integer amount,
@@ -65,6 +89,7 @@ public record PaymentResult(
                 paymentId,
                 provider.name(),
                 providerPaymentId,
+                providerOrderId,
                 null,
                 status,
                 paymentMethod,
@@ -81,6 +106,7 @@ public record PaymentResult(
                 this.paymentId,
                 this.provider,
                 this.providerPaymentId,
+                this.providerOrderId,
                 this.orderId,
                 "CANCELED",
                 this.paymentMethod,

@@ -30,6 +30,7 @@ out/
 !**/src/test/**/out/
 # Local configuration containing secrets
 /config/application-local.yml
+/config/application-dev.yml
 seed-data.sql
 .env
 *.pem

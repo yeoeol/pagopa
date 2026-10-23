@@ -180,7 +180,8 @@ public class Payment extends BaseTimeEntity {
         return true;
     }
 
-    public void startApproval() {
+    public void startApproval(Integer amount) {
+        validateAmount(amount);
         if (this.status == PaymentStatus.APPROVING) {
             return;
         }
@@ -229,6 +230,12 @@ public class Payment extends BaseTimeEntity {
         }
         if (this.status != PaymentStatus.READY) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        }
+    }
+
+    private void validateAmount(Integer amount) {
+        if (!this.amount.equals(amount)) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
     }
 }
