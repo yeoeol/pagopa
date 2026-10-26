@@ -1,4 +1,4 @@
-package com.commerce.pagopa.auth.handler;
+package com.commerce.pagopa.identity.infrastructure.handler;
 
 import java.util.Set;
 

@@ -1,4 +1,4 @@
-package com.commerce.pagopa.auth.handler;
+package com.commerce.pagopa.identity.infrastructure.handler;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;

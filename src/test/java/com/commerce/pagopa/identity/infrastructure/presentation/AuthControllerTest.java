@@ -1,4 +1,4 @@
-package com.commerce.pagopa.auth.controller;
+package com.commerce.pagopa.identity.infrastructure.presentation;
 
 import jakarta.servlet.http.Cookie;
 
