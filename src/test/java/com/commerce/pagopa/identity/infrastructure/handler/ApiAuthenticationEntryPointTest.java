@@ -1,4 +1,4 @@
-package com.commerce.pagopa.auth.handler;
+package com.commerce.pagopa.identity.infrastructure.handler;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -10,7 +10,6 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 import com.commerce.pagopa.global.response.ErrorCode;
-import com.commerce.pagopa.identity.infrastructure.handler.ApiAuthenticationEntryPoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

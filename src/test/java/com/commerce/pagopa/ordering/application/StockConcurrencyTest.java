@@ -1,4 +1,4 @@
-package com.commerce.pagopa.order.application;
+package com.commerce.pagopa.ordering.application;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.identity.domain.*;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
-import com.commerce.pagopa.ordering.application.OrderService;
 import com.commerce.pagopa.ordering.application.dto.request.DeliveryRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderItemRequestDto;
