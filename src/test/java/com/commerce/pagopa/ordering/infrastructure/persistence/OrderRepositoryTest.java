@@ -1,4 +1,4 @@
-package com.commerce.pagopa.order.infrastructure.persistence;
+package com.commerce.pagopa.ordering.infrastructure.persistence;
 
 import java.time.LocalDateTime;
 
