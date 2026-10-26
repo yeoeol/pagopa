@@ -1,4 +1,4 @@
-package com.commerce.pagopa.product.infrastructure.persistence;
+package com.commerce.pagopa.catalog.infrastructure.persistence;
 
 import java.util.ArrayList;
 import java.util.List;
