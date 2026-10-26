@@ -72,7 +72,6 @@ public class OrderPaymentApiService implements OrderPaymentApi {
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void cancelAfterPayment(Long orderId) {
-        Order order = orderPaymentService.getOrderForUpdate(orderId);
-        orderPaymentService.cancelAfterPayment(order.getId());
+        orderPaymentService.cancelAfterPayment(orderId);
     }
 }

@@ -22,8 +22,8 @@ import com.commerce.pagopa.global.response.ErrorCode;
                         columnNames = "order_id"
                 ),
                 @UniqueConstraint(
-                        name = "uq_payment_provider_transaction_id",
-                        columnNames = "provider_transaction_id"
+                        name = "uq_payment_provider_payment_id",
+                        columnNames = {"provider", "provider_payment_id"}
                 )}
 )
 public class Payment extends BaseTimeEntity {
@@ -76,12 +76,21 @@ public class Payment extends BaseTimeEntity {
     private LocalDateTime canceledAt;
 
     @ToString.Include
+    @Enumerated(EnumType.STRING)
     @Column(
-            name = "provider_transaction_id",
+            name = "provider",
+            length = 20,
+            nullable = false
+    )
+    private PaymentProvider provider;
+
+    @ToString.Include
+    @Column(
+            name = "provider_payment_id",
             length = 255,
             nullable = true
     )
-    private String providerTransactionId;
+    private String providerPaymentId;
 
     @Column(
             name = "order_id",
@@ -90,31 +99,46 @@ public class Payment extends BaseTimeEntity {
     private Long orderId;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Payment(String paymentMethod, Integer amount, PaymentStatus status, Long orderId) {
+    private Payment(
+            String paymentMethod,
+            Integer amount,
+            PaymentStatus status,
+            Long orderId,
+            PaymentProvider provider,
+            String providerPaymentId
+    ) {
         this.paymentMethod = paymentMethod;
         this.amount = amount;
         this.status = status;
         this.orderId = orderId;
+        this.provider = provider;
+        this.providerPaymentId = providerPaymentId;
     }
 
-    public static Payment create(String paymentMethod, Integer amount, Long orderId) {
+    public static Payment create(
+            String paymentMethod,
+            Integer amount,
+            Long orderId,
+            PaymentProvider provider
+    ) {
         return Payment.builder()
                 .paymentMethod(paymentMethod)
                 .amount(amount)
                 .status(PaymentStatus.READY)
                 .orderId(orderId)
+                .provider(provider)
                 .build();
     }
 
-    public boolean approve(String providerTransactionId, Integer approveAmount, LocalDateTime approvedAt) {
-        if (providerTransactionId == null || providerTransactionId.isBlank() || approvedAt == null) {
+    public boolean approve(String providerPaymentId, Integer approveAmount, LocalDateTime approvedAt) {
+        if (providerPaymentId == null || providerPaymentId.isBlank() || approvedAt == null) {
             throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAIL);
         }
         if (!this.amount.equals(approveAmount)) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
         if (this.status == PaymentStatus.PAID) {
-            if (!providerTransactionId.equals(this.providerTransactionId)) {
+            if (!providerPaymentId.equals(this.providerPaymentId)) {
                 throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
             }
             return false;
@@ -122,13 +146,17 @@ public class Payment extends BaseTimeEntity {
         if (this.status != PaymentStatus.APPROVING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
         }
-        this.providerTransactionId = providerTransactionId;
+        this.providerPaymentId = providerPaymentId;
         this.paidAt = approvedAt;
         this.status = PaymentStatus.PAID;
         return true;
     }
 
-    public boolean cancel(String providerTransactionId, Integer canceledAmount, LocalDateTime canceledAt) {
+    public boolean cancel(
+            String providerPaymentId,
+            Integer canceledAmount,
+            LocalDateTime canceledAt
+    ) {
         if (canceledAt == null) {
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
         }
@@ -136,7 +164,7 @@ public class Payment extends BaseTimeEntity {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
         if (this.status == PaymentStatus.CANCELED) {
-            if (!this.providerTransactionId.equals(providerTransactionId)) {
+            if (!this.providerPaymentId.equals(providerPaymentId)) {
                 throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
             }
             return false;
@@ -144,7 +172,7 @@ public class Payment extends BaseTimeEntity {
         if (this.status != PaymentStatus.CANCELLING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
         }
-        if (!this.providerTransactionId.equals(providerTransactionId)) {
+        if (!this.providerPaymentId.equals(providerPaymentId)) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
         this.canceledAt = canceledAt;
@@ -152,7 +180,8 @@ public class Payment extends BaseTimeEntity {
         return true;
     }
 
-    public void startApproval() {
+    public void startApproval(Integer amount) {
+        validateAmount(amount);
         if (this.status == PaymentStatus.APPROVING) {
             return;
         }
@@ -201,6 +230,12 @@ public class Payment extends BaseTimeEntity {
         }
         if (this.status != PaymentStatus.READY) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        }
+    }
+
+    private void validateAmount(Integer amount) {
+        if (!this.amount.equals(amount)) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
     }
 }

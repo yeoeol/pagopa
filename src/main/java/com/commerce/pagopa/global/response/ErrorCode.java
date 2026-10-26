@@ -186,6 +186,10 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST,
             "PAYMENT_015",
             "결제 승인 금액이 일치하지 않습니다."
+    ), PAYMENT_READ_FAILED(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "PAYMENT_016",
+            "결제 조회 요청이 실패했습니다."
     ),
 
     // SELLER

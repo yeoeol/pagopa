@@ -16,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.payment.application.PaymentService;
-import com.commerce.pagopa.payment.application.dto.request.CancelPaymentCommand;
-import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalCommand;
-import com.commerce.pagopa.payment.application.dto.request.PaymentCommand;
+import com.commerce.pagopa.payment.application.dto.command.PaymentApprovalCommand;
+import com.commerce.pagopa.payment.application.dto.command.PaymentCancelCommand;
+import com.commerce.pagopa.payment.application.dto.command.PaymentRequestCommand;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
 
 @Tag(
@@ -39,7 +39,7 @@ public class PaymentController {
     @PostMapping("/request")
     public ResponseEntity<ApiResponse<PaymentResult>> request(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @Valid @RequestBody PaymentCommand command
+            @Valid @RequestBody PaymentRequestCommand command
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(
@@ -77,7 +77,7 @@ public class PaymentController {
     @PostMapping("/cancel")
     public ResponseEntity<ApiResponse<PaymentResult>> cancel(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @Valid @RequestBody CancelPaymentCommand command
+            @Valid @RequestBody PaymentCancelCommand command
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(

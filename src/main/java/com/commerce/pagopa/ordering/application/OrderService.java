@@ -36,6 +36,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
+    private final OrderStockRestorer orderStockRestorer;
     private final ProductStockApi productStockApi;
     private final ProductApi productApi;
     private final CartItemApi cartItemApi;
@@ -46,12 +47,10 @@ public class OrderService {
     public OrderStockResponseDto order(Long userId, OrderCreateRequestDto requestDto) {
         List<ProductStockRequest> stockRequests = requestDto.products()
                 .stream()
-                .map(
-                        item -> new ProductStockRequest(
-                                item.productId(),
-                                item.quantity()
-                        )
-                )
+                .map(item -> new ProductStockRequest(
+                        item.productId(),
+                        item.quantity()
+                ))
                 .toList();
 
         List<ProductStockResult> products = productStockApi.decreaseStocks(stockRequests);
@@ -127,22 +126,13 @@ public class OrderService {
     /** 주문을 취소합니다. */
     @Counted("my.order")
     @Transactional
-    public OrderStockResponseDto cancelOrder(Long orderId) {
+    public OrderStockResponseDto cancelPendingOrder(Long orderId) {
         // 주문 존재 여부 확인
         Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
-        order.cancel(LocalDateTime.now());
+        order.cancelBeforePayment(LocalDateTime.now());
 
-        List<ProductStockResult> products = productStockApi.restoreStocks(
-                order.getOrderItems()
-                        .stream()
-                        .map(
-                                oi -> new ProductStockRequest(
-                                        oi.getProductId(),
-                                        oi.getOrderQuantity()
-                                )
-                        )
-                        .toList()
-        );
+        List<ProductStockResult> products = orderStockRestorer.restore(order);
+
         Map<Long, ProductSummary> summary = productApi.findAllByIds(
                 products.stream()
                         .map(ProductStockResult::productId)

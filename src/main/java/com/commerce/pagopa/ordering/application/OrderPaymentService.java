@@ -17,7 +17,7 @@ import com.commerce.pagopa.ordering.domain.order.OrderRepository;
 public class OrderPaymentService {
 
     private final OrderRepository orderRepository;
-    private final OrderService orderService;
+    private final OrderStockRestorer orderStockRestorer;
 
     @Transactional
     public Order getOrderForUpdateWithValidateOrdererId(Long userId, Long orderId) {
@@ -40,7 +40,7 @@ public class OrderPaymentService {
         Order order = orderRepository.findByIdForUpdateOrThrow(orderId);
         order.cancelAfterPayment(LocalDateTime.now());
 
-        orderService.cancelOrder(orderId);
+        orderStockRestorer.restore(order);
     }
 
     @Transactional

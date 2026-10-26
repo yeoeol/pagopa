@@ -136,7 +136,7 @@ public class OrderController {
     public ResponseEntity<ApiResponse<OrderStockResponseDto>> cancelOrder(@PathVariable("id") Long orderId) {
         return ResponseEntity.ok(
                 ApiResponse.ok(
-                        orderService.cancelOrder(orderId)
+                        orderService.cancelPendingOrder(orderId)
                 )
         );
     }

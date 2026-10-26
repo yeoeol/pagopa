@@ -1,19 +1,12 @@
 package com.commerce.pagopa.payment.application.port;
 
-import java.util.Optional;
-
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
-import com.commerce.pagopa.payment.application.dto.response.PaymentApprovalResponse;
-import com.commerce.pagopa.payment.application.dto.response.PaymentCancellationResponse;
+import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
 
 public interface PaymentGateway {
 
-    PaymentApprovalResponse approve(PaymentApprovalRequest request);
+    PaymentResult approve(PaymentApprovalRequest request);
 
-    PaymentCancellationResponse cancel(PaymentCancellationRequest request);
-
-    Optional<PaymentApprovalResponse> findApprovalByIdempotencyKey(String idempotencyKey);
-
-    Optional<PaymentCancellationResponse> findCancellationByIdempotencyKey(String idempotencyKey);
+    PaymentResult cancel(PaymentCancellationRequest request);
 }

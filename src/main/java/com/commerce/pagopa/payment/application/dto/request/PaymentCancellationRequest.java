@@ -1,15 +1,25 @@
 package com.commerce.pagopa.payment.application.dto.request;
 
 public record PaymentCancellationRequest(
-        String transactionId,
+        Long paymentId,
+        String providerPaymentId,
         Integer amount,
-        String idempotencyKey
+        String idempotencyKey,
+        String cancelReason
 ) {
-    public static PaymentCancellationRequest of(String transactionId, Integer amount, String idempotencyKey) {
+    public static PaymentCancellationRequest of(
+            Long paymentId,
+            String providerPaymentId,
+            Integer amount,
+            String idempotencyKey,
+            String cancelReason
+    ) {
         return new PaymentCancellationRequest(
-                transactionId,
+                paymentId,
+                providerPaymentId,
                 amount,
-                idempotencyKey
+                idempotencyKey,
+                cancelReason
         );
     }
 }
