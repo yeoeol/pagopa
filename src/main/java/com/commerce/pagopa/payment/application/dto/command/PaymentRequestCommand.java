@@ -7,14 +7,14 @@ import jakarta.validation.constraints.Size;
 import com.commerce.pagopa.payment.domain.PaymentProvider;
 
 public record PaymentRequestCommand(
-        @NotNull(message = "{validation.notnull}")
+        @NotNull(message = "{validation.notNull}")
         Long orderId,
 
-        @NotBlank(message = "{validation.notblank}")
+        @NotBlank(message = "{validation.notBlank}")
         @Size(min = 1, max = 50, message = "{validation.size}")
         String paymentMethod,
 
-        @NotNull(message = "{validation.notnull}")
+        @NotNull(message = "{validation.notNull}")
         PaymentProvider provider
 ) {
 }

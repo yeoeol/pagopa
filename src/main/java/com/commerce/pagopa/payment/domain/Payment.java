@@ -22,7 +22,7 @@ import com.commerce.pagopa.global.response.ErrorCode;
                         columnNames = "order_id"
                 ),
                 @UniqueConstraint(
-                        name = "uq_payment_provider_payment_id ",
+                        name = "uq_payment_provider_payment_id",
                         columnNames = {"provider", "provider_payment_id"}
                 )}
 )

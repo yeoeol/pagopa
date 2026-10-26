@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.ordering.api.OrderPaymentApi;
 import com.commerce.pagopa.ordering.api.OrderPaymentSummary;
 import com.commerce.pagopa.payment.application.dto.command.PaymentApprovalCommand;
@@ -80,6 +82,9 @@ public class PaymentTransactionService {
     @Transactional
     public PaymentResult completeApproval(Long paymentId, PaymentResult approval) {
         Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
+        if (!payment.getProvider().name().equals(approval.provider())) {
+            throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
+        }
 
         boolean approved = payment.approve(
                 approval.providerPaymentId(),
