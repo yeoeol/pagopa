@@ -180,13 +180,14 @@ public class Payment extends BaseTimeEntity {
         return true;
     }
 
-    public void startApproval(Integer amount) {
+    public boolean startApproval(Integer amount) {
         validateAmount(amount);
         if (this.status == PaymentStatus.APPROVING) {
-            return;
+            return false;
         }
         validateApprovable();
         this.status = PaymentStatus.APPROVING;
+        return true;
     }
 
     public void startCancellation() {
@@ -197,11 +198,16 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.CANCELLING;
     }
 
-    public void fail() {
+    public boolean failApproval() {
+        if (this.status == PaymentStatus.FAILED) {
+            return false;
+        }
         if (this.status != PaymentStatus.APPROVING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
         }
+
         this.status = PaymentStatus.FAILED;
+        return true;
     }
 
     public void revertCancellation() {

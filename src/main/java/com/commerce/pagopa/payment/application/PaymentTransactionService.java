@@ -2,6 +2,7 @@ package com.commerce.pagopa.payment.application;
 
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +15,11 @@ import com.commerce.pagopa.ordering.api.OrderPaymentSummary;
 import com.commerce.pagopa.payment.application.dto.command.PaymentApprovalCommand;
 import com.commerce.pagopa.payment.application.dto.command.PaymentCancelCommand;
 import com.commerce.pagopa.payment.application.dto.command.PaymentRequestCommand;
-import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
 import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
 import com.commerce.pagopa.payment.domain.Payment;
 import com.commerce.pagopa.payment.domain.PaymentRepository;
+import com.commerce.pagopa.payment.event.PaymentApprovalRequested;
 
 /** 결제 DB 트랜잭션 경계. 외부 PG 호출은 포함하지 않고, 호출 전 검증/중간 상태 전환과 호출 후 확정만 담당한다. */
 @Service
@@ -30,6 +31,7 @@ public class PaymentTransactionService {
 
     private final OrderPaymentApi orderPaymentApi;
     private final PaymentRepository paymentRepository;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public PaymentResult request(Long userId, PaymentRequestCommand command) {
@@ -59,7 +61,10 @@ public class PaymentTransactionService {
     }
 
     @Transactional
-    public PaymentApprovalRequest prepareApproval(Long userId, PaymentApprovalCommand command) {
+    public PaymentResult startApproval(
+            Long userId,
+            PaymentApprovalCommand command
+    ) {
         Payment payment = paymentRepository.findByIdForUpdateOrThrow(command.paymentId());
 
         OrderPaymentSummary summary = orderPaymentApi.validateConfirmPayment(
@@ -67,16 +72,22 @@ public class PaymentTransactionService {
                 payment.getOrderId()
         );
 
-        payment.startApproval(command.amount());
-        return PaymentApprovalRequest.of(
-                payment.getId(),
-                summary.orderId(),
-                command.providerPaymentId(),
-                command.providerOrderId(),
-                payment.getAmount(),
-                payment.getPaymentMethod(),
-                APPROVAL_IDEMPOTENCY_KEY_PREFIX + payment.getId()
-        );
+        boolean started = payment.startApproval(command.amount());
+        if (started) {
+            events.publishEvent(
+                    new PaymentApprovalRequested(
+                            UUID.randomUUID(),
+                            payment.getId(),
+                            summary.orderId(),
+                            command.providerPaymentId(),
+                            command.providerOrderId(),
+                            payment.getAmount(),
+                            payment.getPaymentMethod()
+                    )
+            );
+        }
+
+        return PaymentResult.from(payment, command.providerOrderId());
     }
 
     @Transactional
@@ -141,7 +152,7 @@ public class PaymentTransactionService {
     @Transactional
     public void markApprovalFailed(Long paymentId) {
         Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-        payment.fail();
+        payment.failApproval();
     }
 
     @Transactional

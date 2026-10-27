@@ -60,14 +60,13 @@ public class PaymentController {
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody PaymentApprovalCommand command
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(
+        return ResponseEntity.accepted()
+                .body(ApiResponse.ok(
                         paymentService.approve(
                                 userId,
                                 command
                         )
-                )
-        );
+                ));
     }
 
     @Operation(

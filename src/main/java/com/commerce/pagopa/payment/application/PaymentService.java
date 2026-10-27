@@ -28,24 +28,7 @@ public class PaymentService {
     }
 
     public PaymentResult approve(Long userId, PaymentApprovalCommand command) {
-        Long paymentId = command.paymentId();
-        PaymentApprovalRequest request = paymentTransactionService
-                .prepareApproval(
-                        userId,
-                        command
-                );
-
-        try {
-            PaymentResult approval = paymentGateway.approve(request);
-
-            return paymentTransactionService.completeApproval(
-                    paymentId,
-                    approval
-            );
-        } catch (PaymentGatewayRejectedException e) {
-            paymentTransactionService.markApprovalFailed(paymentId);
-            throw e;
-        }
+        return paymentTransactionService.startApproval(userId, command);
     }
 
     public PaymentResult cancel(Long userId, PaymentCancelCommand command) {
