@@ -9,4 +9,11 @@ public class PaymentGatewayRejectedException extends BusinessException {
     public PaymentGatewayRejectedException(ErrorCode errorCode) {
         super(errorCode);
     }
+
+    public PaymentGatewayRejectedException(ErrorCode errorCode, String internalMessage) {
+        super(
+                errorCode,
+                internalMessage
+        );
+    }
 }

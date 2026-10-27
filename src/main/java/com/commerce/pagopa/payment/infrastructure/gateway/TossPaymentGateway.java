@@ -53,7 +53,14 @@ public class TossPaymentGateway implements PaymentGateway {
                             request.providerOrderId(),
                             request.amount()
                     ))
-                    .exchange(responseMapper::readApproval);
+                    .exchange(
+                            (httpRequest, httpResponse) ->
+                                    responseMapper.readApproval(
+                                            httpRequest,
+                                            httpResponse,
+                                            request
+                                    )
+                    );
 
             return PaymentResult.approve(
                     request.paymentId(),

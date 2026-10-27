@@ -19,7 +19,7 @@ public class PaymentApprovalRetryScheduler {
 
     private final FailedEventPublications failedEventPublications;
 
-    @Scheduled(fixedDelayString = "{app.payment.approval-retry-delay:30000}")
+    @Scheduled(fixedDelayString = "${app.payment.approval-retry-delay:30000}")
     void retry() {
         Instant idempotencyCutoff = Instant.now().minus(Duration.ofDays(14));
 

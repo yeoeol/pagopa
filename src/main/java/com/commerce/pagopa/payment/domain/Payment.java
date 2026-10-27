@@ -182,10 +182,21 @@ public class Payment extends BaseTimeEntity {
 
     public boolean startApproval(Integer amount) {
         validateAmount(amount);
+
         if (this.status == PaymentStatus.APPROVING) {
             return false;
         }
-        validateApprovable();
+
+        if (this.status == PaymentStatus.PAID || this.status == PaymentStatus.CANCELED) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_COMPLETED);
+        }
+
+        if (this.status != PaymentStatus.READY
+            && this.status != PaymentStatus.FAILED
+        ) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        }
+
         this.status = PaymentStatus.APPROVING;
         return true;
     }
