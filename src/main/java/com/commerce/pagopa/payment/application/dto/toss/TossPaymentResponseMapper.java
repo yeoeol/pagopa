@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleC
 import org.springframework.web.client.RestClientException;
 
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayIndeterminateException;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayRejectedException;
 
@@ -18,7 +19,23 @@ public class TossPaymentResponseMapper {
     private static final Set<String> APPROVAL_REJECTION_CODES = Set.of(
             "REJECT_CARD_PAYMENT",
             "REJECT_ACCOUNT_PAYMENT",
-            "NOT_FOUND_PAYMENT"
+            "REJECT_CARD_COMPANY",
+            "INVALID_REJECT_CARD",
+            "INVALID_STOPPED_CARD",
+            "INVALID_CARD_LOST_OR_STOLEN",
+            "REJECT_TOSSPAY_INVALID_ACCOUNT",
+            "EXCEED_MAX_AUTH_COUNT",
+            "NOT_FOUND_PAYMENT",
+            "NOT_FOUND_PAYMENT_SESSION"
+    );
+
+    private static final Set<String> APPROVAL_RETRYABLE_CODES = Set.of(
+            "IDEMPOTENT_REQUEST_PROCESSING",
+            "ALREADY_PROCESSING_REQUEST",
+            "PROVIDER_ERROR",
+            "CARD_PROCESSING_ERROR",
+            "NOT_AVAILABLE_PAYMENT",
+            "NOT_AVAILABLE_BANK"
     );
 
     private static final Set<String> CANCELLATION_REJECTION_CODES = Set.of(
@@ -51,14 +68,15 @@ public class TossPaymentResponseMapper {
 
     public TossPaymentResponse readApproval(
             HttpRequest httpRequest,
-            ConvertibleClientHttpResponse response
+            ConvertibleClientHttpResponse response,
+            PaymentApprovalRequest request
     ) throws IOException {
         if (response.getStatusCode().is2xxSuccessful()) {
             TossPaymentResponse payment = readSuccess(
                     response,
                     ErrorCode.PAYMENT_CONFIRM_FAIL
             );
-            validateApprovalResponse(payment);
+            validateApprovalResponse(request, payment);
             return payment;
         }
 
@@ -76,7 +94,8 @@ public class TossPaymentResponseMapper {
 
         if (isDefinitiveRejection(error.code())) {
             throw new PaymentGatewayRejectedException(
-                    ErrorCode.PAYMENT_CONFIRM_REJECTED
+                    ErrorCode.PAYMENT_CONFIRM_REJECTED,
+                    internalMessage(error)
             );
         }
 
@@ -106,7 +125,8 @@ public class TossPaymentResponseMapper {
 
         if (CANCELLATION_REJECTION_CODES.contains(error.code())) {
             throw new PaymentGatewayRejectedException(
-                    ErrorCode.PAYMENT_CANCEL_REJECTED
+                    ErrorCode.PAYMENT_CANCEL_REJECTED,
+                    internalMessage(error)
             );
         }
 
@@ -184,14 +204,24 @@ public class TossPaymentResponseMapper {
         return APPROVAL_REJECTION_CODES.contains(code);
     }
 
-    private void validateApprovalResponse(TossPaymentResponse payment) {
-        if (payment.paymentKey() == null
-                || payment.paymentKey().isBlank()
-                || payment.approvedAt() == null
-                || payment.totalAmount() == null) {
+    private void validateApprovalResponse(
+            PaymentApprovalRequest request,
+            TossPaymentResponse response
+    ) {
+        if (!"DONE".equals(response.status())) {
             throw new PaymentGatewayIndeterminateException(
                     ErrorCode.PAYMENT_CONFIRM_FAIL,
-                    "Toss Payments returned an incomplete approval response"
+                    "Unexpected response status=" + response.status()
+            );
+        }
+
+        if (!request.providerPaymentId().equals(response.paymentKey())
+                || !request.providerOrderId().equals(response.orderId())
+                || !request.amount().equals(response.totalAmount())
+                || response.approvedAt() == null) {
+            throw new PaymentGatewayIndeterminateException(
+                    ErrorCode.PAYMENT_CONFIRM_FAIL,
+                    "Toss Payments returned a mismatched approval response"
             );
         }
     }

@@ -4,7 +4,7 @@ import java.net.URI;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "payment.toss")
+@ConfigurationProperties(prefix = "app.payment.toss")
 public record TossPaymentProperties(
         String secretKey,
         URI baseUrl,

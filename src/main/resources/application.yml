@@ -95,6 +95,11 @@ spring:
       jdbc:
         schema-initialization:
           enabled: false
+      staleness:
+        check-interval: 1m
+        published: 2m
+        processing: 2m
+        resubmitted: 2m
 
   ai:
     model:
@@ -182,12 +187,13 @@ app:
       review-images: ${SEED_REVIEW_IMAGES:300000}
       search-histories: ${SEED_SEARCH_HISTORIES:2000000}
 
-payment:
-  toss:
-    secret-key: ${TOSS_SECRET_KEY}
-    base-url: ${TOSS_BASE_URL:https://api.tosspayments.com}
-    success-url: ${TOSS_SUCCESS_URL:http://localhost:3000/success}
-    fail-url: ${TOSS_FAIL_URL:http://localhost:3000/fail}
+  payment:
+    toss:
+      secret-key: ${TOSS_SECRET_KEY}
+      base-url: ${TOSS_BASE_URL:https://api.tosspayments.com}
+      success-url: ${TOSS_SUCCESS_URL:http://localhost:3000/success}
+      fail-url: ${TOSS_FAIL_URL:http://localhost:3000/fail}
+    approval-retry-delay: 30000
 
 management:
   endpoints:

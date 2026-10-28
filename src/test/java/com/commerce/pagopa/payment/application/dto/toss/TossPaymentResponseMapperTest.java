@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayIndeterminateException;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayRejectedException;
 
@@ -47,7 +48,16 @@ class TossPaymentResponseMapperTest {
 
         TossPaymentResponse result = mapper.readApproval(
                 null,
-                response
+                response,
+                new PaymentApprovalRequest(
+                        null,
+                        null,
+                        payment.paymentKey(),
+                        payment.orderId(),
+                        payment.totalAmount(),
+                        payment.method(),
+                        null
+                )
         );
 
         assertThat(result).isSameAs(payment);
@@ -64,7 +74,8 @@ class TossPaymentResponseMapperTest {
                 PaymentGatewayRejectedException.class,
                 () -> mapper.readApproval(
                         null,
-                        response
+                        response,
+                        null
                 )
         );
 
@@ -83,7 +94,8 @@ class TossPaymentResponseMapperTest {
                 PaymentGatewayIndeterminateException.class,
                 () -> mapper.readApproval(
                         null,
-                        response
+                        response,
+                        null
                 )
         );
 
@@ -102,7 +114,8 @@ class TossPaymentResponseMapperTest {
                 PaymentGatewayIndeterminateException.class,
                 () -> mapper.readApproval(
                         null,
-                        response
+                        response,
+                        null
                 )
         );
 

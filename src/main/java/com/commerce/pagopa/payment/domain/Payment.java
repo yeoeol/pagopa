@@ -1,6 +1,8 @@
 package com.commerce.pagopa.payment.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -98,6 +100,13 @@ public class Payment extends BaseTimeEntity {
     )
     private Long orderId;
 
+    @Column(
+            name = "approval_attempt_id",
+            length = 36,
+            nullable = true
+    )
+    private String approvalAttemptId;
+
     @Builder(access = AccessLevel.PRIVATE)
     private Payment(
             String paymentMethod,
@@ -131,21 +140,28 @@ public class Payment extends BaseTimeEntity {
     }
 
     public boolean approve(String providerPaymentId, Integer approveAmount, LocalDateTime approvedAt) {
-        if (providerPaymentId == null || providerPaymentId.isBlank() || approvedAt == null) {
+        if (providerPaymentId == null
+            || providerPaymentId.isBlank()
+            || approvedAt == null
+        ) {
             throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAIL);
         }
+
         if (!this.amount.equals(approveAmount)) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
+
         if (this.status == PaymentStatus.PAID) {
             if (!providerPaymentId.equals(this.providerPaymentId)) {
                 throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
             }
             return false;
         }
+
         if (this.status != PaymentStatus.APPROVING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
         }
+
         this.providerPaymentId = providerPaymentId;
         this.paidAt = approvedAt;
         this.status = PaymentStatus.PAID;
@@ -180,13 +196,31 @@ public class Payment extends BaseTimeEntity {
         return true;
     }
 
-    public void startApproval(Integer amount) {
+    public boolean startApproval(
+            Integer amount,
+            UUID attemptId
+    ) {
         validateAmount(amount);
+
         if (this.status == PaymentStatus.APPROVING) {
-            return;
+            return false;
         }
-        validateApprovable();
+
+        if (this.status == PaymentStatus.PAID
+            || this.status == PaymentStatus.CANCELED
+        ) {
+            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_COMPLETED);
+        }
+
+        if (this.status != PaymentStatus.READY
+            && this.status != PaymentStatus.FAILED
+        ) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
+        }
+
         this.status = PaymentStatus.APPROVING;
+        this.approvalAttemptId = attemptId.toString();
+        return true;
     }
 
     public void startCancellation() {
@@ -197,11 +231,16 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.CANCELLING;
     }
 
-    public void fail() {
+    public boolean failApproval() {
+        if (this.status == PaymentStatus.FAILED) {
+            return false;
+        }
         if (this.status != PaymentStatus.APPROVING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
         }
+
         this.status = PaymentStatus.FAILED;
+        return true;
     }
 
     public void revertCancellation() {
@@ -221,21 +260,16 @@ public class Payment extends BaseTimeEntity {
         }
     }
 
-    public void validateApprovable() {
-        if (this.status == PaymentStatus.PAID || this.status == PaymentStatus.CANCELED) {
-            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_COMPLETED);
-        }
-        if (this.status == PaymentStatus.FAILED) {
-            throw new BusinessException(ErrorCode.PAYMENT_ALREADY_FAILED);
-        }
-        if (this.status != PaymentStatus.READY) {
-            throw new BusinessException(ErrorCode.PAYMENT_NOT_IN_PROGRESS);
-        }
-    }
-
     private void validateAmount(Integer amount) {
         if (!this.amount.equals(amount)) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
+    }
+
+    public boolean isCurrentApprovalAttempt(UUID attemptId) {
+        return Objects.equals(
+                this.approvalAttemptId,
+                attemptId.toString()
+        );
     }
 }
