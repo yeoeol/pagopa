@@ -28,18 +28,45 @@ public class PaymentApprovalEventListener {
         try {
             PaymentResult approval = paymentGateway.approve(event.toRequest());
 
-            paymentTransactionService.completeApproval(
-                    event.paymentId(),
-                    approval
-            );
-        } catch (PaymentGatewayRejectedException exception) {
-            paymentTransactionService.markApprovalFailed(event.paymentId());
+            ApprovalApplyResult result =
+                    paymentTransactionService.completeApproval(
+                            event.paymentId(),
+                            event.eventId(),
+                            approval
+                    );
 
-            log.info(
-                    "Payment approval rejected. paymentId={}, message={}",
-                    event.paymentId(),
-                    exception.getMessage()
-            );
+            if (result == ApprovalApplyResult.STALE) {
+                log.error(
+                        "Stale payment attempt was approved by PG. " +
+                        "paymentId={}, attemptId={}, providerPaymentId={}",
+                        event.paymentId(),
+                        event.eventId(),
+                        approval.providerPaymentId()
+                );
+            }
+        } catch (PaymentGatewayRejectedException exception) {
+            ApprovalApplyResult result =
+                    paymentTransactionService.markApprovalFailed(
+                            event.paymentId(),
+                            event.eventId()
+                    );
+
+            if (result == ApprovalApplyResult.STALE) {
+                log.info(
+                        "Ignored stale payment rejection. " +
+                        "paymentId={}, attemptId={}",
+                        event.paymentId(),
+                        event.eventId()
+                );
+            }
+            else {
+                log.info(
+                        "Payment approval rejected. " +
+                        "paymentId={}, message={}",
+                        event.paymentId(),
+                        exception.getMessage()
+                );
+            }
         }
     }
 }

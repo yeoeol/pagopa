@@ -72,11 +72,16 @@ public class PaymentTransactionService {
                 payment.getOrderId()
         );
 
-        boolean started = payment.startApproval(command.amount());
+        UUID attemptId = UUID.randomUUID();
+
+        boolean started = payment.startApproval(
+                command.amount(),
+                attemptId
+        );
         if (started) {
             events.publishEvent(
                     new PaymentApprovalRequested(
-                            UUID.randomUUID(),
+                            attemptId,
                             payment.getId(),
                             summary.orderId(),
                             command.providerPaymentId(),
@@ -91,8 +96,17 @@ public class PaymentTransactionService {
     }
 
     @Transactional
-    public PaymentResult completeApproval(Long paymentId, PaymentResult approval) {
+    public ApprovalApplyResult completeApproval(
+            Long paymentId,
+            UUID attemptId,
+            PaymentResult approval
+    ) {
         Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
+
+        if (!payment.isCurrentApprovalAttempt(attemptId)) {
+            return ApprovalApplyResult.STALE;
+        }
+
         if (!payment.getProvider().name().equals(approval.provider())) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
@@ -108,7 +122,25 @@ public class PaymentTransactionService {
                     approval.amount()
             );
         }
-        return PaymentResult.from(payment, approval.providerOrderId());
+        return approved
+                ? ApprovalApplyResult.APPLIED
+                : ApprovalApplyResult.ALREADY_APPLIED;
+    }
+
+    @Transactional
+    public ApprovalApplyResult markApprovalFailed(
+            Long paymentId,
+            UUID attemptId
+    ) {
+        Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
+
+        if (payment.isCurrentApprovalAttempt(attemptId)) {
+            return ApprovalApplyResult.STALE;
+        }
+
+        return payment.failApproval()
+                ? ApprovalApplyResult.APPLIED
+                : ApprovalApplyResult.ALREADY_APPLIED;
     }
 
     @Transactional
@@ -147,12 +179,6 @@ public class PaymentTransactionService {
             orderPaymentApi.cancelAfterPayment(payment.getOrderId());
         }
         return PaymentResult.from(payment, cancellation.providerOrderId());
-    }
-
-    @Transactional
-    public void markApprovalFailed(Long paymentId) {
-        Payment payment = paymentRepository.findByIdForUpdateOrThrow(paymentId);
-        payment.failApproval();
     }
 
     @Transactional
