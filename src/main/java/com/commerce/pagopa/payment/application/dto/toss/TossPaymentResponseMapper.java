@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClientException;
 
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
+import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayIndeterminateException;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayRejectedException;
 
@@ -107,14 +108,15 @@ public class TossPaymentResponseMapper {
 
     public TossPaymentResponse readCancellation(
             HttpRequest httpRequest,
-            ConvertibleClientHttpResponse response
+            ConvertibleClientHttpResponse response,
+            PaymentCancellationRequest request
     ) throws IOException {
         if (response.getStatusCode().is2xxSuccessful()) {
             TossPaymentResponse payment = readSuccess(
                     response,
                     ErrorCode.PAYMENT_CANCEL_FAIL
             );
-            validateCancellationResponse(payment);
+            validateCancellationResponse(request, payment);
             return payment;
         }
 
@@ -218,7 +220,8 @@ public class TossPaymentResponseMapper {
         if (!request.providerPaymentId().equals(response.paymentKey())
                 || !request.providerOrderId().equals(response.orderId())
                 || !request.amount().equals(response.totalAmount())
-                || response.approvedAt() == null) {
+                || response.approvedAt() == null
+        ) {
             throw new PaymentGatewayIndeterminateException(
                     ErrorCode.PAYMENT_CONFIRM_FAIL,
                     "Toss Payments returned a mismatched approval response"
@@ -226,16 +229,41 @@ public class TossPaymentResponseMapper {
         }
     }
 
-    private void validateCancellationResponse(TossPaymentResponse payment) {
-        if (payment.paymentKey() == null
-                || payment.paymentKey().isBlank()
-                || payment.cancels() == null
-                || payment.cancels().isEmpty()
-                || payment.cancels().getLast().canceledAt() == null
-                || payment.totalAmount() == null) {
+    private void validateCancellationResponse(
+            PaymentCancellationRequest request,
+            TossPaymentResponse response
+    ) {
+        if (!request.providerPaymentId().equals(response.paymentKey())) {
             throw new PaymentGatewayIndeterminateException(
                     ErrorCode.PAYMENT_CANCEL_FAIL,
-                    "Toss Payments returned an incomplete cancellation response"
+                    "Mismatched paymentKey"
+            );
+        }
+
+        if (!"CANCELED".equals(response.status())) {
+            throw new PaymentGatewayIndeterminateException(
+                    ErrorCode.PAYMENT_CANCEL_FAIL,
+                    "Unexpected payment status=" + response.status()
+            );
+        }
+
+        if (response.cancels() == null
+            || response.cancels().isEmpty()
+        ) {
+            throw new PaymentGatewayIndeterminateException(
+                    ErrorCode.PAYMENT_CANCEL_FAIL,
+                    "Missing cancellation"
+            );
+        }
+
+        TossPaymentResponse.Cancel cancel = response.cancels().getLast();
+        if (!"DONE".equals(cancel.cancelStatus())
+            || !request.amount().equals(cancel.cancelAmount())
+            || cancel.canceledAt() == null
+        ) {
+            throw new PaymentGatewayIndeterminateException(
+                    ErrorCode.PAYMENT_CANCEL_FAIL,
+                    "Invalid cancellation result"
             );
         }
     }

@@ -90,7 +90,13 @@ public class TossPaymentGateway implements PaymentGateway {
                             request.cancelReason(),
                             request.amount()
                     ))
-                    .exchange(responseMapper::readCancellation);
+                    .exchange((httpRequest, httpResponse) ->
+                            responseMapper.readCancellation(
+                                    httpRequest,
+                                    httpResponse,
+                                    request
+                            )
+                    );
 
             return PaymentResult.cancel(
                     request.paymentId(),

@@ -15,19 +15,16 @@ import com.commerce.pagopa.ordering.api.OrderPaymentSummary;
 import com.commerce.pagopa.payment.application.dto.command.PaymentApprovalCommand;
 import com.commerce.pagopa.payment.application.dto.command.PaymentCancelCommand;
 import com.commerce.pagopa.payment.application.dto.command.PaymentRequestCommand;
-import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
 import com.commerce.pagopa.payment.domain.Payment;
 import com.commerce.pagopa.payment.domain.PaymentRepository;
 import com.commerce.pagopa.payment.event.PaymentApprovalRequested;
+import com.commerce.pagopa.payment.event.PaymentCancellationRequested;
 
 /** 결제 DB 트랜잭션 경계. 외부 PG 호출은 포함하지 않고, 호출 전 검증/중간 상태 전환과 호출 후 확정만 담당한다. */
 @Service
 @RequiredArgsConstructor
 public class PaymentTransactionService {
-
-    private static final String APPROVAL_IDEMPOTENCY_KEY_PREFIX = "payment-approval-";
-    private static final String CANCELLATION_IDEMPOTENCY_KEY_PREFIX = "payment-cancellation-";
 
     private final OrderPaymentApi orderPaymentApi;
     private final PaymentRepository paymentRepository;
@@ -144,7 +141,7 @@ public class PaymentTransactionService {
     }
 
     @Transactional
-    public PaymentCancellationRequest prepareCancellation(
+    public PaymentResult startCancellation(
             Long userId,
             PaymentCancelCommand command
     ) {
@@ -156,14 +153,19 @@ public class PaymentTransactionService {
                 payment.getOrderId()
         );
 
-        payment.startCancellation();
-        return PaymentCancellationRequest.of(
-                payment.getId(),
-                payment.getProviderPaymentId(),
-                payment.getAmount(),
-                CANCELLATION_IDEMPOTENCY_KEY_PREFIX + payment.getId(),
-                command.cancelReason()
-        );
+        boolean started = payment.startCancellation();
+        if (started) {
+            events.publishEvent(
+                    new PaymentCancellationRequested(
+                            UUID.randomUUID(),
+                            payment.getId(),
+                            payment.getProviderPaymentId(),
+                            payment.getAmount(),
+                            command.cancelReason()
+                    )
+            );
+        }
+        return PaymentResult.from(payment, null);
     }
 
     @Transactional

@@ -78,13 +78,12 @@ public class PaymentController {
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody PaymentCancelCommand command
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(
+        return ResponseEntity.accepted()
+                .body(ApiResponse.ok(
                         paymentService.cancel(
                                 userId,
                                 command
                         )
-                )
-        );
+                ));
     }
 }

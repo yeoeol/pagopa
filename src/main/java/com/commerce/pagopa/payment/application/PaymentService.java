@@ -9,8 +9,6 @@ import com.commerce.pagopa.payment.application.dto.command.PaymentCancelCommand;
 import com.commerce.pagopa.payment.application.dto.command.PaymentRequestCommand;
 import com.commerce.pagopa.payment.application.dto.request.*;
 import com.commerce.pagopa.payment.application.dto.response.PaymentResult;
-import com.commerce.pagopa.payment.application.exception.PaymentGatewayRejectedException;
-import com.commerce.pagopa.payment.application.port.PaymentGateway;
 
 /** 결제 유스케이스 오케스트레이션. DB 트랜잭션(사전 검증·중간/최종 상태)과 외부 PG 호출을 분리한다. */
 @Service
@@ -18,13 +16,9 @@ import com.commerce.pagopa.payment.application.port.PaymentGateway;
 public class PaymentService {
 
     private final PaymentTransactionService paymentTransactionService;
-    private final PaymentGateway paymentGateway;
 
     public PaymentResult request(Long userId, PaymentRequestCommand command) {
-        return paymentTransactionService.request(
-                userId,
-                command
-        );
+        return paymentTransactionService.request(userId, command);
     }
 
     public PaymentResult approve(Long userId, PaymentApprovalCommand command) {
@@ -32,24 +26,6 @@ public class PaymentService {
     }
 
     public PaymentResult cancel(Long userId, PaymentCancelCommand command) {
-        Long paymentId = command.paymentId();
-
-        PaymentCancellationRequest request = paymentTransactionService
-                .prepareCancellation(
-                        userId,
-                        command
-                );
-
-        try {
-            PaymentResult cancellation = paymentGateway.cancel(request);
-
-            return paymentTransactionService.completeCancellation(
-                    paymentId,
-                    cancellation
-            );
-        } catch (PaymentGatewayRejectedException e) {
-            paymentTransactionService.revertCancellation(paymentId);
-            throw e;
-        }
+        return paymentTransactionService.startCancellation(userId, command);
     }
 }
