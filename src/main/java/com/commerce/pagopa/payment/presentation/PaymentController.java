@@ -62,7 +62,7 @@ public class PaymentController {
     ) {
         return ResponseEntity.accepted()
                 .body(ApiResponse.ok(
-                        paymentService.approve(
+                        paymentService.startApproval(
                                 userId,
                                 command
                         )
@@ -80,7 +80,7 @@ public class PaymentController {
     ) {
         return ResponseEntity.accepted()
                 .body(ApiResponse.ok(
-                        paymentService.cancel(
+                        paymentService.startCancellation(
                                 userId,
                                 command
                         )

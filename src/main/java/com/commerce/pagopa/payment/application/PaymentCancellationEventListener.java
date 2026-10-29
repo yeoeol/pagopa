@@ -18,7 +18,7 @@ import com.commerce.pagopa.payment.event.PaymentCancellationRequested;
 public class PaymentCancellationEventListener {
 
     private final PaymentGateway paymentGateway;
-    private final PaymentTransactionService paymentTransactionService;
+    private final PaymentService paymentService;
 
     @ApplicationModuleListener(
             id = "payment.cancellation",
@@ -28,12 +28,12 @@ public class PaymentCancellationEventListener {
         try {
             PaymentResult cancellation = paymentGateway.cancel(event.toRequest());
 
-            paymentTransactionService.completeCancellation(
+            paymentService.completeCancellation(
                     event.paymentId(),
                     cancellation
             );
         } catch (PaymentGatewayRejectedException exception) {
-            paymentTransactionService.revertCancellation(event.paymentId());
+            paymentService.revertCancellation(event.paymentId());
 
             log.info(
                     "Payment cancellation rejected. " +
