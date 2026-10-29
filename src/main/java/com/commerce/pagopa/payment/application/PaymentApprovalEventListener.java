@@ -18,7 +18,7 @@ import com.commerce.pagopa.payment.event.PaymentApprovalRequested;
 public class PaymentApprovalEventListener {
 
     private final PaymentGateway paymentGateway;
-    private final PaymentTransactionService paymentTransactionService;
+    private final PaymentService paymentService;
 
     @ApplicationModuleListener(
             id = "payment.approval",
@@ -29,7 +29,7 @@ public class PaymentApprovalEventListener {
             PaymentResult approval = paymentGateway.approve(event.toRequest());
 
             ApprovalApplyResult result =
-                    paymentTransactionService.completeApproval(
+                    paymentService.completeApproval(
                             event.paymentId(),
                             event.eventId(),
                             approval
@@ -46,7 +46,7 @@ public class PaymentApprovalEventListener {
             }
         } catch (PaymentGatewayRejectedException exception) {
             ApprovalApplyResult result =
-                    paymentTransactionService.markApprovalFailed(
+                    paymentService.markApprovalFailed(
                             event.paymentId(),
                             event.eventId()
                     );

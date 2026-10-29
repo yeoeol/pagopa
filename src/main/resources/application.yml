@@ -194,6 +194,7 @@ app:
       success-url: ${TOSS_SUCCESS_URL:http://localhost:3000/success}
       fail-url: ${TOSS_FAIL_URL:http://localhost:3000/fail}
     approval-retry-delay: 30000
+    cancellation-retry-delay: 30000
 
 management:
   endpoints:

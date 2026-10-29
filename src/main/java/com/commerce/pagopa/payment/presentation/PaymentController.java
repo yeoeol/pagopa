@@ -62,7 +62,7 @@ public class PaymentController {
     ) {
         return ResponseEntity.accepted()
                 .body(ApiResponse.ok(
-                        paymentService.approve(
+                        paymentService.startApproval(
                                 userId,
                                 command
                         )
@@ -78,13 +78,12 @@ public class PaymentController {
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @Valid @RequestBody PaymentCancelCommand command
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(
-                        paymentService.cancel(
+        return ResponseEntity.accepted()
+                .body(ApiResponse.ok(
+                        paymentService.startCancellation(
                                 userId,
                                 command
                         )
-                )
-        );
+                ));
     }
 }

@@ -18,7 +18,7 @@ public record PaymentApprovalRequested(
     }
 
     public PaymentApprovalRequest toRequest() {
-        return new PaymentApprovalRequest(
+        return PaymentApprovalRequest.of(
                 paymentId,
                 orderId,
                 providerPaymentId,

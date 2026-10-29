@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.payment.application.dto.request.PaymentApprovalRequest;
+import com.commerce.pagopa.payment.application.dto.request.PaymentCancellationRequest;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayIndeterminateException;
 import com.commerce.pagopa.payment.application.exception.PaymentGatewayRejectedException;
 
@@ -129,9 +130,18 @@ class TossPaymentResponseMapperTest {
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.bodyTo(TossPaymentResponse.class)).thenReturn(payment);
 
+        TossPaymentResponse.Cancel cancel = payment.cancels().getLast();
+
         TossPaymentResponse result = mapper.readCancellation(
                 null,
-                response
+                response,
+                new PaymentCancellationRequest(
+                        null,
+                        payment.paymentKey(),
+                        cancel.cancelAmount(),
+                        null,
+                        cancel.cancelReason()
+                )
         );
 
         assertThat(result).isSameAs(payment);
@@ -174,9 +184,23 @@ class TossPaymentResponseMapperTest {
                         MediaType.APPLICATION_JSON
                 ));
 
+        PaymentCancellationRequest request = new PaymentCancellationRequest(
+                null,
+                "payment-key",
+                10000,
+                null,
+                "customer request"
+        );
+
         TossPaymentResponse result = restClient.get()
                 .uri("/v1/payments/payment-key")
-                .exchange(mapper::readCancellation);
+                .exchange((httpRequest, httpResponse) ->
+                        mapper.readCancellation(
+                                httpRequest,
+                                httpResponse,
+                                request
+                        )
+                );
 
         assertThat(result.cancels()).hasSize(1);
         assertThat(result.cancels().getFirst().canceledAt())
@@ -195,7 +219,8 @@ class TossPaymentResponseMapperTest {
                 PaymentGatewayRejectedException.class,
                 () -> mapper.readCancellation(
                         null,
-                        response
+                        response,
+                        null
                 )
         );
 
@@ -214,7 +239,8 @@ class TossPaymentResponseMapperTest {
                 PaymentGatewayIndeterminateException.class,
                 () -> mapper.readCancellation(
                         null,
-                        response
+                        response,
+                        null
                 )
         );
 
@@ -239,11 +265,19 @@ class TossPaymentResponseMapperTest {
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.bodyTo(TossPaymentResponse.class)).thenReturn(payment);
 
+        PaymentCancellationRequest request = new PaymentCancellationRequest(
+                null,
+                "payment-key",
+                10_000,
+                null,
+                "customer request"
+        );
         PaymentGatewayIndeterminateException exception = catchThrowableOfType(
                 PaymentGatewayIndeterminateException.class,
                 () -> mapper.readCancellation(
                         null,
-                        response
+                        response,
+                        request
                 )
         );
 
