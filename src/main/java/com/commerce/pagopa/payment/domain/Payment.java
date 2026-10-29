@@ -176,21 +176,22 @@ public class Payment extends BaseTimeEntity {
         if (canceledAt == null) {
             throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAIL);
         }
-        if (!this.amount.equals(canceledAmount)) {
-            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
-        }
-        if (this.status == PaymentStatus.CANCELED) {
-            if (!this.providerPaymentId.equals(providerPaymentId)) {
-                throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
-            }
-            return false;
-        }
-        if (this.status != PaymentStatus.CANCELLING) {
-            throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
-        }
+        validateAmount(canceledAmount);
+
         if (!this.providerPaymentId.equals(providerPaymentId)) {
             throw new BusinessException(ErrorCode.PAYMENT_REQUEST_ERROR);
         }
+
+        if (this.status == PaymentStatus.CANCELED) {
+            return false;
+        }
+
+        if (this.status != PaymentStatus.CANCELLING
+            && this.status != PaymentStatus.PAID
+        ) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
+        }
+
         this.canceledAt = canceledAt;
         this.status = PaymentStatus.CANCELED;
         return true;
@@ -223,12 +224,14 @@ public class Payment extends BaseTimeEntity {
         return true;
     }
 
-    public void startCancellation() {
+    public boolean startCancellation() {
         if (this.status == PaymentStatus.CANCELLING) {
-            return;
+            return false;
         }
+
         validateCancelable();
         this.status = PaymentStatus.CANCELLING;
+        return true;
     }
 
     public boolean failApproval() {
@@ -243,11 +246,19 @@ public class Payment extends BaseTimeEntity {
         return true;
     }
 
-    public void revertCancellation() {
+    public boolean revertCancellation() {
+        if (this.status == PaymentStatus.PAID
+            || this.status == PaymentStatus.CANCELED
+        ) {
+            return false;
+        }
+
         if (this.status != PaymentStatus.CANCELLING) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_CANCELABLE);
         }
+
         this.status = PaymentStatus.PAID;
+        return true;
     }
 
     // == 상태 검증 메서드 == //
