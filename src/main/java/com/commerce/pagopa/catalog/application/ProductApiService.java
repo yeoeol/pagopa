@@ -96,7 +96,7 @@ public class ProductApiService implements ProductApi {
     @Override
     @Transactional(readOnly = true)
     public ProductPageResponseDto findAllByUserId(Long sellerId, int pageSize, int pageNumber) {
-        Page<Product> products = productRepository.findAllByUserId(
+        Page<Product> products = productRepository.findAllBySellerId(
                 sellerId,
                 PageRequest.of(
                         pageNumber,
@@ -193,7 +193,7 @@ public class ProductApiService implements ProductApi {
                         .name(),
                 product.getCategory()
                         .getId(),
-                product.getUserId()
+                product.getSellerId()
         );
     }
 }

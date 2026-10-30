@@ -30,7 +30,7 @@ public interface ProductRepository {
 
     void deleteById(Long id);
 
-    Page<Product> findAllByUserId(Long userId, Pageable pageable);
+    Page<Product> findAllBySellerId(Long sellerId, Pageable pageable);
 
     Page<Product> findAllByCategoryOrAncestorCategoryIdAndStatusIn(
             Long categoryId,
