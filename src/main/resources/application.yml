@@ -172,21 +172,6 @@ app:
   order:
     unpaid-before-min: ${ORDER_UNPAID_BEFORE_MIN:15}
 
-  seed:
-    enabled: ${SEED_ENABLED:false}
-    batch-size: ${SEED_BATCH_SIZE:5000}
-    counts:
-      users: ${SEED_USERS:300000}
-      products: ${SEED_PRODUCTS:100000}
-      carts: ${SEED_CARTS:300000}
-      cart-items: ${SEED_CART_ITEMS:600000}
-      orders: ${SEED_ORDERS:1000000}
-      order-items: ${SEED_ORDER_ITEMS:3000000}
-      payments: ${SEED_PAYMENTS:1000000}
-      reviews: ${SEED_REVIEWS:500000}
-      review-images: ${SEED_REVIEW_IMAGES:300000}
-      search-histories: ${SEED_SEARCH_HISTORIES:2000000}
-
   payment:
     toss:
       secret-key: ${TOSS_SECRET_KEY}

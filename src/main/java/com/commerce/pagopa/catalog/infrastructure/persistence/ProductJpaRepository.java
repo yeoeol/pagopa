@@ -17,7 +17,7 @@ import com.commerce.pagopa.catalog.domain.ProductRepository;
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository, ProductRepositoryCustom {
 
     @Override
-    Page<Product> findAllByUserId(Long userId, Pageable pageable);
+    Page<Product> findAllBySellerId(Long sellerId, Pageable pageable);
 
     @Override
     @Query("""

@@ -26,7 +26,7 @@ public record ProductResponseDto(
                 product.getStockQuantity(),
                 StatusResponseDto.from(product.getStatus()),
                 CategorySimpleResponseDto.from(product.getCategory()),
-                product.getUserId(),
+                product.getSellerId(),
                 product.getImages()
                         .stream()
                         .map(ProductImageResponseDto::from)
