@@ -206,10 +206,11 @@ class ProductRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
+        int limit = 2;
         List<Product> firstPage = productRepository.findAllByCursor(
                 null,
                 null,
-                2
+                limit
         );
 
         Product lastProduct = firstPage.getLast();
@@ -217,15 +218,46 @@ class ProductRepositoryTest {
         List<Product> secondPage = productRepository.findAllByCursor(
                 lastProduct.getCreatedAt(),
                 lastProduct.getId(),
-                2
+                limit
         );
 
+        assertThat(firstPage).hasSize(2);
+        assertThat(secondPage).hasSize(1);
         assertThat(firstPage)
                 .extracting(Product::getId)
                 .doesNotContainAnyElementsOf(
                         secondPage.stream()
                                 .map(Product::getId)
                                 .toList()
+                );
+    }
+
+    @Test
+    void findAllByCursor_when_createdAt_is_same_and_over_boundary_returns_empty() {
+        entityManager.flush();
+        entityManager.clear();
+
+        int limit = 10;
+        List<Product> firstPage = productRepository.findAllByCursor(
+                null,
+                null,
+                limit
+        );
+
+        Product lastProduct = firstPage.getLast();
+
+        List<Product> secondPage = productRepository.findAllByCursor(
+                lastProduct.getCreatedAt(),
+                lastProduct.getId(),
+                limit
+        );
+
+        assertThat(firstPage).hasSize(3);
+        assertThat(secondPage).isEmpty();
+        assertThat(firstPage)
+                .extracting(Product::getId)
+                .containsAnyElementsOf(
+                        productIds()
                 );
     }
 
