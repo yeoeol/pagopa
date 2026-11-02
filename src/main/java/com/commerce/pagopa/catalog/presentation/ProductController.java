@@ -20,7 +20,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.catalog.application.ProductService;
+import com.commerce.pagopa.catalog.application.dto.request.ProductCursorRequestDto;
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.catalog.application.dto.response.ProductCursorPageResponseDto;
 import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.identity.api.CurrentUser;
@@ -52,6 +54,23 @@ public class ProductController {
         return ResponseEntity.ok(
                 ApiResponse.ok(
                         productService.findAllWithActiveAndSoldOut(pageable)
+                )
+        );
+    }
+
+    @Operation(
+            summary = "커서 기반 상품 목록 조회",
+            description = "생성일시와 상품 ID를 기준으로 다음 상품 목록을 조회합니다."
+    )
+    @GetMapping("/cursor")
+    public ResponseEntity<ApiResponse<ProductCursorPageResponseDto>> getAllByCursor(
+            @ParameterObject
+            @Valid
+            @ModelAttribute ProductCursorRequestDto requestDto
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        productService.findAllByCursor(requestDto)
                 )
         );
     }

@@ -1,12 +1,18 @@
 package com.commerce.pagopa.catalog.infrastructure.persistence;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +47,10 @@ class ProductRepositoryTest {
     RoleRepository roleRepository;
     @Autowired
     SellerRepository sellerRepository;
+    @Autowired
+    EntityManager entityManager;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     private Category rootCategory;
     private Category middleCategory;
@@ -189,6 +199,102 @@ class ProductRepositoryTest {
         );
 
         assertThat(results).isEmpty();
+    }
+
+    @Test
+    void findAllByCursor_returns_nextProducts_without_duplicates() {
+        entityManager.flush();
+        entityManager.clear();
+
+        int limit = 2;
+        List<Product> firstPage = productRepository.findAllByCursor(
+                null,
+                null,
+                limit
+        );
+
+        Product lastProduct = firstPage.getLast();
+
+        List<Product> secondPage = productRepository.findAllByCursor(
+                lastProduct.getCreatedAt(),
+                lastProduct.getId(),
+                limit
+        );
+
+        assertThat(firstPage).hasSize(2);
+        assertThat(secondPage).hasSize(1);
+        assertThat(firstPage)
+                .extracting(Product::getId)
+                .doesNotContainAnyElementsOf(
+                        secondPage.stream()
+                                .map(Product::getId)
+                                .toList()
+                );
+    }
+
+    @Test
+    void findAllByCursor_when_createdAt_is_same_and_over_boundary_returns_empty() {
+        entityManager.flush();
+        entityManager.clear();
+
+        int limit = 10;
+        List<Product> firstPage = productRepository.findAllByCursor(
+                null,
+                null,
+                limit
+        );
+
+        Product lastProduct = firstPage.getLast();
+
+        List<Product> secondPage = productRepository.findAllByCursor(
+                lastProduct.getCreatedAt(),
+                lastProduct.getId(),
+                limit
+        );
+
+        assertThat(firstPage).hasSize(3);
+        assertThat(secondPage).isEmpty();
+        assertThat(firstPage)
+                .extracting(Product::getId)
+                .containsAnyElementsOf(
+                        productIds()
+                );
+    }
+
+    @Test
+    void findAllByCursor_when_createdAt_is_same_returns_products_by_id_descending() {
+        entityManager.flush();
+
+        LocalDateTime sameCreatedAt = LocalDateTime.of(
+                2026, 11, 2, 10, 0
+        );
+
+        products.forEach(product -> jdbcTemplate.update(
+                """
+                UPDATE product
+                SET created_at = ?
+                WHERE product_id = ?
+                """,
+                Timestamp.valueOf(sameCreatedAt),
+                product.getId()
+        ));
+
+        entityManager.clear();
+
+        List<Product> results = productRepository.findAllByCursor(
+                null,
+                null,
+                products.size()
+        );
+
+        List<Long> expectedIds = products.stream()
+                .map(Product::getId)
+                .sorted(Comparator.reverseOrder())
+                .toList();
+
+        assertThat(results)
+                .extracting(Product::getId)
+                .containsExactlyElementsOf(expectedIds);
     }
 
     private List<Long> productIds() {

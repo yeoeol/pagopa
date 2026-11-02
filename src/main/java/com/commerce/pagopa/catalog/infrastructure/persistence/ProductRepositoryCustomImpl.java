@@ -1,5 +1,6 @@
 package com.commerce.pagopa.catalog.infrastructure.persistence;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -122,6 +123,31 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
+    public List<Product> findAllByCursor(
+            LocalDateTime cursorCreatedAt,
+            Long cursorProductId,
+            int limit
+    ) {
+        return queryFactory.selectFrom(product)
+                .where(
+                        product.status.in(
+                                ProductStatus.ACTIVE,
+                                ProductStatus.SOLD_OUT
+                        ),
+                        productBeforeCursor(
+                                cursorCreatedAt,
+                                cursorProductId
+                        )
+                )
+                .orderBy(
+                        product.createdAt.desc(),
+                        product.id.desc()
+                )
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
     public List<Product> searchProducts(@NonNull ProductSearchCondition condition) {
         return queryFactory.selectFrom(product)
                 .distinct()
@@ -230,5 +256,24 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     private BooleanExpression statusEq(ProductStatus status) {
         return status == null ? null : product.status.eq(status);
+    }
+
+    private BooleanExpression productBeforeCursor(
+            LocalDateTime cursorCreatedAt,
+            Long cursorProductId
+    ) {
+        if (cursorCreatedAt == null && cursorProductId == null) {
+            return null;
+        }
+
+        if (cursorCreatedAt == null || cursorProductId == null) {
+            throw new IllegalArgumentException("Cursor values must be provided together");
+        }
+
+        return product.createdAt.lt(cursorCreatedAt)
+                .or(
+                        product.createdAt.eq(cursorCreatedAt)
+                                .and(product.id.lt(cursorProductId))
+                );
     }
 }
