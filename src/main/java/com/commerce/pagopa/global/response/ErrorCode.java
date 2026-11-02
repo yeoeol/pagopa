@@ -62,6 +62,7 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST, "PRODUCT_005",
             "quantity는 1 이상이어야 합니다."
     ),
+    INVALID_PRODUCT_CURSOR(HttpStatus.BAD_REQUEST, "PRODUCT_006", "유효하지 않은 상품 커서입니다."),
 
     // CATEGORY
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_001", "존재하지 않는 카테고리입니다."), INVALID_CATEGORY_LEVEL(

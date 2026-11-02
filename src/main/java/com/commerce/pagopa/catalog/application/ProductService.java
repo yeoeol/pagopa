@@ -13,7 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import com.commerce.pagopa.catalog.application.dto.request.ProductCursor;
+import com.commerce.pagopa.catalog.application.dto.request.ProductCursorRequestDto;
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
+import com.commerce.pagopa.catalog.application.dto.response.ProductCursorPageResponseDto;
 import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.catalog.domain.ProductRepository;
@@ -56,6 +59,37 @@ public class ProductService {
         return productPage.map(ProductResponseDto::from);
     }
 
+    @Transactional(readOnly = true)
+    public ProductCursorPageResponseDto findAllByCursor(ProductCursorRequestDto requestDto) {
+        int size = requestDto.resolvedSize();
+        ProductCursor cursor = ProductCursor.decodeNullable(requestDto.cursor());
+
+        List<Product> fetchedProducts = productRepository.findAllByCursor(
+                cursor == null ? null : cursor.createdAt(),
+                cursor == null ? null : cursor.productId(),
+                size + 1
+        );
+
+        boolean hasNext = fetchedProducts.size() > size;
+
+        List<Product> products = fetchedProducts.stream()
+                .limit(size)
+                .toList();
+
+        String nextCursor = createNextCursor(
+                products,
+                hasNext
+        );
+
+        return new ProductCursorPageResponseDto(
+                products.stream()
+                        .map(ProductResponseDto::from)
+                        .toList(),
+                nextCursor,
+                hasNext
+        );
+    }
+
     @Transactional
     public List<ProductResponseDto> search(
             Long userId,
@@ -80,5 +114,21 @@ public class ProductService {
         }
 
         return products;
+    }
+
+    private String createNextCursor(
+            List<Product> products,
+            boolean hasNext
+    ) {
+        if (!hasNext || products.isEmpty()) {
+            return null;
+        }
+
+        Product lastProduct = products.getLast();
+
+        return new ProductCursor(
+                lastProduct.getCreatedAt(),
+                lastProduct.getId()
+        ).encode();
     }
 }

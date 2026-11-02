@@ -1,5 +1,6 @@
 package com.commerce.pagopa.catalog.domain;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +48,12 @@ public interface ProductRepository {
     List<Product> findRecommendationCandidatesByKeyword(String keyword, Collection<Long> excludedProductIds, int limit);
 
     List<Product> findDefaultRecommendationProducts(Collection<Long> excludedProductIds, int limit);
+
+    List<Product> findAllByCursor(
+            LocalDateTime cursorCreatedAt,
+            Long cursorProductId,
+            int limit
+    );
 
     default Product findByIdForUpdateOrThrow(Long id) {
         return findByIdForUpdate(id).orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));

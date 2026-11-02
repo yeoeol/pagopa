@@ -1,5 +1,6 @@
 package com.commerce.pagopa.catalog.infrastructure.persistence;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +20,12 @@ public interface ProductRepositoryCustom {
             Long categoryId,
             Collection<ProductStatus> statuses,
             Pageable pageable
+    );
+
+    List<Product> findAllByCursor(
+            LocalDateTime cursorCreatedAt,
+            Long cursorProductId,
+            int limit
     );
 
     List<Product> searchProducts(@NonNull ProductSearchCondition condition);
