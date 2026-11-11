@@ -113,6 +113,12 @@ public class Order extends BaseTimeEntity {
                 .sum();
     }
 
+    public void validateOwner(Long userId) {
+        if (!isOwner(userId)) {
+            throw new BusinessException(ErrorCode.REVIEW_NOT_MINE);
+        }
+    }
+
     public boolean isOwner(Long userId) {
         return this.userId.equals(userId);
     }
@@ -147,5 +153,12 @@ public class Order extends BaseTimeEntity {
 
         this.status = OrderStatus.CANCELED;
         this.canceledAt = canceledAt;
+    }
+
+    public OrderItem getOrderItem(Long orderItemId) {
+        return orderItems.stream()
+                .filter(item -> item.getId().equals(orderItemId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_ITEM_NOT_FOUND));
     }
 }

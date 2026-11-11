@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
-import com.commerce.pagopa.global.exception.BusinessException;
-import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
@@ -98,11 +96,5 @@ public class OrderItem extends BaseTimeEntity {
 
     public void assignOrder(Order order) {
         this.order = order;
-    }
-
-    public void validateOrderUser(Long userId) {
-        if (!order.isOwner(userId)) {
-            throw new BusinessException(ErrorCode.REVIEW_NOT_MINE);
-        }
     }
 }

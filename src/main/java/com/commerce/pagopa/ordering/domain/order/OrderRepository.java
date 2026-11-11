@@ -28,6 +28,8 @@ public interface OrderRepository {
 
     Optional<Order> findByIdForUpdate(Long id);
 
+    Optional<Order> findByOrderItemIdWithItems(Long orderItemId);
+
     default Order findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(() -> new BusinessException(ORDER_NOT_FOUND));
     }
