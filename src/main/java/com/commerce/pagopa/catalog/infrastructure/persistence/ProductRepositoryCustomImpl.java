@@ -165,10 +165,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 )
                 .fetchJoin()
                 .where(nameStartsWith(condition.productName()))
-                .orderBy(
-                        product.createdAt.desc(),
-                        product.id.desc()
-                )
+                .orderBy(orderSpecifiers(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

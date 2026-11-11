@@ -101,7 +101,7 @@ public class ProductController {
             @PageableDefault(
                     size = 20,
                     page = 0,
-                    sort = {"created_at", "product_id"},
+                    sort = {"createdAt", "id"},
                     direction = Sort.Direction.DESC
             ) Pageable pageable
     ) {
