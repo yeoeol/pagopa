@@ -24,7 +24,14 @@ import com.commerce.pagopa.global.entity.BaseTimeEntity;
                 @UniqueConstraint(
                         name = "uq_review_order_item_id",
                         columnNames = {"order_item_id"}
-                )}
+                )
+        },
+        indexes = {
+                @Index(
+                        name = "idx_review_product_id_created_at",
+                        columnList = "product_id, created_at"
+                )
+        }
 )
 public class Review extends BaseTimeEntity {
 

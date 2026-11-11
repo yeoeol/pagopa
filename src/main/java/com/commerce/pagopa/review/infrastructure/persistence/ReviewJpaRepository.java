@@ -1,7 +1,7 @@
 package com.commerce.pagopa.review.infrastructure.persistence;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,10 +13,14 @@ public interface ReviewJpaRepository extends JpaRepository<Review, Long>, Review
 
     @Override
     @Query("""
-            SELECT DISTINCT r
+            SELECT r
             FROM Review r
                 LEFT JOIN FETCH r.images ri
             WHERE r.productId = :productId
+            ORDER BY r.createdAt desc, r.id desc
             """)
-    List<Review> findAllWithDetailsByProductId(@Param("productId") Long productId);
+    Page<Review> findAllWithDetailsByProductId(
+            @Param("productId") Long productId,
+            Pageable pageable
+    );
 }

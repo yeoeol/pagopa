@@ -8,6 +8,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.identity.api.ReviewAuthorQuery;
 import com.commerce.pagopa.identity.api.ReviewAuthorSummary;
 import com.commerce.pagopa.ordering.api.OrderItemApi;
@@ -108,26 +111,29 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductReviewResponseDto> findAllByProduct(Long productId) {
+    public OffsetPageResponseDto<ProductReviewResponseDto> findAllByProduct(
+            Long productId,
+            Pageable pageable
+    ) {
         if (!productApi.existsById(productId)) {
             throw new BusinessException(PRODUCT_NOT_FOUND);
         }
 
-        List<Review> reviews = reviewRepository.findAllWithDetailsByProductId(productId);
+        Page<Review> reviews = reviewRepository.findAllWithDetailsByProductId(
+                productId,
+                pageable
+        );
 
         Set<Long> userIds = reviews.stream()
                 .map(Review::getUserId)
                 .collect(Collectors.toSet());
 
         Map<Long, ReviewAuthorSummary> authors = reviewAuthorQuery.findAllByIds(userIds);
-
-        return reviews.stream()
-                .map(
-                        review -> ProductReviewResponseDto.from(
-                                review,
-                                authors.get(review.getUserId())
-                        )
-                )
-                .toList();
+        return OffsetPageResponseDto.from(
+                reviews.map(review -> ProductReviewResponseDto.from(
+                        review,
+                        authors.get(review.getUserId())
+                ))
+        );
     }
 }
