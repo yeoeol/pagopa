@@ -16,13 +16,14 @@ import lombok.RequiredArgsConstructor;
 import com.commerce.pagopa.catalog.application.dto.request.ProductCursor;
 import com.commerce.pagopa.catalog.application.dto.request.ProductCursorRequestDto;
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.catalog.application.dto.response.ProductCursorPageResponseDto;
 import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.catalog.domain.Product;
 import com.commerce.pagopa.catalog.domain.ProductRepository;
 import com.commerce.pagopa.catalog.domain.ProductStatus;
 import com.commerce.pagopa.catalog.event.ProductSearched;
 import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.CursorPageResponseDto;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 
 import static com.commerce.pagopa.global.response.ErrorCode.PRODUCT_NOT_FOUND;
 
@@ -34,9 +35,13 @@ public class ProductService {
     private final ApplicationEventPublisher events;
 
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> findAllWithActiveAndSoldOut(Pageable pageable) {
+    public OffsetPageResponseDto<ProductResponseDto> findAllWithActiveAndSoldOut(
+            Pageable pageable
+    ) {
         Page<Product> productPage = productRepository.findAll(pageable);
-        return productPage.map(ProductResponseDto::from);
+        return OffsetPageResponseDto.from(
+                productPage.map(ProductResponseDto::from)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +52,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> findAllByCategory(Long categoryId, Pageable pageable) {
+    public OffsetPageResponseDto<ProductResponseDto> findAllByCategory(Long categoryId, Pageable pageable) {
         Page<Product> productPage = productRepository.findAllByCategoryOrAncestorCategoryIdAndStatusIn(
                 categoryId,
                 List.of(
@@ -56,11 +61,13 @@ public class ProductService {
                 ),
                 pageable
         );
-        return productPage.map(ProductResponseDto::from);
+        return OffsetPageResponseDto.from(
+                productPage.map(ProductResponseDto::from)
+        );
     }
 
     @Transactional(readOnly = true)
-    public ProductCursorPageResponseDto findAllByCursor(ProductCursorRequestDto requestDto) {
+    public CursorPageResponseDto<ProductResponseDto> findAllByCursor(ProductCursorRequestDto requestDto) {
         int size = requestDto.resolvedSize();
         ProductCursor cursor = ProductCursor.decodeNullable(requestDto.cursor());
 
@@ -81,7 +88,7 @@ public class ProductService {
                 hasNext
         );
 
-        return new ProductCursorPageResponseDto(
+        return CursorPageResponseDto.from(
                 products.stream()
                         .map(ProductResponseDto::from)
                         .toList(),
@@ -91,15 +98,14 @@ public class ProductService {
     }
 
     @Transactional
-    public List<ProductResponseDto> search(
+    public OffsetPageResponseDto<ProductResponseDto> search(
             Long userId,
             String sessionId,
-            @NonNull ProductSearchCondition condition
+            @NonNull ProductSearchCondition condition,
+            Pageable pageable
     ) {
-        List<ProductResponseDto> products = productRepository.searchProducts(condition)
-                .stream()
-                .map(ProductResponseDto::from)
-                .toList();
+        Page<Product> productPage = productRepository
+                .searchProducts(condition, pageable);
 
         if (userId != null && sessionId == null) {
             events.publishEvent(
@@ -113,7 +119,9 @@ public class ProductService {
             );
         }
 
-        return products;
+        return OffsetPageResponseDto.from(
+                productPage.map(ProductResponseDto::from)
+        );
     }
 
     private String createNextCursor(

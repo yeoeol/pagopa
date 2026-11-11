@@ -17,10 +17,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.catalog.api.ProductSummary;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.merchant.application.SellerProductService;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductRegisterRequestDto;
-import com.commerce.pagopa.merchant.application.dto.seller.response.SellerProductPageResponseDto;
 
 @Controller
 @RequiredArgsConstructor
@@ -47,10 +47,11 @@ public class SellerProductPageController {
             HttpServletResponse response,
             Model model
     ) {
-        SellerProductPageResponseDto result = sellerProductService.findAll(
-                userId,
-                pageable
-        );
+        OffsetPageResponseDto<ProductSummary> result =
+                sellerProductService.findAll(
+                        userId,
+                        pageable
+                );
 
         model.addAttribute(
                 "result",
@@ -180,7 +181,7 @@ public class SellerProductPageController {
         return "redirect:/seller/products?notice=stock-added";
     }
 
-    private boolean isOutOfRange(SellerProductPageResponseDto result) {
+    private boolean isOutOfRange(OffsetPageResponseDto<ProductSummary> result) {
         return result.totalPages() > 0 && result.page() >= result.totalPages();
     }
 

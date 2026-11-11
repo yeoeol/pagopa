@@ -17,10 +17,16 @@ import com.commerce.pagopa.global.response.ErrorCode;
 @ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "product",
-        indexes = {@Index(
-                name = "idx_product_name",
-                columnList = "name"
-        )}
+        indexes = {
+                @Index(
+                        name = "idx_product_name_created_at_product_id",
+                        columnList = "name, created_at desc, product_id desc"
+                ),
+                @Index(
+                        name = "idx_product_created_at_product_id",
+                        columnList = "created_at desc, product_id desc"
+                )
+        }
 )
 public class Product extends BaseTimeEntity {
 

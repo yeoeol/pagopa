@@ -119,15 +119,21 @@ class ProductRepositoryTest {
 
     @Test
     void searchProducts_one() {
-        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("A"));
+        Page<Product> results = productRepository.searchProducts(
+                new ProductSearchCondition("productA"),
+                PageRequest.of(0, 20)
+        );
         assertThat(results).hasSize(1);
-        assertThat(results.getFirst()).isEqualTo(products.getFirst());
+        assertThat(results.getContent().getFirst()).isEqualTo(products.getFirst());
     }
 
     @Test
     void searchProducts_List() {
-        List<Product> results = productRepository.searchProducts(new ProductSearchCondition("roduc"));
-        assertThat(results).hasSize(products.size());
+        Page<Product> results = productRepository.searchProducts(
+                new ProductSearchCondition("pro"),
+                PageRequest.of(0, 20)
+        );
+        assertThat(results.getContent()).hasSize(products.size());
     }
 
     @Test

@@ -14,15 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.catalog.api.ProductApi;
-import com.commerce.pagopa.catalog.api.ProductPageResponseDto;
 import com.commerce.pagopa.catalog.api.ProductRegisterRequest;
 import com.commerce.pagopa.catalog.api.ProductSummary;
 import com.commerce.pagopa.catalog.domain.*;
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +29,6 @@ public class ProductApiService implements ProductApi {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    private static final int PAGE_WINDOW_SIZE = 10;
     private static final int MIN_RECOMMENDATION_LIMIT = 1;
     private static final int MAX_RECOMMENDATION_LIMIT = 100;
 
@@ -95,7 +92,11 @@ public class ProductApiService implements ProductApi {
 
     @Override
     @Transactional(readOnly = true)
-    public ProductPageResponseDto findAllByUserId(Long sellerId, int pageSize, int pageNumber) {
+    public OffsetPageResponseDto<ProductSummary> findAllByUserId(
+            Long sellerId,
+            int pageSize,
+            int pageNumber
+    ) {
         Page<Product> products = productRepository.findAllBySellerId(
                 sellerId,
                 PageRequest.of(
@@ -106,37 +107,17 @@ public class ProductApiService implements ProductApi {
                 )
         );
 
-        int totalPages = products.getTotalPages();
-        int currentPage = products.getNumber();
-        int startPage = max(
-                0,
-                currentPage - PAGE_WINDOW_SIZE / 2
-        );
-        int endPage = min(
-                max(
-                        totalPages - 1,
-                        0
-                ),
-                startPage + PAGE_WINDOW_SIZE - 1
-        );
-        startPage = max(
-                0,
-                endPage - PAGE_WINDOW_SIZE + 1
-        );
-
-        return new ProductPageResponseDto(
-                products.getContent()
-                        .stream()
-                        .map(this::toSummary)
-                        .toList(),
-                currentPage,
-                products.getSize(),
-                products.getTotalElements(),
-                totalPages,
-                products.isFirst(),
-                products.isLast(),
-                startPage,
-                endPage
+        return OffsetPageResponseDto.from(
+                products.map(product -> new ProductSummary(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getStockQuantity(),
+                        product.getStatus().name(),
+                        product.getCategory().getId(),
+                        product.getSellerId()
+                ))
         );
     }
 

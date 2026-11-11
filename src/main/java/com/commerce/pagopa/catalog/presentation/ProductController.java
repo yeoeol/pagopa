@@ -1,10 +1,8 @@
 package com.commerce.pagopa.catalog.presentation;
 
-import java.util.List;
 
 import jakarta.validation.Valid;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -22,9 +20,10 @@ import lombok.RequiredArgsConstructor;
 import com.commerce.pagopa.catalog.application.ProductService;
 import com.commerce.pagopa.catalog.application.dto.request.ProductCursorRequestDto;
 import com.commerce.pagopa.catalog.application.dto.request.ProductSearchCondition;
-import com.commerce.pagopa.catalog.application.dto.response.ProductCursorPageResponseDto;
 import com.commerce.pagopa.catalog.application.dto.response.ProductResponseDto;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.response.CursorPageResponseDto;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.identity.api.CurrentUser;
 import com.commerce.pagopa.identity.api.UserIdentity;
 
@@ -44,7 +43,7 @@ public class ProductController {
             description = "전체 상품 목록을 조회합니다."
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getAll(
+    public ResponseEntity<ApiResponse<OffsetPageResponseDto<ProductResponseDto>>> getAll(
             @ParameterObject
             @PageableDefault(
                     size = 10,
@@ -63,7 +62,7 @@ public class ProductController {
             description = "생성일시와 상품 ID를 기준으로 다음 상품 목록을 조회합니다."
     )
     @GetMapping("/cursor")
-    public ResponseEntity<ApiResponse<ProductCursorPageResponseDto>> getAllByCursor(
+    public ResponseEntity<ApiResponse<CursorPageResponseDto<ProductResponseDto>>> getAllByCursor(
             @ParameterObject
             @Valid
             @ModelAttribute ProductCursorRequestDto requestDto
@@ -93,18 +92,26 @@ public class ProductController {
             description = "검색 조건에 맞는 상품을 조회합니다."
     )
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> search(
+    public ResponseEntity<ApiResponse<OffsetPageResponseDto<ProductResponseDto>>> search(
             @Parameter(hidden = true)
             @CurrentUser UserIdentity user,
             @ParameterObject
-            @Valid @ModelAttribute ProductSearchCondition productSearchCondition
+            @Valid @ModelAttribute ProductSearchCondition productSearchCondition,
+            @ParameterObject
+            @PageableDefault(
+                    size = 20,
+                    page = 0,
+                    sort = {"createdAt", "id"},
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(
                         productService.search(
                                 user.userId(),
                                 user.sessionId(),
-                                productSearchCondition
+                                productSearchCondition,
+                                pageable
                         )
                 )
         );
@@ -115,7 +122,7 @@ public class ProductController {
             description = "카테고리ID를 전달받고, 해당 카테고리 또는 하위 카테고리에 속한 모든 상품을 조회합니다."
     )
     @GetMapping("/categories/{categoryId}")
-    public ResponseEntity<ApiResponse<Page<ProductResponseDto>>> getProductsByCategory(
+    public ResponseEntity<ApiResponse<OffsetPageResponseDto<ProductResponseDto>>> getProductsByCategory(
             @PathVariable("categoryId") Long categoryId,
             @ParameterObject
             @PageableDefault(

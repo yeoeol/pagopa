@@ -26,6 +26,7 @@ import com.commerce.pagopa.assistant.chat.application.dto.request.AssistantConve
 import com.commerce.pagopa.assistant.chat.application.dto.request.AssistantMessageRequestDto;
 import com.commerce.pagopa.assistant.chat.application.dto.response.*;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class AssistantController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<AssistantConversationPageResponseDto>> getAll(
+    public ResponseEntity<ApiResponse<OffsetPageResponseDto<AssistantConversationResponseDto>>> getAll(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @ParameterObject
             @PageableDefault(

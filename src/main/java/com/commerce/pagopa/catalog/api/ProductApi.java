@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
+
 public interface ProductApi {
     boolean existsById(Long productId);
 
@@ -13,7 +15,7 @@ public interface ProductApi {
 
     ProductSummary register(ProductRegisterRequest request);
 
-    ProductPageResponseDto findAllByUserId(Long sellerId, int pageSize, int pageNumber);
+    OffsetPageResponseDto<ProductSummary> findAllByUserId(Long sellerId, int pageSize, int pageNumber);
 
     List<ProductSummary> findCandidatesByKeyword(String keyword, Collection<Long> excludedProductIds, int limit);
 

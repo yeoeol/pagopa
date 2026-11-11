@@ -39,7 +39,10 @@ public interface ProductRepository {
             Pageable pageable
     );
 
-    List<Product> searchProducts(@NonNull ProductSearchCondition condition);
+    Page<Product> searchProducts(
+            @NonNull ProductSearchCondition condition,
+            Pageable pageable
+    );
 
     List<Product> findByIdIn(Collection<Long> productIds);
 
