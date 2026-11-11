@@ -1,8 +1,8 @@
 package com.commerce.pagopa.global.response;
 
-import org.springframework.data.domain.Page;
-
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 
 public record OffsetPageResponseDto<T>(
         List<T> content,
