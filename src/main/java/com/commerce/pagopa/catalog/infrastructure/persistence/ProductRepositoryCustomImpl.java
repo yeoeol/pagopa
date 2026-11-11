@@ -148,8 +148,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
-    public List<Product> searchProducts(@NonNull ProductSearchCondition condition) {
-        return queryFactory.selectFrom(product)
+    public Page<Product> searchProducts(
+            @NonNull ProductSearchCondition condition,
+            Pageable pageable
+    ) {
+        List<Product> products = queryFactory.selectFrom(product)
                 .distinct()
                 .leftJoin(
                         product.category,
@@ -161,8 +164,25 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                         productImage
                 )
                 .fetchJoin()
-                .where(nameContains(condition.productName()))
+                .where(nameStartsWith(condition.productName()))
+                .orderBy(
+                        product.createdAt.desc(),
+                        product.id.desc()
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
+
+        Long total = queryFactory.select(product.count())
+                .from(product)
+                .where(nameStartsWith(condition.productName()))
+                .fetchOne();
+
+        return new PageImpl<>(
+                products,
+                pageable,
+                total == null ? 0L : total
+        );
     }
 
     @Override
@@ -174,7 +194,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         return queryFactory.selectFrom(product)
                 .where(
                         isSellable(),
-                        nameContains(keyword),
+                        nameStartsWith(keyword),
                         productIdNotIn(excludedProductIds)
                 )
                 .orderBy(
@@ -213,8 +233,8 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .and(product.stockQuantity.gt(0));
     }
 
-    private BooleanExpression nameContains(String name) {
-        return hasText(name) ? product.name.containsIgnoreCase(name) : null;
+    private BooleanExpression nameStartsWith(String name) {
+        return hasText(name) ? product.name.startsWithIgnoreCase(name) : null;
     }
 
     private BooleanExpression categoryOrAncestorCategoryIdEq(

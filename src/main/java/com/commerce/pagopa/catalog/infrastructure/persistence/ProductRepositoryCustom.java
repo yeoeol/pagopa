@@ -28,7 +28,10 @@ public interface ProductRepositoryCustom {
             int limit
     );
 
-    List<Product> searchProducts(@NonNull ProductSearchCondition condition);
+    Page<Product> searchProducts(
+            @NonNull ProductSearchCondition condition,
+            Pageable pageable
+    );
 
     List<Product> findRecommendationCandidatesByKeyword(String keyword, Collection<Long> excludedProductIds, int limit);
 
