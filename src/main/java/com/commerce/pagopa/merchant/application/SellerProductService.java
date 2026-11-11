@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.catalog.api.*;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductRegisterRequestDto;
-import com.commerce.pagopa.merchant.application.dto.seller.response.SellerProductPageResponseDto;
 import com.commerce.pagopa.merchant.domain.Seller;
 import com.commerce.pagopa.merchant.domain.SellerRepository;
 
@@ -25,25 +25,16 @@ public class SellerProductService {
     private final CategoryQueryApi categoryQueryApi;
 
     @Transactional(readOnly = true)
-    public SellerProductPageResponseDto findAll(Long userId, Pageable pageable) {
+    public OffsetPageResponseDto<ProductSummary> findAll(
+            Long userId,
+            Pageable pageable
+    ) {
         Seller seller = sellerRepository.findByUserIdOrThrow(userId);
 
-        ProductPageResponseDto response = productApi.findAllByUserId(
+        return productApi.findAllByUserId(
                 seller.getId(),
                 pageable.getPageSize(),
                 pageable.getPageNumber()
-        );
-
-        return new SellerProductPageResponseDto(
-                response.content(),
-                response.page(),
-                response.size(),
-                response.totalElements(),
-                response.totalPages(),
-                response.first(),
-                response.last(),
-                response.startPage(),
-                response.endPage()
         );
     }
 

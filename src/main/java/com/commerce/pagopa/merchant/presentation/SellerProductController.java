@@ -26,10 +26,10 @@ import lombok.RequiredArgsConstructor;
 import com.commerce.pagopa.catalog.api.ProductStockResult;
 import com.commerce.pagopa.catalog.api.ProductSummary;
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.merchant.application.SellerProductService;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductAddStockRequestDto;
 import com.commerce.pagopa.merchant.application.dto.product.request.ProductRegisterRequestDto;
-import com.commerce.pagopa.merchant.application.dto.seller.response.SellerProductPageResponseDto;
 
 @Tag(
         name = "SELLER PRODUCT API",
@@ -47,7 +47,7 @@ public class SellerProductController {
             description = "판매자 본인 상품 목록을 조회합니다."
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<SellerProductPageResponseDto>> getSellerProducts(
+    public ResponseEntity<ApiResponse<OffsetPageResponseDto<ProductSummary>>> getSellerProducts(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @ParameterObject
             @PageableDefault(
