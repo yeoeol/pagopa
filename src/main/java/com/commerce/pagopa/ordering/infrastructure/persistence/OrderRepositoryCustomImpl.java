@@ -37,7 +37,6 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
             Pageable pageable
     ) {
         List<Order> orders = queryFactory.selectFrom(order)
-                .distinct()
                 .where(
                         userIdEq(userId),
                         periodGoeAndLt(
