@@ -101,6 +101,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private OrderSpecifier<?> orderSpecifier(Sort.Order order) {
         return switch (order.getProperty()) {
             case "id" -> order.isAscending() ? QOrder.order.id.asc() : QOrder.order.id.desc();
+            case "orderedAt" -> order.isAscending() ? QOrder.order.orderedAt.asc() : QOrder.order.orderedAt.desc();
             case "createdAt" -> order.isAscending() ? QOrder.order.createdAt.asc() : QOrder.order.createdAt.desc();
             case "updatedAt" -> order.isAscending() ? QOrder.order.updatedAt.asc() : QOrder.order.updatedAt.desc();
             default -> null;

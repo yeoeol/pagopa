@@ -1,6 +1,7 @@
 package com.commerce.pagopa.basket.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -99,7 +100,7 @@ public class Cart extends BaseTimeEntity {
         return cartItem;
     }
 
-    public CartItem getCartItem(Long cartItemId) {
+    public CartItem getItemByItemId(Long cartItemId) {
         return cartItems.stream()
                 .filter(item -> item.getId().equals(cartItemId))
                 .findFirst()
@@ -117,25 +118,25 @@ public class Cart extends BaseTimeEntity {
             Long cartItemId,
             Integer quantity
     ) {
-        getCartItem(cartItemId).addQuantity(quantity);
+        getItemByItemId(cartItemId).addQuantity(quantity);
     }
 
-    public List<CartItem> getItemsByIds(List<Long> cartItemIds) {
-        List<CartItem> items = new ArrayList<>();
-        cartItems.forEach(cartItem -> {
-            if (!cartItemIds.contains(cartItem.getId())) {
-                throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
-            }
-            items.add(cartItem);
-        });
-        return items;
+    public List<CartItem> getItemsByItemIds(List<Long> cartItemIds) {
+        return new HashSet<>(cartItemIds)
+                .stream()
+                .map(this::getItemByItemId)
+                .toList();
     }
 
-    public void deleteItem(Long productId) {
+    public void deleteItemByProductId(Long productId) {
         cartItems.removeIf(item -> item.getProductId().equals(productId));
     }
 
+    public void deleteItemByItemId(Long cartItemId) {
+        cartItems.removeIf(item -> item.getId().equals(cartItemId));
+    }
+
     public void deleteAll(List<Long> cartItemIds) {
-        cartItemIds.forEach(this::deleteItem);
+        cartItemIds.forEach(this::deleteItemByItemId);
     }
 }

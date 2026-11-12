@@ -26,7 +26,7 @@ public class CartItemService {
             Long userId,
             CartItemAddRequestDto requestDto
     ) {
-        Cart cart = cartService.getOrCreate(userId);
+        Cart cart = cartService.getForUpdateOrCreate(userId);
 
         ProductSummary product = productApi.get(requestDto.productId());
 
@@ -53,7 +53,7 @@ public class CartItemService {
             Long userId,
             Long productId
     ) {
-        Cart cart = cartRepository.findByUserIdOrThrow(userId);
+        Cart cart = cartRepository.findByUserIdForUpdateOrThrow(userId);
         cart.validateOwner(userId);
 
         CartItem item = cart.incrementItem(productId);
@@ -65,7 +65,7 @@ public class CartItemService {
             Long userId,
             Long productId
     ) {
-        Cart cart = cartRepository.findByUserIdOrThrow(userId);
+        Cart cart = cartRepository.findByUserIdForUpdateOrThrow(userId);
 
         CartItem item = cart.decrementItem(productId);
         return CartItemResponseDto.from(item);
@@ -76,7 +76,7 @@ public class CartItemService {
             Long userId,
             Long productId
     ) {
-        Cart cart = cartRepository.findByUserIdOrThrow(userId);
-        cart.deleteItem(productId);
+        Cart cart = cartRepository.findByUserIdForUpdateOrThrow(userId);
+        cart.deleteItemByProductId(productId);
     }
 }

@@ -83,7 +83,7 @@ public class CartItemController {
                 userId,
                 productId
         );
-        if (response == null) {
+        if (response.cartQuantity() <= 0) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
                     .build();
         }

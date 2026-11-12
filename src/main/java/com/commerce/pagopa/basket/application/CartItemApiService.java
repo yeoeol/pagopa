@@ -28,7 +28,7 @@ public class CartItemApiService implements CartItemApi {
         Cart cart = cartRepository.findByUserIdWithItems(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
 
-        return cart.getItemsByIds(cartItemIds)
+        return cart.getItemsByItemIds(cartItemIds)
                 .stream()
                 .map(this::toSummary)
                 .toList();
@@ -40,7 +40,7 @@ public class CartItemApiService implements CartItemApi {
             Long userId,
             List<Long> cartItemIds
     ) {
-        Cart cart = cartRepository.findByUserIdWithItems(userId)
+        Cart cart = cartRepository.findByUserIdWithItemsForUpdate(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
         cart.deleteAll(cartItemIds);
     }

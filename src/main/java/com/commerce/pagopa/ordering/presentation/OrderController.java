@@ -112,7 +112,7 @@ public class OrderController {
             @PageableDefault(
                     size = 20,
                     page = 0,
-                    sort = "orderedAt desc, order_id desc",
+                    sort = {"orderedAt", "id"},
                     direction = Sort.Direction.DESC
             ) Pageable pageable
     ) {
