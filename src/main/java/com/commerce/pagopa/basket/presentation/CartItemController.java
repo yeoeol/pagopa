@@ -28,7 +28,7 @@ import com.commerce.pagopa.global.response.ApiResponse;
 )
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/cart-items")
+@RequestMapping("/api/v1/cart/items")
 public class CartItemController {
 
     private final CartItemService cartItemService;
@@ -54,14 +54,14 @@ public class CartItemController {
             summary = "장바구니 항목 수량 증가",
             description = "장바구니 항목의 수량을 1 증가시킵니다."
     )
-    @PostMapping("/{cartItemId}/increment")
+    @PostMapping("/{productId}/increment")
     public ResponseEntity<ApiResponse<CartItemResponseDto>> incrementQuantity(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @PathVariable("cartItemId") Long cartItemId
+            @PathVariable("productId") Long productId
     ) {
         CartItemResponseDto response = cartItemService.incrementQuantity(
                 userId,
-                cartItemId
+                productId
         );
         return ResponseEntity.ok(
                 ApiResponse.ok(
@@ -74,14 +74,14 @@ public class CartItemController {
             summary = "장바구니 항목 수량 감소",
             description = "장바구니 항목의 수량을 1 감소시킵니다. 수량이 0이 되면 해당 항목이 삭제되고 null을 반환합니다."
     )
-    @PostMapping("/{cartItemId}/decrement")
+    @PostMapping("/{productId}/decrement")
     public ResponseEntity<ApiResponse<CartItemResponseDto>> decrementQuantity(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @PathVariable("cartItemId") Long cartItemId
+            @PathVariable("productId") Long productId
     ) {
         CartItemResponseDto response = cartItemService.decrementQuantity(
                 userId,
-                cartItemId
+                productId
         );
         if (response == null) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
@@ -96,12 +96,12 @@ public class CartItemController {
             summary = "장바구니 항목 삭제",
             description = "장바구니에서 특정 항목을 삭제합니다."
     )
-    @DeleteMapping("/{cartItemId}")
+    @DeleteMapping("/{productId}")
     public ResponseEntity<ApiResponse<Void>> deleteCart(
             @AuthenticationPrincipal(expression = "userId") Long userId,
-            @PathVariable("cartItemId") Long cartItemId
+            @PathVariable("productId") Long productId
     ) {
-        cartItemService.delete(userId, cartItemId);
+        cartItemService.delete(userId, productId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 }

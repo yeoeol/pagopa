@@ -51,35 +51,32 @@ public class CartItemService {
     @Transactional
     public CartItemResponseDto incrementQuantity(
             Long userId,
-            Long cartItemId
+            Long productId
     ) {
-        Cart cart = cartRepository.findByCartItemIdForUpdateOrThrow(cartItemId);
+        Cart cart = cartRepository.findByUserIdOrThrow(userId);
         cart.validateOwner(userId);
 
-        CartItem item = cart.incrementItem(cartItemId);
+        CartItem item = cart.incrementItem(productId);
         return CartItemResponseDto.from(item);
     }
 
     @Transactional
     public CartItemResponseDto decrementQuantity(
             Long userId,
-            Long cartItemId
+            Long productId
     ) {
-        Cart cart = cartRepository.findByCartItemIdForUpdateOrThrow(cartItemId);
-        cart.validateOwner(userId);
+        Cart cart = cartRepository.findByUserIdOrThrow(userId);
 
-        CartItem item = cart.decrementItem(cartItemId);
+        CartItem item = cart.decrementItem(productId);
         return CartItemResponseDto.from(item);
     }
 
     @Transactional
     public void delete(
             Long userId,
-            Long cartItemId
+            Long productId
     ) {
-        Cart cart = cartRepository.findByCartItemIdForUpdateOrThrow(cartItemId);
-        cart.validateOwner(userId);
-
-        cart.deleteItem(cartItemId);
+        Cart cart = cartRepository.findByUserIdOrThrow(userId);
+        cart.deleteItem(productId);
     }
 }

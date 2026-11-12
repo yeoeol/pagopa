@@ -65,10 +65,6 @@ public class CartItem extends BaseTimeEntity {
                 .build();
     }
 
-    public void assignCart(Cart cart) {
-        this.cart = cart;
-    }
-
     public void addQuantity(Integer quantity) {
         this.cartQuantity += quantity;
     }
