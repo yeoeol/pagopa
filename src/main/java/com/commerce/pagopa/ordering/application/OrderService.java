@@ -116,7 +116,8 @@ public class OrderService {
         );
 
         // 장바구니 목록 삭제
-        cartItemApi.deleteAllByIdIn(
+        cartItemApi.deleteAllByUserIdAndItemIdIn(
+                userId,
                 cartItems.stream()
                         .map(CartItemSummary::cartItemId)
                         .toList()

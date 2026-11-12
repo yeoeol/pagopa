@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
@@ -58,10 +60,75 @@ public class Cart extends BaseTimeEntity {
 
     public void addItem(CartItem cartItem) {
         this.cartItems.add(cartItem);
-        cartItem.assignCart(this);
     }
 
     public void removeAllItems() {
         this.cartItems.clear();
+    }
+
+    public void validateOwner(Long userId) {
+        if (!isOwner(userId)) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_MINE);
+        }
+    }
+
+    public boolean isOwner(Long userId) {
+        return this.userId.equals(userId);
+    }
+
+    public CartItem incrementItem(Long cartItemId) {
+        CartItem cartItem = getCartItem(cartItemId);
+        cartItem.addQuantity(1);
+        return cartItem;
+    }
+
+    public CartItem decrementItem(Long cartItemId) {
+        CartItem cartItem = getCartItem(cartItemId);
+        cartItem.reduceQuantity(1);
+
+        if (cartItem.getCartQuantity() <= 0) {
+            cartItems.remove(cartItem);
+        }
+        return cartItem;
+    }
+
+    public CartItem getCartItem(Long cartItemId) {
+        return cartItems.stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
+    }
+
+    public CartItem getItemByProductId(Long productId) {
+        return cartItems.stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void addItemQuantity(
+            Long cartItemId,
+            Integer quantity
+    ) {
+        getCartItem(cartItemId).addQuantity(quantity);
+    }
+
+    public List<CartItem> getItemsByIds(List<Long> cartItemIds) {
+        List<CartItem> items = new ArrayList<>();
+        cartItems.forEach(cartItem -> {
+            if (!cartItemIds.contains(cartItem.getId())) {
+                throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
+            }
+            items.add(cartItem);
+        });
+        return items;
+    }
+
+    public void deleteItem(Long cartItemId) {
+        cartItems.removeIf(item -> item.getId().equals(cartItemId));
+    }
+
+    public void deleteAll(List<Long> cartItemIds) {
+        cartItemIds.forEach(this::deleteItem);
     }
 }
