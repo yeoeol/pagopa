@@ -11,17 +11,14 @@ public interface CartRepository {
 
     Optional<Cart> findById(Long id);
 
-    void deleteById(Long id);
-
-    Optional<Cart> findByUserId(Long userId);
+    Optional<Cart> findByUserIdForUpdate(Long userId);
 
     Optional<Cart> findByUserIdWithItems(Long userId);
 
-    default Cart findByUserIdOrThrow(Long userId) {
-        return findByUserId(userId).orElseThrow(() -> new BusinessException(CART_NOT_FOUND));
-    }
+    Optional<Cart> findByUserIdWithItemsForUpdate(Long userId);
 
-    default Cart findByUserIdWithItemsOrThrow(Long userId) {
-        return findByUserIdWithItems(userId).orElseThrow(() -> new BusinessException(CART_NOT_FOUND));
+    default Cart findByUserIdForUpdateOrThrow(Long userId) {
+        return findByUserIdForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(CART_NOT_FOUND));
     }
 }

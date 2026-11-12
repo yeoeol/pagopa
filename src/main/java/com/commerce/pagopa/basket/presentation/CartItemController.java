@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +28,7 @@ import com.commerce.pagopa.global.response.ApiResponse;
 )
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/cart-items")
+@RequestMapping("/api/v1/cart/items")
 public class CartItemController {
 
     private final CartItemService cartItemService;
@@ -55,12 +54,15 @@ public class CartItemController {
             summary = "장바구니 항목 수량 증가",
             description = "장바구니 항목의 수량을 1 증가시킵니다."
     )
-    @PostMapping("/{cartItemId}/increment")
-    @PreAuthorize("@cartItemOwnerValidator.isOwner(#cartItemId, principal.userId)")
+    @PostMapping("/{productId}/increment")
     public ResponseEntity<ApiResponse<CartItemResponseDto>> incrementQuantity(
-            @PathVariable("cartItemId") Long cartItemId
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @PathVariable("productId") Long productId
     ) {
-        CartItemResponseDto response = cartItemService.incrementQuantity(cartItemId);
+        CartItemResponseDto response = cartItemService.incrementQuantity(
+                userId,
+                productId
+        );
         return ResponseEntity.ok(
                 ApiResponse.ok(
                         response
@@ -72,13 +74,16 @@ public class CartItemController {
             summary = "장바구니 항목 수량 감소",
             description = "장바구니 항목의 수량을 1 감소시킵니다. 수량이 0이 되면 해당 항목이 삭제되고 null을 반환합니다."
     )
-    @PostMapping("/{cartItemId}/decrement")
-    @PreAuthorize("@cartItemOwnerValidator.isOwner(#cartItemId, principal.userId)")
+    @PostMapping("/{productId}/decrement")
     public ResponseEntity<ApiResponse<CartItemResponseDto>> decrementQuantity(
-            @PathVariable("cartItemId") Long cartItemId
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @PathVariable("productId") Long productId
     ) {
-        CartItemResponseDto response = cartItemService.decrementQuantity(cartItemId);
-        if (response == null) {
+        CartItemResponseDto response = cartItemService.decrementQuantity(
+                userId,
+                productId
+        );
+        if (response.cartQuantity() <= 0) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
                     .build();
         }
@@ -91,10 +96,12 @@ public class CartItemController {
             summary = "장바구니 항목 삭제",
             description = "장바구니에서 특정 항목을 삭제합니다."
     )
-    @DeleteMapping("/{cartItemId}")
-    @PreAuthorize("@cartItemOwnerValidator.isOwner(#cartItemId, principal.userId)")
-    public ResponseEntity<ApiResponse<Void>> deleteCart(@PathVariable("cartItemId") Long cartItemId) {
-        cartItemService.delete(cartItemId);
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCart(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @PathVariable("productId") Long productId
+    ) {
+        cartItemService.delete(userId, productId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 }

@@ -1,9 +1,10 @@
 package com.commerce.pagopa.review.presentation;
 
-import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,12 +18,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springdoc.core.annotations.ParameterObject;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.review.application.ReviewService;
 import com.commerce.pagopa.review.application.dto.request.ReviewCreateRequestDto;
 import com.commerce.pagopa.review.application.dto.request.ReviewUpdateRequestDto;
@@ -93,12 +97,20 @@ public class ReviewController {
             description = "특정 상품에 대한 리뷰 목록을 조회합니다."
     )
     @GetMapping("/products/{productId}")
-    public ResponseEntity<ApiResponse<List<ProductReviewResponseDto>>> getAllByProduct(
-            @PathVariable("productId") Long productId
+    public ResponseEntity<ApiResponse<OffsetPageResponseDto<ProductReviewResponseDto>>> getAllByProduct(
+            @PathVariable("productId") Long productId,
+            @ParameterObject
+            @PageableDefault(
+                    size = 20,
+                    page = 0
+            ) Pageable pageable
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(
-                        reviewService.findAllByProduct(productId)
+                        reviewService.findAllByProduct(
+                                productId,
+                                pageable
+                        )
                 )
         );
     }

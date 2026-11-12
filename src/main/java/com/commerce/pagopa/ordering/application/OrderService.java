@@ -19,6 +19,7 @@ import com.commerce.pagopa.basket.api.CartItemSummary;
 import com.commerce.pagopa.catalog.api.*;
 import com.commerce.pagopa.global.entity.Address;
 import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.ordering.application.dto.request.*;
 import com.commerce.pagopa.ordering.application.dto.response.OrderResponseDto;
 import com.commerce.pagopa.ordering.application.dto.response.OrderStockResponseDto;
@@ -115,7 +116,8 @@ public class OrderService {
         );
 
         // 장바구니 목록 삭제
-        cartItemApi.deleteAllByIdIn(
+        cartItemApi.deleteAllByUserIdAndItemIdIn(
+                userId,
                 cartItems.stream()
                         .map(CartItemSummary::cartItemId)
                         .toList()
@@ -152,12 +154,13 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResponseDto> findAll(Long userId, OrderSearch orderSearch, Pageable pageable) {
+    public OffsetPageResponseDto<OrderResponseDto> findAll(
+            Long userId,
+            OrderSearch orderSearch,
+            Pageable pageable
+    ) {
         OrderSearch search = orderSearch == null
-                ? new OrderSearch(
-                        null,
-                        null
-                )
+                ? new OrderSearch(null, null)
                 : orderSearch;
         LocalDateTime now = LocalDateTime.now();
 
@@ -168,7 +171,10 @@ public class OrderService {
                 search.end(now),
                 pageable
         );
-        return pageOrder.map(OrderResponseDto::from);
+
+        return OffsetPageResponseDto.from(
+                pageOrder.map(OrderResponseDto::from)
+        );
     }
 
     private OrderCreateRequestDto getOrderCreateRequestDto(

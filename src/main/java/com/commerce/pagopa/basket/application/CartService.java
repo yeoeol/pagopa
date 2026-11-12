@@ -24,13 +24,13 @@ public class CartService {
 
     @Transactional
     public void deleteAll(Long userId) {
-        Cart cart = cartRepository.findByUserIdOrThrow(userId);
+        Cart cart = cartRepository.findByUserIdForUpdateOrThrow(userId);
         cart.removeAllItems();
     }
 
     @Transactional
-    public Cart getOrCreate(Long userId) {
-        return cartRepository.findByUserId(userId)
+    public Cart getForUpdateOrCreate(Long userId) {
+        return cartRepository.findByUserIdForUpdate(userId)
                 .orElseGet(() -> cartRepository.save(Cart.create(userId)));
     }
 }

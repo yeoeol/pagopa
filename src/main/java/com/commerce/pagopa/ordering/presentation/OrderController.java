@@ -2,7 +2,6 @@ package com.commerce.pagopa.ordering.presentation;
 
 import jakarta.validation.Valid;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -27,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 import com.commerce.pagopa.ordering.application.OrderService;
 import com.commerce.pagopa.ordering.application.dto.request.CartItemOrderRequestDto;
 import com.commerce.pagopa.ordering.application.dto.request.OrderCreateRequestDto;
@@ -104,15 +104,15 @@ public class OrderController {
             description = "본인 주문 목록을 조회합니다. year 미지정 시 최근 6개월, year 지정 시 해당 연도. status로 추가 필터링 가능합니다."
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> getOrders(
+    public ResponseEntity<ApiResponse<OffsetPageResponseDto<OrderResponseDto>>> getOrders(
             @AuthenticationPrincipal(expression = "userId") Long userId,
             @ParameterObject
             @ModelAttribute OrderSearch orderSearch,
             @ParameterObject
             @PageableDefault(
-                    size = 10,
+                    size = 20,
                     page = 0,
-                    sort = "createdAt",
+                    sort = {"orderedAt", "id"},
                     direction = Sort.Direction.DESC
             ) Pageable pageable
     ) {

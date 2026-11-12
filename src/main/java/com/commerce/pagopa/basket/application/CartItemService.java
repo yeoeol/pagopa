@@ -9,7 +9,7 @@ import com.commerce.pagopa.basket.application.dto.request.CartItemAddRequestDto;
 import com.commerce.pagopa.basket.application.dto.response.CartItemResponseDto;
 import com.commerce.pagopa.basket.domain.Cart;
 import com.commerce.pagopa.basket.domain.CartItem;
-import com.commerce.pagopa.basket.domain.CartItemRepository;
+import com.commerce.pagopa.basket.domain.CartRepository;
 import com.commerce.pagopa.catalog.api.ProductApi;
 import com.commerce.pagopa.catalog.api.ProductSummary;
 
@@ -17,58 +17,66 @@ import com.commerce.pagopa.catalog.api.ProductSummary;
 @RequiredArgsConstructor
 public class CartItemService {
 
-    private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
     private final CartService cartService;
     private final ProductApi productApi;
 
     @Transactional
-    public CartItemResponseDto addCartItem(Long userId, CartItemAddRequestDto requestDto) {
-        Cart cart = cartService.getOrCreate(userId);
+    public CartItemResponseDto addCartItem(
+            Long userId,
+            CartItemAddRequestDto requestDto
+    ) {
+        Cart cart = cartService.getForUpdateOrCreate(userId);
 
         ProductSummary product = productApi.get(requestDto.productId());
 
-        CartItem cartItem = cartItemRepository.findByCartAndProductId(
-                cart,
-                product.productId()
-        )
-                .map(existing -> {
-                    existing.addQuantity(requestDto.quantity());
-                    return existing;
-                })
-                .orElseGet(
-                        () -> cartItemRepository.save(
-                                CartItem.create(
-                                        cart,
-                                        product.productId(),
-                                        requestDto.quantity()
-                                )
-                        )
-                );
-
-        return CartItemResponseDto.from(cartItem);
-    }
-
-    @Transactional
-    public CartItemResponseDto incrementQuantity(Long cartItemId) {
-        CartItem cartItem = cartItemRepository.findByIdForUpdateOrThrow(cartItemId);
-        cartItem.addQuantity(1);
-        return CartItemResponseDto.from(cartItem);
-    }
-
-    @Transactional
-    public CartItemResponseDto decrementQuantity(Long cartItemId) {
-        CartItem cartItem = cartItemRepository.findByIdForUpdateOrThrow(cartItemId);
-        cartItem.reduceQuantity(1);
-
-        if (cartItem.getCartQuantity() == 0) {
-            delete(cartItem.getId());
-            return null;
+        CartItem item = cart.getItemByProductId(product.productId());
+        if (item == null) {
+            item = CartItem.create(
+                    cart,
+                    product.productId(),
+                    requestDto.quantity()
+            );
+            cart.addItem(item);
+        } else {
+            cart.addItemQuantity(
+                    item.getId(),
+                    requestDto.quantity()
+            );
         }
-        return CartItemResponseDto.from(cartItem);
+
+        return CartItemResponseDto.from(item);
     }
 
     @Transactional
-    public void delete(Long cartItemId) {
-        cartItemRepository.deleteById(cartItemId);
+    public CartItemResponseDto incrementQuantity(
+            Long userId,
+            Long productId
+    ) {
+        Cart cart = cartRepository.findByUserIdForUpdateOrThrow(userId);
+        cart.validateOwner(userId);
+
+        CartItem item = cart.incrementItem(productId);
+        return CartItemResponseDto.from(item);
+    }
+
+    @Transactional
+    public CartItemResponseDto decrementQuantity(
+            Long userId,
+            Long productId
+    ) {
+        Cart cart = cartRepository.findByUserIdForUpdateOrThrow(userId);
+
+        CartItem item = cart.decrementItem(productId);
+        return CartItemResponseDto.from(item);
+    }
+
+    @Transactional
+    public void delete(
+            Long userId,
+            Long productId
+    ) {
+        Cart cart = cartRepository.findByUserIdForUpdateOrThrow(userId);
+        cart.deleteItemByProductId(productId);
     }
 }

@@ -10,22 +10,25 @@ import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.basket.api.CartItemApi;
 import com.commerce.pagopa.basket.api.CartItemSummary;
+import com.commerce.pagopa.basket.domain.Cart;
 import com.commerce.pagopa.basket.domain.CartItem;
-import com.commerce.pagopa.basket.domain.CartItemRepository;
+import com.commerce.pagopa.basket.domain.CartRepository;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
 public class CartItemApiService implements CartItemApi {
 
-    private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public List<CartItemSummary> findAllByIdInAndUserIdForUpdate(List<Long> cartItemIds, Long userId) {
-        return cartItemRepository.findAllByIdInAndUserIdForUpdate(
-                cartItemIds,
-                userId
-        )
+        Cart cart = cartRepository.findByUserIdWithItems(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+
+        return cart.getItemsByItemIds(cartItemIds)
                 .stream()
                 .map(this::toSummary)
                 .toList();
@@ -33,8 +36,13 @@ public class CartItemApiService implements CartItemApi {
 
     @Override
     @Transactional
-    public void deleteAllByIdIn(List<Long> cartItemIds) {
-        cartItemRepository.deleteAllByIdIn(cartItemIds);
+    public void deleteAllByUserIdAndItemIdIn(
+            Long userId,
+            List<Long> cartItemIds
+    ) {
+        Cart cart = cartRepository.findByUserIdWithItemsForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+        cart.deleteAll(cartItemIds);
     }
 
     private CartItemSummary toSummary(CartItem cartItem) {

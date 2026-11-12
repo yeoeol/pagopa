@@ -1,6 +1,7 @@
 package com.commerce.pagopa.basket.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -11,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
@@ -58,10 +61,82 @@ public class Cart extends BaseTimeEntity {
 
     public void addItem(CartItem cartItem) {
         this.cartItems.add(cartItem);
-        cartItem.assignCart(this);
     }
 
     public void removeAllItems() {
         this.cartItems.clear();
+    }
+
+    public void validateOwner(Long userId) {
+        if (!isOwner(userId)) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_MINE);
+        }
+    }
+
+    public boolean isOwner(Long userId) {
+        return this.userId.equals(userId);
+    }
+
+    public CartItem incrementItem(Long productId) {
+        CartItem cartItem = getItemByProductId(productId);
+        if (cartItem == null) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_MINE);
+        }
+
+        cartItem.addQuantity(1);
+        return cartItem;
+    }
+
+    public CartItem decrementItem(Long productId) {
+        CartItem cartItem = getItemByProductId(productId);
+        if (cartItem == null) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_MINE);
+        }
+
+        cartItem.reduceQuantity(1);
+        if (cartItem.getCartQuantity() <= 0) {
+            cartItems.remove(cartItem);
+        }
+        return cartItem;
+    }
+
+    public CartItem getItemByItemId(Long cartItemId) {
+        return cartItems.stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
+    }
+
+    public CartItem getItemByProductId(Long productId) {
+        return cartItems.stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void addItemQuantity(
+            Long cartItemId,
+            Integer quantity
+    ) {
+        getItemByItemId(cartItemId).addQuantity(quantity);
+    }
+
+    public List<CartItem> getItemsByItemIds(List<Long> cartItemIds) {
+        return new HashSet<>(cartItemIds)
+                .stream()
+                .map(this::getItemByItemId)
+                .toList();
+    }
+
+    public void deleteItemByProductId(Long productId) {
+        cartItems.removeIf(item -> item.getProductId().equals(productId));
+    }
+
+    public void deleteItemByItemId(Long cartItemId) {
+        cartItems.removeIf(item -> item.getId().equals(cartItemId));
+    }
+
+    public void deleteAll(List<Long> cartItemIds) {
+        cartItemIds.forEach(this::deleteItemByItemId);
     }
 }
