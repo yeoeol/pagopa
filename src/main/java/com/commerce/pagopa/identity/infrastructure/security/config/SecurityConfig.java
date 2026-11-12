@@ -94,7 +94,7 @@ public class SecurityConfig {
                                 .authenticated()
                                 .requestMatchers("/api/v1/cart/**")
                                 .authenticated()
-                                .requestMatchers("/api/v1/cart-items/**")
+                                .requestMatchers("/api/v1/cart/items/**")
                                 .authenticated()
                                 .requestMatchers("/api/v1/images/**")
                                 .authenticated()

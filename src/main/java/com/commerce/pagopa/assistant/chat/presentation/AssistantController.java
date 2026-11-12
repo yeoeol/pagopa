@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springdoc.core.annotations.ParameterObject;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import lombok.RequiredArgsConstructor;
 
 import reactor.core.publisher.Flux;
@@ -28,6 +31,10 @@ import com.commerce.pagopa.assistant.chat.application.dto.response.*;
 import com.commerce.pagopa.global.response.ApiResponse;
 import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 
+@Tag(
+        name = "ASSISTANT CHAT API",
+        description = "어시스턴트 대화 API"
+)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/assistant/conversations")
@@ -37,6 +44,10 @@ public class AssistantController {
     private final AssistantHistoryService historyService;
     private final AssistantChatService assistantChatService;
 
+    @Operation(
+            summary = "어시스턴트 대화 생성",
+            description = "어시스턴트 대화를 생성합니다."
+    )
     @PostMapping
     public ResponseEntity<ApiResponse<AssistantConversationResponseDto>> create(
             @AuthenticationPrincipal(expression = "userId") Long userId,
@@ -52,6 +63,10 @@ public class AssistantController {
         );
     }
 
+    @Operation(
+            summary = "어시스턴트 대화방 목록 조회",
+            description = "어시스턴트 대화방 목록을 전체 조회합니다."
+    )
     @GetMapping
     public ResponseEntity<ApiResponse<OffsetPageResponseDto<AssistantConversationResponseDto>>> getAll(
             @AuthenticationPrincipal(expression = "userId") Long userId,
@@ -73,6 +88,10 @@ public class AssistantController {
         );
     }
 
+    @Operation(
+            summary = "어시스턴트 대화 메시지 목록 조회",
+            description = "어시스턴트 대화 메시지 목록을 전체 조회합니다."
+    )
     @GetMapping("/{conversationId}/messages")
     public ResponseEntity<ApiResponse<List<AssistantHistoryMessageResponseDto>>> getMessages(
             @AuthenticationPrincipal(expression = "userId") Long userId,
@@ -96,6 +115,10 @@ public class AssistantController {
         );
     }
 
+    @Operation(
+            summary = "어시스턴트 대화 메시지 송신/응답",
+            description = "어시스턴트에게 메시지를 보내고 응답받습니다."
+    )
     @PostMapping("/{conversationId}/messages")
     public ResponseEntity<ApiResponse<AssistantMessageResponseDto>> chat(
             @AuthenticationPrincipal(expression = "userId") Long userId,
@@ -113,6 +136,10 @@ public class AssistantController {
         );
     }
 
+    @Operation(
+            summary = "[실시간] 어시스턴트 대화 메시지 송신/응답",
+            description = "어시스턴트에게 메시지를 보내고, 토큰 단위 응답을 실시간으로 받습니다."
+    )
     @PostMapping(
             value = "/{conversationId}/messages/stream",
             consumes = MediaType.APPLICATION_JSON_VALUE,
