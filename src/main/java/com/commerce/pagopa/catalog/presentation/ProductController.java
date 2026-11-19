@@ -63,7 +63,7 @@ public class ProductController {
     )
     @GetMapping("/cursor")
     public ResponseEntity<ApiResponse<CursorPageResponseDto<ProductResponseDto>>> getAllByCursor(
-            @Valid @RequestBody ProductCursorRequestDto requestDto
+            @ParameterObject @Valid @ModelAttribute ProductCursorRequestDto requestDto
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(

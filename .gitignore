@@ -33,6 +33,8 @@ out/
 /config/application-dev.yml
 seed-data.sql
 .env
+k6/.env
+k6/results/
 *.pem
 *.key
 *.p12
