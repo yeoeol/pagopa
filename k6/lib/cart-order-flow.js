@@ -48,7 +48,10 @@ export function runCartOrderFlow(token, { verifyStock = false } = {}) {
         check(res, {
             '장바구니 주문 201': (r) => r.status === 201,
             '주문 상태 PENDING_PAYMENT': (r) => r.json('data.status.status') === 'PENDING_PAYMENT',
-            '주문 상품 일치': (r) => (r.json('data.orderItems') || []).length === 1,
+            '주문 상품 일치': (r) =>
+                (r.json('data.orderItems') || []).length === 1
+                    && r.json('data.orderItems.0.product.productId') === productId
+                    && r.json('data.orderItems.0.orderQuantity') === cartQuantity,
         });
         orderId = res.json('data.orderId');
     });
