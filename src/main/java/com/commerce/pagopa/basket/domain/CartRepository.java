@@ -9,6 +9,8 @@ import static com.commerce.pagopa.global.response.ErrorCode.CART_NOT_FOUND;
 public interface CartRepository {
     Cart save(Cart cart);
 
+    void flush();
+
     Optional<Cart> findById(Long id);
 
     Optional<Cart> findByUserIdForUpdate(Long userId);

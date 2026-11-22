@@ -38,6 +38,7 @@ public class CartItemService {
                     requestDto.quantity()
             );
             cart.addItem(item);
+            cartRepository.flush();
         } else {
             cart.addItemQuantity(
                     item.getId(),
