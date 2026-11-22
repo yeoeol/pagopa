@@ -1,5 +1,5 @@
 import { sleep } from 'k6';
-import { createTestUserToken } from './lib/auth.js';
+import { createTestUserToken, TEST_USER_COUNT } from './lib/auth.js';
 import { runOrderFlow } from './lib/order-flow.js';
 import { runOrderCancelFlow } from "./lib/order-cancel-flow.js";
 import { runCartOrderFlow } from "./lib/cart-order-flow.js";
@@ -39,6 +39,18 @@ export const options = {
         http_req_duration: ['p(95)<800'],
     },
 };
+
+const maxConfiguredVus = Object.values(options.scenarios)
+    .reduce((total, scenario) =>
+            total + Math.max(scenario.startVUs ?? 0, ...scenario.stages.map((stage) => stage.target)),
+        0
+);
+
+if (TEST_USER_COUNT < maxConfiguredVus) {
+    throw new Error(
+        `TEST_USER_COUNT는 전체 시나리오의 최대 VU 합계인 ${maxConfiguredVus} 이상이어야 합니다.`
+    );
+}
 
 export function orderFlow() {
     runOrderFlow(createTestUserToken());

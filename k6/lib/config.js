@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:8080';
+export const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
 export const PATH = {
     productList: '/api/v1/products/cursor',

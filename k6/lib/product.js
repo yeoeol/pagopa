@@ -9,12 +9,16 @@ export function pickOrderableProductId(token) {
         `${BASE_URL}${PATH.productList}?size=${PRODUCT_POOL_SIZE}`,
         jsonHeaders(token)
     );
+    check(res, {
+        '상품 조회 200': (r) => r.status === 200,
+    });
+
     const products = (res.json('data.content') || [])
         .filter((p) => p.stockQuantity > 0);
     check(res, {
-        '상품 조회 200': (r) => r.status === 200,
         '주문 가능 상품 1개 이상': () => products.length > 0,
     });
+
     return products.length > 0
         ? products[Math.floor(Math.random() * products.length)].productId
         : null;
