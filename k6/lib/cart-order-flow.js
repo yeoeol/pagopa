@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, group } from 'k6';
-import { BASE_URL, PATH, DELIVERY, jsonHeaders } from "./config.js";
-import { getStock, pickOrderableProductId } from "./product.js";
+import { BASE_URL, PATH, DELIVERY, jsonHeaders } from './config.js';
+import { getStock, pickOrderableProductId } from './product.js';
 
 export function runCartOrderFlow(token, { verifyStock = false } = {}) {
     let productId;
@@ -64,7 +64,7 @@ export function runCartOrderFlow(token, { verifyStock = false } = {}) {
         check(res, {
             '장바구니 조회 200': (r) => r.status === 200,
             '주문한 항목 제거': (r) =>
-                !r.json('data.cartItems').some((item) => item.cartItemId === cartItemId),
+                !(r.json('data.cartItems') || []).some((item) => item.cartItemId === cartItemId),
         });
 
         if (verifyStock) {

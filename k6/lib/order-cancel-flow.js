@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, group } from 'k6';
-import { BASE_URL, PATH, DELIVERY, jsonHeaders } from "./config.js";
-import { getStock, pickOrderableProductId } from "./product.js";
+import { BASE_URL, PATH, DELIVERY, jsonHeaders } from './config.js';
+import { getStock, pickOrderableProductId } from './product.js';
 
 const ORDER_QUANTITY = 1;
 
