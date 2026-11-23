@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, group } from 'k6';
-import {BASE_URL, PATH, jsonHeaders, DELIVERY} from './config.js';
-import { pickOrderableProductId } from "./product.js";
+import { BASE_URL, PATH, DELIVERY, jsonHeaders } from './config.js';
+import { pickOrderableProductId } from './product.js';
 
 export function runOrderFlow(token) {
     let productId;
@@ -21,7 +21,7 @@ export function runOrderFlow(token) {
             jsonHeaders(token)
         );
         check(res, {
-            '주문 생성 성공': (r) => r.status === 200 || r.status === 201,
+            '주문 생성 성공': (r) => r.status === 201,
             'orderId 존재': (r) => !!r.json('data.orderId'),
         });
         orderId = res.json('data.orderId');
