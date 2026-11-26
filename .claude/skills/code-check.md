@@ -84,10 +84,10 @@ argument-hint: <대상> (예: 파일 경로, "diff", "staged", 생략 시 git di
 
 ## 다른 프로젝트로 가져가기
 
-이 파일을 새 프로젝트의 `.claude/commands/code-check.md` 로 두면 끝. 두 방법:
+이 파일을 새 프로젝트의 `/code-check.md` 로 두면 끝. 두 방법:
 
 ```bash
-mkdir -p .claude/commands
+mkdir -p .claude/skills
 # (a) GitHub 최신본 내려받기
 curl -fsSL https://raw.githubusercontent.com/goodjwon/my-wiki/main/.claude/commands/code-check.md \
   -o .claude/commands/code-check.md
