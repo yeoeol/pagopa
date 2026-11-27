@@ -41,7 +41,4 @@ if [[ "$FILE" == *.java && "$FILE" == */src/main/java/* ]]; then
   fi
 fi
 
-if [ -f "$FILE" ] && [[ "$FILE" == */src/* ]]; then
-  decide ask "기존 코드 수정($FILE). 사용자 승인 후에만 진행."
-fi
 exit 0
