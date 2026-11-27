@@ -1,11 +1,9 @@
-# Claude Progress — 자동 업데이트: 2026-11-28 01:27
+# Claude Progress — 자동 업데이트: 2026-11-28 02:10
 
 ## 마지막 커밋
-31a325d harness: task-list·progress 템플릿 + Stop hook 등록
+f280756 plan: 태스크 분해
 
 ## 최근 변경 파일
-.claude/hooks/update-progress.sh
-.claude/settings.json
 claude-progress.txt
 task-list.md
 
