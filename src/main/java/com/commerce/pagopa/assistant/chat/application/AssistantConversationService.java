@@ -41,8 +41,9 @@ public class AssistantConversationService {
     @Transactional(readOnly = true)
     public OffsetPageResponseDto<AssistantConversationResponseDto> getAll(Long userId, Pageable pageable) {
         Page<AssistantConversation> conversations =
-                conversationRepository.findAllByUserIdOrderByUpdatedAtDesc(
+                conversationRepository.findAllByUserIdAndStatusOrderByUpdatedAtDesc(
                         userId,
+                        AssistantConversationStatus.ACTIVE,
                         pageable
                 );
 

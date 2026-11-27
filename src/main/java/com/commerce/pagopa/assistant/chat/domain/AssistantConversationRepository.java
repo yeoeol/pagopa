@@ -21,6 +21,12 @@ public interface AssistantConversationRepository {
             Pageable pageable
     );
 
+    Page<AssistantConversation> findAllByUserIdAndStatusOrderByUpdatedAtDesc(
+            Long userId,
+            AssistantConversationStatus status,
+            Pageable pageable
+    );
+
     default AssistantConversation findByIdOrThrow(Long conversationId) {
         return findById(conversationId).orElseThrow(
                 () -> new BusinessException(ErrorCode.ASSISTANT_CONVERSATION_NOT_FOUND)

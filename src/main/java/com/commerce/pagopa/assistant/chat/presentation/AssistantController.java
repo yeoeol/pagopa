@@ -64,8 +64,8 @@ public class AssistantController {
     }
 
     @Operation(
-            summary = "어시스턴트 대화방 목록 조회",
-            description = "어시스턴트 대화방 목록을 전체 조회합니다."
+            summary = "어시스턴트 활성 대화방 목록 조회",
+            description = "활성화된 어시스턴트 대화방 목록을 조회합니다."
     )
     @GetMapping
     public ResponseEntity<ApiResponse<OffsetPageResponseDto<AssistantConversationResponseDto>>> getAll(
@@ -80,7 +80,7 @@ public class AssistantController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(
-                        conversationService.getAll(
+                        conversationService.getAllWithActive(
                                 userId,
                                 pageable
                         )

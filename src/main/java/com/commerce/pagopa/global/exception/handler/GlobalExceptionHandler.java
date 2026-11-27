@@ -3,6 +3,8 @@ package com.commerce.pagopa.global.exception.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import org.hibernate.exception.ConstraintViolationException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,6 +95,29 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
                 .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE));
+    }
+
+    // 컨트롤러 파라미터 제약 위반 (@PathVariable @Positive 등, @Validated 없이 내장 메서드 검증 시)
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHandlerMethodValidation(HandlerMethodValidationException e) {
+        log.warn(
+                "[HandlerMethodValidation] {}",
+                e.getMessage()
+        );
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE));
+    }
+
+    // @PathVariable, @RequestParam 타입 변환 실패 (예: Long 자리에 "abc")
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+        log.warn(
+                "[MethodArgumentTypeMismatch] name={}, value={}",
+                e.getName(),
+                e.getValue()
+        );
+        return ResponseEntity.status(ErrorCode.INVALID_TYPE_VALUE.getHttpStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_TYPE_VALUE));
     }
 
     // 지원하지 않는 HTTP 메서드
