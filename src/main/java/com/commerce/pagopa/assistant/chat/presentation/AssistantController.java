@@ -3,6 +3,7 @@ package com.commerce.pagopa.assistant.chat.presentation;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -163,5 +164,22 @@ public class AssistantController {
                 );
     }
 
-    // @DeleteMapping("/{conversationId}")
+    @Operation(
+            summary = "어시스턴트 대화방 종료",
+            description = "어시스턴트 대화방을 종료(CLOSED) 상태로 변경하고 대화방 목록에서 제외합니다. 복원을 위해 삭제하지 않습니다."
+    )
+    @PatchMapping("/{conversationId}")
+    public ResponseEntity<ApiResponse<AssistantConversationResponseDto>> close(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @PathVariable @Positive Long conversationId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        conversationService.close(
+                                userId,
+                                conversationId
+                        )
+                )
+        );
+    }
 }

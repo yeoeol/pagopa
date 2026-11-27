@@ -11,6 +11,9 @@ import com.commerce.pagopa.assistant.chat.application.dto.request.AssistantConve
 import com.commerce.pagopa.assistant.chat.application.dto.response.AssistantConversationResponseDto;
 import com.commerce.pagopa.assistant.chat.domain.AssistantConversation;
 import com.commerce.pagopa.assistant.chat.domain.AssistantConversationRepository;
+import com.commerce.pagopa.assistant.chat.domain.AssistantConversationStatus;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 import com.commerce.pagopa.global.response.OffsetPageResponseDto;
 
 
@@ -39,7 +42,7 @@ public class AssistantConversationService {
     }
 
     @Transactional(readOnly = true)
-    public OffsetPageResponseDto<AssistantConversationResponseDto> getAll(Long userId, Pageable pageable) {
+    public OffsetPageResponseDto<AssistantConversationResponseDto> getAllWithActive(Long userId, Pageable pageable) {
         Page<AssistantConversation> conversations =
                 conversationRepository.findAllByUserIdAndStatusOrderByUpdatedAtDesc(
                         userId,
@@ -50,5 +53,17 @@ public class AssistantConversationService {
         return OffsetPageResponseDto.from(
                 conversations.map(AssistantConversationResponseDto::from)
         );
+    }
+
+    // 복원 가능성을 위해 삭제하지 않고 CLOSED 상태로만 변경한다. 이미 CLOSED면 409.
+    @Transactional
+    public AssistantConversationResponseDto close(Long userId, Long conversationId) {
+        AssistantConversation conversation = conversationRepository.findByIdAndUserId(
+                conversationId,
+                userId
+        ).orElseThrow(() -> new BusinessException(ErrorCode.ASSISTANT_CONVERSATION_NOT_FOUND));
+
+        conversation.close();
+        return AssistantConversationResponseDto.from(conversation);
     }
 }

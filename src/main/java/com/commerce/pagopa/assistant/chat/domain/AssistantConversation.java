@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import com.commerce.pagopa.global.entity.BaseTimeEntity;
+import com.commerce.pagopa.global.exception.BusinessException;
+import com.commerce.pagopa.global.response.ErrorCode;
 
 @Entity
 @Getter
@@ -70,6 +72,9 @@ public class AssistantConversation extends BaseTimeEntity {
     }
 
     public void close() {
+        if (!isActive()) {
+            throw new BusinessException(ErrorCode.ASSISTANT_CONVERSATION_CLOSED);
+        }
         this.status = AssistantConversationStatus.CLOSED;
     }
 
