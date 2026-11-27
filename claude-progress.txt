@@ -1,0 +1,20 @@
+# Claude Progress — 자동 업데이트: 2026-11-28 00:07
+
+## 마지막 커밋
+dbdb0ad harness: AGENTS.md 추가 (Planner/Coder/Critic)
+
+## 최근 변경 파일
+AGENTS.md
+
+## 테스트 상태
+
+
+## 다음 세션 시작
+1. cat AGENTS.md
+2. cat claude-progress.txt
+3. cat task-list.md
+4. ./gradlew test
+
+📝 에이전트 메모: 
+  - CLAUDE.md 섹션 11에 추가할 패턴: 
+  - guard.sh에 추가할 규칙:
