@@ -1,10 +1,13 @@
-# Claude Progress — 자동 업데이트: 2026-11-28 00:07
+# Claude Progress — 자동 업데이트: 2026-11-28 01:27
 
 ## 마지막 커밋
-dbdb0ad harness: AGENTS.md 추가 (Planner/Coder/Critic)
+31a325d harness: task-list·progress 템플릿 + Stop hook 등록
 
 ## 최근 변경 파일
-AGENTS.md
+.claude/hooks/update-progress.sh
+.claude/settings.json
+claude-progress.txt
+task-list.md
 
 ## 테스트 상태
 
