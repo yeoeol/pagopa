@@ -31,7 +31,7 @@
 ## 태스크 목록
 
 ### TASK-001: ImageCategory 패키지를 media.domain → media.api로 이동
-- 상태: 🔄
+- 상태: ✅
 - 복잡도: LOW
 - 의존: 없음
 - verify: `./gradlew test --tests "com.commerce.pagopa.media.infrastructure.supabase.SupabaseImageServiceTest"` + `./gradlew test --tests "com.commerce.pagopa.ApplicationModulithTest"`
@@ -42,10 +42,10 @@
   - src/main/java/com/commerce/pagopa/media/infrastructure/supabase/SupabaseImageService.java (import 경로)
   - src/main/java/com/commerce/pagopa/media/presentation/ImageApiController.java (import 경로)
 - 완료 기준:
-  - [ ] `media.domain`에서 `ImageCategory`를 참조하는 곳이 하나도 없음 (grep)
-  - [ ] `./gradlew compileTestJava` 통과
+  - [x] `media.domain`에서 `ImageCategory`를 참조하는 곳이 하나도 없음 (grep)
+  - [x] `./gradlew compileTestJava` 통과
   - [x] SupabaseImageServiceTest, ApplicationModulithTest 통과
-  - [ ] Critic APPROVE
+  - [x] Critic APPROVE
 - 메모:
   - enum 상수 이름(PROFILE/PRODUCT/REVIEW)과 `directory` 값은 그대로 둔다 → `ImageApiController`의 `{category}` path 바인딩과 pagopa-web 호출부에는 영향 없음
   - `media/domain/` 패키지에 다른 클래스가 없어 빈 디렉터리가 남으면 삭제 여부를 보고만 한다 (CLAUDE.md §4)
@@ -162,6 +162,7 @@
 
 | ID | 태스크명 | 완료일 | Critic 판정 |
 |----|---------|--------|------------|
+| TASK-001 | ImageCategory 패키지를 media.domain → media.api로 이동 | 2026-11-28 | APPROVE |
 
 ## 블로킹 이슈
 

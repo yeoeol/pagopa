@@ -25,7 +25,7 @@
 책임:
 - 구현 전 CLAUDE.md 섹션 8 체크리스트 확인
 - 단계별 계획 제시 → 구현 → 자기검증 루프
-- 완료 후 task-list.md 상태 업데이트
+- 착수 시 task-list.md 상태를 🔄로 변경 (✅는 Critic APPROVE 후 Critic이 기록)
 - 컨텍스트 80% 이상 사용 → 세션 인계 후 종료
 
 금지:
@@ -47,6 +47,16 @@
 - APPROVE: 모두 통과
 - CONDITIONAL REJECT: [문제]·[수정 방법] 명시, 재검토 후 통과 가능
 - REJECT: 근본적 재설계 필요
+
+판정 후 task-list.md 갱신 (Critic 책임):
+- 검토한 태스크의 "완료 기준" 체크박스는 Critic이 직접 체크한다. Coder가 체크해 둔 항목도 Critic이 다시 확인하고, 직접 확인한 항목만 `[x]`로 둔다.
+- APPROVE면 `Critic APPROVE` 항목도 체크한다. CONDITIONAL REJECT / REJECT면 충족되지 않은 항목은 `[ ]`로 둔다.
+- APPROVE면 태스크 상태를 ✅로 바꾸고 "완료된 태스크" 표에 한 줄(ID, 태스크명, 완료일, 판정)을 추가한다. CONDITIONAL REJECT / REJECT면 상태는 🔄로 둔다.
+- Critic이 수정하는 파일은 task-list.md(완료 기준 체크박스, 상태, 완료된 태스크 표)뿐이다. 코드 파일은 수정하지 않는다.
+
+상태 변경 권한:
+- task-list.md의 태스크 상태(🔲/🔄/✅/❌)는 모든 에이전트가 바꿀 수 있다.
+- 주된 흐름: Coder가 착수할 때 🔄, Critic이 APPROVE하면서 ✅.
 
 ## 세션 인계 프로토콜
 

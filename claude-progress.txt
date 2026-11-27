@@ -1,10 +1,15 @@
-# Claude Progress — 자동 업데이트: 2026-11-28 02:10
+# Claude Progress — 자동 업데이트: 2026-11-28 03:01
 
 ## 마지막 커밋
-f280756 plan: 태스크 분해
+24d9f38 refactor: ImageCategory 패키지를 media.domain → media.api로 이동
 
 ## 최근 변경 파일
 claude-progress.txt
+src/main/java/com/commerce/pagopa/media/api/ImageCategory.java
+src/main/java/com/commerce/pagopa/media/api/ImageUploadRequest.java
+src/main/java/com/commerce/pagopa/media/infrastructure/azure/AzureImageService.java
+src/main/java/com/commerce/pagopa/media/infrastructure/supabase/SupabaseImageService.java
+src/main/java/com/commerce/pagopa/media/presentation/ImageApiController.java
 task-list.md
 
 ## 테스트 상태
