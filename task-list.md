@@ -52,7 +52,7 @@
   - `AzureImageServiceIntegrationTest`는 외부 스토리지 연동이라 verify 대상에서 뺐다. 3단계 전체 테스트에서 실패하면 원인만 보고
 
 ### TASK-002: 메시지 삭제 — Controller DELETE 엔드포인트 + ControllerTest (테스트 먼저)
-- 상태: 🔄
+- 상태: ✅
 - 복잡도: LOW
 - 의존: 없음
 - verify: `./gradlew test --tests "com.commerce.pagopa.assistant.chat.presentation.AssistantControllerTest"`
@@ -61,12 +61,12 @@
   - src/main/java/com/commerce/pagopa/assistant/chat/presentation/AssistantController.java (`@DeleteMapping("/{conversationId}/messages/{messageId}")` 추가)
   - src/main/java/com/commerce/pagopa/assistant/chat/application/AssistantHistoryService.java (`delete(userId, conversationId, messageId)` **시그니처만**, 본문은 `UnsupportedOperationException` — TASK-003에서 구현)
 - 완료 기준:
-  - [ ] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
-  - [ ] 성공 시 200 + `ApiResponse.ok()` → `{"success": true}` (data 생략, `@JsonInclude(NON_NULL)`)
-  - [ ] 실패 시 `@RestControllerAdvice`가 `ApiResponse.error(...)` → `{"success": false, "error": {...}}` — 응답은 성공/실패 두 형태뿐
-  - [ ] 입력 검증: `conversationId`, `messageId`에 `@Positive` → 0, -1은 400 / "abc"처럼 타입이 안 맞으면 400 (기존 `close_nonPositiveId_badRequest`, `close_invalidTypeId_badRequest` 패턴 재사용)
-  - [ ] Service mock이 던지는 예외별 응답 검증: 404(대화방/메시지 없음), 403(본인 메시지 아님), 409(닫힌 대화방)
-  - [ ] Critic APPROVE
+  - [x] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
+  - [x] 성공 시 200 + `ApiResponse.ok()` → `{"success": true}` (data 생략, `@JsonInclude(NON_NULL)`)
+  - [x] 실패 시 `@RestControllerAdvice`가 `ApiResponse.error(...)` → `{"success": false, "error": {...}}` — 응답은 성공/실패 두 형태뿐
+  - [x] 입력 검증: `conversationId`, `messageId`에 `@Positive` → 0, -1은 400 / "abc"처럼 타입이 안 맞으면 400 (기존 `close_nonPositiveId_badRequest`, `close_invalidTypeId_badRequest` 패턴 재사용)
+  - [x] Service mock이 던지는 예외별 응답 검증: 404(대화방/메시지 없음), 403(본인 메시지 아님), 409(닫힌 대화방)
+  - [x] Critic APPROVE
 - 메모:
   - DELETE는 요청 바디가 없어서 "요청 DTO 검증"은 path variable 검증으로 대신한다 → 블로킹 이슈 #1 참고
   - 401은 이 슬라이스 테스트로 검증할 수 없음(`addFilters = false`) → TASK-006
@@ -75,7 +75,7 @@
   - [Coder 기록] 추가한 에러코드: `ASSISTANT_MESSAGE_NOT_OWNER`(403, `ASSISTANT_006`)
 
 ### TASK-003: 메시지 삭제 — Service·Repository 구현 + ServiceTest (테스트 먼저)
-- 상태: 🔄
+- 상태: ✅
 - 복잡도: MEDIUM
 - 의존: TASK-002
 - verify: `./gradlew test --tests "com.commerce.pagopa.assistant.chat.application.AssistantHistoryServiceTest"`
@@ -90,7 +90,7 @@
   - [x] 메시지가 다른 대화방 소속이면 403 (TASK-002에서 추가한 "본인 메시지 아님" 에러코드)
   - [x] 메시지 role이 ASSISTANT면 403 (같은 에러코드)
   - [x] 정상 케이스에서 repository 삭제 호출 검증
-  - [ ] Critic APPROVE
+  - [x] Critic APPROVE
 - 메모:
   - 검사 순서: 대화방 소유 → CLOSED 여부 → 메시지 존재 → 대화방 소속 → role
   - [Coder 기록 2026-11-28] red 확인: (1) Repository `delete` 선언 전 컴파일 실패 (2) 선언 후 `UnsupportedOperationException`으로 6/6 FAILED. 구현 후 6/6 통과
@@ -168,6 +168,8 @@
 | ID | 태스크명 | 완료일 | Critic 판정 |
 |----|---------|--------|------------|
 | TASK-001 | ImageCategory 패키지를 media.domain → media.api로 이동 | 2026-11-28 | APPROVE |
+| TASK-002 | 메시지 삭제 — Controller DELETE 엔드포인트 + ControllerTest | 2026-11-28 | APPROVE |
+| TASK-003 | 메시지 삭제 — Service·Repository 구현 + ServiceTest | 2026-11-28 | APPROVE |
 
 ## 블로킹 이슈
 
