@@ -98,7 +98,7 @@
   - [Coder 기록] 동시성: 대화방 조회를 `findByIdAndUserIdForUpdate`(비관적 쓰기 락)로 해서 종료(close)와 직렬화함 — `saveUserMessage`와 같은 방식. `AssistantConversationConcurrencyTest.delete_waitsForClose_thenFailsWithClosed` 추가: 락 없는 조회로 돌렸을 때 FAILED(red) 확인 후 락 조회로 통과. 전체 122 tests / 0 fail
 
 ### TASK-004: 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest (테스트 먼저)
-- 상태: 🔄
+- 상태: ✅
 - 복잡도: MEDIUM
 - 의존: 없음
 - verify: `./gradlew test --tests "com.commerce.pagopa.merchant.presentation.SellerProductControllerTest"`
@@ -107,14 +107,14 @@
   - src/main/java/com/commerce/pagopa/merchant/presentation/SellerProductController.java (`@PatchMapping("/{productId}")` + 기존 `@PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")` 재사용, 요청 바디 없음)
   - src/main/java/com/commerce/pagopa/merchant/application/SellerProductService.java (`hide(productId)` **시그니처만** — TASK-005에서 구현)
 - 완료 기준:
-  - [ ] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
-  - [ ] 성공 시 200 + `ApiResponse<ProductSummary>` (status = "HIDDEN")
-  - [ ] 상품을 등록한 판매자가 아니면 403
-  - [ ] 입력 검증: `productId` `@Positive` → 0, -1은 400 / 타입 불일치는 400
-  - [ ] 상품 없음 404
-  - [ ] 이미 HIDDEN인 상품 → 409 (Service mock이 던지는 예외로 검증)
+  - [x] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
+  - [x] 성공 시 200 + `ApiResponse<ProductSummary>` (status = "HIDDEN")
+  - [x] 상품을 등록한 판매자가 아니면 403
+  - [x] 입력 검증: `productId` `@Positive` → 0, -1은 400 / 타입 불일치는 400
+  - [x] 상품 없음 404
+  - [x] 이미 HIDDEN인 상품 → 409 (Service mock이 던지는 예외로 검증)
   - [x] 단위 테스트 통과 (`SellerProductControllerTest` 9/9)
-  - [ ] Critic APPROVE
+  - [x] Critic APPROVE
 - 메모:
   - 응답 DTO는 기존 판매자 상품 API와 같은 `ProductSummary`를 쓴다 (새 DTO를 만들지 않음)
   - 기존 `PATCH /{productId}/stock`와 경로가 겹치지 않음
@@ -176,6 +176,7 @@
 | TASK-001 | ImageCategory 패키지를 media.domain → media.api로 이동 | 2026-11-28 | APPROVE |
 | TASK-002 | 메시지 삭제 — Controller DELETE 엔드포인트 + ControllerTest | 2026-11-28 | APPROVE |
 | TASK-003 | 메시지 삭제 — Service·Repository 구현 + ServiceTest | 2026-11-28 | APPROVE |
+| TASK-004 | 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest | 2026-11-29 | APPROVE |
 
 ## 블로킹 이슈
 

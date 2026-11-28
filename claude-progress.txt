@@ -1,14 +1,18 @@
-# Claude Progress — 자동 업데이트: 2026-11-29 00:07
+# Claude Progress — 자동 업데이트: 2026-11-29 00:23
 
 ## 마지막 커밋
-ac8e784 review: 메시지 삭제 API 구현 점검 및 승인
+745b668 feat: 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest
 
 ## 최근 변경 파일
 claude-progress.txt
+src/main/java/com/commerce/pagopa/global/response/ErrorCode.java
+src/main/java/com/commerce/pagopa/merchant/application/SellerProductService.java
+src/main/java/com/commerce/pagopa/merchant/presentation/SellerProductController.java
+src/test/java/com/commerce/pagopa/merchant/presentation/SellerProductControllerTest.java
 task-list.md
 
 ## 테스트 상태
-✅ 24 classes, 131 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T15:06:41.619Z)
+✅ 24 classes, 131 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T15:21:40Z)
 
 ## 다음 세션 시작
 1. cat AGENTS.md
