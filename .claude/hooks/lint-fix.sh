@@ -49,8 +49,16 @@ case "$MODIFIED_FILE" in
 esac
 if [ -n "$CS_SET" ]; then
   CS_TASK="checkstyle$(echo "${CS_SET:0:1}" | tr a-z A-Z)${CS_SET:1}"
+  REPORT="build/reports/checkstyle/$CS_SET.xml"
+  # 이전 실행의 리포트를 지워, 아래에서 읽는 리포트가 이번 실행 결과임을 보장
+  rm -f "$REPORT"
   if ! CS_OUT=$(./gradlew "$CS_TASK" -q 2>&1); then
-    REPORT="build/reports/checkstyle/$CS_SET.xml"
+    # 이번 실행이 리포트를 만들지 못함 (설정 오류, Gradle 실패 등)
+    if [ ! -f "$REPORT" ]; then
+      echo "$CS_OUT" | tail -20 >&2
+      echo "  ❌ Checkstyle 실행 실패 (리포트 없음)" >&2
+      exit 2
+    fi
     # 리포트의 <file name="C:\...">...</file> 블록 중 수정한 파일의 <error> 줄만 추출
     # (awk -v는 C:\study의 백슬래시를 이스케이프로 해석하므로 ENVIRON으로 전달)
     FILE_ERRORS=$(CS_FILE="$HOOK_PATH" awk '
@@ -62,11 +70,6 @@ if [ -n "$CS_SET" ]; then
       | sed -e "s/&apos;/'/g" -e 's/&quot;/"/g' -e 's/&lt;/</g' -e 's/&gt;/>/g' -e 's/&amp;/\&/g' \
       | head -20 >&2
       echo "  ❌ Checkstyle 위반 — Claude가 수정해야 함" >&2
-      exit 2
-    fi
-    if [ ! -f "$REPORT" ]; then
-      echo "$CS_OUT" | tail -20 >&2
-      echo "  ❌ Checkstyle 실행 실패" >&2
       exit 2
     fi
     echo "  ⚠️  Checkstyle: 이 파일은 통과, 다른 파일에 기존 위반 있음 ($REPORT)" >&2
