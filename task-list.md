@@ -98,7 +98,7 @@
   - [Coder 기록] 동시성: 대화방 조회를 `findByIdAndUserIdForUpdate`(비관적 쓰기 락)로 해서 종료(close)와 직렬화함 — `saveUserMessage`와 같은 방식. `AssistantConversationConcurrencyTest.delete_waitsForClose_thenFailsWithClosed` 추가: 락 없는 조회로 돌렸을 때 FAILED(red) 확인 후 락 조회로 통과. 전체 122 tests / 0 fail
 
 ### TASK-004: 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest (테스트 먼저)
-- 상태: 🔲
+- 상태: 🔄
 - 복잡도: MEDIUM
 - 의존: 없음
 - verify: `./gradlew test --tests "com.commerce.pagopa.merchant.presentation.SellerProductControllerTest"`
@@ -113,6 +113,7 @@
   - [ ] 입력 검증: `productId` `@Positive` → 0, -1은 400 / 타입 불일치는 400
   - [ ] 상품 없음 404
   - [ ] 이미 HIDDEN인 상품 → 409 (Service mock이 던지는 예외로 검증)
+  - [x] 단위 테스트 통과 (`SellerProductControllerTest` 9/9)
   - [ ] Critic APPROVE
 - 메모:
   - 응답 DTO는 기존 판매자 상품 API와 같은 `ProductSummary`를 쓴다 (새 DTO를 만들지 않음)
@@ -120,6 +121,11 @@
   - `@ControllerSliceTest`(`addFilters = false`)에서 `@PreAuthorize`가 동작하는지는 아직 확인 안 됨 (`SellerProductController` 테스트가 하나도 없음). 동작하지 않으면 403 케이스를 TASK-006 통합 테스트로 옮기고 보고
   - 요청 바디를 받지 않기로 해서 "요청 DTO 검증"은 path variable 검증으로 대신한다 → 블로킹 이슈 #1 참고
   - 상품 이미지 삭제나 장바구니·추천 노출 제외 같은 후속 처리는 요구사항에 없어서 범위에서 뺐다
+  - [Coder 기록 2026-11-29] red 확인: (1) `hide` 시그니처 추가 전 컴파일 실패 (2) 시그니처 추가 후 `@PatchMapping` 추가 전 8/8 FAILED (405 — 같은 경로에 GET만 있음). 매핑 추가 후 통과
+  - [Coder 기록] `@ControllerSliceTest`에는 `SecurityConfig`(`@EnableMethodSecurity`)가 로드되지 않아 `@PreAuthorize`가 동작하지 않음(403/404 케이스가 200) → 테스트 클래스 안에 `@TestConfiguration @EnableMethodSecurity`를 `@Import`해서 켬. `sellerProductOwnerValidator`는 `@MockitoBean(name=...)`으로 등록. 403 케이스는 TASK-006으로 옮기지 않음
+  - [Coder 기록] 메서드 보안을 켜니 판매자 아님이 **401**(`ACCESS_DENIED`가 `HttpStatus.UNAUTHORIZED`)로 나옴 → 사용자 승인(2026-11-29)을 받아 `ErrorCode.ACCESS_DENIED`를 **403**으로 변경. 코드(`COMMON_005`)·메시지는 그대로. 영향: `@PreAuthorize`를 쓰는 기존 엔드포인트 전체의 거부 응답이 401 → 403 (pagopa-web은 401에서만 토큰 refresh를 시도하므로 거부 시 불필요한 refresh가 사라짐)
+  - [Coder 기록] 사용자 승인(2026-11-29)으로 TASK-005 범위였던 `PRODUCT_ALREADY_HIDDEN`(409, `PRODUCT_007`)을 이 태스크에서 `ErrorCode`에 추가함 (TASK-002 전례). TASK-005에서는 추가할 필요 없음
+  - [Coder 기록] 404는 실제 흐름상 `@PreAuthorize`의 `isOwner` → `productApi.get()`에서 `PRODUCT_NOT_FOUND`가 나므로, validator mock이 예외를 던지게 해서 검증함 (`BusinessException`이 그대로 전파되어 404 확인)
 
 ### TASK-005: 상품 숨김 — catalog ProductApi.hide 구현 + SellerProductService 연결 (테스트 먼저)
 - 상태: 🔲

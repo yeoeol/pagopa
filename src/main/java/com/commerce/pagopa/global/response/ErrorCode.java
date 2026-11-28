@@ -17,7 +17,7 @@ public enum ErrorCode {
     ), INVALID_TYPE_VALUE(
             HttpStatus.BAD_REQUEST, "COMMON_004", "잘못된 타입입니다."
     ), ACCESS_DENIED(
-            HttpStatus.UNAUTHORIZED,
+            HttpStatus.FORBIDDEN,
             "COMMON_005", "접근이 거부되었습니다."
     ), RESOURCE_NOT_FOUND(
             HttpStatus.NOT_FOUND,
@@ -63,6 +63,7 @@ public enum ErrorCode {
             "quantity는 1 이상이어야 합니다."
     ),
     INVALID_PRODUCT_CURSOR(HttpStatus.BAD_REQUEST, "PRODUCT_006", "유효하지 않은 상품 커서입니다."),
+    PRODUCT_ALREADY_HIDDEN(HttpStatus.CONFLICT, "PRODUCT_007", "이미 숨김 처리된 상품입니다."),
 
     // CATEGORY
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_001", "존재하지 않는 카테고리입니다."), INVALID_CATEGORY_LEVEL(

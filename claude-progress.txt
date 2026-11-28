@@ -1,16 +1,14 @@
-# Claude Progress — 자동 업데이트: 2026-11-28 23:43
+# Claude Progress — 자동 업데이트: 2026-11-29 00:07
 
 ## 마지막 커밋
-fbf6cfa test: 어시스턴트 메시지 삭제 컨트롤러, 서비스 로직 테스트 구현
+ac8e784 review: 메시지 삭제 API 구현 점검 및 승인
 
 ## 최근 변경 파일
 claude-progress.txt
-src/test/java/com/commerce/pagopa/assistant/chat/application/AssistantConversationConcurrencyTest.java
-src/test/java/com/commerce/pagopa/assistant/chat/application/AssistantHistoryServiceTest.java
-src/test/java/com/commerce/pagopa/assistant/chat/presentation/AssistantControllerTest.java
+task-list.md
 
 ## 테스트 상태
-✅ 23 classes, 122 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T14:30:19.906Z)
+✅ 24 classes, 131 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T15:06:41.619Z)
 
 ## 다음 세션 시작
 1. cat AGENTS.md
