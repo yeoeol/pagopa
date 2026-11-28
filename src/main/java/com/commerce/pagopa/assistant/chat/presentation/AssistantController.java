@@ -182,4 +182,22 @@ public class AssistantController {
                 )
         );
     }
+
+    @Operation(
+            summary = "어시스턴트 대화 메시지 삭제",
+            description = "본인 대화방의 본인(USER) 메시지를 삭제합니다. 종료된 대화방의 메시지는 삭제할 수 없습니다."
+    )
+    @DeleteMapping("/{conversationId}/messages/{messageId}")
+    public ResponseEntity<ApiResponse<Void>> deleteMessage(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @PathVariable @Positive Long conversationId,
+            @PathVariable @Positive Long messageId
+    ) {
+        historyService.delete(
+                userId,
+                conversationId,
+                messageId
+        );
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
 }

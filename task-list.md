@@ -52,7 +52,7 @@
   - `AzureImageServiceIntegrationTest`는 외부 스토리지 연동이라 verify 대상에서 뺐다. 3단계 전체 테스트에서 실패하면 원인만 보고
 
 ### TASK-002: 메시지 삭제 — Controller DELETE 엔드포인트 + ControllerTest (테스트 먼저)
-- 상태: 🔲
+- 상태: 🔄
 - 복잡도: LOW
 - 의존: 없음
 - verify: `./gradlew test --tests "com.commerce.pagopa.assistant.chat.presentation.AssistantControllerTest"`
@@ -71,9 +71,11 @@
   - DELETE는 요청 바디가 없어서 "요청 DTO 검증"은 path variable 검증으로 대신한다 → 블로킹 이슈 #1 참고
   - 401은 이 슬라이스 테스트로 검증할 수 없음(`addFilters = false`) → TASK-006
   - 403에 쓸 에러코드(예: `ASSISTANT_MESSAGE_NOT_OWNER`)는 이 태스크에서 `ErrorCode`에 추가한다. 기존 `NOT_PRODUCT_OWNER`(403)와 같은 형태
+  - [Coder 기록 2026-11-28] red 확인: `@DeleteMapping` 추가 전 신규 14케이스 전부 FAILED (매핑 없음 → 기대 200/400, 실제 404), 기존 8케이스는 통과. 매핑 추가 후 22/22 통과
+  - [Coder 기록] 추가한 에러코드: `ASSISTANT_MESSAGE_NOT_OWNER`(403, `ASSISTANT_006`)
 
 ### TASK-003: 메시지 삭제 — Service·Repository 구현 + ServiceTest (테스트 먼저)
-- 상태: 🔲
+- 상태: 🔄
 - 복잡도: MEDIUM
 - 의존: TASK-002
 - verify: `./gradlew test --tests "com.commerce.pagopa.assistant.chat.application.AssistantHistoryServiceTest"`
@@ -82,15 +84,18 @@
   - src/main/java/com/commerce/pagopa/assistant/chat/domain/AssistantMessageRepository.java (삭제 메서드 선언 — JPA 구현은 `AssistantMessageJpaRepository`가 `JpaRepository`에서 상속)
   - src/main/java/com/commerce/pagopa/assistant/chat/application/AssistantHistoryService.java (`delete` 본문 구현)
 - 완료 기준:
-  - [ ] 본인 대화방(`findByIdAndUserId`)이 아니면 `ASSISTANT_CONVERSATION_NOT_FOUND`(404)
-  - [ ] 대화방이 CLOSED면 `ASSISTANT_CONVERSATION_CLOSED`(409)
-  - [ ] 메시지가 없으면(이미 삭제된 경우 포함) `ASSISTANT_MESSAGE_NOT_FOUND`(404)
-  - [ ] 메시지가 다른 대화방 소속이면 403 (TASK-002에서 추가한 "본인 메시지 아님" 에러코드)
-  - [ ] 메시지 role이 ASSISTANT면 403 (같은 에러코드)
-  - [ ] 정상 케이스에서 repository 삭제 호출 검증
+  - [x] 본인 대화방(`findByIdAndUserId`)이 아니면 `ASSISTANT_CONVERSATION_NOT_FOUND`(404)
+  - [x] 대화방이 CLOSED면 `ASSISTANT_CONVERSATION_CLOSED`(409)
+  - [x] 메시지가 없으면(이미 삭제된 경우 포함) `ASSISTANT_MESSAGE_NOT_FOUND`(404)
+  - [x] 메시지가 다른 대화방 소속이면 403 (TASK-002에서 추가한 "본인 메시지 아님" 에러코드)
+  - [x] 메시지 role이 ASSISTANT면 403 (같은 에러코드)
+  - [x] 정상 케이스에서 repository 삭제 호출 검증
   - [ ] Critic APPROVE
 - 메모:
   - 검사 순서: 대화방 소유 → CLOSED 여부 → 메시지 존재 → 대화방 소속 → role
+  - [Coder 기록 2026-11-28] red 확인: (1) Repository `delete` 선언 전 컴파일 실패 (2) 선언 후 `UnsupportedOperationException`으로 6/6 FAILED. 구현 후 6/6 통과
+  - [Coder 기록] Mockito mock은 인터페이스 default 메서드(`findByIdOrThrow`)를 실행하지 않아 테스트에서 `willCallRealMethod()`로 설정함
+  - [Coder 기록] 동시성: 대화방 조회를 `findByIdAndUserIdForUpdate`(비관적 쓰기 락)로 해서 종료(close)와 직렬화함 — `saveUserMessage`와 같은 방식. `AssistantConversationConcurrencyTest.delete_waitsForClose_thenFailsWithClosed` 추가: 락 없는 조회로 돌렸을 때 FAILED(red) 확인 후 락 조회로 통과. 전체 122 tests / 0 fail
 
 ### TASK-004: 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest (테스트 먼저)
 - 상태: 🔲
