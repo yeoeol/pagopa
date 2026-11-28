@@ -3,6 +3,7 @@ package com.commerce.pagopa.assistant.chat.presentation;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -64,8 +65,8 @@ public class AssistantController {
     }
 
     @Operation(
-            summary = "어시스턴트 대화방 목록 조회",
-            description = "어시스턴트 대화방 목록을 전체 조회합니다."
+            summary = "어시스턴트 활성 대화방 목록 조회",
+            description = "활성화된 어시스턴트 대화방 목록을 조회합니다."
     )
     @GetMapping
     public ResponseEntity<ApiResponse<OffsetPageResponseDto<AssistantConversationResponseDto>>> getAll(
@@ -80,7 +81,7 @@ public class AssistantController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(
-                        conversationService.getAll(
+                        conversationService.getAllWithActive(
                                 userId,
                                 pageable
                         )
@@ -163,5 +164,22 @@ public class AssistantController {
                 );
     }
 
-    // @DeleteMapping("/{conversationId}")
+    @Operation(
+            summary = "어시스턴트 대화방 종료",
+            description = "어시스턴트 대화방을 종료(CLOSED) 상태로 변경하고 대화방 목록에서 제외합니다. 복원을 위해 삭제하지 않습니다."
+    )
+    @PatchMapping("/{conversationId}")
+    public ResponseEntity<ApiResponse<AssistantConversationResponseDto>> close(
+            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @PathVariable @Positive Long conversationId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        conversationService.close(
+                                userId,
+                                conversationId
+                        )
+                )
+        );
+    }
 }

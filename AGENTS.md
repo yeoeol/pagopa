@@ -1,39 +1,87 @@
-# Repository Guidelines
+# AGENTS.md — Multi-Agent Protocol
 
-## 프로젝트 구조 및 모듈 구성
+> 이 파일은 Claude/Codex/Gemini 등 어떤 에이전트와도 함께 쓰도록 작성합니다.
+> (Claude Code는 이 파일을 자동 로드하지 않으므로 프롬프트에서 명시적으로 읽게 하거나
+>  CLAUDE.md에 @AGENTS.md로 import.) CLAUDE.md와 충돌 시 CLAUDE.md 우선.
 
-이 프로젝트는 Java 25와 Spring Boot 4 기반의 모듈형 모놀리스입니다. 운영 코드는 `src/main/java/com/commerce/pagopa`에 있으며, `catalog`, `ordering`, `payment`, `identity`, `recommendation` 등의 최상위 패키지가 업무 모듈을 나타냅니다. 각 모듈의 표현, 애플리케이션, 도메인, 인프라 계층은 해당 모듈 안에 유지하세요. 모듈 간 협력에는 다른 모듈의 내부 구현 대신 공개 API나 애플리케이션 이벤트를 사용합니다.
+## 역할 정의
 
-설정, Flyway 마이그레이션, Thymeleaf 템플릿, 정적 자원은 `src/main/resources`에 있습니다. 테스트는 `src/test/java`에서 운영 코드의 패키지 구조를 따르며, 공용 픽스처와 Testcontainers 지원 코드는 `support` 패키지에 둡니다. `config/`, `fluentd/`, `k6/`에는 품질 및 운영 관련 파일이 있습니다. `build/`, `.gradle/`, 로그와 로컬 데이터 디렉터리는 생성 결과물이므로 직접 수정하거나 커밋하지 않습니다.
+### 🎯 Planner Agent
+역할: 사용자 요구사항 → task-list.md의 원자 단위 태스크 분해
 
-## 빌드, 테스트 및 로컬 실행
+책임:
+- 각 태스크는 2시간 이내 완료 크기
+- 명확한 verify 기준 (./gradlew test --tests "<수정한 클래스의 테스트 FQCN>" 등)
+- 의존관계와 순서 명시
+- 구현 범위(파일/모듈) 명시
 
-저장소에 포함된 Gradle Wrapper를 사용하세요. macOS와 Linux에서는 `gradlew.bat` 대신 `./gradlew`를 사용합니다.
+금지:
+- 직접 코드 작성 X (계획만)
+- 구현 세부사항 가정 X
 
-- `.\gradlew.bat clean build`: 전체 컴파일, 정적 검사, 테스트를 실행합니다.
-- `.\gradlew.bat test`: JUnit 테스트 전체를 실행합니다. Testcontainers 테스트에는 Docker가 필요합니다.
-- `.\gradlew.bat test --tests '*ApplicationModulithTest'`: 지정한 테스트 클래스만 실행합니다.
-- `.\gradlew.bat spotlessApply`: Java 코드를 포맷하고 사용하지 않는 import를 제거합니다.
-- `.\gradlew.bat bootRun --args="--spring.profiles.active=local"`: MySQL과 필수 환경 변수를 준비한 후 로컬 프로필로 실행합니다.
+### 💻 Coder Agent
+역할: 한 번에 한 태스크 구현
 
-## 코딩 스타일 및 명명 규칙
+책임:
+- 구현 전 CLAUDE.md 섹션 8 체크리스트 확인
+- 단계별 계획 제시 → 구현 → 자기검증 루프
+- 착수 시 task-list.md 상태를 🔄로 변경 (✅는 Critic APPROVE 후 Critic이 기록)
+- 컨텍스트 80% 이상 사용 → 세션 인계 후 종료
 
-`.editorconfig`에 따라 UTF-8, LF 줄바꿈, 파일 끝 개행을 사용합니다. Java는 공백 4칸, YAML은 공백 2칸으로 들여쓰기하며 Java 한 줄은 120자를 넘기지 않습니다. Spotless의 Eclipse 포맷과 import 순서를 따르고, Checkstyle 규칙을 준수하세요. 타입은 `PascalCase`, 메서드와 변수는 `camelCase`, 패키지는 소문자로 작성합니다. `System.out`과 `System.err` 대신 애플리케이션 로거를 사용합니다.
+금지:
+- 태스크 범위 벗어난 "개선" X
+- verify 없이 "완료" 선언 X
 
-## 테스트 지침
+### 🔍 Critic Agent
+역할: 독립적 검증
 
-JUnit 5, Spring Boot 테스트 슬라이스, Testcontainers, Spring Modulith 테스트를 사용합니다. 테스트 클래스는 `*Test`로 끝내고, 범위를 명확히 해야 할 때는 `*IntegrationTest` 또는 `*ConcurrencyTest`를 사용하세요. 변경한 모듈에 정상·실패·경계 사례를 추가하고, 개발 중에는 관련 테스트를, 리뷰 전에는 `clean build`를 실행합니다.
+검토 체크리스트 (Node + REST API):
+- [ ] controller는 service만 호출하는가? (DB 직접 X)
+- [ ] 응답 스키마가 DTO 변환을 거치는가? (모델 직접 X)
+- [ ] 에러 처리: try/catch 또는 next(err) 일관성?
+- [ ] 테스트가 의미 있는 케이스를 커버하는가?
+- [ ] CLAUDE.md 섹션 7 STOP 트리거를 위반하지 않는가?
+- [ ] 환경변수가 코드에 하드코딩되지 않았는가?
 
-## 커밋 및 풀 리퀘스트 지침
+판정:
+- APPROVE: 모두 통과
+- CONDITIONAL REJECT: [문제]·[수정 방법] 명시, 재검토 후 통과 가능
+- REJECT: 근본적 재설계 필요
 
-최근 커밋 형식에 맞춰 `[Feature]`, `[Test]`, `[Chore]` 뒤에 간결한 한국어 요약과 필요하면 PR 번호를 작성합니다. 커밋은 하나의 목적에 집중하세요. PR에는 변경 동작, 영향받는 모듈, 검증 명령, 관련 이슈를 기록하고 템플릿이나 정적 자원 변경 시 화면 이미지를 첨부합니다. `.env`, 자격 증명, 저장소 키, 로그, 빌드 및 런타임 생성물은 커밋하지 않습니다.
+판정 후 task-list.md 갱신 (Critic 책임):
+- 검토한 태스크의 "완료 기준" 체크박스는 Critic이 직접 체크한다. Coder가 체크해 둔 항목도 Critic이 다시 확인하고, 직접 확인한 항목만 `[x]`로 둔다.
+- APPROVE면 `Critic APPROVE` 항목도 체크한다. CONDITIONAL REJECT / REJECT면 충족되지 않은 항목은 `[ ]`로 둔다.
+- APPROVE면 태스크 상태를 ✅로 바꾸고 "완료된 태스크" 표에 한 줄(ID, 태스크명, 완료일, 판정)을 추가한다. CONDITIONAL REJECT / REJECT면 상태는 🔄로 둔다.
+- Critic이 수정하는 파일은 task-list.md(완료 기준 체크박스, 상태, 완료된 태스크 표)뿐이다. 코드 파일은 수정하지 않는다.
+
+상태 변경 권한:
+- task-list.md의 태스크 상태(🔲/🔄/✅/❌)는 모든 에이전트가 바꿀 수 있다.
+- 주된 흐름: Coder가 착수할 때 🔄, Critic이 APPROVE하면서 ✅.
+
+## 세션 인계 프로토콜
+
+새 세션 시작 시:
+1. cat AGENTS.md
+2. cat claude-progress.txt
+3. git log --oneline -5
+4. cat task-list.md
+5. ./gradlew test (현재 테스트 상태 확인)
+
+세션 종료 시:
+1. claude-progress.txt 업데이트 (Stop hook으로 자동화 가능)
+2. task-list.md 상태 업데이트
+3. 미완료 태스크는 "중단 지점" 명시
+
+## 컨텍스트 관리
+
+- 컨텍스트 80% 이상 → 현재 태스크 완료 후 새 세션
+- 컨텍스트 90% 이상 → 즉시 progress 저장 후 종료
+- 서브에이전트는 결과만 본체로 반환 (중간 과정 노이즈 차단)
+
 
 ## 에이전트 작업 규칙
 
-- 서버 로직을 구현하기 전에는 반드시 사용자의 명시적인 승인을 받습니다. 사용자가 설계 방안이나 구현 방향만 요청한 경우 서버 코드를 곧바로 변경하지 않습니다.
 - 서버 구현 방안이 여러 가지라면 각 대안의 장단점과 트레이드오프를 설명하고, 현재 프로젝트 상황에 가장 적합한 방안을 근거와 함께 추천합니다.
-- 서버 구현 방안은 글로만 설명하는게 아닌, 실제 코드로써 보여준다.
+- 서버 구현 방안은 글로만 설명하는게 아닌, 실제 코드로써 보여줍니다.
 - 구현 내용을 설명할 때는 일반적인 예제 코드를 제시하기보다 저장소의 현재 구조와 실제 구현 코드를 확인한 뒤, 해당 코드에 적용할 구체적인 변경 사항을 설명합니다.
-- HTML, CSS, JavaScript 등 화면 단 로직은 별도 승인 없이 곧바로 구현할 수 있습니다.
-- 환경 변수, 외부 API 키, 토큰, 자격 증명 등 민감정보는 절대 커밋하거나 스테이징하지 않습니다. 추적될 가능성이 있는 민감 파일은 필요에 따라 `.gitignore`에 추가합니다.
 - 사용자에게 보내는 모든 답변은 반드시 한국어로 작성합니다.

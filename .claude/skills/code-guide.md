@@ -87,13 +87,13 @@ public Money totalFee(Order order) {
 
 ## 다른 프로젝트로 가져가기
 
-이 파일을 새 프로젝트의 `.claude/commands/code-guide.md` 로 두면 끝. 두 방법:
+이 파일을 새 프로젝트의 `/code-guide.md` 로 두면 끝. 두 방법:
 
 ```bash
-mkdir -p .claude/commands
+mkdir -p .claude/skills
 # (a) GitHub 최신본 내려받기
 curl -fsSL https://raw.githubusercontent.com/goodjwon/my-wiki/main/.claude/commands/code-guide.md \
-  -o .claude/commands/code-guide.md
+  -o .claude/skills/code-guide.md
 # (b) 또는 이 파일 내용을 그대로 복사해 위 경로에 저장 (오프라인)
 ```
 

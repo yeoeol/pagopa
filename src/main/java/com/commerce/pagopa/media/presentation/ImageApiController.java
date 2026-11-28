@@ -17,10 +17,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import com.commerce.pagopa.global.response.ApiResponse;
+import com.commerce.pagopa.media.api.ImageCategory;
 import com.commerce.pagopa.media.api.ImageUploadRequest;
 import com.commerce.pagopa.media.application.ImageService;
 import com.commerce.pagopa.media.application.response.ImageResponseDto;
-import com.commerce.pagopa.media.domain.ImageCategory;
 
 @Tag(
         name = "IMAGE API",

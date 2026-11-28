@@ -32,7 +32,8 @@ public class AssistantHistoryService {
             Long conversationId,
             String message
     ) {
-        AssistantConversation conversation = conversationRepository.findByIdAndUserId(
+        // 종료 트랜잭션과 직렬화: 락 없이 읽으면 커밋된 CLOSED를 못 보고 ACTIVE를 덮어쓴다
+        AssistantConversation conversation = conversationRepository.findByIdAndUserIdForUpdate(
                 conversationId,
                 userId
         )
@@ -69,7 +70,10 @@ public class AssistantHistoryService {
             Long conversationId,
             GeneratedAnswer answer
     ) {
-        AssistantConversation conversation = conversationRepository.findByIdOrThrow(conversationId);
+        AssistantConversation conversation = conversationRepository.findByIdForUpdate(conversationId)
+                .orElseThrow(
+                        () -> new BusinessException(ErrorCode.ASSISTANT_CONVERSATION_NOT_FOUND)
+                );
 
         if (!conversation.isActive()) {
             throw new BusinessException(ErrorCode.ASSISTANT_CONVERSATION_CLOSED);

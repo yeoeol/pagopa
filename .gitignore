@@ -39,6 +39,10 @@ k6/results/
 *.key
 *.p12
 *.jks
+.claude/failure-audit.md
+.claude/guard-blocked.log
+.claude/critic.log
+docs/temp.md
 
 ### NetBeans ###
 /nbproject/private/

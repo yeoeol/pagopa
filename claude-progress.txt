@@ -1,0 +1,20 @@
+# Claude Progress — 자동 업데이트: 2026-11-28 17:49
+
+## 마지막 커밋
+2aed024 docs: npm 테스트 -> gradlew 테스트 수정
+
+## 최근 변경 파일
+AGENTS.md
+
+## 테스트 상태
+✅ 22 classes, 101 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T08:49:09.040Z)
+
+## 다음 세션 시작
+1. cat AGENTS.md
+2. cat claude-progress.txt
+3. cat task-list.md
+4. ./gradlew test
+
+📝 에이전트 메모: 
+  - CLAUDE.md 섹션 11에 추가할 패턴: 
+  - guard.sh에 추가할 규칙:

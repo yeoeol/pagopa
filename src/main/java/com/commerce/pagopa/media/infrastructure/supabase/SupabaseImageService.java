@@ -22,10 +22,10 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import com.commerce.pagopa.global.exception.BusinessException;
 import com.commerce.pagopa.global.response.ErrorCode;
+import com.commerce.pagopa.media.api.ImageCategory;
 import com.commerce.pagopa.media.api.ImageUploadRequest;
 import com.commerce.pagopa.media.application.ImageService;
 import com.commerce.pagopa.media.application.response.ImageResponseDto;
-import com.commerce.pagopa.media.domain.ImageCategory;
 import com.commerce.pagopa.media.infrastructure.ImageProperties;
 
 @ConditionalOnProperty(

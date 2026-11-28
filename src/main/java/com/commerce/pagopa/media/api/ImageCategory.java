@@ -1,4 +1,4 @@
-package com.commerce.pagopa.media.domain;
+package com.commerce.pagopa.media.api;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
