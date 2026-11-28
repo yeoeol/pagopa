@@ -128,7 +128,7 @@
   - [Coder 기록] 404는 실제 흐름상 `@PreAuthorize`의 `isOwner` → `productApi.get()`에서 `PRODUCT_NOT_FOUND`가 나므로, validator mock이 예외를 던지게 해서 검증함 (`BusinessException`이 그대로 전파되어 404 확인)
 
 ### TASK-005: 상품 숨김 — catalog ProductApi.hide 구현 + SellerProductService 연결 (테스트 먼저)
-- 상태: 🔄
+- 상태: ✅
 - 복잡도: MEDIUM
 - 의존: TASK-004
 - verify: `./gradlew test --tests "com.commerce.pagopa.catalog.application.ProductApiServiceTest"`
@@ -140,12 +140,12 @@
   - src/main/java/com/commerce/pagopa/merchant/application/SellerProductService.java (`hide` 본문: `productApi.hide(productId)` 위임)
   - src/main/java/com/commerce/pagopa/global/response/ErrorCode.java (이미 HIDDEN일 때 쓸 409 에러코드 추가, 예: `PRODUCT_ALREADY_HIDDEN` — 기존 PRODUCT_00x 번호 체계를 따름)
 - 완료 기준:
-  - [ ] 호출 후 상품 status가 HIDDEN이고, 반환된 `ProductSummary.status`에 반영됨
-  - [ ] 상품이 없으면 `PRODUCT_NOT_FOUND`(404)
-  - [ ] 이미 HIDDEN인 상품이면 409 (`Product.hide()`에서 판정 — 기존 `AssistantMessage.fail()`처럼 도메인 메서드가 예외를 던지는 패턴)
-  - [ ] ApplicationModulithTest 통과 (`catalog :: api` 경계 유지)
+  - [x] 호출 후 상품 status가 HIDDEN이고, 반환된 `ProductSummary.status`에 반영됨
+  - [x] 상품이 없으면 `PRODUCT_NOT_FOUND`(404)
+  - [x] 이미 HIDDEN인 상품이면 409 (`Product.hide()`에서 판정 — 기존 `AssistantMessage.fail()`처럼 도메인 메서드가 예외를 던지는 패턴)
+  - [x] ApplicationModulithTest 통과 (`catalog :: api` 경계 유지)
   - [x] 단위 테스트 통과 (`ProductApiServiceTest` 3/3)
-  - [ ] Critic APPROVE
+  - [x] Critic APPROVE
 - 메모:
   - merchant가 catalog 내부를 직접 참조하면 STOP 트리거라서, 상태 변경은 반드시 catalog의 공개 API를 거친다
   - `ProductApi` 인터페이스에 메서드를 추가하는 것은 HTTP 응답 시그니처 변경이 아니지만, `ProductApi`를 구현하거나 mock하는 다른 테스트가 컴파일되는지 3단계에서 확인
@@ -182,6 +182,7 @@
 | TASK-002 | 메시지 삭제 — Controller DELETE 엔드포인트 + ControllerTest | 2026-11-28 | APPROVE |
 | TASK-003 | 메시지 삭제 — Service·Repository 구현 + ServiceTest | 2026-11-28 | APPROVE |
 | TASK-004 | 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest | 2026-11-29 | APPROVE |
+| TASK-005 | 상품 숨김 — catalog ProductApi.hide 구현 + SellerProductService 연결 | 2026-11-29 | APPROVE |
 
 ## 블로킹 이슈
 
