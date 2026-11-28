@@ -72,8 +72,7 @@ if echo "$COMMAND" | grep -qE "git push.*(-f|--force)"; then
 fi
 
 # 7. 빌드·의존성 잠금 파일 조작
-if echo "$COMMAND" | grep -qE '(rm|mv|cp|sed -i|tee|truncate|Remove-Item|Set-Content)[^;&|]*(gradle[/\\]wrapper|package-lock\.json)|>[[:space:]]*[^
-]*(gradle[/\\]wrapper|package-lock\.json)|gradlew(\.bat)?[[:space:]]+wrapper'; then
+if echo "$COMMAND" | grep -qE '(rm|mv|cp|sed -i|tee|truncate|Remove-Item|Set-Content)[^;&|]*(gradle[/\\]wrapper|package-lock\.json)|>[[:space:]]*[^]*(gradle[/\\]wrapper|package-lock\.json)|gradlew(\.bat)?[[:space:]]+wrapper'; then
   block "빌드·의존성 잠금 파일 조작" \
     "gradle/wrapper, package-lock.json 임의 변경은 빌드 재현성 파괴" \
     "사용자에게 변경 이유와 옵션 제시 후 승인"

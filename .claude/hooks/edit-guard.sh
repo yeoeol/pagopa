@@ -12,8 +12,7 @@ decide() { jq -n --arg d "$1" --arg r "[CLAUDE.md §7] $2" \
 case "$FILE" in */gradle/wrapper/*|*/package-lock.json)
   decide deny "빌드·의존성 잠금 파일($FILE) 직접 수정 금지. 필요하면 사용자에게 먼저 확인." ;; esac
 
-if [[ "$FILE" == */build.gradle ]] && grep -qE "(implementation|api|compileOnly|runtimeOnly|annotationProcessor|developmentOnly|testImplementation|testRuntimeOnly|test
-CompileOnly|testAnnotationProcessor)[[:space:]]*[\('\"]" <<<"$NEW"; then
+if [[ "$FILE" == */build.gradle ]] && grep -qE "(implementation|api|compileOnly|runtimeOnly|annotationProcessor|developmentOnly|testImplementation|testRuntimeOnly|testCompileOnly|testAnnotationProcessor)[[:space:]]*[\('\"]" <<<"$NEW"; then
   decide ask "build.gradle 의존성 변경 감지. 추가 전에 옵션을 제시하고 승인받았는지 확인."
 fi
 
