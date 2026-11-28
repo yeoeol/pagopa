@@ -1,19 +1,13 @@
-# Claude Progress — 자동 업데이트: 2026-11-28 03:01
+# Claude Progress — 자동 업데이트: 2026-11-28 17:49
 
 ## 마지막 커밋
-24d9f38 refactor: ImageCategory 패키지를 media.domain → media.api로 이동
+2aed024 docs: npm 테스트 -> gradlew 테스트 수정
 
 ## 최근 변경 파일
-claude-progress.txt
-src/main/java/com/commerce/pagopa/media/api/ImageCategory.java
-src/main/java/com/commerce/pagopa/media/api/ImageUploadRequest.java
-src/main/java/com/commerce/pagopa/media/infrastructure/azure/AzureImageService.java
-src/main/java/com/commerce/pagopa/media/infrastructure/supabase/SupabaseImageService.java
-src/main/java/com/commerce/pagopa/media/presentation/ImageApiController.java
-task-list.md
+AGENTS.md
 
 ## 테스트 상태
-
+✅ 22 classes, 101 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T08:49:09.040Z)
 
 ## 다음 세션 시작
 1. cat AGENTS.md

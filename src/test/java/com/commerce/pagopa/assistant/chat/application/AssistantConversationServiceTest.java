@@ -42,7 +42,7 @@ class AssistantConversationServiceTest {
     @DisplayName("본인 대화방을 종료하면 삭제하지 않고 상태만 CLOSED로 변경한다")
     void close_changesStatusToClosed() {
         AssistantConversation conversation = AssistantConversation.start(USER_ID, "배송 문의");
-        given(conversationRepository.findByIdAndUserId(CONVERSATION_ID, USER_ID))
+        given(conversationRepository.findByIdAndUserIdForUpdate(CONVERSATION_ID, USER_ID))
                 .willReturn(Optional.of(conversation));
 
         AssistantConversationResponseDto response = conversationService.close(USER_ID, CONVERSATION_ID);
@@ -56,7 +56,7 @@ class AssistantConversationServiceTest {
     void close_alreadyClosed_throwsBusinessException() {
         AssistantConversation conversation = AssistantConversation.start(USER_ID, "배송 문의");
         conversation.close();
-        given(conversationRepository.findByIdAndUserId(CONVERSATION_ID, USER_ID))
+        given(conversationRepository.findByIdAndUserIdForUpdate(CONVERSATION_ID, USER_ID))
                 .willReturn(Optional.of(conversation));
 
         assertThatThrownBy(() -> conversationService.close(USER_ID, CONVERSATION_ID))
@@ -68,7 +68,7 @@ class AssistantConversationServiceTest {
     @Test
     @DisplayName("존재하지 않거나 본인 소유가 아닌 대화방이면 ASSISTANT_CONVERSATION_NOT_FOUND 예외를 던진다")
     void close_notFound_throwsBusinessException() {
-        given(conversationRepository.findByIdAndUserId(CONVERSATION_ID, USER_ID))
+        given(conversationRepository.findByIdAndUserIdForUpdate(CONVERSATION_ID, USER_ID))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> conversationService.close(USER_ID, CONVERSATION_ID))

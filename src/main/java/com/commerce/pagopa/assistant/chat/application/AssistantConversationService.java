@@ -58,7 +58,8 @@ public class AssistantConversationService {
     // 복원 가능성을 위해 삭제하지 않고 CLOSED 상태로만 변경한다. 이미 CLOSED면 409.
     @Transactional
     public AssistantConversationResponseDto close(Long userId, Long conversationId) {
-        AssistantConversation conversation = conversationRepository.findByIdAndUserId(
+        // 메시지 저장 트랜잭션과 직렬화 (중복 종료 요청도 두 번째는 409)
+        AssistantConversation conversation = conversationRepository.findByIdAndUserIdForUpdate(
                 conversationId,
                 userId
         ).orElseThrow(() -> new BusinessException(ErrorCode.ASSISTANT_CONVERSATION_NOT_FOUND));
