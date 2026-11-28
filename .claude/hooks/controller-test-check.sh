@@ -1,5 +1,5 @@
 #!/bin/bash
-# stop-check.sh — 엔드포인트가 추가된 Controller에 대응 테스트 변경이 없으면 종료 차단
+# controller-test-check.sh — 엔드포인트가 추가된 Controller에 대응 테스트 변경이 없으면 종료 차단
 INPUT=$(cat)
 [ "$(jq -r '.stop_hook_active' <<<"$INPUT")" = "true" ] && exit 0   # 무한 루프 방지
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
