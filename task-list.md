@@ -128,7 +128,7 @@
   - [Coder 기록] 404는 실제 흐름상 `@PreAuthorize`의 `isOwner` → `productApi.get()`에서 `PRODUCT_NOT_FOUND`가 나므로, validator mock이 예외를 던지게 해서 검증함 (`BusinessException`이 그대로 전파되어 404 확인)
 
 ### TASK-005: 상품 숨김 — catalog ProductApi.hide 구현 + SellerProductService 연결 (테스트 먼저)
-- 상태: 🔲
+- 상태: 🔄
 - 복잡도: MEDIUM
 - 의존: TASK-004
 - verify: `./gradlew test --tests "com.commerce.pagopa.catalog.application.ProductApiServiceTest"`
@@ -144,10 +144,15 @@
   - [ ] 상품이 없으면 `PRODUCT_NOT_FOUND`(404)
   - [ ] 이미 HIDDEN인 상품이면 409 (`Product.hide()`에서 판정 — 기존 `AssistantMessage.fail()`처럼 도메인 메서드가 예외를 던지는 패턴)
   - [ ] ApplicationModulithTest 통과 (`catalog :: api` 경계 유지)
+  - [x] 단위 테스트 통과 (`ProductApiServiceTest` 3/3)
   - [ ] Critic APPROVE
 - 메모:
   - merchant가 catalog 내부를 직접 참조하면 STOP 트리거라서, 상태 변경은 반드시 catalog의 공개 API를 거친다
   - `ProductApi` 인터페이스에 메서드를 추가하는 것은 HTTP 응답 시그니처 변경이 아니지만, `ProductApi`를 구현하거나 mock하는 다른 테스트가 컴파일되는지 3단계에서 확인
+  - [Coder 기록 2026-11-29] red 확인: (1) `hide` 선언 전 컴파일 실패 (2) 시그니처만 추가(`UnsupportedOperationException`) 후 3/3 FAILED. 구현 후 3/3 통과. 전체 134 tests / 0 fail / 1 skipped
+  - [Coder 기록] `ErrorCode.PRODUCT_ALREADY_HIDDEN`은 TASK-004에서 이미 추가돼 있어 `ErrorCode.java`는 수정하지 않음
+  - [Coder 기록] 상품 조회는 `findByIdForUpdateOrThrow`(비관적 락) 사용 — 재고 차감·복구(`ProductStockApiService`)와 같은 락으로 직렬화해 status lost update를 막음
+  - [Coder 기록] 범위 밖 관찰(수정 X): HIDDEN 상품도 `decreaseStock`에서 재고가 0이 되면 SOLD_OUT으로 바뀔 수 있음. `SellerProductService.hide`의 한 줄 위임은 별도 단위 테스트 없음
 
 ### TASK-006: 두 엔드포인트 401 통합 테스트 (토큰 없음 / 토큰 무효)
 - 상태: 🔲

@@ -91,6 +91,15 @@ public class ProductApiService implements ProductApi {
     }
 
     @Override
+    @Transactional
+    public ProductSummary hide(Long productId) {
+        // 재고 차감·복구(findByIdForUpdate)와 같은 락으로 직렬화해 status 덮어쓰기(lost update)를 막는다
+        Product product = productRepository.findByIdForUpdateOrThrow(productId);
+        product.hide();
+        return toSummary(product);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public OffsetPageResponseDto<ProductSummary> findAllByUserId(
             Long sellerId,

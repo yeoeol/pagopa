@@ -74,10 +74,9 @@ public class SellerProductService {
         return results.getFirst();
     }
 
-    // TASK-005에서 productApi.hide(productId) 위임으로 구현
     @Transactional
     public ProductSummary hide(Long productId) {
-        throw new UnsupportedOperationException();
+        return productApi.hide(productId);
     }
 
     @Transactional(readOnly = true)

@@ -153,6 +153,16 @@ public class Product extends BaseTimeEntity {
         }
     }
 
+    public void hide() {
+        if (this.status == ProductStatus.HIDDEN) {
+            throw new BusinessException(
+                    ErrorCode.PRODUCT_ALREADY_HIDDEN,
+                    "productId=%d".formatted(this.id)
+            );
+        }
+        this.status = ProductStatus.HIDDEN;
+    }
+
     private void validateEnoughStock(int quantity) {
         if (this.stockQuantity < quantity) {
             throw new BusinessException(
