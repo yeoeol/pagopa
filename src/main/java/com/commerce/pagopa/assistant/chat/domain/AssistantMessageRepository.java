@@ -14,6 +14,8 @@ public interface AssistantMessageRepository {
 
     Optional<AssistantMessage> findById(Long messageId);
 
+    void delete(AssistantMessage message);
+
     Slice<AssistantMessage> findAllByConversationIdOrderByIdDesc(
             Long conversationId,
             Pageable pageable

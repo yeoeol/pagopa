@@ -52,7 +52,7 @@
   - `AzureImageServiceIntegrationTest`는 외부 스토리지 연동이라 verify 대상에서 뺐다. 3단계 전체 테스트에서 실패하면 원인만 보고
 
 ### TASK-002: 메시지 삭제 — Controller DELETE 엔드포인트 + ControllerTest (테스트 먼저)
-- 상태: 🔲
+- 상태: ✅
 - 복잡도: LOW
 - 의존: 없음
 - verify: `./gradlew test --tests "com.commerce.pagopa.assistant.chat.presentation.AssistantControllerTest"`
@@ -61,19 +61,21 @@
   - src/main/java/com/commerce/pagopa/assistant/chat/presentation/AssistantController.java (`@DeleteMapping("/{conversationId}/messages/{messageId}")` 추가)
   - src/main/java/com/commerce/pagopa/assistant/chat/application/AssistantHistoryService.java (`delete(userId, conversationId, messageId)` **시그니처만**, 본문은 `UnsupportedOperationException` — TASK-003에서 구현)
 - 완료 기준:
-  - [ ] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
-  - [ ] 성공 시 200 + `ApiResponse.ok()` → `{"success": true}` (data 생략, `@JsonInclude(NON_NULL)`)
-  - [ ] 실패 시 `@RestControllerAdvice`가 `ApiResponse.error(...)` → `{"success": false, "error": {...}}` — 응답은 성공/실패 두 형태뿐
-  - [ ] 입력 검증: `conversationId`, `messageId`에 `@Positive` → 0, -1은 400 / "abc"처럼 타입이 안 맞으면 400 (기존 `close_nonPositiveId_badRequest`, `close_invalidTypeId_badRequest` 패턴 재사용)
-  - [ ] Service mock이 던지는 예외별 응답 검증: 404(대화방/메시지 없음), 403(본인 메시지 아님), 409(닫힌 대화방)
-  - [ ] Critic APPROVE
+  - [x] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
+  - [x] 성공 시 200 + `ApiResponse.ok()` → `{"success": true}` (data 생략, `@JsonInclude(NON_NULL)`)
+  - [x] 실패 시 `@RestControllerAdvice`가 `ApiResponse.error(...)` → `{"success": false, "error": {...}}` — 응답은 성공/실패 두 형태뿐
+  - [x] 입력 검증: `conversationId`, `messageId`에 `@Positive` → 0, -1은 400 / "abc"처럼 타입이 안 맞으면 400 (기존 `close_nonPositiveId_badRequest`, `close_invalidTypeId_badRequest` 패턴 재사용)
+  - [x] Service mock이 던지는 예외별 응답 검증: 404(대화방/메시지 없음), 403(본인 메시지 아님), 409(닫힌 대화방)
+  - [x] Critic APPROVE
 - 메모:
   - DELETE는 요청 바디가 없어서 "요청 DTO 검증"은 path variable 검증으로 대신한다 → 블로킹 이슈 #1 참고
   - 401은 이 슬라이스 테스트로 검증할 수 없음(`addFilters = false`) → TASK-006
   - 403에 쓸 에러코드(예: `ASSISTANT_MESSAGE_NOT_OWNER`)는 이 태스크에서 `ErrorCode`에 추가한다. 기존 `NOT_PRODUCT_OWNER`(403)와 같은 형태
+  - [Coder 기록 2026-11-28] red 확인: `@DeleteMapping` 추가 전 신규 14케이스 전부 FAILED (매핑 없음 → 기대 200/400, 실제 404), 기존 8케이스는 통과. 매핑 추가 후 22/22 통과
+  - [Coder 기록] 추가한 에러코드: `ASSISTANT_MESSAGE_NOT_OWNER`(403, `ASSISTANT_006`)
 
 ### TASK-003: 메시지 삭제 — Service·Repository 구현 + ServiceTest (테스트 먼저)
-- 상태: 🔲
+- 상태: ✅
 - 복잡도: MEDIUM
 - 의존: TASK-002
 - verify: `./gradlew test --tests "com.commerce.pagopa.assistant.chat.application.AssistantHistoryServiceTest"`
@@ -82,18 +84,21 @@
   - src/main/java/com/commerce/pagopa/assistant/chat/domain/AssistantMessageRepository.java (삭제 메서드 선언 — JPA 구현은 `AssistantMessageJpaRepository`가 `JpaRepository`에서 상속)
   - src/main/java/com/commerce/pagopa/assistant/chat/application/AssistantHistoryService.java (`delete` 본문 구현)
 - 완료 기준:
-  - [ ] 본인 대화방(`findByIdAndUserId`)이 아니면 `ASSISTANT_CONVERSATION_NOT_FOUND`(404)
-  - [ ] 대화방이 CLOSED면 `ASSISTANT_CONVERSATION_CLOSED`(409)
-  - [ ] 메시지가 없으면(이미 삭제된 경우 포함) `ASSISTANT_MESSAGE_NOT_FOUND`(404)
-  - [ ] 메시지가 다른 대화방 소속이면 403 (TASK-002에서 추가한 "본인 메시지 아님" 에러코드)
-  - [ ] 메시지 role이 ASSISTANT면 403 (같은 에러코드)
-  - [ ] 정상 케이스에서 repository 삭제 호출 검증
-  - [ ] Critic APPROVE
+  - [x] 본인 대화방(`findByIdAndUserId`)이 아니면 `ASSISTANT_CONVERSATION_NOT_FOUND`(404)
+  - [x] 대화방이 CLOSED면 `ASSISTANT_CONVERSATION_CLOSED`(409)
+  - [x] 메시지가 없으면(이미 삭제된 경우 포함) `ASSISTANT_MESSAGE_NOT_FOUND`(404)
+  - [x] 메시지가 다른 대화방 소속이면 403 (TASK-002에서 추가한 "본인 메시지 아님" 에러코드)
+  - [x] 메시지 role이 ASSISTANT면 403 (같은 에러코드)
+  - [x] 정상 케이스에서 repository 삭제 호출 검증
+  - [x] Critic APPROVE
 - 메모:
   - 검사 순서: 대화방 소유 → CLOSED 여부 → 메시지 존재 → 대화방 소속 → role
+  - [Coder 기록 2026-11-28] red 확인: (1) Repository `delete` 선언 전 컴파일 실패 (2) 선언 후 `UnsupportedOperationException`으로 6/6 FAILED. 구현 후 6/6 통과
+  - [Coder 기록] Mockito mock은 인터페이스 default 메서드(`findByIdOrThrow`)를 실행하지 않아 테스트에서 `willCallRealMethod()`로 설정함
+  - [Coder 기록] 동시성: 대화방 조회를 `findByIdAndUserIdForUpdate`(비관적 쓰기 락)로 해서 종료(close)와 직렬화함 — `saveUserMessage`와 같은 방식. `AssistantConversationConcurrencyTest.delete_waitsForClose_thenFailsWithClosed` 추가: 락 없는 조회로 돌렸을 때 FAILED(red) 확인 후 락 조회로 통과. 전체 122 tests / 0 fail
 
 ### TASK-004: 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest (테스트 먼저)
-- 상태: 🔲
+- 상태: ✅
 - 복잡도: MEDIUM
 - 의존: 없음
 - verify: `./gradlew test --tests "com.commerce.pagopa.merchant.presentation.SellerProductControllerTest"`
@@ -102,22 +107,28 @@
   - src/main/java/com/commerce/pagopa/merchant/presentation/SellerProductController.java (`@PatchMapping("/{productId}")` + 기존 `@PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")` 재사용, 요청 바디 없음)
   - src/main/java/com/commerce/pagopa/merchant/application/SellerProductService.java (`hide(productId)` **시그니처만** — TASK-005에서 구현)
 - 완료 기준:
-  - [ ] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
-  - [ ] 성공 시 200 + `ApiResponse<ProductSummary>` (status = "HIDDEN")
-  - [ ] 상품을 등록한 판매자가 아니면 403
-  - [ ] 입력 검증: `productId` `@Positive` → 0, -1은 400 / 타입 불일치는 400
-  - [ ] 상품 없음 404
-  - [ ] 이미 HIDDEN인 상품 → 409 (Service mock이 던지는 예외로 검증)
-  - [ ] Critic APPROVE
+  - [x] 엔드포인트를 추가하기 전에 테스트가 실패(red)하는 것을 확인하고 기록
+  - [x] 성공 시 200 + `ApiResponse<ProductSummary>` (status = "HIDDEN")
+  - [x] 상품을 등록한 판매자가 아니면 403
+  - [x] 입력 검증: `productId` `@Positive` → 0, -1은 400 / 타입 불일치는 400
+  - [x] 상품 없음 404
+  - [x] 이미 HIDDEN인 상품 → 409 (Service mock이 던지는 예외로 검증)
+  - [x] 단위 테스트 통과 (`SellerProductControllerTest` 9/9)
+  - [x] Critic APPROVE
 - 메모:
   - 응답 DTO는 기존 판매자 상품 API와 같은 `ProductSummary`를 쓴다 (새 DTO를 만들지 않음)
   - 기존 `PATCH /{productId}/stock`와 경로가 겹치지 않음
   - `@ControllerSliceTest`(`addFilters = false`)에서 `@PreAuthorize`가 동작하는지는 아직 확인 안 됨 (`SellerProductController` 테스트가 하나도 없음). 동작하지 않으면 403 케이스를 TASK-006 통합 테스트로 옮기고 보고
   - 요청 바디를 받지 않기로 해서 "요청 DTO 검증"은 path variable 검증으로 대신한다 → 블로킹 이슈 #1 참고
   - 상품 이미지 삭제나 장바구니·추천 노출 제외 같은 후속 처리는 요구사항에 없어서 범위에서 뺐다
+  - [Coder 기록 2026-11-29] red 확인: (1) `hide` 시그니처 추가 전 컴파일 실패 (2) 시그니처 추가 후 `@PatchMapping` 추가 전 8/8 FAILED (405 — 같은 경로에 GET만 있음). 매핑 추가 후 통과
+  - [Coder 기록] `@ControllerSliceTest`에는 `SecurityConfig`(`@EnableMethodSecurity`)가 로드되지 않아 `@PreAuthorize`가 동작하지 않음(403/404 케이스가 200) → 테스트 클래스 안에 `@TestConfiguration @EnableMethodSecurity`를 `@Import`해서 켬. `sellerProductOwnerValidator`는 `@MockitoBean(name=...)`으로 등록. 403 케이스는 TASK-006으로 옮기지 않음
+  - [Coder 기록] 메서드 보안을 켜니 판매자 아님이 **401**(`ACCESS_DENIED`가 `HttpStatus.UNAUTHORIZED`)로 나옴 → 사용자 승인(2026-11-29)을 받아 `ErrorCode.ACCESS_DENIED`를 **403**으로 변경. 코드(`COMMON_005`)·메시지는 그대로. 영향: `@PreAuthorize`를 쓰는 기존 엔드포인트 전체의 거부 응답이 401 → 403 (pagopa-web은 401에서만 토큰 refresh를 시도하므로 거부 시 불필요한 refresh가 사라짐)
+  - [Coder 기록] 사용자 승인(2026-11-29)으로 TASK-005 범위였던 `PRODUCT_ALREADY_HIDDEN`(409, `PRODUCT_007`)을 이 태스크에서 `ErrorCode`에 추가함 (TASK-002 전례). TASK-005에서는 추가할 필요 없음
+  - [Coder 기록] 404는 실제 흐름상 `@PreAuthorize`의 `isOwner` → `productApi.get()`에서 `PRODUCT_NOT_FOUND`가 나므로, validator mock이 예외를 던지게 해서 검증함 (`BusinessException`이 그대로 전파되어 404 확인)
 
 ### TASK-005: 상품 숨김 — catalog ProductApi.hide 구현 + SellerProductService 연결 (테스트 먼저)
-- 상태: 🔲
+- 상태: ✅
 - 복잡도: MEDIUM
 - 의존: TASK-004
 - verify: `./gradlew test --tests "com.commerce.pagopa.catalog.application.ProductApiServiceTest"`
@@ -129,14 +140,19 @@
   - src/main/java/com/commerce/pagopa/merchant/application/SellerProductService.java (`hide` 본문: `productApi.hide(productId)` 위임)
   - src/main/java/com/commerce/pagopa/global/response/ErrorCode.java (이미 HIDDEN일 때 쓸 409 에러코드 추가, 예: `PRODUCT_ALREADY_HIDDEN` — 기존 PRODUCT_00x 번호 체계를 따름)
 - 완료 기준:
-  - [ ] 호출 후 상품 status가 HIDDEN이고, 반환된 `ProductSummary.status`에 반영됨
-  - [ ] 상품이 없으면 `PRODUCT_NOT_FOUND`(404)
-  - [ ] 이미 HIDDEN인 상품이면 409 (`Product.hide()`에서 판정 — 기존 `AssistantMessage.fail()`처럼 도메인 메서드가 예외를 던지는 패턴)
-  - [ ] ApplicationModulithTest 통과 (`catalog :: api` 경계 유지)
-  - [ ] Critic APPROVE
+  - [x] 호출 후 상품 status가 HIDDEN이고, 반환된 `ProductSummary.status`에 반영됨
+  - [x] 상품이 없으면 `PRODUCT_NOT_FOUND`(404)
+  - [x] 이미 HIDDEN인 상품이면 409 (`Product.hide()`에서 판정 — 기존 `AssistantMessage.fail()`처럼 도메인 메서드가 예외를 던지는 패턴)
+  - [x] ApplicationModulithTest 통과 (`catalog :: api` 경계 유지)
+  - [x] 단위 테스트 통과 (`ProductApiServiceTest` 3/3)
+  - [x] Critic APPROVE
 - 메모:
   - merchant가 catalog 내부를 직접 참조하면 STOP 트리거라서, 상태 변경은 반드시 catalog의 공개 API를 거친다
   - `ProductApi` 인터페이스에 메서드를 추가하는 것은 HTTP 응답 시그니처 변경이 아니지만, `ProductApi`를 구현하거나 mock하는 다른 테스트가 컴파일되는지 3단계에서 확인
+  - [Coder 기록 2026-11-29] red 확인: (1) `hide` 선언 전 컴파일 실패 (2) 시그니처만 추가(`UnsupportedOperationException`) 후 3/3 FAILED. 구현 후 3/3 통과. 전체 134 tests / 0 fail / 1 skipped
+  - [Coder 기록] `ErrorCode.PRODUCT_ALREADY_HIDDEN`은 TASK-004에서 이미 추가돼 있어 `ErrorCode.java`는 수정하지 않음
+  - [Coder 기록] 상품 조회는 `findByIdForUpdateOrThrow`(비관적 락) 사용 — 재고 차감·복구(`ProductStockApiService`)와 같은 락으로 직렬화해 status lost update를 막음
+  - [Coder 기록] 범위 밖 관찰(수정 X): HIDDEN 상품도 `decreaseStock`에서 재고가 0이 되면 SOLD_OUT으로 바뀔 수 있음. `SellerProductService.hide`의 한 줄 위임은 별도 단위 테스트 없음
 
 ### TASK-006: 두 엔드포인트 401 통합 테스트 (토큰 없음 / 토큰 무효)
 - 상태: 🔲
@@ -163,6 +179,10 @@
 | ID | 태스크명 | 완료일 | Critic 판정 |
 |----|---------|--------|------------|
 | TASK-001 | ImageCategory 패키지를 media.domain → media.api로 이동 | 2026-11-28 | APPROVE |
+| TASK-002 | 메시지 삭제 — Controller DELETE 엔드포인트 + ControllerTest | 2026-11-28 | APPROVE |
+| TASK-003 | 메시지 삭제 — Service·Repository 구현 + ServiceTest | 2026-11-28 | APPROVE |
+| TASK-004 | 상품 숨김 — Controller PATCH 엔드포인트 + ControllerTest | 2026-11-29 | APPROVE |
+| TASK-005 | 상품 숨김 — catalog ProductApi.hide 구현 + SellerProductService 연결 | 2026-11-29 | APPROVE |
 
 ## 블로킹 이슈
 

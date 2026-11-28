@@ -74,6 +74,11 @@ public class SellerProductService {
         return results.getFirst();
     }
 
+    @Transactional
+    public ProductSummary hide(Long productId) {
+        return productApi.hide(productId);
+    }
+
     @Transactional(readOnly = true)
     public List<CategoryOption> findCategoryOptions() {
         return categoryQueryApi.findProductCategoryOptions();

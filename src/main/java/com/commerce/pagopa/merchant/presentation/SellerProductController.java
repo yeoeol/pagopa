@@ -1,6 +1,7 @@
 package com.commerce.pagopa.merchant.presentation;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -98,6 +99,20 @@ public class SellerProductController {
                                 )
                         )
                 );
+    }
+
+    @Operation(
+            summary = "판매자 상품 숨김",
+            description = "상품을 등록한 판매자가 상품 상태를 숨김(HIDDEN)으로 변경합니다. 요청 바디는 없습니다."
+    )
+    @PatchMapping("/{productId}")
+    @PreAuthorize("@sellerProductOwnerValidator.isOwner(#productId, principal.userId)")
+    public ResponseEntity<ApiResponse<ProductSummary>> hide(@PathVariable("productId") @Positive Long productId) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(
+                        sellerProductService.hide(productId)
+                )
+        );
     }
 
     @Operation(

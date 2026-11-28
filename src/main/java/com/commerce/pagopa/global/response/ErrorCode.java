@@ -17,7 +17,7 @@ public enum ErrorCode {
     ), INVALID_TYPE_VALUE(
             HttpStatus.BAD_REQUEST, "COMMON_004", "잘못된 타입입니다."
     ), ACCESS_DENIED(
-            HttpStatus.UNAUTHORIZED,
+            HttpStatus.FORBIDDEN,
             "COMMON_005", "접근이 거부되었습니다."
     ), RESOURCE_NOT_FOUND(
             HttpStatus.NOT_FOUND,
@@ -63,6 +63,7 @@ public enum ErrorCode {
             "quantity는 1 이상이어야 합니다."
     ),
     INVALID_PRODUCT_CURSOR(HttpStatus.BAD_REQUEST, "PRODUCT_006", "유효하지 않은 상품 커서입니다."),
+    PRODUCT_ALREADY_HIDDEN(HttpStatus.CONFLICT, "PRODUCT_007", "이미 숨김 처리된 상품입니다."),
 
     // CATEGORY
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_001", "존재하지 않는 카테고리입니다."), INVALID_CATEGORY_LEVEL(
@@ -224,6 +225,7 @@ public enum ErrorCode {
             "종료된 대화입니다."
     ),
     ASSISTANT_MESSAGE_ALREADY_FAILED(HttpStatus.BAD_REQUEST, "ASSISTANT_005", "이미 메시지 생성에 실패했습니다."),
+    ASSISTANT_MESSAGE_NOT_OWNER(HttpStatus.FORBIDDEN, "ASSISTANT_006", "본인 메시지만 삭제할 수 있습니다."),
 
     // ASSISTANT RAG
     KNOWLEDGE_DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "KNOWLEDGE_001", "지식 문서를 찾을 수 없습니다."),

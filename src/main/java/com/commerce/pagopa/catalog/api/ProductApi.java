@@ -15,6 +15,8 @@ public interface ProductApi {
 
     ProductSummary register(ProductRegisterRequest request);
 
+    ProductSummary hide(Long productId);
+
     OffsetPageResponseDto<ProductSummary> findAllByUserId(Long sellerId, int pageSize, int pageNumber);
 
     List<ProductSummary> findCandidatesByKeyword(String keyword, Collection<Long> excludedProductIds, int limit);

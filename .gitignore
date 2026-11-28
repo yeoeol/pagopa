@@ -58,3 +58,6 @@ docs/temp.md
 logs/
 prometheus-data/
 grafana-data/
+
+### Claude harness (Stop hook이 자동 생성) ###
+claude-progress.txt
