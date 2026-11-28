@@ -90,7 +90,7 @@ argument-hint: <대상> (예: 파일 경로, "diff", "staged", 생략 시 git di
 mkdir -p .claude/skills
 # (a) GitHub 최신본 내려받기
 curl -fsSL https://raw.githubusercontent.com/goodjwon/my-wiki/main/.claude/commands/code-check.md \
-  -o .claude/commands/code-check.md
+  -o .claude/skills/code-check.md
 # (b) 또는 이 파일 내용을 그대로 복사해 위 경로에 저장 (오프라인)
 ```
 

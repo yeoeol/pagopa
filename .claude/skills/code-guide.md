@@ -93,7 +93,7 @@ public Money totalFee(Order order) {
 mkdir -p .claude/skills
 # (a) GitHub 최신본 내려받기
 curl -fsSL https://raw.githubusercontent.com/goodjwon/my-wiki/main/.claude/commands/code-guide.md \
-  -o .claude/commands/code-guide.md
+  -o .claude/skills/code-guide.md
 # (b) 또는 이 파일 내용을 그대로 복사해 위 경로에 저장 (오프라인)
 ```
 
