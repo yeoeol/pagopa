@@ -65,7 +65,7 @@
 2. cat claude-progress.txt
 3. git log --oneline -5
 4. cat task-list.md
-5. npm test (현재 테스트 상태 확인)
+5. ./gradlew test (현재 테스트 상태 확인)
 
 세션 종료 시:
 1. claude-progress.txt 업데이트 (Stop hook으로 자동화 가능)
