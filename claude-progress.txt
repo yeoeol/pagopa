@@ -1,13 +1,22 @@
-# Claude Progress — 자동 업데이트: 2026-11-28 17:49
+# Claude Progress — 자동 업데이트: 2026-11-28 22:47
 
 ## 마지막 커밋
-2aed024 docs: npm 테스트 -> gradlew 테스트 수정
+175540f [Harness] 환경 구축 및 API 구현 (#142)
 
 ## 최근 변경 파일
+.claude/hooks/controller-test-check.sh
+.claude/hooks/edit-guard.sh
+.claude/hooks/guard.sh
+.claude/hooks/lint-fix.sh
+.claude/hooks/update-progress.sh
+.claude/settings.json
+.claude/skills/code-check.md
+.claude/skills/code-guide.md
+.gitignore
 AGENTS.md
 
 ## 테스트 상태
-✅ 22 classes, 101 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T08:49:09.040Z)
+✅ 23 classes, 122 tests / 0 failures / 0 errors / 1 skipped (마지막 실행: 2026-11-28T13:47:07.004Z)
 
 ## 다음 세션 시작
 1. cat AGENTS.md

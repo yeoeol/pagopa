@@ -194,6 +194,39 @@ class AssistantConversationConcurrencyTest {
     }
 
     @Test
+    @DisplayName("종료 트랜잭션이 커밋 전이면 메시지 삭제는 대기했다가 CLOSED 예외로 실패하고 메시지는 남는다")
+    void delete_waitsForClose_thenFailsWithClosed() throws Exception {
+        Long messageId = historyService.saveUserMessage(userId, conversationId, "안녕하세요")
+                .messageId();
+        CountDownLatch locked = new CountDownLatch(1);
+        CountDownLatch releaseClose = new CountDownLatch(1);
+
+        Future<?> closeTask = executor.submit(
+                () -> transactionTemplate.executeWithoutResult(status -> {
+                    conversationService.close(userId, conversationId);
+                    locked.countDown();
+                    await(releaseClose);
+                })
+        );
+        assertThat(locked.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)).isTrue();
+
+        Future<?> deleteTask = executor.submit(
+                () -> historyService.delete(userId, conversationId, messageId)
+        );
+
+        assertBlocked(deleteTask);
+        releaseClose.countDown();
+        closeTask.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+        assertThatThrownBy(() -> deleteTask.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .hasCauseInstanceOf(BusinessException.class)
+                .cause()
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.ASSISTANT_CONVERSATION_CLOSED);
+        assertClosedWithMessageCount(1);
+    }
+
+    @Test
     @DisplayName("이미 종료된 대화에 메시지를 저장하면 CLOSED 예외를 던지고 메시지는 저장되지 않는다")
     void saveUserMessage_closedConversation_throwsClosed() {
         conversationService.close(userId, conversationId);
